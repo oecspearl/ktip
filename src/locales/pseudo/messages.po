@@ -17,6 +17,10 @@ msgstr ""
 msgid "Discussion Board"
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Post a note"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Every achievement KTIP can award: its name, artwork, category, points and the rule that unlocks it.\n"
 "\n"
@@ -51,6 +55,10 @@ msgstr ""
 msgid "Authentication events, administrative actions, moderation actions and rate-limit counters."
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "{votes, plural, one {# vote} other {# votes}}"
+msgstr ""
+
 #: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
@@ -73,6 +81,10 @@ msgstr ""
 msgid "What types of events can I create?"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "A few things are still missing."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Code Editor"
 msgstr ""
@@ -93,6 +105,10 @@ msgstr ""
 msgid "Active Grants"
 msgstr ""
 
+#: src/components/venue/map/VenueMapExplorer.tsx
+msgid "Another team's Homebase"
+msgstr ""
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Applies to projects and resources — events and grants are sorted by type instead"
 msgstr ""
@@ -103,6 +119,10 @@ msgstr ""
 
 #: src/components/association/AssociationReviewQueue.tsx
 msgid "Only accounts with the Administer employers permission can decide from here."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Could not remove the file."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -182,6 +202,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Events works the same way for anything you organize. Connections is the people side."
+msgstr ""
+
+#. placeholder {0}: formatDuration(entry.demo_video_seconds)
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Demo video ({0})"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -310,12 +335,17 @@ msgstr ""
 
 #: src/components/documents/DocumentsPanel.tsx
 #: src/components/events/EventSolutionsPanel.tsx
+#: src/components/venue/room/homebase/TeamFiles.tsx
 msgid "Could not open the file"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Set up two-step verification"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "GitHub didn't answer. The repo may be private, or the hourly limit is used up. It tries again in two minutes."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -603,6 +633,10 @@ msgstr ""
 msgid "Policy enabler and programme administrator. Publishes public funding calls, administers awards, verifies institutions and businesses."
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "None right now. Knock on another team's Homebase to ask for one."
+msgstr ""
+
 #: src/components/messages/ChatWindow.tsx
 msgid "Show earlier messages"
 msgstr ""
@@ -737,6 +771,10 @@ msgstr ""
 
 #: src/lib/member-kpis.ts
 msgid "Forum posts"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Could not upload the deck."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -941,6 +979,11 @@ msgstr ""
 msgid "Schedule deletion"
 msgstr ""
 
+#. placeholder {0}: i + 1
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Entry {0}"
+msgstr ""
+
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Added to your team"
 msgstr ""
@@ -958,6 +1001,10 @@ msgstr ""
 #: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/dashboard/tabs/ProjectsTab.tsx
 msgid "Select {0}"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Ranking"
 msgstr ""
 
 #. placeholder {0}: confirmed.institution
@@ -1103,6 +1150,10 @@ msgid "Partner API — issue and revoke API keys for partner organisations. Trea
 "Analytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.\n"
 "\n"
 "Member feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Save links"
 msgstr ""
 
 #: src/components/venue/room/RoomAnnouncements.tsx
@@ -1303,6 +1354,7 @@ msgstr ""
 #: src/components/events/EventCard.tsx
 #: src/components/personalization/ForYouRail.tsx
 #: src/components/settings/PersonalizationTab.tsx
+#: src/components/venue/room/homebase/TeamCalendar.tsx
 #: src/hooks/useCalendarFeed.ts
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Event"
@@ -1370,6 +1422,10 @@ msgstr ""
 
 #: src/hooks/useProjects.ts
 msgid "Not deleted. It may already be gone, or you no longer own it."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Nothing waiting on you."
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
@@ -1552,6 +1608,10 @@ msgstr ""
 msgid "A child at risk"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Applying for"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Process"
 msgstr ""
@@ -1599,6 +1659,11 @@ msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Who may apply — country, sector, stage, anything an applicant should check first."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Judging console"
 msgstr ""
 
 #: src/pages/projects/ProjectsPage.tsx
@@ -1670,6 +1735,10 @@ msgstr ""
 msgid "Stops the same walkthrough appearing every visit."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Team formed. Your Homebase is the next free team room."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What you have made, and what was shared with you."
 msgstr ""
@@ -1737,6 +1806,10 @@ msgstr ""
 msgid "You are watching this room. Spectators can read chat but not post."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "For example, UI designer"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event host"
 msgstr ""
@@ -1786,6 +1859,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Entrepreneurs"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Reject"
 msgstr ""
 
 #: src/components/grants/application/ApplicationDocumentsField.tsx
@@ -2056,6 +2133,10 @@ msgstr ""
 msgid "Back to Projects"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Checks passing"
+msgstr ""
+
 #: src/pages/courses/CourseDetailPage.tsx
 msgid "Course"
 msgstr ""
@@ -2096,6 +2177,7 @@ msgstr ""
 msgid "No solutions were submitted."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "More"
 msgstr ""
@@ -2128,12 +2210,20 @@ msgstr ""
 msgid "A verification badge reflects a check made at a point in time and can be revoked. Treat it as one signal among several, not as a guarantee."
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "What your team is stuck on"
+msgstr ""
+
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "{n, plural, one {# project deleted} other {# projects deleted}}"
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in."
+msgstr ""
+
+#: src/lib/free-tiers.ts
+msgid "Speech translation this month"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2168,6 +2258,15 @@ msgstr ""
 msgid "The knowledge base"
 msgstr ""
 
+#. placeholder {0}: feed.data!.pulls.length
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "{0} open pull requests"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Export CSV"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Moderation collects reported content and anything the automated filters caught.\n"
 "\n"
@@ -2188,6 +2287,10 @@ msgstr ""
 
 #: src/components/ui/FloatingActionButton.tsx
 msgid "All settings"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Entries are still open, so teams may change what you see until the deadline."
 msgstr ""
 
 #: src/components/venue/room/RoomArrivalPanels.tsx
@@ -2247,6 +2350,15 @@ msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "The organizer did not approve this registration."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "They invited you"
+msgstr ""
+
+#. placeholder {0}: ballot.total_votes ?? 0
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "{0, plural, one {# vote} other {# votes}}"
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
@@ -2376,6 +2488,10 @@ msgstr ""
 msgid "Gradient colour {0}"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Project title"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Turn off"
 msgstr ""
@@ -2491,6 +2607,10 @@ msgstr ""
 msgid "Voice commands stopped listening after five minutes without a command."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "stored now"
+msgstr ""
+
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Rank"
 msgstr ""
@@ -2540,6 +2660,10 @@ msgstr ""
 msgid "Can I message more than one person at once?"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Evidence for {title}"
+msgstr ""
+
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "A reviewer removed the verified badge from this account, so confirming an address cannot bring it back. Open Settings, Verification, to see why and how to ask for a review."
 msgstr ""
@@ -2577,6 +2701,7 @@ msgstr ""
 msgid "Beanbags"
 msgstr ""
 
+#: src/components/shared/SubmissionKindBadge.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Event Registration"
 msgstr ""
@@ -2661,8 +2786,14 @@ msgid "On a computer, choose “Enter details manually” and paste the setup ke
 msgstr ""
 
 #: src/components/dashboard/TimelineItemDetail.tsx
+#: src/components/shared/SubmissionKindBadge.tsx
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Grant Application"
+msgstr ""
+
+#. placeholder {0}: i18n._(col.label)
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Add a card to {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2679,6 +2810,10 @@ msgstr ""
 
 #: src/pages/auth/SignupPage.tsx
 msgid "Use a different address from your main email."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "AI tools materially helped us build this"
 msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
@@ -2702,8 +2837,16 @@ msgstr ""
 msgid "Stage"
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Skills or time your team can lend"
+msgstr ""
+
 #: src/components/ui/CountrySelect.tsx
 msgid "All Countries"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "GitHub repository"
 msgstr ""
 
 #: src/lib/achievement-copy.ts
@@ -2716,6 +2859,12 @@ msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "New Email"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Teammate"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2832,6 +2981,10 @@ msgstr ""
 msgid "Search the whole platform"
 msgstr ""
 
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "If they accept, your team can join their call and chat until the time runs out. Their workspace stays private."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Business Associations"
 msgstr ""
@@ -2894,6 +3047,10 @@ msgstr ""
 msgid "Save Preferences"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Draft. Not submitted yet."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "The rules of the road. Read them once, then you’re in."
@@ -2912,6 +3069,7 @@ msgid "Remove link"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Code block"
 msgstr ""
 
@@ -2947,6 +3105,10 @@ msgstr ""
 
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Discover more resources"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "Add milestone"
 msgstr ""
 
 #: src/components/venue/room/RoomSignalPanels.tsx
@@ -3109,6 +3271,10 @@ msgstr ""
 msgid "Word, PDF, Excel, CSV, Markdown or an image. Text documents are read into an editable copy."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Neural voice"
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Budget Breakdown"
 msgstr ""
@@ -3138,6 +3304,7 @@ msgid "Go"
 msgstr ""
 
 #: src/components/venue/room/LookingForTeamPanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/components/venue/RoomOccupantList.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "(you)"
@@ -3196,6 +3363,10 @@ msgstr ""
 msgid "Finding a thread, or starting one."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Save and next"
+msgstr ""
+
 #: src/components/security/AuthenticatorAppGuide.tsx
 msgid "Get one of these from your app store, then come back here and tap “Open in my authenticator app”."
 msgstr ""
@@ -3252,6 +3423,14 @@ msgstr ""
 msgid "Everything you have published, including anything still private — this tab is the only place a private project is visible.\n"
 "\n"
 "Open one to edit it, manage its team, or answer collaboration requests. Projects you were added to by someone else are not here; they are on your profile."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamTimer.tsx
+msgid "Timer length"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "Milestone"
 msgstr ""
 
 #: src/components/ui/PreviewGrid.tsx
@@ -3343,13 +3522,30 @@ msgstr ""
 msgid "Could not hide this right now"
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Could not post"
+msgstr ""
+
 #. placeholder {0}: auth.user?.email
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "You asked to join as <0>{orgLabel}</0>. A KTIP administrator checks your practice before turning the role on for <1>{0}</1>. We will email you when it is done."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Without a team"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Not added"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Four tools, one account"
+msgstr ""
+
+#. placeholder {0}: entry.author
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Solo entry by {0}"
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -3505,6 +3701,8 @@ msgstr ""
 
 #: src/components/association/AssociationReviewQueue.tsx
 #: src/components/legal/ReconsentBanner.tsx
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/i18n/harvested.ts
 msgid "Review"
 msgstr ""
@@ -3542,6 +3740,10 @@ msgstr ""
 #: src/pages/auth/VerifyEmailProofPage.tsx
 #: src/pages/JoinInvitePage.tsx
 msgid "Sign in"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Before you score, declare any conflicts of interest"
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
@@ -3585,6 +3787,12 @@ msgstr ""
 #. placeholder {0}: connectionCount ?? 0
 #: src/pages/dashboard/DashboardLayout.tsx
 msgid "{0, plural, one {connection} other {connections}}"
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "People's Choice"
 msgstr ""
 
 #: src/hooks/useAIAssistant.ts
@@ -3685,6 +3893,10 @@ msgstr ""
 msgid "Open the email and press Confirm. The link works for 24 hours."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Could not update the board"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 msgid "Please select an image file."
 msgstr ""
@@ -3707,6 +3919,10 @@ msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Note (optional)"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Open help requests"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3853,6 +4069,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What happens to your idea when you enter a hackathon, challenge or pitch on KTIP — who owns it, who may see it, and what a prize does and does not buy."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Mean of each judge's weighted total, out of 10"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -4020,6 +4240,10 @@ msgstr ""
 msgid "Get {0}"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "A short note to the team"
+msgstr ""
+
 #: src/components/WelcomePanel.tsx
 msgid "Welcome"
 msgstr ""
@@ -4102,6 +4326,10 @@ msgstr ""
 msgid "Start a new conversation!"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "No teams yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "KTIP is provided \"as is\" and \"as available\". We do not warrant uninterrupted or error-free operation, and we may change, suspend or discontinue features. Planned maintenance is announced where practical."
 msgstr ""
@@ -4171,6 +4399,10 @@ msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Answer the challenge and attach your supporting files"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Link to show it"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -4302,6 +4534,10 @@ msgstr ""
 msgid "Show the page"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Total"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "A guide, article, case study or tool published for the KTIP community, with its type and topic tags.\n"
 "\n"
@@ -4341,8 +4577,14 @@ msgstr ""
 msgid "Describe the work you own"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Milestones"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Published {publishedAt}. Everyone in the venue can see the ranking."
 msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
@@ -4391,6 +4633,10 @@ msgstr ""
 msgid "Authenticator"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "A short note to {name}"
+msgstr ""
+
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Invite members"
 msgstr ""
@@ -4416,8 +4662,16 @@ msgstr ""
 msgid "Go to the event page"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "A judge"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Where are my messages?"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Checks running"
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -4444,6 +4698,10 @@ msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Send invitation"
 msgstr ""
 
 #: src/components/verification/OrgCodesPanel.tsx
@@ -4687,6 +4945,10 @@ msgstr ""
 msgid "Higher contrast in light and dark themes. The page can also be made dimmer or brighter, with softer colours."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Caption translation"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Sharing is not licensing"
 msgstr ""
@@ -4701,6 +4963,10 @@ msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "A participant"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not send the invitation"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
@@ -4829,6 +5095,10 @@ msgstr ""
 msgid "Register for this event to enter the venue."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTimer.tsx
+msgid "Reset team timer"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "OECS Commons and catalogue APIs — course and catalogue records linked to your account where you use those integrations."
 msgstr ""
@@ -4927,6 +5197,10 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "characters"
+msgstr ""
+
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "Open the app, choose to add an account, and scan the square code KTIP is showing. Type the 6 digits the app gives you into KTIP, and you are done."
 msgstr ""
@@ -4945,6 +5219,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Co-founders/Project Partners"
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "People's Choice is not set up for this event yet."
 msgstr ""
 
 #: src/components/verification/OrgCodesPanel.tsx
@@ -4976,6 +5254,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Aggregate platform figures only — counts, percentages, targets and the titles of already-public projects, events and resources. Never a member record, message or document"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Submit again"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5083,6 +5365,10 @@ msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Tour, stop {n} of {total}"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "No docs yet. Start one for your pitch outline or README."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5333,6 +5619,10 @@ msgstr ""
 msgid "Click a result to go there, or click the chevron on the right to see how to do it yourself."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "The deck must be 25 MB or smaller."
+msgstr ""
+
 #: src/components/messages/NewConversationModal.tsx
 msgid "New Group"
 msgstr ""
@@ -5353,6 +5643,12 @@ msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Sign in to attach a screenshot."
+msgstr ""
+
+#. placeholder {0}: nameOf(b.from_team_id)
+#. placeholder {1}: i18n.date(b.expires_at!, { hour: '2-digit', minute: '2-digit' })
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "{0} can join your call until {1}."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5439,6 +5735,10 @@ msgstr ""
 msgid "How do I get a verified badge?"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Evidence against the brief"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The opening message"
 msgstr ""
@@ -5446,6 +5746,10 @@ msgstr ""
 #. placeholder {0}: note.title
 #: src/components/notes/StickyNote.tsx
 msgid "{0} contents"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "You have not sent anything yet."
 msgstr ""
 
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
@@ -5643,6 +5947,10 @@ msgstr ""
 msgid "Any member can see your full profile."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Hide receipt"
+msgstr ""
+
 #: src/hooks/useVerification.ts
 msgid "Your organisation was approved. Your account now holds the {grantedLabel} role."
 msgstr ""
@@ -5657,6 +5965,10 @@ msgstr ""
 msgid "In this room"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Calls"
+msgstr ""
+
 #: src/lib/resume-designs.ts
 msgid "Compact"
 msgstr ""
@@ -5665,6 +5977,7 @@ msgstr ""
 msgid "Symbols"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 #: src/pages/collaborate/CollaborateHubPage.tsx
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Whiteboard"
@@ -5704,6 +6017,10 @@ msgstr ""
 #: src/components/grants/application/RichTextField.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Undo"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Any role"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -5748,6 +6065,10 @@ msgstr ""
 
 #: src/pages/forums/BoardPage.tsx
 msgid "Search discussions..."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "{scored, plural, one {# entry scored} other {# entries scored}}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5880,6 +6201,10 @@ msgstr ""
 msgid "Frequently asked questions"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "What you're building, in a line"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Content you mark as public can be read by anyone and may be indexed by search engines. We can stop serving it; we cannot make a search engine forget it."
 msgstr ""
@@ -5942,6 +6267,10 @@ msgstr ""
 msgid "Sorry, I ran into an issue. Please try asking again in a moment."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Hide team names"
+msgstr ""
+
 #: src/components/verification/RedeemCodeCard.tsx
 msgid "A reviewer removed the badge from this account, so a code cannot restore it."
 msgstr ""
@@ -5977,6 +6306,10 @@ msgstr ""
 #. placeholder {0}: resource.author!.display_name
 #: src/components/resources/ResourceCard.tsx
 msgid "By {0}"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not withdraw the request"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6019,6 +6352,10 @@ msgstr ""
 
 #: src/components/security/EmailCodeCard.tsx
 msgid "Code from your email"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Team Discord"
 msgstr ""
 
 #: src/components/documents/ExtractionReviewPanel.tsx
@@ -6094,6 +6431,10 @@ msgstr ""
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Account"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Thanks. No conflicts recorded."
 msgstr ""
 
 #: src/components/directory/ConnectButton.tsx
@@ -6214,6 +6555,14 @@ msgstr ""
 msgid "Event Type"
 msgstr ""
 
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Ask to join their call"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Could not form the team"
+msgstr ""
+
 #: src/components/moderation/ReportModal.tsx
 msgid "Spam or scam"
 msgstr ""
@@ -6238,6 +6587,7 @@ msgstr ""
 msgid "Rename note"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 #: src/pages/events/EventsPage.tsx
 msgid "Calendar"
 msgstr ""
@@ -6367,6 +6717,10 @@ msgstr ""
 msgid "Switch between light and dark mode"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Over the allowance"
+msgstr ""
+
 #: src/hooks/useContentModeration.ts
 msgid "This needs another look before it goes up."
 msgstr ""
@@ -6437,6 +6791,10 @@ msgstr ""
 msgid "Submissions close "
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "View receipt"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The top half assigns roles to members. The matrix below defines what each role can actually do — every permission, every role, one grid.\n"
 "\n"
@@ -6503,6 +6861,10 @@ msgstr ""
 msgid "{0, plural, one {# day} other {# days}}"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "PDF or slides, 25 MB at most. It stays private: rival teams never see it."
+msgstr ""
+
 #: src/lib/achievement-style.ts
 msgid "Common"
 msgstr ""
@@ -6555,6 +6917,11 @@ msgstr ""
 #: src/hooks/useWhiteboards.ts
 #: src/pages/collaborate/WhiteboardPage.tsx
 msgid "Untitled Whiteboard"
+msgstr ""
+
+#. placeholder {0}: myTeam.name
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "You are already on {0}. Each team gets one Homebase."
 msgstr ""
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
@@ -6690,6 +7057,7 @@ msgid "Grants, seed funding, competitions and more"
 msgstr ""
 
 #: src/components/events/EventChallengeBrief.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "optional"
 msgstr ""
 
@@ -6705,8 +7073,20 @@ msgstr ""
 msgid "Security, preferences, personalization, verification and consent — on the dashboard rail"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "so far"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "What it does and who it is for. Judges read this first."
+msgstr ""
+
 #: src/components/messages/AssistantChatWindow.tsx
 msgid "Clear conversation"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Demo video length"
 msgstr ""
 
 #: src/components/collaboration/PreviewPanel.tsx
@@ -6846,8 +7226,13 @@ msgstr ""
 msgid "JSON"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamFiles.tsx
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Upload failed"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Add a card"
 msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
@@ -6879,6 +7264,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Working"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Links saved"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6949,6 +7338,10 @@ msgstr ""
 msgid "Publishing…"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Open the printable copy"
+msgstr ""
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Your role does not include permission to submit resources. Contact your organization if this looks wrong."
 msgstr ""
@@ -7007,6 +7400,10 @@ msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
 msgid "That sign-in link has already been used. Please start again from the Virtual Campus."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Deck uploaded"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7089,6 +7486,10 @@ msgstr ""
 #. placeholder {0}: params.requesterName
 #: src/hooks/useConnections.ts
 msgid "{0} wants to connect with you"
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "One vote each for a favourite entry once entries close. Results show when you publish them."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7174,6 +7575,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Click the magnifying glass in the top navigation bar, or press Ctrl+K (Cmd+K on Mac)."
+msgstr ""
+
+#. placeholder {0}: display(f.name)
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "Download {0}"
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -7307,6 +7713,10 @@ msgstr ""
 #: src/pages/security/MfaChallengePage.tsx
 #: src/pages/security/MfaRecoverPage.tsx
 msgid "Use a recovery code"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "That is not a GitHub repository. Use owner/name or the repo's URL."
 msgstr ""
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
@@ -7518,6 +7928,10 @@ msgid "Hackathons currently running, with a door straight into the virtual venue
 "This section is empty between events, which is normal rather than broken."
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Claimed. An organiser will check it."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Not permitted"
 msgstr ""
@@ -7615,6 +8029,10 @@ msgstr ""
 msgid "We could not complete sign-in from the Virtual Campus. Please try again from there."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "How your entry meets this"
+msgstr ""
+
 #: src/lib/authenticator-apps.ts
 msgid "Choose “Scan a QR code” and point the camera at the code KTIP shows — or choose “Enter a setup key” and type the key from under “Can't scan the code?”."
 msgstr ""
@@ -7630,6 +8048,7 @@ msgid "What's in the room"
 msgstr ""
 
 #: src/components/grants/SponsorNominationCard.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Accepted"
 msgstr ""
 
@@ -7742,6 +8161,10 @@ msgstr ""
 msgid "Help Center"
 msgstr ""
 
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Let them in"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "If several people made something together — a project team, a group of co-authors — each of you needs the right to license their part before it is published here."
 msgstr ""
@@ -7805,6 +8228,8 @@ msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/directory/ConnectButton.tsx
+#: src/components/venue/room/CollabCommonsPanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/InvitationsPage.tsx
 msgid "Someone"
@@ -7818,6 +8243,7 @@ msgid "Title, summary, description and tags at the top; dates, capacity and opti
 "Admins get an extra Status field — draft events are visible only to administrators until published."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Task board"
 msgstr ""
@@ -7874,6 +8300,8 @@ msgstr ""
 msgid "Failed to send reset email. Please try again."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/i18n/harvested.ts
 msgid "Teams"
 msgstr ""
@@ -7900,6 +8328,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How KTIP protects members under 18 — what supervised mode restricts, how the date of birth is handled, and how a parent or guardian can act."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "No teams yet. Form one from any free Homebase and it will show up here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -7969,7 +8401,13 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "People online"
+msgstr ""
+
+#. placeholder {0}: desk.receipt.id
 #. placeholder {0}: receipt.id
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 msgid "KTIP submission copy · Reference {0}"
 msgstr ""
@@ -8038,6 +8476,10 @@ msgstr ""
 msgid "Submit a Resource"
 msgstr ""
 
+#: src/components/shared/ReceiptDocument.tsx
+msgid "Video length"
+msgstr ""
+
 #: src/pages/account/AccountSuspendedPage.tsx
 msgid "Your account is suspended"
 msgstr ""
@@ -8052,6 +8494,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Private Sector"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Entries are closed, so nothing can be changed or submitted now."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -8211,6 +8657,7 @@ msgstr ""
 #: src/components/dashboard/stats/RankProgress.tsx
 #: src/components/directory/MemberPanel.tsx
 #: src/components/profile/ProfileCanvas.tsx
+#: src/components/venue/room/QuestBoardPanel.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Points"
@@ -8311,6 +8758,11 @@ msgstr ""
 #: src/components/admin/ModerationReasonModal.tsx
 #: src/components/admin/SuspendAccountsModal.tsx
 msgid "Suspend {label}?"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Results board"
 msgstr ""
 
 #. placeholder {0}: formatCurrency(application.awarded_amount, application.awarded_currency)
@@ -8500,6 +8952,10 @@ msgstr ""
 msgid "Nothing yet — likes, follows, RSVPs, applications and what you open count here"
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Could not save your vote."
+msgstr ""
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Redirecting you to <0>My Reports</0>. Click the link if you are not redirected automatically."
 msgstr ""
@@ -8633,6 +9089,10 @@ msgstr ""
 msgid "Accepted {approvedDate}"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "New quest, e.g. Help another team"
+msgstr ""
+
 #: src/hooks/useProjects.ts
 msgid "Not changed. You may no longer own it."
 msgstr ""
@@ -8676,6 +9136,10 @@ msgstr ""
 msgid "Business verified"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "Team docs"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Constraints"
 msgstr ""
@@ -8711,6 +9175,10 @@ msgstr ""
 
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Waiting for your agreement"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Everything is in. Submitting saves a copy for every teammate. You can still edit and submit again until the deadline."
 msgstr ""
 
 #: src/pages/grants/MyGrantsPage.tsx
@@ -8765,6 +9233,7 @@ msgstr ""
 msgid "Break"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/room/RoomCountdown.tsx
 #: src/components/venue/RoomZone.tsx
 #: src/pages/events/EventVenueRoomPage.tsx
@@ -8843,6 +9312,10 @@ msgstr ""
 msgid "Session token"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Replace file"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Warning signs"
 msgstr ""
@@ -8859,6 +9332,7 @@ msgstr ""
 msgid "Could not change the room"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Apply"
 msgstr ""
@@ -8959,6 +9433,8 @@ msgstr ""
 #: src/components/projects/RequestCollaborationModal.tsx
 #: src/components/settings/LegalSettingsTab.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/components/verification/OrgCodesPanel.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/cv/CvEditPage.tsx
@@ -9036,6 +9512,16 @@ msgstr ""
 #: src/components/profile/PortraitStudio.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Centre"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Link to show it (optional)"
+msgstr ""
+
+#. placeholder {0}: m / 60
+#: src/components/venue/room/homebase/Bridges.tsx
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "{0} h"
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -9134,6 +9620,10 @@ msgstr ""
 msgid "This action is permanent and cannot be undone."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "Doc title"
+msgstr ""
+
 #: src/components/gantt/gantt-nav.tsx
 msgid "Previous quarter"
 msgstr ""
@@ -9150,6 +9640,10 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Horizontal Rule"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Post an opening"
 msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
@@ -9175,6 +9669,10 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Work the /admin/verification queue and set a member’s verified badge."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Invited"
 msgstr ""
 
 #: src/hooks/useAIAssistant.ts
@@ -9233,6 +9731,8 @@ msgstr ""
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/components/shared/BulkActionBar.tsx
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+#: src/components/venue/room/QuestBoardPanel.tsx
 #: src/components/verification/OrgCodesPanel.tsx
 #: src/lib/calendar-note-item.ts
 msgid "Done"
@@ -9278,6 +9778,10 @@ msgstr ""
 msgid "Custom Section"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Weighted total"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "On the Login page, click \"Forgot Password?\".\n"
 "\n"
@@ -9314,6 +9818,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Events you organize."
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "The team's task board, whiteboard and files. Only the team and organisers see it."
 msgstr ""
 
 #: src/components/settings/PersonalizationTab.tsx
@@ -9440,6 +9948,10 @@ msgstr ""
 msgid "Assign roles and toggle what each role can do"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "{scored} of {total} scored"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Ocean"
 msgstr ""
@@ -9474,6 +9986,8 @@ msgid "{0}/{1} characters"
 msgstr ""
 
 #: src/components/events/EventDetailsForm.tsx
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/i18n/harvested.ts
 #: src/lib/extracted-fields.ts
 #: src/pages/events/CreateEventPage.tsx
@@ -9564,6 +10078,11 @@ msgstr ""
 msgid "Sign up"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Submission Desk"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Regional body such as the OECS Commission. Strategic partner and ecosystem facilitator; funds and convenes without administering the platform."
 msgstr ""
@@ -9588,6 +10107,7 @@ msgstr ""
 #: src/components/personalization/ForYouRail.tsx
 #: src/components/projects/ProjectCard.tsx
 #: src/components/settings/PersonalizationTab.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Project"
@@ -9722,6 +10242,11 @@ msgstr ""
 msgid "How are you attending?"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "A team"
+msgstr ""
+
 #: src/components/ui/EmojiPicker.tsx
 msgid "Search emoji"
 msgstr ""
@@ -9752,7 +10277,12 @@ msgid "What the licence does not allow"
 msgstr ""
 
 #: src/components/association/AssociationReviewQueue.tsx
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Unassigned"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Results published"
 msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
@@ -9783,6 +10313,7 @@ msgstr ""
 #: src/components/calendar/CalendarShell.tsx
 #: src/components/gantt/gantt-nav.tsx
 #: src/components/gantt/gantt-view.tsx
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "Today"
 msgstr ""
 
@@ -9843,6 +10374,7 @@ msgstr ""
 msgid "Featuring is the main lever"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
 #: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/events/EventDetailPage.tsx
 msgid "Publish"
@@ -9852,6 +10384,7 @@ msgstr ""
 msgid "{count, plural, one {# selected} other {# selected}}"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Entries"
 msgstr ""
@@ -9929,6 +10462,14 @@ msgstr ""
 msgid "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Nothing scheduled yet."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Judging is not set up for this event yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What does following a project do?"
 msgstr ""
@@ -9961,6 +10502,10 @@ msgstr ""
 
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Access granted"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "{team} invited you"
 msgstr ""
 
 #: src/pages/auth/SignupPage.tsx
@@ -10095,6 +10640,11 @@ msgstr ""
 msgid "Generate a random room name"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Team Finder"
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Waiting on the organizer"
 msgstr ""
@@ -10200,6 +10750,10 @@ msgstr ""
 msgid "Change the terms, extend the deadline, or close the call."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "No team"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "add the facilitator"
 msgstr ""
@@ -10230,6 +10784,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "For documents, diagrams and written material rather than code."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "I have no conflicts"
 msgstr ""
 
 #: src/pages/grants/GrantDetailPage.tsx
@@ -10322,6 +10880,7 @@ msgid "Team Size (Optional)"
 msgstr ""
 
 #: src/components/ui/ToolPanelShell.tsx
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
 #: src/pages/collaborate/VideoConferencePage.tsx
@@ -10450,6 +11009,10 @@ msgstr ""
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/ui/Coachmark.tsx
 msgid "Close tour"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Three minutes at most"
 msgstr ""
 
 #: src/pages/projects/ProjectsPage.tsx
@@ -10669,6 +11232,10 @@ msgstr ""
 msgid "Direct messages, group chats and the KTIP Assistant."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Backup Zoom room"
+msgstr ""
+
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "A live venue with rooms, teams, mentors and judging — all in the browser."
 msgstr ""
@@ -10688,6 +11255,10 @@ msgstr ""
 
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Who belongs to your organisation"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Notion page"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -10762,6 +11333,10 @@ msgstr ""
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/components/venue/map/VenueRoomList.tsx
 msgid "Rooms"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "weight {weight}"
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -10966,6 +11541,10 @@ msgstr ""
 msgid "Failed to load whiteboard"
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "The Build plan allows 100 people in calls at the same time, across every room."
+msgstr ""
+
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "The code could not be issued."
 msgstr ""
@@ -10996,6 +11575,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Employers"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Could not save. Try again."
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -11065,6 +11648,10 @@ msgstr ""
 msgid "Replace"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Opening posted"
+msgstr ""
+
 #: src/components/venue/VenueTopBar.tsx
 #: src/pages/events/EventVenueRoomPage.tsx
 msgid "Back to the map"
@@ -11100,8 +11687,16 @@ msgstr ""
 msgid "You keep ownership of everything you post. To display your work to other members we need a limited licence from you, and the exact scope of that licence — what it permits, what it does not permit, and when it ends — is set out in the IP, Content & Licensing Policy."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Drag cards between columns, or use the arrow. Your team sees changes as they happen."
+msgstr ""
+
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Focus"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Backup Zoom link (for when the venue call is full)"
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -11165,6 +11760,10 @@ msgstr ""
 msgid "Description *"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Teams hand in their entries here. You are not on a team, so there is nothing for you to fill in. The results board lists every entry."
+msgstr ""
+
 #: src/pages/account/AccountSuspendedPage.tsx
 msgid "No reason was recorded."
 msgstr ""
@@ -11217,6 +11816,10 @@ msgstr ""
 
 #: src/hooks/useInstitutions.ts
 msgid "No email address is attached to this account."
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Needs"
 msgstr ""
 
 #: src/components/admin/ModerationStatusBadge.tsx
@@ -11330,6 +11933,10 @@ msgstr ""
 msgid "Your activity timeline"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "No entries to score yet. Submitted entries appear here."
+msgstr ""
+
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Your page's look"
 msgstr ""
@@ -11363,6 +11970,7 @@ msgid "Ask the KTIP administrator at your school or university to add <0>{0}</0>
 msgstr ""
 
 #: src/components/venue/map/VenueRoomBrief.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Full"
 msgstr ""
 
@@ -11386,6 +11994,7 @@ msgstr ""
 #: src/components/legal/ReconsentBanner.tsx
 #: src/components/projects/TeamWidget.tsx
 #: src/components/settings/LegalSettingsTab.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Accept"
 msgstr ""
@@ -11495,6 +12104,14 @@ msgstr ""
 msgid "<0>{0}</0> is now your primary email address, so it no longer works as a secondary one. You can remove it and add a different backup address."
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Side quests"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Team files across all events: {filesStored}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Rules binding partners that read KTIP data"
 msgstr ""
@@ -11529,6 +12146,10 @@ msgstr ""
 #. placeholder {0}: Math.max(0, progress.target - progress.current)
 #: src/components/achievements/TrophyCard.tsx
 msgid "{0} to go"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "This event"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11662,6 +12283,10 @@ msgstr ""
 msgid "Impersonation"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Results are published. Scores are final."
+msgstr ""
+
 #: src/components/verification/VerificationNotice.tsx
 msgid "Send new documents"
 msgstr ""
@@ -11727,6 +12352,7 @@ msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
 #: src/components/moderation/ReportButton.tsx
+#: src/components/shared/SubmissionKindBadge.tsx
 msgid "Report"
 msgstr ""
 
@@ -11859,6 +12485,10 @@ msgstr ""
 msgid "Open the event in the admin console and choose the Venue tab."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Form a team to claim a Homebase. You become its captain, and teammates join you from the Team Finder."
+msgstr ""
+
 #: src/components/documents/RequestAccessModal.tsx
 msgid "Say why you need it — it helps the owner decide."
 msgstr ""
@@ -11883,6 +12513,10 @@ msgstr ""
 #. placeholder {0}: status.label
 #: src/components/verification/VerificationStatusCard.tsx
 msgid "It came from {0} and lasted 12 months. Renew it, or verify another way below."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "Due"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11917,6 +12551,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Results for “{term}”"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "Start writing. Your team sees every word as you type it."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -11983,6 +12621,10 @@ msgstr ""
 msgid "Draft events are only visible to administrators"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "{percent}% used"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "When you may use the KTIP and OECS names and logos, when you may not, and what you are asserting when you upload someone else’s logo."
 msgstr ""
@@ -12024,6 +12666,10 @@ msgstr ""
 
 #: src/components/messages/ChatSidebar.tsx
 msgid "Contacts"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Who you need"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12183,6 +12829,14 @@ msgstr ""
 msgid "Change photo"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Could not add the block"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Which tools, and what for"
+msgstr ""
+
 #: src/lib/site-search.ts
 msgid "Places & Actions"
 msgstr ""
@@ -12193,6 +12847,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Code you did not write"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Sent"
 msgstr ""
 
 #: src/components/venue/room/RoomOpsPanels.tsx
@@ -12206,6 +12864,10 @@ msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
 msgid "Skills are how the directory finds you."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "AI wrote the first full draft"
 msgstr ""
 
 #: src/components/calendar/CalendarDayPanel.tsx
@@ -12225,12 +12887,29 @@ msgstr ""
 msgid "Collapse"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Help requests"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Quest Board"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I pin trophies to my profile?"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Before you send money, documents or data"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "This event has no objectives or deliverables in its brief yet."
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "minutes"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12272,6 +12951,12 @@ msgid "Reach it from your avatar menu, \"My Dashboard\". The rail on the left li
 "Under Account, further down: Security, Preferences, Personalization, Verification, and Legal & Consent.\n"
 "\n"
 "Some sections only appear for certain roles: Funding for investors, Mentees for mentors and faculty, Research for faculty and researchers, Business profile and Team for organisation accounts, and Admin for administrators."
+msgstr ""
+
+#. placeholder {0}: team.members.length
+#. placeholder {1}: team.max_size
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "{0} of {1} places taken"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12323,6 +13008,10 @@ msgstr ""
 
 #: src/lib/venue-furniture.ts
 msgid "Sofas and beanbags"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "The brief has no objectives or deliverables to answer. Move on to the review."
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -12488,6 +13177,11 @@ msgid "Click the magnifier in the navigation bar, or press Ctrl+K (Cmd+K on Mac)
 "The brain icon in the panel turns on AI-guided navigation: describe what you are trying to do in plain language and it points you to the right page."
 msgstr ""
 
+#. placeholder {0}: file.name
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "{0} is over 25 MB."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I reset my password?"
 msgstr ""
@@ -12526,6 +13220,10 @@ msgstr ""
 msgid "{0, plural, one {Found # open opportunity} other {Found # open opportunities}}"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Write it as minutes and seconds, like 2:45."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Click your avatar in the top-right corner."
 msgstr ""
@@ -12550,6 +13248,10 @@ msgstr ""
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
 msgid "My Profile"
+msgstr ""
+
+#: src/lib/free-tiers.ts
+msgid "Translated characters this month"
 msgstr ""
 
 #: src/pages/dashboard/tabs/OverviewTab.tsx
@@ -12601,6 +13303,11 @@ msgid "Open a listing and click \"Apply Now\". Once you have a draft for it, the
 "Your work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n"
 "\n"
 "The final step shows the whole application for review before you submit."
+msgstr ""
+
+#. placeholder {0}: task.title
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Assign {0}"
 msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
@@ -12701,6 +13408,10 @@ msgstr ""
 msgid "{0, plural, one {# question answered here — for anything else, send us feedback.} other {# questions answered here — for anything else, send us feedback.}}"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Claim"
+msgstr ""
+
 #. placeholder {0}: result.org_name
 #: src/components/verification/RedeemCodeCard.tsx
 msgid "{0} vouched for you."
@@ -12735,6 +13446,10 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Choose what you want to be notified about"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Link to your deck, or upload a file below"
 msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
@@ -12774,6 +13489,7 @@ msgstr ""
 msgid "Failed to submit the resource"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/pages/resources/ResourcesPage.tsx
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Submit"
@@ -12783,12 +13499,20 @@ msgstr ""
 msgid "How we protect young members"
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "No entries were submitted."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "File a notice"
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Innovation Funding"
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "End bridge"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12863,6 +13587,10 @@ msgstr ""
 msgid "Issue and revoke keys for external platforms pulling employer data"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Scored"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Each report with its category, the date, and where the safety team has got to with it.\n"
 "\n"
@@ -12893,6 +13621,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Security settings"
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "Headcount and help requests now, and where the free tiers are going. Only organisers see it."
 msgstr ""
 
 #: src/components/events/EventRegistrationForm.tsx
@@ -12934,6 +13666,7 @@ msgstr ""
 #: src/a11y/messages.ts
 #: src/components/achievements/AchievementUnlockModal.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/WelcomePanel.tsx
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -12976,6 +13709,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The IP, Content & Licensing Policy and the Copyright & Takedown Policy apply the first time you publish a project, event, forum post, CV or organisation profile."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Each team hands in one entry. Judges, mentors and spectators do not enter."
 msgstr ""
 
 #: src/pages/dashboard/tabs/EventsTab.tsx
@@ -13281,6 +14018,10 @@ msgstr ""
 msgid "I’m back"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Each row keeps the team a person was on at the time. Files show what is stored now, whatever the range."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "That you are the owner of the right, or authorised to act on the owner’s behalf."
 msgstr ""
@@ -13311,6 +14052,8 @@ msgstr ""
 #: src/components/grants/application/SaveStatusBadge.tsx
 #: src/components/ui/ToolStatusBar.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
 msgid "Saved"
 msgstr ""
 
@@ -13397,6 +14140,10 @@ msgstr ""
 msgid "New connection request"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "That didn't work"
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Logo"
 msgstr ""
@@ -13415,6 +14162,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "KTIP serves the OECS region and its members live in several countries, so this policy is written to the stricter of the applicable national data-protection acts and the GDPR standard rather than to the lowest common bar."
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "A public board where teams post what they offer and what they need. Shows the bridges open between teams."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -13437,6 +14188,7 @@ msgstr ""
 #: src/a11y/messages.ts
 #: src/components/messages/MessagingPanel.tsx
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/grants/GrantApplicationPage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -13490,6 +14242,10 @@ msgstr ""
 msgid "Nothing in motion yet"
 msgstr ""
 
+#: src/pages/events/EventVenueRoomPage.tsx
+msgid "Only the team and the organisers can come in. You can ask to join their call for a while."
+msgstr ""
+
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Search integrations..."
 msgstr ""
@@ -13521,6 +14277,11 @@ msgstr ""
 
 #: src/components/shared/DeleteEntityControl.tsx
 msgid "Delete this {noun}"
+msgstr ""
+
+#. placeholder {0}: hostTeam.name
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Request sent. Waiting for {0}."
 msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
@@ -13614,6 +14375,10 @@ msgstr ""
 msgid "You do not have access to this file"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Publish results"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Only the content submitted to those features"
 msgstr ""
@@ -13648,6 +14413,10 @@ msgstr ""
 
 #: src/lib/authenticator-apps.ts
 msgid "Choose + to add a code."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "Could not create the doc"
 msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
@@ -13865,6 +14634,10 @@ msgstr ""
 msgid "Go to Settings → Verification and upload an identity document (national ID, passport, or business registration). An OECS administrator reviews it, and once approved your profile shows a verified checkmark. Documents are stored privately and only visible to administrators."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Date range"
+msgstr ""
+
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Only an owner or admin of your organisation can change this."
 msgstr ""
@@ -13919,6 +14692,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Help article — Collaboration Tools"
+msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Read aloud a few seconds behind. The room is turned down while it plays."
 msgstr ""
 
 #: src/lib/forum-board-icons.ts
@@ -14015,6 +14792,10 @@ msgstr ""
 msgid "Mentors, judges and organizers only."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Search teams and the roles they need"
+msgstr ""
+
 #: src/lib/personalization.ts
 msgid "Matches your topics"
 msgstr ""
@@ -14026,6 +14807,10 @@ msgstr ""
 #: src/components/venue/VenuePresencePanel.tsx
 #: src/pages/events/EventVenuePage.tsx
 msgid "Everyone is inside a room."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "{conflicts, plural, one {# conflict} other {# conflicts}}"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
@@ -14182,6 +14967,8 @@ msgstr ""
 #: src/components/directory/ConnectButton.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/projects/TeamWidget.tsx
+#: src/components/venue/room/homebase/Bridges.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Decline"
 msgstr ""
@@ -14248,8 +15035,16 @@ msgstr ""
 msgid "Forgot Password?"
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Remove note"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Some content is quarantined automatically when several members report it, before a moderator has looked at it. That is a holding action, not a finding, and it is reversed if the review clears the content."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "Could not delete the file"
 msgstr ""
 
 #: src/pages/hackathons/HackathonsPage.tsx
@@ -14340,6 +15135,10 @@ msgstr ""
 #: src/components/collaboration/TiptapEditor.tsx
 #: src/components/ui/ImageUpload.tsx
 msgid "Failed to upload image"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "No team matches that search."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14459,6 +15258,14 @@ msgstr ""
 msgid "Annotation tool"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "The brief has no judging criteria yet. Organisers add them to the event's challenge brief."
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Judges' ranking"
+msgstr ""
+
 #: src/components/resume/sheets/AtlasSheet.tsx
 #: src/components/resume/sheets/ClassicSheet.tsx
 #: src/components/resume/sheets/CompactSheet.tsx
@@ -14470,12 +15277,17 @@ msgstr ""
 msgid "Academic Competencies"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Close this opening"
+msgstr ""
+
 #: src/components/moderation/ContentWarningModal.tsx
 msgid "The highlighted text breaks the community guidelines, so this can't be submitted until it's removed."
 msgstr ""
 
 #: src/components/messages/AssistantChatWindow.tsx
 #: src/components/messages/ChatWindow.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Send"
 msgstr ""
@@ -14486,6 +15298,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Edit your profile on a live preview of the page other members see"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "You applied to {team}"
 msgstr ""
 
 #: src/pages/dashboard/tabs/ConnectionsTab.tsx
@@ -14539,12 +15355,20 @@ msgstr ""
 msgid "How do I delete my account?"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not answer the request"
+msgstr ""
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Solutions"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "An organiser or sponsor who receives your entry through KTIP may not:"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+msgid "Tools and how they were used"
 msgstr ""
 
 #. placeholder {0}: resolveCopy(i18n, TIER_LABEL[tier])
@@ -14624,6 +15448,8 @@ msgid "Post-Secondary Institution"
 msgstr ""
 
 #: src/components/venue/room/AvStage.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
 msgid "Connecting…"
 msgstr ""
 
@@ -14669,8 +15495,16 @@ msgstr ""
 msgid "Mark all read"
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Vote saved. You can change it until results are out."
+msgstr ""
+
 #: src/components/WelcomePanel.tsx
 msgid "Welcome to"
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Your vote"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14681,9 +15515,19 @@ msgstr ""
 msgid "Jan 2024 – Present"
 msgstr ""
 
+#. placeholder {0}: m.title
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "Done: {0}"
+msgstr ""
+
 #. placeholder {0}: event.capacity
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "{0, plural, one {# place} other {# places}}"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "No material AI help"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14704,6 +15548,10 @@ msgstr ""
 #. placeholder {1}: floorBadge(room.floor)
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "{0} on {1} is in the way."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Nothing missing. You can submit."
 msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
@@ -14750,6 +15598,10 @@ msgstr ""
 msgid "Verification email sent."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Changed since you submitted. Submit again for a fresh receipt."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Students"
 msgstr ""
@@ -14788,6 +15640,13 @@ msgstr ""
 msgid "Read aloud: this step"
 msgstr ""
 
+#. placeholder {0}: nameOf(b.from_team_id)
+#. placeholder {1}: nameOf(b.to_team_id)
+#. placeholder {2}: i18n.date(b.expires_at!, { hour: '2-digit', minute: '2-digit' })
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "{0} is visiting {1} until {2}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Deletion"
 msgstr ""
@@ -14824,6 +15683,10 @@ msgstr ""
 msgid "Applications close"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "No files yet. Put your datasets and pitch deck here."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Be honest about who you are and what you are offering"
 msgstr ""
@@ -14852,6 +15715,8 @@ msgstr ""
 #: src/components/profile/PortraitStudio.tsx
 #: src/components/ui/ToolStatusBar.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
 msgid "Saving…"
 msgstr ""
 
@@ -14971,6 +15836,10 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "No judge has finished scoring this entry."
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid " · {unearnedSecrets} still secret"
 msgstr ""
@@ -15017,6 +15886,10 @@ msgid "The KTIP Assistant is an AI thread pinned to the top of your conversation
 "The thread is kept on the device you use it from, so it will not follow you to another browser."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "{person} wants to join your team"
+msgstr ""
+
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Only you, unless the general access setting says otherwise."
 msgstr ""
@@ -15031,6 +15904,10 @@ msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Only verified businesses are listed here."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Team name"
 msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
@@ -15076,6 +15953,10 @@ msgstr ""
 msgid "After you create it, the next screen is where you {0}."
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "Half a million characters a month. Nothing reads aloud through Azure yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The filters stack, so combine as many as you need.\n"
 "\n"
@@ -15087,6 +15968,7 @@ msgid "The filters stack, so combine as many as you need.\n"
 "The count tells you how many are open versus closed, and Clear all filters resets everything."
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Try again"
 msgstr ""
@@ -15113,6 +15995,10 @@ msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "Anyone at the event whose status is “needs help”, and where they are."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "You applied"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15147,6 +16033,10 @@ msgstr ""
 msgid "Featured by OECS"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Entry submitted. Every teammate has a copy in their dashboard."
+msgstr ""
+
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Change KTIP to suit you"
 msgstr ""
@@ -15157,6 +16047,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Published and draft, upcoming and past. Draft events are visible only to administrators, which is how an event is prepared before anyone can see it."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Conflicts"
 msgstr ""
 
 #: src/components/auth/RolePicker.tsx
@@ -15348,6 +16242,10 @@ msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
 #: src/components/projects/TeamWidget.tsx
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Team"
@@ -15373,6 +16271,7 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 #: src/components/notes/StickyNote.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Bold"
 msgstr ""
 
@@ -15428,6 +16327,10 @@ msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "All Subjects"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Weighted"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15607,6 +16510,10 @@ msgstr ""
 msgid "You can submit a new request below."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Solo entry"
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "For signing in and account recovery. We email it a link to confirm."
 msgstr ""
@@ -15621,6 +16528,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "To KTIP"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Results"
 msgstr ""
 
 #: src/pages/resources/SubmitResourcePage.tsx
@@ -15654,6 +16565,10 @@ msgstr ""
 
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Things you marked “not interested”. They stay out of every ranked list until you bring them back."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Fixing spelling or grammar does not count. Judges see your answer."
 msgstr ""
 
 #: src/lib/authenticator-apps.ts
@@ -15706,6 +16621,11 @@ msgstr ""
 msgid "The reported content"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamDocs.tsx
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
+msgid "Live with your team"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Safety Admin"
 msgstr ""
@@ -15733,6 +16653,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The text of your CV"
+msgstr ""
+
+#: src/components/shared/SubmissionKindBadge.tsx
+msgid "Hackathon Entry"
 msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
@@ -15841,11 +16765,20 @@ msgstr ""
 msgid "Failed to submit application"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Link or a line of proof"
+msgstr ""
+
 #: src/components/documents/ExtractionReviewPanel.tsx
 #: src/components/notes/StickyNoteFabPanel.tsx
 #: src/components/shared/ReceiptDocument.tsx
 #: src/i18n/harvested.ts
 msgid "Yes"
+msgstr ""
+
+#. placeholder {0}: task.title
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Move {0} to the next column"
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -15885,6 +16818,14 @@ msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Generate new recovery codes"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Within the allowance"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Hide results"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15988,6 +16929,7 @@ msgstr ""
 msgid "From URL"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/components/venue/room/RoomCountdown.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/events/CreateEventPage.tsx
@@ -16147,6 +17089,7 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamMilestones.tsx
 #: src/i18n/harvested.ts
 msgid "Objective"
 msgstr ""
@@ -16222,8 +17165,13 @@ msgstr ""
 msgid "Funding call posted"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
 #: src/i18n/harvested.ts
 msgid "Judging"
+msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Show original"
 msgstr ""
 
 #: src/components/settings/LegalSettingsTab.tsx
@@ -16249,6 +17197,10 @@ msgstr ""
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 #: src/i18n/harvested.ts
 msgid "Optional"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "{n} files added"
 msgstr ""
 
 #: src/pages/account/AccountSuspendedPage.tsx
@@ -16406,6 +17358,10 @@ msgstr ""
 msgid "We do not sell personal data. We use the following processors:"
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Vote"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What are the different user roles?"
 msgstr ""
@@ -16444,6 +17400,10 @@ msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Your profile is saved either way. To start using KTIP now, pick a role that needs no approval. We still add this one if the review approves it."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "New doc"
 msgstr ""
 
 #: src/components/venue/room/HomebaseLookPanel.tsx
@@ -16546,6 +17506,10 @@ msgstr ""
 
 #: src/components/WelcomePanel.tsx
 msgid "KTIP connects entrepreneurs, academia, civil society, investors and policy makers across the OECS Member States and the diaspora, bringing ideas, funding, knowledge, and collaboration into one trusted regional space."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Results are not available for this event yet."
 msgstr ""
 
 #: src/pages/forums/ForumsPage.tsx
@@ -16732,6 +17696,8 @@ msgstr ""
 
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/messages/GroupSettingsModal.tsx
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Add"
@@ -16798,6 +17764,7 @@ msgstr ""
 
 #: src/components/grants/application/RichTextField.tsx
 #: src/components/notes/StickyNote.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Numbered list"
 msgstr ""
 
@@ -16819,6 +17786,10 @@ msgstr ""
 
 #: src/pages/forums/CreatePostPage.tsx
 msgid "Failed to start discussion"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Screen share"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16869,6 +17840,10 @@ msgstr ""
 
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# resource published} other {# resources published}}"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Save conflicts"
 msgstr ""
 
 #: src/hooks/useAIAssistant.ts
@@ -16938,6 +17913,12 @@ msgstr ""
 #. placeholder {0}: field.label
 #: src/components/events/EventRegistrationForm.tsx
 msgid "{0} is required"
+msgstr ""
+
+#. placeholder {0}: nameOf(b.from_team_id)
+#. placeholder {1}: b.minutes
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "{0} asks to join your call for {1} minutes."
 msgstr ""
 
 #: src/pages/auth/SignupPage.tsx
@@ -17031,6 +18012,10 @@ msgstr ""
 msgid "If we do not act on it, we tell you why. A notice we decline is not a finding that you are wrong — it may simply be outside what this process can resolve."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Demo video link"
+msgstr ""
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Save Personalization"
 msgstr ""
@@ -17060,6 +18045,7 @@ msgid "JavaScript / TypeScript"
 msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/DocumentEditorPage.tsx
 #: src/pages/collaborate/WhiteboardPage.tsx
@@ -17103,12 +18089,20 @@ msgstr ""
 msgid "Submission Deadline (Optional)"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Captioned speech"
+msgstr ""
+
 #: src/lib/emoji-catalog.ts
 msgid "Smileys"
 msgstr ""
 
 #: src/components/legal/Disclaimer.tsx
 msgid "Before you apply"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Your streak: {streak} days"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -17168,6 +18162,10 @@ msgstr ""
 
 #: src/components/projects/CommentSection.tsx
 msgid "Comments ({commentCount})"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Submitted. You can still edit until the deadline."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17287,6 +18285,10 @@ msgstr ""
 msgid "Organization / Team"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Entrant"
+msgstr ""
+
 #: src/components/calendar/CalendarShell.tsx
 #: src/components/gantt/gantt-nav.tsx
 msgid "Previous week"
@@ -17298,6 +18300,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Every section"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Add to my calendar"
 msgstr ""
 
 #: src/pages/collaborate/VideoConferencePage.tsx
@@ -17354,6 +18360,10 @@ msgstr ""
 
 #: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Engagement received"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Everyone in the venue will see the ranking and the People's Choice count. While results are out, nothing can be edited or voted on."
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -17429,6 +18439,10 @@ msgstr ""
 msgid "Posts here follow the Community Guidelines and the Safeguarding rules. If something breaks them, report it from the post."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not send the application"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "We log partner access and may ask a partner to demonstrate compliance, including how records are stored and deleted. Access can be suspended immediately where we reasonably believe these terms have been breached or member data is at risk, and we will explain why."
 msgstr ""
@@ -17451,6 +18465,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Nothing matched “{term}”."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Publish the results?"
 msgstr ""
 
 #: src/components/personalization/SignalSummary.tsx
@@ -17478,6 +18496,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A request to receive money and forward part of it to someone else."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Normalised"
 msgstr ""
 
 #: src/components/settings/PersonalizationTab.tsx
@@ -17644,6 +18666,10 @@ msgstr ""
 msgid "That code was not accepted."
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Hear translations"
+msgstr ""
+
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "People you mentor"
 msgstr ""
@@ -17733,6 +18759,10 @@ msgstr ""
 
 #: src/components/messages/GroupSettingsModal.tsx
 msgid "Group Settings"
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Pick the entry you liked most. One vote each, and you can change it until results are out."
 msgstr ""
 
 #: src/components/calendar/CalendarDayPanel.tsx
@@ -17825,6 +18855,10 @@ msgstr ""
 msgid "Everything attached to the event. Who may open what is unchanged."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Comment for the organisers"
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Apply on External Site"
 msgstr ""
@@ -17841,6 +18875,7 @@ msgstr ""
 msgid "Verify employers and control what the partner API publishes"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 #: src/hooks/useGlobalSearch.ts
 #: src/i18n/harvested.ts
 #: src/lib/site-search.ts
@@ -17861,6 +18896,11 @@ msgstr ""
 msgid "Retention"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Length"
+msgstr ""
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "This removes the entry and every file attached to it. This cannot be undone."
 msgstr ""
@@ -17879,6 +18919,10 @@ msgid "A title and a body, added to the board you came from — the board is fix
 "Write the title as the question you actually want answered; it is all most people see in the thread list.\n"
 "\n"
 "Once published you can edit or delete your own discussion, and replies notify you as they arrive."
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "Team leaderboard and the side quests organisers set. Judging scores never count here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17918,6 +18962,11 @@ msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "Smallest team"
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Collab Commons"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18436,6 +19485,10 @@ msgstr ""
 msgid "Could not withdraw the badge"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Give the block a title and a start time."
+msgstr ""
+
 #. placeholder {0}: pendingRequests.length
 #: src/components/projects/TeamWidget.tsx
 msgid "{0, plural, one {# request to collaborate} other {# requests to collaborate}}"
@@ -18452,6 +19505,7 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamMilestones.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Could not save"
 msgstr ""
@@ -18481,6 +19535,7 @@ msgid "Assistant chat"
 msgstr ""
 
 #: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Evidence"
 msgstr ""
 
@@ -18587,6 +19642,10 @@ msgstr ""
 msgid "Voice commands use the speech recognition built into your browser. To turn speech into text, Chrome sends your voice to Google, Edge to Microsoft and Safari to Apple. KTIP never receives the recording."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "e.g. Mentor call with Priya"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Sign-up, onboarding, publishing and settings"
 msgstr ""
@@ -18686,6 +19745,10 @@ msgstr ""
 msgid "{0} is presenting"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Could not submit. Try again."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Find the Team panel in the sidebar and click \"Manage Team\"."
 msgstr ""
@@ -18723,6 +19786,10 @@ msgstr ""
 
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Remove logo"
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Join or form a team to ask for a bridge."
 msgstr ""
 
 #: src/components/achievements/TrophyCard.tsx
@@ -18781,6 +19848,10 @@ msgid "Search what you already have, or start something new with the button on t
 "Everything is saved to your account, so you can close the tab and pick it up from another machine."
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "Five audio hours a month. Captions use the browser's own speech service for now, so this stays at zero."
+msgstr ""
+
 #: src/lib/funding-types.ts
 msgid "Blended finance"
 msgstr ""
@@ -18829,8 +19900,16 @@ msgstr ""
 msgid "Could not send that message"
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Voting opens when entries close. Every submitted entry will be listed here."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Ownership"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Results hidden again"
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -18900,6 +19979,10 @@ msgstr ""
 
 #: src/lib/grant-application-template.ts
 msgid "Proposed Start Date"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Opening closed"
 msgstr ""
 
 #: src/components/WelcomePanel.tsx
@@ -19079,6 +20162,10 @@ msgstr ""
 msgid "Professional"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "The Zoom link must be an https zoom.us link."
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "When I press the microphone"
 msgstr ""
@@ -19103,6 +20190,11 @@ msgstr ""
 msgid "Save look"
 msgstr ""
 
+#. placeholder {0}: formatScore(average)
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "gives {0} on average"
+msgstr ""
+
 #: src/components/feedback/AdminNotesSection.tsx
 #: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -19115,6 +20207,14 @@ msgstr ""
 
 #: src/components/collaboration/JitsiVideoCall.tsx
 msgid "Leave Call"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Link to your deck"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Points for quests and finished milestones. Judging scores are separate."
 msgstr ""
 
 #. placeholder {0}: room.name
@@ -19134,6 +20234,18 @@ msgstr ""
 msgid "Update Email"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "No judges yet. Give people the judge role from the venue roster."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "People looking"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Figma, accessibility"
+msgstr ""
+
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/directory/DirectoryPage.tsx
 #: src/pages/discover/DiscoverPage.tsx
@@ -19146,6 +20258,15 @@ msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Entrance: {doorSide} · No stairs yet"
+msgstr ""
+
+#. placeholder {0}: myTeam.name
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Post as {0}"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not close the opening"
 msgstr ""
 
 #: src/pages/JoinInvitePage.tsx
@@ -19171,6 +20292,8 @@ msgid "Earned"
 msgstr ""
 
 #: src/components/events/EventSolutionsPanel.tsx
+#: src/components/venue/room/homebase/Bridges.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Withdraw"
 msgstr ""
 
@@ -19187,8 +20310,16 @@ msgstr ""
 msgid "Close the reading bar"
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "Neural voice characters this month"
+msgstr ""
+
 #: src/components/profile/PortraitTile.tsx
 msgid "Profile Photo"
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Watch the demo"
 msgstr ""
 
 #: src/lib/authenticator-apps.ts
@@ -19251,8 +20382,10 @@ msgstr ""
 #: src/components/venue/map/VenueRoomBrief.tsx
 #: src/components/venue/room/AvStage.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/components/venue/room/RoleRosterPanel.tsx
 #: src/components/venue/room/RoomPeoplePanels.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/components/venue/RoomOccupantList.tsx
 #: src/hooks/useGlobalSearch.ts
@@ -19281,6 +20414,7 @@ msgstr ""
 msgid "{n, plural, one {# event RSVP} other {# event RSVPs}}"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "This month"
 msgstr ""
@@ -19358,6 +20492,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Event rules"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Speech translation"
 msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
@@ -19549,6 +20687,10 @@ msgstr ""
 msgid "Only these signals feed the ranking, and only the groups you left switched on above."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Entering on your own"
+msgstr ""
+
 #: src/components/gantt/gantt-bar.tsx
 msgid "{title}: {itemsLabel}, {start} to {end}, {pct}% complete"
 msgstr ""
@@ -19700,6 +20842,10 @@ msgstr ""
 msgid "The discussions on this board could not be counted. Anything posted here — by anyone — is destroyed with it and cannot be recovered."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Skills, separated by commas (optional)"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your account is deactivated. Sign in any time in the next 90 days to bring it back."
 msgstr ""
@@ -19803,8 +20949,16 @@ msgstr ""
 msgid "Translate"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "The Submission Desk is not open for this event yet."
+msgstr ""
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Copied!"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Entries are closed. Nothing was submitted."
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -19932,8 +21086,21 @@ msgstr ""
 msgid "Previous year"
 msgstr ""
 
+#. placeholder {0}: hostTeam.name
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Request sent to {0}"
+msgstr ""
+
 #: src/components/settings/PreferencesTab.tsx
 msgid "Project Updates"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Workspace"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Could not save your scores."
 msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
@@ -19986,6 +21153,10 @@ msgstr ""
 
 #: src/hooks/useMfa.ts
 msgid "Your session has ended. Sign in again."
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Send claim"
 msgstr ""
 
 #: src/components/shared/OrgEngagementFields.tsx
@@ -20135,6 +21306,8 @@ msgid "Do not:"
 msgstr ""
 
 #. placeholder {0}: format(target, 'MMM d · h:mm a')
+#. placeholder {0}: format(target, 'd MMM, HH:mm')
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/room/RoomCountdown.tsx
 msgid "Closes {0}"
 msgstr ""
@@ -20167,6 +21340,10 @@ msgstr ""
 msgid "Open folder"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "Doing"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "A lot of KTIP is public. Without signing in you can browse Discover, Projects, Events, Funding Opportunities, Forums, the member Directory, the Leaderboard, member pages, published CVs, Resources and this Help Center.\n"
 "\n"
@@ -20190,6 +21367,10 @@ msgstr ""
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "I have read and agree to the documents above."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Requests"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20305,6 +21486,7 @@ msgstr ""
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
 #: src/components/notes/StickyNote.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Italic"
 msgstr ""
 
@@ -20314,6 +21496,10 @@ msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Confirm & Submit"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "AI wrote the first full draft of the code or content"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20332,6 +21518,11 @@ msgstr ""
 msgid "Imply endorsement, partnership, accreditation, sponsorship or approval by %entityShort% that you do not have."
 msgstr ""
 
+#. placeholder {0}: i18n.date(mine.expires_at!, { hour: '2-digit', minute: '2-digit' })
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Bridge open until {0}. Reload to go in."
+msgstr ""
+
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Set New Password"
 msgstr ""
@@ -20346,6 +21537,10 @@ msgstr ""
 
 #: src/lib/permissions.ts
 msgid "Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin."
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Another team"
 msgstr ""
 
 #: src/lib/extracted-fields.ts
@@ -20476,6 +21671,11 @@ msgstr ""
 msgid "A short pitch or demonstration video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\". A Google Drive folder link works too. Check the link in a private browser window first — an assessor who cannot open it will move on."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Team workspace"
+msgstr ""
+
 #: src/pages/auth/LoginPage.tsx
 msgid "Please confirm your email address first. Check your inbox for a confirmation link."
 msgstr ""
@@ -20536,6 +21736,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Do not probe, load-test or attack the platform’s security without written authorisation. Report vulnerabilities to %privacyEmail% instead — we would rather hear from you than about you."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Still missing"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -20613,6 +21817,10 @@ msgstr ""
 msgid "Specific enough for us to recognise it — where it was published, when, and by whom."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTimer.tsx
+msgid "Pause team timer"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Slicing it"
 msgstr ""
@@ -20672,6 +21880,7 @@ msgid "Dashboard, Security, Secondary Email.\n"
 "This is for password accounts. If you only ever sign in with Google or Microsoft, there is no password for a second address to use."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamMilestones.tsx
 #: src/i18n/harvested.ts
 msgid "Deliverable"
 msgstr ""
@@ -20736,6 +21945,10 @@ msgstr ""
 msgid "Slate"
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Offers"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "If you write code as part of your employment or your studies, your employer or institution may own it. That is between you and them, and it is worth checking before you share it here."
 msgstr ""
@@ -20756,6 +21969,10 @@ msgid "The photo block on My Profile opens the portrait studio. Upload a picture
 "That also means it depends on your device. If the cut is refused or comes back looking wrong, your plain photo is kept and used as it is — nothing is lost. A clear subject, an uncluttered background and decent light give it the best chance; a second person at the edge of the frame is what most often confuses it.\n"
 "\n"
 "You can go back to the plain photo at any time from the same studio."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "Drop files here. Up to 25 MB each. Only your team and the organisers can open them."
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -20847,6 +22064,10 @@ msgstr ""
 #. placeholder {0}: document.extracted_field_count
 #: src/components/documents/DocumentCard.tsx
 msgid "{0, plural, one {# field found} other {# fields found}}"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Discord invite or channel"
 msgstr ""
 
 #: src/components/verification/VerificationStatusCard.tsx
@@ -21015,6 +22236,10 @@ msgstr ""
 msgid "Loading your copy..."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "This event: {shareText}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "CC BY or CC BY-SA"
 msgstr ""
@@ -21140,6 +22365,10 @@ msgstr ""
 
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Edit showcase"
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "Where a team hands in its entry, with a countdown to the deadline. Teams only."
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
@@ -21295,6 +22524,10 @@ msgstr ""
 msgid "Attacks based on identity, or targeted abuse of a person."
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Voting has closed. Here is how the room voted."
+msgstr ""
+
 #. placeholder {0}: room.name
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Stop looking at {0}"
@@ -21344,6 +22577,10 @@ msgstr ""
 msgid "This invitation has already been redeemed by another account."
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "No entries have been submitted yet."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Triage"
 msgstr ""
@@ -21371,6 +22608,14 @@ msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Your browser will ask to use the microphone the first time."
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Hide the results?"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Participants will stop seeing the ranking. Judges can change scores again."
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -21469,6 +22714,11 @@ msgstr ""
 msgid "Match the room type"
 msgstr ""
 
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "AI tools materially helped"
+msgstr ""
+
 #: src/components/legal/AgreementGate.tsx
 msgid "Before you submit your entry"
 msgstr ""
@@ -21536,6 +22786,10 @@ msgstr ""
 msgid "Reason (the member sees this)"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "Choose files"
+msgstr ""
+
 #: src/components/moderation/ReportModal.tsx
 msgid "Report {targetLabel}"
 msgstr ""
@@ -21552,6 +22806,11 @@ msgid "The bell in the navigation bar carries a count of everything unread.\n"
 "\"Mark all as read\" clears the badge, and \"View all invitations\" jumps to your invitations inbox.\n"
 "\n"
 "Which notifications you receive is up to you: Your Dashboard has a switch per category under Preferences."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Could not open the file."
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -21573,6 +22832,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Go to Dashboard › Security."
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Open bridges"
 msgstr ""
 
 #: src/lib/achievement-style.ts
@@ -21648,8 +22911,17 @@ msgstr ""
 msgid "By publishing you agree to the IP, Content & Licensing Policy and the Copyright & Takedown Policy. You keep ownership of your work."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Unknown member"
+msgstr ""
+
 #: src/lib/personalization.ts
 msgid "Closing soon"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Links"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21719,6 +22991,10 @@ msgstr ""
 msgid "Back to achievements"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "GitHub"
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Save CV"
 msgstr ""
@@ -21747,6 +23023,14 @@ msgstr ""
 msgid "The fastest way. Nothing to upload, and usually nobody to wait for."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "The Discord link must start with https://discord.gg/ or https://discord.com/"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "What you would bring to the team"
+msgstr ""
+
 #: src/components/profile/ProfileCanvas.tsx
 msgid "Topics you care about, so the right things reach you."
 msgstr ""
@@ -21770,6 +23054,10 @@ msgstr ""
 
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Address confirmed, but not recognised"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Upload a file"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21852,6 +23140,10 @@ msgstr ""
 
 #: src/pages/account/AccountSuspendedPage.tsx
 msgid "Send appeal"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "e.g. Working prototype"
 msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -21953,6 +23245,10 @@ msgstr ""
 msgid "The classic build weekend: a main hall for announcements, a stage for demos, a help desk, and somewhere quiet to actually work."
 msgstr ""
 
+#: src/lib/venue-room-sections.ts
+msgid "Every team and the roles it wants filled. People apply or get invited, and the other side answers."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Who else is here"
 msgstr ""
@@ -21969,6 +23265,10 @@ msgstr ""
 msgid "Every setting lives here, and on the accessibility button in the corner of each page."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Usage could not be loaded. It tries again every minute."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Remembers that you allowed or declined analytics, so you are not asked again on this device."
 msgstr ""
@@ -21983,6 +23283,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your contact details, and your consent to those details being passed to the complainant."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Everything is in. Submitting saves a copy to your dashboard. You can still edit and submit again until the deadline."
 msgstr ""
 
 #: src/components/auth/RolePicker.tsx
@@ -22086,6 +23390,10 @@ msgstr ""
 msgid "Your publications, student projects and the research collaborations you're part of."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
+msgid "To do"
+msgstr ""
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description must be at least 20 characters"
 msgstr ""
@@ -22153,6 +23461,10 @@ msgstr ""
 #: src/lib/personalization.ts
 #: src/pages/dashboard/tabs/OverviewTab.tsx
 msgid "For You"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not update your profile"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
@@ -22337,6 +23649,10 @@ msgstr ""
 msgid "Whatever the Team page says applies here too."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Show me here so teams can invite me"
+msgstr ""
+
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Customise"
 msgstr ""
@@ -22359,6 +23675,8 @@ msgstr ""
 msgid "We email {email} a link to confirm you are still there."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Files"
 msgstr ""
@@ -22407,6 +23725,10 @@ msgstr ""
 
 #: src/lib/validation.ts
 msgid "A recovery code is 10 characters"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Team block"
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -22624,6 +23946,10 @@ msgstr ""
 msgid "The code could not be checked."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Usage tracking is not switched on for this database yet. It starts counting once database update 193 is applied."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Provide the foundational details of your application."
 msgstr ""
@@ -22642,6 +23968,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Curriculum Advisory"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Organiser ops"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22734,6 +24065,11 @@ msgstr ""
 msgid "Your copy of everything you submitted"
 msgstr ""
 
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Code repository"
+msgstr ""
+
 #: src/components/venue/RoomChatPanel.tsx
 msgid "No messages yet. Say hello."
 msgstr ""
@@ -22793,6 +24129,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Try the brain icon to ask in your own words."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Search teams"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22868,6 +24208,7 @@ msgstr ""
 #: src/components/feedback/FeedbackModal.tsx
 #: src/components/moderation/ModeratedField.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/components/verification/InstitutionalEmailCard.tsx
 #: src/pages/cv/CvEditPage.tsx
@@ -22887,6 +24228,8 @@ msgid "Failed to send invitation"
 msgstr ""
 
 #. placeholder {0}: format(target, 'MMM d · h:mm a')
+#. placeholder {0}: format(target, 'd MMM, HH:mm')
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/room/RoomCountdown.tsx
 msgid "Closed {0}"
 msgstr ""
@@ -22901,6 +24244,10 @@ msgstr ""
 
 #: src/components/WelcomePanel.tsx
 msgid "Enter KTIP"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Team members"
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -22938,6 +24285,15 @@ msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "We could not file your notice. Please try again."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Could not save the links"
+msgstr ""
+
+#. placeholder {0}: homebase.team?.name
+#: src/pages/events/EventVenueRoomPage.tsx
+msgid "{0}'s Homebase is private"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -23056,6 +24412,10 @@ msgstr ""
 msgid "Or sign up with"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Tick a team if you work with, mentor, manage or are related to anyone on it. You will not see or score its entry. Scores you already gave it are removed."
+msgstr ""
+
 #: src/components/AnalyticsConsentBanner.tsx
 msgid "No thanks"
 msgstr ""
@@ -23082,6 +24442,10 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Failed to save preferences"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Docs"
 msgstr ""
 
 #: src/components/verification/OrgCodesPanel.tsx
@@ -23180,6 +24544,7 @@ msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/messages/GroupSettingsModal.tsx
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/collaborate/WhiteboardPage.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
@@ -23196,6 +24561,10 @@ msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "CSS"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "This Homebase is free"
 msgstr ""
 
 #: src/hooks/useAISuggestions.ts
@@ -23244,6 +24613,7 @@ msgstr ""
 msgid "Publish funding calls to the platform."
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
 #: src/i18n/harvested.ts
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/leaderboard/LeaderboardPage.tsx
@@ -23370,6 +24740,10 @@ msgstr ""
 msgid "Registration approved"
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "People in calls now"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Using AI features responsibly"
 msgstr ""
@@ -23401,6 +24775,7 @@ msgid "You disappear from the directory and can no longer post. What you have al
 msgstr ""
 
 #: src/components/grants/application/ApplicationDocumentsField.tsx
+#: src/components/venue/room/homebase/TeamMilestones.tsx
 msgid "Required"
 msgstr ""
 
@@ -23524,6 +24899,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Limitation of liability"
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Shared data"
 msgstr ""
 
 #. placeholder {0}: visible.length
@@ -23724,6 +25103,10 @@ msgstr ""
 msgid "Safety Administrator"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Could not post the opening"
+msgstr ""
+
 #: src/a11y/messages.ts
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Start"
@@ -23809,6 +25192,10 @@ msgstr ""
 msgid "Our reply"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamFiles.tsx
+msgid "File added"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Your declared date of birth is treated as restricted data: it is stored in its own table behind its own access rules, it is never copied onto your public profile, and ordinary application queries cannot read it back. Everything downstream consumes a derived yes-or-no answer to \"is this account a minor?\" rather than the date itself."
 msgstr ""
@@ -23880,6 +25267,10 @@ msgstr ""
 
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Failed to update"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Claimed. Waiting for an organiser."
 msgstr ""
 
 #: src/pages/integrations/IntegrationDetailPage.tsx
@@ -24016,6 +25407,11 @@ msgstr ""
 msgid "Project team invitation"
 msgstr ""
 
+#. placeholder {0}: o.title
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Close the opening for {0}"
+msgstr ""
+
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/projects/ManageTeamModal.tsx
 msgid "Editor"
@@ -24073,6 +25469,8 @@ msgid "What does the business do?"
 msgstr ""
 
 #: src/components/legal/AiDeclaration.tsx
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "AI declaration"
 msgstr ""
 
@@ -24145,6 +25543,10 @@ msgstr ""
 msgid "Who this is for"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Save and continue"
+msgstr ""
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Submit a report about inappropriate behavior or policy violations"
 msgstr ""
@@ -24159,6 +25561,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Encrypt the data in transit and at rest, and restrict access to staff who need it."
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Organiser"
 msgstr ""
 
 #: src/pages/forums/PostDetailPage.tsx
@@ -24274,6 +25680,10 @@ msgstr ""
 msgid "Stops animations and page transitions. Your device setting is always respected too."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
+msgid "Press N for a sticky note. Paste images, draw, write, add arrows. Everyone on the team sees it live."
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "This event type runs to a finish — say when"
 msgstr ""
@@ -24311,6 +25721,14 @@ msgstr ""
 
 #: src/lib/site-search.ts
 msgid "Forum Posts"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Your team invited {person}"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Mean z-score. Each judge's totals are measured against that judge's own average, so a harsh or generous judge counts the same as any other."
 msgstr ""
 
 #: src/hooks/useCollabInvites.ts
@@ -24507,6 +25925,7 @@ msgid "Research Institution"
 msgstr ""
 
 #: src/components/association/AssociationReviewQueue.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Waiting"
 msgstr ""
 
@@ -24530,6 +25949,10 @@ msgstr ""
 
 #: src/pages/auth/AuthCallbackPage.tsx
 msgid "An account already exists for that email address. Sign in the way you did originally, or use “Forgot Password?” to set a password for it."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Applied to you"
 msgstr ""
 
 #: src/components/events/EventDetailsForm.tsx
@@ -24556,6 +25979,10 @@ msgstr ""
 
 #: src/lib/resume-designs.ts
 msgid "Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page."
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "{hours} h"
 msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
@@ -24609,8 +26036,16 @@ msgstr ""
 msgid "Notes from KTIP"
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Could not save your conflicts."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Connect overseas expertise with the region"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Submit entry"
 msgstr ""
 
 #: src/components/grants/RequiredDocumentsEditor.tsx
@@ -24770,12 +26205,21 @@ msgstr ""
 msgid "Request sent to the document owner"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamDocs.tsx
+#: src/components/venue/room/homebase/TeamWhiteboard.tsx
+msgid "Not saved. Check your connection."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Reports you have filed"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What is in the admin console?"
+msgstr ""
+
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Could not change the results."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -24985,6 +26429,10 @@ msgstr ""
 msgid "You're attending!"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Read captions in"
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "All Event Types"
 msgstr ""
@@ -25033,6 +26481,10 @@ msgstr ""
 msgid "Away"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "count"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Adults outside a shared, supervised context cannot start a direct conversation with a minor. Conversations a minor starts are subject to the same restriction in reverse."
 msgstr ""
@@ -25043,6 +26495,11 @@ msgstr ""
 
 #: src/components/documents/ExtractionReviewPanel.tsx
 msgid "These values were read out of your document by AI and may be wrong or incomplete. Check each one before accepting it — accepted values are written to the record."
+msgstr ""
+
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Your team"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -25069,9 +26526,18 @@ msgstr ""
 msgid "Legal"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Hands raised in the last 5 minutes"
+msgstr ""
+
 #: src/components/directory/ConnectButton.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 msgid "Request declined"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Entry"
 msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
@@ -25159,6 +26625,10 @@ msgstr ""
 msgid "Prototype - Building MVP"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Hide"
+msgstr ""
+
 #: src/components/InstallPromptSheet.tsx
 msgid "Tap <0/> then<1/> Add to Home Screen."
 msgstr ""
@@ -25213,6 +26683,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Centre puts your name on one side of the portrait and your details on the other."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "We did not use AI tools in any material way"
 msgstr ""
 
 #: src/pages/forums/BoardFormPage.tsx
@@ -25435,6 +26909,10 @@ msgid "Upcoming hackathons you can register for, then a Past section underneath.
 "Past events keep their pages — the brief, the schedule and the submissions stay readable, which is the easiest way to see what a KTIP hackathon actually involves before entering one."
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Link your repository below to see commits, pull requests and test results here."
+msgstr ""
+
 #: src/components/venue/room/SponsorHero.tsx
 msgid "visit"
 msgstr ""
@@ -25459,6 +26937,10 @@ msgstr ""
 msgid "Hashtags"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Getting close"
+msgstr ""
+
 #. placeholder {0}: standing.streak
 #: src/components/profile/ProfileCanvas.tsx
 msgid "{0}-day streak."
@@ -25479,6 +26961,10 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "The meters could not be loaded. They try again every minute."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "People you are connected to"
 msgstr ""
@@ -25489,6 +26975,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Extraction. Fields proposed from a document are shown to you for review and are not saved until you accept them."
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "Judges declare conflicts, then score each entry. Only judges and organisers see it."
 msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
@@ -25502,6 +26992,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Creating grants and reviewing applications."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Code repository link"
 msgstr ""
 
 #: src/components/collaboration/editor/ImageModal.tsx
@@ -25526,6 +27020,10 @@ msgid "Grant applications, event registrations, forms — a record of each, as i
 "These do not change when the event or the grant does, which is the point: if a deadline moves or a form is edited afterwards, your copy still shows what you actually sent.\n"
 "\n"
 "Open one for the full receipt, with a reference number and a print-ready view."
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Scores saved"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -25570,6 +27068,10 @@ msgstr ""
 msgid "Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Why you think they would fit"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Never public"
 msgstr ""
@@ -25596,6 +27098,14 @@ msgstr ""
 msgid "24h"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+msgid "Starts"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Blind mode"
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "Turn off voice commands"
 msgstr ""
@@ -25619,6 +27129,10 @@ msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
 msgid "If your organisation or school should be recognised, ask them to register on KTIP. Otherwise, upload an identity document below."
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Waiting on you"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -25656,6 +27170,8 @@ msgstr ""
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 #: src/components/messages/ChatWindow.tsx
 #: src/components/settings/VerificationTab.tsx
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+#: src/components/venue/room/homebase/TeamMilestones.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Remove {0}"
@@ -25667,6 +27183,10 @@ msgstr ""
 
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Collapse the room list"
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "e.g. Can we compare notes on the landing data?"
 msgstr ""
 
 #: src/pages/InvitationsPage.tsx
@@ -25791,6 +27311,7 @@ msgstr ""
 msgid "Clearing your browser’s storage for this site removes everything in the table above, including your session, so you will be signed out and asked about analytics again."
 msgstr ""
 
+#: src/components/shared/ReceiptDocument.tsx
 #: src/i18n/harvested.ts
 msgid "Declaration"
 msgstr ""
@@ -25804,6 +27325,7 @@ msgid "Black & white"
 msgstr ""
 
 #: src/components/legal/AiDeclaration.tsx
+#: src/components/shared/ReceiptDocument.tsx
 msgid "AI wrote the full first draft"
 msgstr ""
 
@@ -25964,7 +27486,17 @@ msgstr ""
 
 #: src/components/admin/ModerationReasonModal.tsx
 #: src/components/shared/BulkDeleteDialog.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Untitled"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Invitation sent to {name}"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamCalendar.tsx
+#: src/components/venue/room/homebase/TeamTimer.tsx
+msgid "{m} min"
 msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
@@ -26048,9 +27580,14 @@ msgid "Notifications, privacy and display"
 msgstr ""
 
 #: src/components/documents/DocumentCard.tsx
+#: src/components/shared/ReceiptDocument.tsx
 #: src/lib/site-search.ts
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Members"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamMilestones.tsx
+msgid "Challenge checklist"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26193,8 +27730,16 @@ msgstr ""
 msgid "Scoring and deliberation."
 msgstr ""
 
+#: src/components/venue/room/judging/PeoplesChoicePanel.tsx
+msgid "Voting has not opened yet. Organisers see the list early."
+msgstr ""
+
 #: src/lib/forum-board-icons.ts
 msgid "Learning"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Withdrawn"
 msgstr ""
 
 #: src/lib/achievement-copy.ts
@@ -26209,6 +27754,7 @@ msgstr ""
 msgid "your languages"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
 #: src/components/venue/room/RoomSections.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Judges"
@@ -26244,6 +27790,18 @@ msgid "The month grid shows what is happening on each day; multi-day events span
 "When you would rather browse than plan around dates, switch to Grid using the toggle up in the filter bar."
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Use a full link starting with https://"
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Column"
+msgstr ""
+
+#: src/components/venue/room/CollabCommonsPanel.tsx
+msgid "Datasets and APIs anyone can use"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Reply to forum posts and comment on projects."
 msgstr ""
@@ -26263,6 +27821,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "AI navigation is on — ask in your own words"
+msgstr ""
+
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Openings"
 msgstr ""
 
 #: src/pages/dashboard/dashboard-tabs.ts
@@ -26335,6 +27897,10 @@ msgstr ""
 msgid "Report submitted. Our safety team will review it."
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Nobody is looking for a team right now."
+msgstr ""
+
 #: src/pages/help/HelpCenterPage.tsx
 msgid "Browsing by category"
 msgstr ""
@@ -26349,6 +27915,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your content sits in our database and file storage, and in backups of them."
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
+msgid "Form a team"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26465,6 +28035,7 @@ msgstr ""
 
 #: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "Read aloud"
 msgstr ""
 
@@ -26697,6 +28268,7 @@ msgid "Edit Discussion Board"
 msgstr ""
 
 #: src/components/directory/MemberPanel.tsx
+#: src/components/venue/room/homebase/Bridges.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
 #: src/components/venue/RoomOccupantList.tsx
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
@@ -26890,6 +28462,10 @@ msgstr ""
 msgid "Listed to everyone; people ask you for access."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Conflicts saved"
+msgstr ""
+
 #: src/pages/cv/CvPage.tsx
 msgid "Preview ink"
 msgstr ""
@@ -27007,12 +28583,22 @@ msgstr ""
 msgid "{sponsorName} links"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "The Notion link must be an https notion.so or notion.site link."
+msgstr ""
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Applications are read by the organisation that posted the call, and by grants administrators."
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Application marked under review"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Demo video"
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -27039,6 +28625,10 @@ msgstr ""
 msgid "Listen only — no mics"
 msgstr ""
 
+#: src/lib/venue-room-sections.ts
+msgid "Every score and average, with the switch that publishes them. Organisers only."
+msgstr ""
+
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "{n, plural, one {# event deleted} other {# events deleted}}"
 msgstr ""
@@ -27063,6 +28653,10 @@ msgstr ""
 
 #: src/components/venue/room/RoomSections.tsx
 msgid "No mentors in the venue yet."
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "The video can be three minutes at most."
 msgstr ""
 
 #: src/components/security/MethodPicker.tsx
@@ -27174,8 +28768,16 @@ msgstr ""
 msgid "If there is no licence and you want to use the work, ask the author. Most say yes, and now you have it in writing."
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Hearing translations"
+msgstr ""
+
 #: src/pages/help/HelpCenterPage.tsx
 msgid "Browse the FAQ →"
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "{m} minutes"
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -27364,12 +28966,21 @@ msgstr ""
 msgid "A code to your inbox, and you are in."
 msgstr ""
 
+#: src/components/venue/room/CollabCommonsPanel.tsx
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Post"
+msgstr ""
+
 #: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
 msgid "Lock my profile"
 msgstr ""
 
+#. placeholder {0}: display(f.name)
 #. placeholder {0}: note.title
+#. placeholder {0}: task.title
 #: src/components/notes/StickyNoteFabPanel.tsx
+#: src/components/venue/room/homebase/TeamFiles.tsx
+#: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Delete {0}"
 msgstr ""
 
@@ -27392,6 +29003,12 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Legitimate interests in regional accessibility"
+msgstr ""
+
+#: src/components/shared/ReceiptDocument.tsx
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Pitch deck"
 msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
@@ -27527,6 +29144,10 @@ msgstr ""
 msgid "People the funder appoints to assess applications, which may include external experts. Each is bound by the obligations in the next section."
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Only organisers can see this until you publish."
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Failed to update email"
 msgstr ""
@@ -27650,12 +29271,20 @@ msgstr ""
 msgid "Retake"
 msgstr ""
 
+#: src/components/venue/room/judging/ResultsBoardPanel.tsx
+msgid "Has not declared conflicts"
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "Stop"
 msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "↵ open"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamIntegrations.tsx
+msgid "Checks failing"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -27670,11 +29299,19 @@ msgstr ""
 msgid "You made yourself findable. A complete, verified profile is what lets collaborators, funders and employers reach you at all."
 msgstr ""
 
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "For"
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 #: src/i18n/harvested.ts
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/dashboard/tabs/VerificationTab.tsx
 msgid "Verification"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "No quests yet. Organisers add them here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -27818,6 +29455,7 @@ msgid "Use the name as written, in the same size and style as the surrounding te
 msgstr ""
 
 #: src/components/notes/StickyNote.tsx
+#: src/components/venue/room/homebase/TeamDocs.tsx
 msgid "Bulleted list"
 msgstr ""
 
@@ -27901,6 +29539,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Live Sentry issues from the browser and the API"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Chat translation"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -28091,6 +29733,10 @@ msgstr ""
 msgid "{n, plural, one {# day active in a row} other {# days active in a row}}"
 msgstr ""
 
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "Submitted. Entries are closed."
+msgstr ""
+
 #: src/pages/courses/CourseDetailPage.tsx
 msgid "Continue course"
 msgstr ""
@@ -28233,6 +29879,11 @@ msgstr ""
 msgid "Something else to report? Use the feedback button in the corner of any page, or <0>visit the help centre</0>."
 msgstr ""
 
+#. placeholder {0}: c.title
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "How your entry meets {0}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What other people can see"
 msgstr ""
@@ -28247,6 +29898,10 @@ msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Cameras"
+msgstr ""
+
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Add quest"
 msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
@@ -28335,6 +29990,7 @@ msgstr ""
 msgid "Verify business"
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Approve"
 msgstr ""
@@ -28380,6 +30036,10 @@ msgstr ""
 msgid "Every achievement is worth points depending on how rare it is, from 10 for a common one up to 200 for a legendary. Your level comes from how many achievements you have earned rather than how many points — someone who has done a bit of everything ranks higher than someone with one big win. Levels run from Newcomer to KTIP Champion."
 msgstr ""
 
+#: src/components/venue/room/QuestBoardPanel.tsx
+msgid "Join a team to claim quests."
+msgstr ""
+
 #: src/pages/JoinInvitePage.tsx
 msgid "Sign in to continue"
 msgstr ""
@@ -28404,12 +30064,20 @@ msgstr ""
 msgid "{resultCount, plural, one {Found # article} other {Found # articles}}"
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Free tiers, month to date"
+msgstr ""
+
 #: src/components/ui/FilterBar.tsx
 msgid "Show results"
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Sponsorships"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Nothing recorded in this range yet."
 msgstr ""
 
 #: src/pages/forums/PostDetailPage.tsx
@@ -28420,12 +30088,20 @@ msgstr ""
 msgid "Store your entry and show it to the judges and organisers of that competition."
 msgstr ""
 
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "Not scored"
+msgstr ""
+
 #: src/pages/grievances/MyGrievancesPage.tsx
 msgid "No reports submitted"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your data was downloaded"
+msgstr ""
+
+#: src/components/venue/room/judging/SubmissionDeskPanel.tsx
+msgid "You are not on a team, so this entry is yours alone. If you join a team later, hand in the team's entry instead."
 msgstr ""
 
 #: src/components/directory/ConnectButton.tsx
@@ -28512,6 +30188,10 @@ msgstr ""
 msgid "Select a conversation"
 msgstr ""
 
+#: src/components/venue/room/homebase/TeamDocs.tsx
+msgid "Heading"
+msgstr ""
+
 #: src/components/shared/DeleteEntityDialog.tsx
 msgid "Type the {noun} title to confirm"
 msgstr ""
@@ -28534,8 +30214,16 @@ msgid "Scroll to the Comments section on any project to leave a comment or ask a
 "All three need you to be signed in."
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "Counts every translation on the site. Only cache misses use the allowance."
+msgstr ""
+
 #: src/components/notes/StickyNote.tsx
 msgid "Quote"
+msgstr ""
+
+#: src/components/venue/room/homebase/TeamTimer.tsx
+msgid "Start team timer"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -28753,6 +30441,10 @@ msgid "Open your event in the admin console and go to the Venue tab.\n"
 "Staff your Help Desk before the event opens. It is the room participants reach for when they are stuck."
 msgstr ""
 
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Participants online now"
+msgstr ""
+
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Shows on the banner and the rug. PNG, JPEG, WebP or GIF, up to 2 MB."
 msgstr ""
@@ -28766,6 +30458,12 @@ msgstr ""
 #: src/components/admin/AdminNoteModal.tsx
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "New note"
+msgstr ""
+
+#. placeholder {0}: nameOf(b.to_team_id)
+#. placeholder {1}: i18n.date(b.expires_at!, { hour: '2-digit', minute: '2-digit' })
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "You can join {0}'s call until {1}."
 msgstr ""
 
 #: src/components/messages/MessagingPanel.tsx
@@ -28870,6 +30568,7 @@ msgstr ""
 msgid "Loading your CV…"
 msgstr ""
 
+#: src/components/venue/room/TeamFinderPanel.tsx
 #: src/i18n/harvested.ts
 msgid "Declined"
 msgstr ""
@@ -28892,6 +30591,10 @@ msgstr ""
 
 #: src/lib/personalization.ts
 msgid "Climate action"
+msgstr ""
+
+#: src/components/venue/room/homebase/Bridges.tsx
+msgid "Could not send the request"
 msgstr ""
 
 #: src/components/association/AssociationReviewQueue.tsx
@@ -28934,6 +30637,10 @@ msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
 msgid "Addresses you have confirmed"
+msgstr ""
+
+#: src/components/venue/room/OrganiserOpsPanel.tsx
+msgid "Usage by team"
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -29041,6 +30748,11 @@ msgstr ""
 msgid "Python"
 msgstr ""
 
+#. placeholder {0}: team.name
+#: src/components/venue/room/TeamFinderPanel.tsx
+msgid "Application sent to {0}"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Floors"
 msgstr ""
@@ -29073,6 +30785,10 @@ msgstr ""
 
 #: src/components/shared/OrgEngagementFields.tsx
 msgid "Can our own team take part in this {itemNoun}?"
+msgstr ""
+
+#: src/components/venue/room/judging/JudgingConsolePanel.tsx
+msgid "No teams have formed yet."
 msgstr ""
 
 #: src/i18n/harvested.ts
