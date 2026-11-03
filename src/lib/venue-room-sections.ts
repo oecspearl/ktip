@@ -37,6 +37,7 @@ export type RoomSectionId =
   | 'resources'
   | 'chat'
   | 'team_workspace'
+  | 'team_finder'
   | 'announcement_feed'
   | 'faq'
   | 'rules'
@@ -204,6 +205,16 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: ['team'],
     order: 45,
+  },
+  {
+    id: 'team_finder',
+    label: msg`Team Finder`,
+    blurb: msg`Every team and the roles it wants filled. People apply or get invited, and the other side answers.`,
+    slot: 'main',
+    defaultFor: ['networking'],
+    order: 58,
+    // A conference has no teams to form.
+    hiddenForEventTypes: ['conference'],
   },
   {
     id: 'announcement_feed',

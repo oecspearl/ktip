@@ -192,10 +192,13 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     hero: 'chat',
     rail: 'looking_for_team',
     camera: 'huddle',
-    order: ['host_controls', 'av_placeholder', 'chat', 'looking_for_team', 'skill_finder'],
+    // The Team Finder sits under them: eight columns, with the skill search
+    // filling the four beside it.
+    order: ['host_controls', 'av_placeholder', 'chat', 'looking_for_team', 'team_finder', 'skill_finder'],
     spans: {
       host_controls: 'wide',
       av_placeholder: 'wide',
+      team_finder: 'band',
       skill_finder: 'third',
       occupants: 'third',
       wayfinding: 'third',
