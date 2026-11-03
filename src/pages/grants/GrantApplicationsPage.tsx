@@ -51,7 +51,7 @@ export default function GrantApplicationsPage() {
   const toast = useToast()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
-  usePageTitle(grant?.title ? t`Applications — ${grant.title}` : t`Applications`)
+  usePageTitle(grant?.title ? t`Applications | ${grant.title}` : t`Applications`)
 
   const { applications, loading, error: applicationsError, refetch } = useFunderApplications(grant?.id)
   const { decide, loading: deciding } = useDecideApplication()

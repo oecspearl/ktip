@@ -1715,7 +1715,7 @@ msgstr ""
 
 #. placeholder {0}: resource.title
 #: src/pages/resources/ResourceDetailPage.tsx
-msgid "{0} — Resources"
+msgid "{0} | Resources"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5421,7 +5421,7 @@ msgstr ""
 #. placeholder {0}: room.name
 #. placeholder {1}: event?.title ?? venueFallbackTitle
 #: src/pages/events/EventVenueRoomPage.tsx
-msgid "{0} — {1}"
+msgid "{0} | {1}"
 msgstr ""
 
 #: src/hooks/useVerification.ts
@@ -8225,7 +8225,7 @@ msgid "A reviewer removed the badge from this account, so an email address canno
 msgstr ""
 
 #: src/pages/cv/PublicCvPage.tsx
-msgid "{name} — CV"
+msgid "{name} | CV"
 msgstr ""
 
 #: src/components/resume/sheets/LedgerSheet.tsx
@@ -9832,7 +9832,7 @@ msgstr ""
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationsPage.tsx
-msgid "Applications — {0}"
+msgid "Applications | {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20753,7 +20753,7 @@ msgid "Help us locate the incident by describing where it occurred on the platfo
 msgstr ""
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
-msgid "Copy — {receiptTitle}"
+msgid "Copy | {receiptTitle}"
 msgstr ""
 
 #. placeholder {0}: requiredDocuments.filter((d) => d.required && matches(d).length > 0).length
@@ -25239,7 +25239,7 @@ msgstr ""
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationPage.tsx
-msgid "Apply — {0}"
+msgid "Apply | {0}"
 msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
@@ -25314,7 +25314,7 @@ msgstr ""
 
 #. placeholder {0}: event.title
 #: src/pages/events/EventVenuePage.tsx
-msgid "Venue — {0}"
+msgid "Venue | {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26353,7 +26353,7 @@ msgstr ""
 
 #. placeholder {0}: board.name
 #: src/pages/forums/BoardPage.tsx
-msgid "{0} — Forums"
+msgid "{0} | Forums"
 msgstr ""
 
 #. placeholder {0}: verdict.employerName

@@ -16,7 +16,7 @@ export default function BoardPage() {
   const auth = useAuth()
 
   const { board, loading: boardLoading } = useForumBoard(params.slug)
-  usePageTitle(board?.name ? t`${board.name} — Forums` : t`Forums`)
+  usePageTitle(board?.name ? t`${board.name} | Forums` : t`Forums`)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')

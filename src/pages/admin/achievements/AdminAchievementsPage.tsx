@@ -24,7 +24,7 @@ import type { BadgeTier } from '../../../types'
  * would hit exactly the same check.
  */
 export default function AdminAchievementsPage() {
-  usePageTitle('Achievements — Admin')
+  usePageTitle('Achievements | Admin')
   const [tab, setTab] = useState<'definitions' | 'art'>('definitions')
 
   return (

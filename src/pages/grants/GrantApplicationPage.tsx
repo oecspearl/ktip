@@ -48,7 +48,7 @@ export default function GrantApplicationPage() {
   const toast = useToast()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
-  usePageTitle(grant ? t`Apply — ${grant.title}` : t`Apply for Grant`)
+  usePageTitle(grant ? t`Apply | ${grant.title}` : t`Apply for Grant`)
 
   const { application: existingApplication, loading: applicationLoading } = useDraftApplication(
     params.id,

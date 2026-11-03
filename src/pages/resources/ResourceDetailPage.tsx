@@ -35,7 +35,7 @@ export default function ResourceDetailPage() {
   useCanonicalSlug(params.id, resource)
   useRecordView('resource', resource?.id)
 
-  usePageTitle(resource?.title ? t`${resource.title} — Resources` : t`Resource`)
+  usePageTitle(resource?.title ? t`${resource.title} | Resources` : t`Resource`)
 
   if (loading || !resource) {
     if (loading) {

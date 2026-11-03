@@ -1735,8 +1735,8 @@ msgstr "Les participants reçoivent un objectif à atteindre. Les objectifs, con
 
 #. placeholder {0}: resource.title
 #: src/pages/resources/ResourceDetailPage.tsx
-msgid "{0} — Resources"
-msgstr "{0} — Ressources"
+msgid "{0} | Resources"
+msgstr "{0} | Ressources"
 
 #: src/i18n/harvested.ts
 msgid "Entrepreneurs"
@@ -5467,8 +5467,8 @@ msgstr ""
 #. placeholder {0}: room.name
 #. placeholder {1}: event?.title ?? venueFallbackTitle
 #: src/pages/events/EventVenueRoomPage.tsx
-msgid "{0} — {1}"
-msgstr "{0} — {1}"
+msgid "{0} | {1}"
+msgstr "{0} | {1}"
 
 #: src/hooks/useVerification.ts
 msgid "Your organisation was approved. Your account now holds the {grantedLabel} role."
@@ -8299,8 +8299,8 @@ msgid "A reviewer removed the badge from this account, so an email address canno
 msgstr ""
 
 #: src/pages/cv/PublicCvPage.tsx
-msgid "{name} — CV"
-msgstr "{name} — CV"
+msgid "{name} | CV"
+msgstr "{name} | CV"
 
 #: src/components/resume/sheets/LedgerSheet.tsx
 msgid "End of résumé"
@@ -9917,7 +9917,7 @@ msgstr "Supprimé"
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationsPage.tsx
-msgid "Applications — {0}"
+msgid "Applications | {0}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20908,8 +20908,8 @@ msgid "Help us locate the incident by describing where it occurred on the platfo
 msgstr "Aidez-nous à localiser l'incident en décrivant où il s'est produit sur la plateforme"
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
-msgid "Copy — {receiptTitle}"
-msgstr "Copie — {receiptTitle}"
+msgid "Copy | {receiptTitle}"
+msgstr "Copie | {receiptTitle}"
 
 #. placeholder {0}: requiredDocuments.filter((d) => d.required && matches(d).length > 0).length
 #. placeholder {1}: requiredDocuments.filter((d) => d.required).length
@@ -25420,8 +25420,8 @@ msgstr "Vous n'avez encore postulé à aucune subvention. Parcourez les opportun
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationPage.tsx
-msgid "Apply — {0}"
-msgstr "Postuler — {0}"
+msgid "Apply | {0}"
+msgstr "Postuler | {0}"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "The catalog is being curated — check back soon."
@@ -25495,8 +25495,8 @@ msgstr ""
 
 #. placeholder {0}: event.title
 #: src/pages/events/EventVenuePage.tsx
-msgid "Venue — {0}"
-msgstr "Lieu — {0}"
+msgid "Venue | {0}"
+msgstr "Lieu | {0}"
 
 #: src/i18n/harvested.ts
 msgid "Find partnerships, attend events, and support innovation."
@@ -26539,8 +26539,8 @@ msgstr ""
 
 #. placeholder {0}: board.name
 #: src/pages/forums/BoardPage.tsx
-msgid "{0} — Forums"
-msgstr "{0} — Forums"
+msgid "{0} | Forums"
+msgstr "{0} | Forums"
 
 #. placeholder {0}: verdict.employerName
 #: src/components/shared/EngagementNotice.tsx

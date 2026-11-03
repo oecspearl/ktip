@@ -41,7 +41,7 @@ export default function EventVenuePage() {
   // exists once the event has resolved. useEvent takes either shape.
   const { event, loading: eventLoading } = useEvent(params.slug)
   const eventId = event?.id
-  usePageTitle(event ? t`Venue — ${event.title}` : t`Venue`)
+  usePageTitle(event ? t`Venue | ${event.title}` : t`Venue`)
 
   // Session and presence live in the layout's provider so the channel is not
   // torn down when a member walks into a room; this page only reads them.

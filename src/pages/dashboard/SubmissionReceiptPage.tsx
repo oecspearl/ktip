@@ -28,7 +28,7 @@ export default function SubmissionReceiptPage() {
   const { receipt, loading } = useSubmissionReceipt(params.id)
 
   const receiptTitle = receipt?.title
-  usePageTitle(receipt ? t`Copy — ${receiptTitle}` : t`Submission Copy`)
+  usePageTitle(receipt ? t`Copy | ${receiptTitle}` : t`Submission Copy`)
 
   // ?print=1 opens the dialog on arrival, so "Download PDF" elsewhere in the
   // app is one click rather than a page followed by a hunt for the control.

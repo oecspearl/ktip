@@ -1786,8 +1786,8 @@ msgstr "Attendees are given a goal to accomplish. Objectives, constraints, deliv
 
 #. placeholder {0}: resource.title
 #: src/pages/resources/ResourceDetailPage.tsx
-msgid "{0} — Resources"
-msgstr "{0} — Resources"
+msgid "{0} | Resources"
+msgstr "{0} | Resources"
 
 #: src/i18n/harvested.ts
 msgid "Entrepreneurs"
@@ -5622,8 +5622,8 @@ msgstr "Any member can see your full profile."
 #. placeholder {0}: room.name
 #. placeholder {1}: event?.title ?? venueFallbackTitle
 #: src/pages/events/EventVenueRoomPage.tsx
-msgid "{0} — {1}"
-msgstr "{0} — {1}"
+msgid "{0} | {1}"
+msgstr "{0} | {1}"
 
 #: src/hooks/useVerification.ts
 msgid "Your organisation was approved. Your account now holds the {grantedLabel} role."
@@ -8587,8 +8587,8 @@ msgid "A reviewer removed the badge from this account, so an email address canno
 msgstr "A reviewer removed the badge from this account, so an email address cannot bring it back."
 
 #: src/pages/cv/PublicCvPage.tsx
-msgid "{name} — CV"
-msgstr "{name} — CV"
+msgid "{name} | CV"
+msgstr "{name} | CV"
 
 #: src/components/resume/sheets/LedgerSheet.tsx
 msgid "End of résumé"
@@ -10256,8 +10256,8 @@ msgstr "Removed"
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationsPage.tsx
-msgid "Applications — {0}"
-msgstr "Applications — {0}"
+msgid "Applications | {0}"
+msgstr "Applications | {0}"
 
 #: src/i18n/harvested.ts
 msgid "Keeps you signed in between page loads. Without it you would sign in on every navigation."
@@ -21612,8 +21612,8 @@ msgid "Help us locate the incident by describing where it occurred on the platfo
 msgstr "Help us locate the incident by describing where it occurred on the platform"
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
-msgid "Copy — {receiptTitle}"
-msgstr "Copy — {receiptTitle}"
+msgid "Copy | {receiptTitle}"
+msgstr "Copy | {receiptTitle}"
 
 #. placeholder {0}: requiredDocuments.filter((d) => d.required && matches(d).length > 0).length
 #. placeholder {1}: requiredDocuments.filter((d) => d.required).length
@@ -26238,8 +26238,8 @@ msgstr "You haven't applied for any grants yet. Browse available opportunities a
 
 #. placeholder {0}: grant.title
 #: src/pages/grants/GrantApplicationPage.tsx
-msgid "Apply — {0}"
-msgstr "Apply — {0}"
+msgid "Apply | {0}"
+msgstr "Apply | {0}"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "The catalog is being curated — check back soon."
@@ -26313,8 +26313,8 @@ msgstr "Back to setup"
 
 #. placeholder {0}: event.title
 #: src/pages/events/EventVenuePage.tsx
-msgid "Venue — {0}"
-msgstr "Venue — {0}"
+msgid "Venue | {0}"
+msgstr "Venue | {0}"
 
 #: src/i18n/harvested.ts
 msgid "Find partnerships, attend events, and support innovation."
@@ -27384,8 +27384,8 @@ msgstr "Browsing is open to everyone. Publishing, applying for funding and messa
 
 #. placeholder {0}: board.name
 #: src/pages/forums/BoardPage.tsx
-msgid "{0} — Forums"
-msgstr "{0} — Forums"
+msgid "{0} | Forums"
+msgstr "{0} | Forums"
 
 #. placeholder {0}: verdict.employerName
 #: src/components/shared/EngagementNotice.tsx

@@ -40,7 +40,7 @@ export default function PublicCvPage() {
   )
 
   const name = published?.data?.profile?.name || published?.display_name || t`CV`
-  usePageTitle(published ? t`${name} — CV` : t`CV`)
+  usePageTitle(published ? t`${name} | CV` : t`CV`)
 
   const design = resolveDesign(published?.design ?? published?.template)
   const Sheet = sheetFor(design.id)

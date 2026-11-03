@@ -66,7 +66,7 @@ export default function EventVenueRoomPage() {
   const { membership, joining, joinError, presence } = useVenuePresenceContext()
 
   const venueFallbackTitle = t`Venue`
-  usePageTitle(room ? t`${room.name} — ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
+  usePageTitle(room ? t`${room.name} | ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
 
   const me = useMemo(
     () =>
