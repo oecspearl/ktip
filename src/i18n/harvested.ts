@@ -158,9 +158,9 @@ Badges also work as a filter in the member directory, which is how other members
   msg`Administrators and moderators can reach non-public data where that is necessary to operate the platform, investigate a report, or meet a safeguarding duty. Those accesses are logged.`,
   msg`Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.
 
-It covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics, error reports and UAT feedback.
+It covers projects, events, users, roles, achievements, moderation, institutions, association review, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and error reports.
 
-What you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.
+What you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, association review, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.
 
 Actions here apply platform-wide, so they are worth being deliberate about.`,
   msg`Adults outside a shared, supervised context cannot start a direct conversation with a minor. Conversations a minor starts are subject to the same restriction in reverse.`,
@@ -240,6 +240,8 @@ File-based resources upload here; text resources are read in full on the resourc
   msg`Asking for permission`,
   msg`Assign roles and toggle what each role can do`,
   msg`Assistant chat`,
+  msg`Association Review`,
+  msg`Association review`,
   msg`At %strikeLimit% standing notices the account is terminated and its published content removed.`,
   msg`At a partner institution, students are approved automatically, from a list of addresses the institution gave us, or by one of its educators. Teaching staff are added by the institution.`,
   msg`Audit`,
@@ -289,14 +291,19 @@ Open one for the full text plus the page it was sent from — which is usually t
   msg`Business Associations`,
   msg`Business Verification`,
   msg`Business profile`,
+  msg`Business verification`,
   msg`Business verification is done by a business association, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.
 
-Open the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.
+Open Verification from your profile menu (or the Verification tab on your dashboard). Organisation accounts see a Your business section above the identity checks. Enter your legal business name, your member state and your business registration number, then submit it to your business association.
 
-The reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.
+The reviewing organisation checks the submission against its own records. Once approved, your business is verified, your own profile gets the verified badge, and funders and partners see it.
 
 A Private Sector account is the unverified state of the same thing — everything keeps working while you wait.`,
-  msg`Businesses waiting on your Chamber`,
+  msg`Business verification submissions from every member state, oldest first. Waiting shows how many days each has sat in the queue. Association shows who covers that country; Unassigned means nobody can act on it yet.
+
+To fix an unassigned country, open Institutions and add an association admin.`,
+  msg`Businesses waiting for verification in every member state`,
+  msg`Businesses waiting in your country`,
   msg`CC BY or CC BY-SA`,
   msg`CV parsing`,
   msg`Calendar view`,
@@ -314,8 +321,6 @@ A Private Sector account is the unverified state of the same thing — everythin
   msg`Category and phase`,
   msg`Challenge`,
   msg`Challenge events`,
-  msg`Chamber SME review`,
-  msg`Chamber verification`,
   msg`Change it`,
   msg`Change your analytics choice`,
   msg`Change your email address`,
@@ -339,12 +344,10 @@ These preferences are enforced where notifications are created, so a stream that
 For missing email specifically, check your spam folder and, if you added a secondary email, which address the mail actually went to.
 
 In-app notifications appear on the bell in the navigation bar rather than as browser pop-ups.`,
+  msg`Check and verify the businesses waiting in your country`,
   msg`Check for a declared licence before you use anything. No licence means no permission.`,
   msg`Check that what you fed the tool was yours to use. AI output can reproduce other people’s protected work.`,
   msg`Check the legal entity’s name and registration, not just its brand.`,
-  msg`Check the legal name and registration number against the national corporate registry — that check is the entire value of the badge you are about to grant.
-
-Applicants cannot edit their submission after sending it, so a correction means rejecting with a reason and having them resubmit. Verified businesses show the badge on their profile and in the directory.`,
   msg`Check the obvious first: the right email, the right password, caps lock off.
 
 If you signed up with Google or Microsoft you have no KTIP password. Use the same provider button you originally signed up with — the email/password form will always fail for you.
@@ -362,6 +365,7 @@ Out of recovery codes as well? An OECS administrator can reset the second step f
 Still locked out? Clear your cookies for the site — stale session data causes this — and if it persists your account may be suspended, in which case reach out through the Help Center contact options.`,
   msg`Checked In`,
   msg`Checked in`,
+  msg`Checking the businesses waiting in your country.`,
   msg`Checklist`,
   msg`Choose "Sign Out" at the bottom of the menu.`,
   msg`Choose the sun or moon icon that fans out above it.`,
@@ -508,9 +512,9 @@ Update the phase as the project moves. Funders browsing the Projects list filter
   msg`Contact you outside the platform using details taken from your entry, other than about the competition.`,
   msg`Content`,
   msg`Content already shared into another member’s context — a direct message, a collaborative document, a whiteboard, a group chat — stays in that context. We cannot reach into someone else’s conversation and remove your half of it.`,
-  msg`Content first — Projects, Events, Grants, Forums, Resources, Achievements. Then people: Users, Roles & Permissions, Institutions, Chamber Review, Employers, Verification.
+  msg`Content first — Projects, Events, Grants, Forums, Resources, Achievements. Then people: Users, Roles & Permissions, Institutions, Association Review, Employers, Verification.
 
-The safety group is Moderation and Grievances. Integrations, Partner API, Analytics, UAT Feedback and Errors are the operational end.
+The safety group is Moderation and Grievances. Integrations, Partner API, Analytics and Errors are the operational end.
 
 This rail is on every admin page, so it is always the way back out.`,
   msg`Content involving minors`,
@@ -587,6 +591,7 @@ This is for password accounts. If you only ever sign in with Google or Microsoft
   msg`Date, time, location or virtual link, event type, and whether it has already happened. Cancelled and past events keep their page — they just say so.
 
 Everything below expands on this; this block is the part worth screenshotting.`,
+  msg`Deciding for an association`,
   msg`Declaration`,
   msg`Declare a conflict of interest and step aside — including where they are working on something competing.`,
   msg`Declaring`,
@@ -804,6 +809,8 @@ Picking a category never hides the other counts, so you can see where else your 
 The pipeline chart is the one to watch during a funding round: it shows how many applications sit at each stage, so a queue building up at review is visible before anyone complains about it.
 
 Above this, the platform calendar shows every scheduled event across the region in one month grid.`,
+  msg`Every country’s queue`,
+  msg`Every country’s queue, waiting times and the association covering each.`,
   msg`Every event on the platform`,
   msg`Every grant has an Eligibility section describing who may apply.
 
@@ -989,7 +996,7 @@ Venues only exist for events where the organiser has set one up.`,
   msg`Getting Around`,
   msg`Getting Started`,
   msg`Getting your business verified`,
-  msg`Getting your business verified by your Chamber.`,
+  msg`Getting your business verified by your business association.`,
   msg`Give each code to one person you know, directly. Never post codes in public.`,
   msg`Give it a title, a description and a category, then attach a file or link to where it lives.`,
   msg`Gives moderators a second opinion on a queued report`,
@@ -1384,7 +1391,6 @@ Go back to the floorplan to move to another room. Room hosts get moderation cont
   msg`Locks, history and reset`,
   msg`Log in`,
   msg`Logos and brands you upload`,
-  msg`Look for the questions where the spread is wide rather than the average is low: a feature half of members rate highly and half cannot use at all is a discoverability problem, and it reads as mediocre in the average.`,
   msg`MIT or BSD`,
   msg`Machine translation`,
   msg`Machine translation into French and Spanish so that the whole region can read it. Translated text is marked as machine-translated wherever it appears.`,
@@ -1543,9 +1549,7 @@ If the page is blank, no CV has been started yet: either sign in from the OECS V
   msg`Not permitted`,
   msg`Not used`,
   msg`Note`,
-  msg`Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.
-
-The UAT section next door is the structured version of the same signal.`,
+  msg`Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.`,
   msg`Nothing in these Terms limits liability for death or personal injury caused by negligence, for fraud or fraudulent misrepresentation, or for anything else that cannot lawfully be limited. Mandatory consumer-protection rights in your country of residence are unaffected.`,
   msg`Nothing is stored until you save. The note beside the button counts the sections you have touched.
 
@@ -1665,6 +1669,9 @@ Roles are in the name-and-roles editor, but you can only add roles that are self
 Each editor saves on its own — there is no page-wide Save.`,
   msg`Open Projects, Resources, Events or Grants.`,
   msg`Open Resources and click Submit.`,
+  msg`Open Review and check the legal name and registration number against the national company registry. That check is what the badge means.
+
+Verify marks the business and its owner verified. Do not accept sends the owner your note, so say what to fix. Businesses can’t edit a submission, so a correction means they submit again.`,
   msg`Open Security on your Dashboard and choose the authenticator app method. A QR code appears; scan it with your app and type the six-digit code back to confirm.
 
 If you have no app yet, the set-up screen carries a second QR that opens a guide to the ones we recommend, including Apple Passwords, Google Authenticator and Microsoft Authenticator, plus desktop options. The same guide is on the sign-in screen behind "Where do I find my code?".
@@ -1711,9 +1718,6 @@ The final step shows the whole application for review before you submit.`,
 
 The Error Simulator next door sends deliberate failures through the live pipeline — useful for confirming monitoring works, and it does produce real entries here.`,
   msg`Open mics`,
-  msg`Open one to read it as submitted. Approve, reject, or mark under review — the applicant sees the status change on My Applications, so “under review” is worth setting rather than leaving them at “submitted” for weeks.
-
-Student applications need a sponsor’s approval before they reach you.`,
   msg`Open one to run it`,
   msg`Open the Community menu in the navigation bar and choose "Forums" to see the discussion boards.
 
@@ -1846,10 +1850,8 @@ On a narrow screen the column becomes a scrolling row above the panel.`,
 
 Analytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.
 
-UAT — feedback submitted during user acceptance testing, with its state.
-
 Member feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback.`,
-  msg`Partner API, analytics and UAT feedback`,
+  msg`Partner API, analytics and feedback`,
   msg`Partner data access`,
   msg`Partner tools and services connected to KTIP`,
   msg`Partner tools shown on the Resources page`,
@@ -2051,7 +2053,6 @@ Everything you make here saves to your account and appears in that tool’s list
   msg`Refer to KTIP truthfully. That is the whole of the permission.`,
   msg`Refusal to put terms in writing, or a written agreement with no named legal entity in it.`,
   msg`Register for an event`,
-  msg`Register your business with your National Chamber of Commerce for verified status`,
   msg`Register, or attempt to register, a mark or domain that is the same as or confusingly similar to ours.`,
   msg`Registered`,
   msg`Registering`,
@@ -2104,7 +2105,6 @@ Your identity as the reporter is not disclosed to the person reported. You are t
   msg`Reports you have filed and where they stand.`,
   msg`Reproduce and distribute`,
   msg`Reproduce your entry’s title, summary, images and your team’s names in announcing results, in event coverage, and in reporting to the programme’s funders.`,
-  msg`Request a verified badge for your account`,
   msg`Request data, IP addresses, logs`,
   msg`Requests are rate-limited and paginated. Do not attempt to enumerate the whole dataset, run parallel keys to raise your effective limit, or retry aggressively against an error. Ask for a higher limit instead — there is usually a good reason to say yes.`,
   msg`Requests to join a project, collaborate on a document, or come to an event — anything someone has asked you to accept.
@@ -2126,9 +2126,6 @@ Integrations is the other tab: tools and services KTIP connects to. The tab live
   msg`Respect`,
   msg`Respect other people’s work`,
   msg`Responses are scaled to the breach and to whether it is repeated. In rough order: a warning, removal of the content, quarantine of the content pending review, restriction of a feature, suspension of the account, and termination.`,
-  msg`Responses to the usefulness and experience questions, collected during user acceptance testing.
-
-Unlike the free-text feedback queue, these are comparable across members — which is what makes them worth charting.`,
   msg`Restricted data, stored apart from your profile, and write-once by design.`,
   msg`Restrictions`,
   msg`Results framework, community, activity, engagement, health and the reporting pulse`,
@@ -2140,6 +2137,9 @@ Unlike the free-text feedback queue, these are comparable across members — whi
   msg`Review and rosters`,
   msg`Review feedback`,
   msg`Review grievances`,
+  msg`Review lets you verify, decline or revoke on OECS’s behalf. Use it when no association can act. Check the legal name and registration number against the national company registry first, because that check is what the badge means.
+
+Verifying also marks the owner verified. Revoking takes the owner’s badge back if it came from this business.`,
   msg`Review the result yourself before it goes up. You are its author, and you stand behind it.`,
   msg`Review, then submit`,
   msg`Reviewers`,
@@ -2150,8 +2150,7 @@ Unlike the free-text feedback queue, these are comparable across members — whi
 An employer marked publishable is served to external platforms through the partner API. Verify before publishing, never the other way round.`,
   msg`Reviewing an institution is what turns it live. Check the domain genuinely belongs to it — a domain attached to the wrong institution hands its members that institution’s standing.
 
-Pending members lists people waiting to be confirmed onto a roster.`,
-  msg`Reviewing applications`,
+Pending members lists people waiting to be confirmed onto a roster. For a business association, Admins lists who reviews its country, and Add association admin links a new reviewer.`,
   msg`Reviewing identity documents.`,
   msg`Rich text with the usual formatting — headings, lists, links, images, tables — on a toolbar across the top.
 
@@ -2180,9 +2179,6 @@ What each role can do is controlled by a permission matrix that OECS administrat
   msg`Rules and limits entries must respect`,
   msg`Rules binding partners that read KTIP data`,
   msg`Run the platform, publish funding calls, and organise regional events.`,
-  msg`SME verification submissions routed to your member state. Each carries the legal name, registration number and industry the applicant entered.
-
-You see submissions for your own member state, which is why this list is shorter than the platform’s total.`,
   msg`Safeguarding records are kept for %caseRetention%, longer than ordinary moderation records, because that is what a later investigation needs.`,
   msg`Safety & Reporting`,
   msg`Sand`,
@@ -2197,7 +2193,7 @@ Share is the one that matters for collaboration: pick who gets access and whethe
   msg`Say where it came from, so the next reader knows what they are bound by.`,
   msg`Schedule Change`,
   msg`Schedule, speakers, updates and recap articles`,
-  msg`Schools, universities and Chambers`,
+  msg`Schools, universities and business associations`,
   msg`Scope`,
   msg`Score and improve your draft before submitting`,
   msg`Scroll to the Comments section on any project to leave a comment or ask a question.
@@ -2260,7 +2256,7 @@ Out of codes and out of devices? An OECS administrator can reset the second step
   msg`Setting your availability in a venue`,
   msg`Several queues sit behind the verified badges.
 
-Verification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Chamber — Chambers of Commerce and the SME submissions they handle. Employers — employer accounts and their recruiters.
+Verification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Association Review — every country’s business verification queue, how long each business has waited, and which business association covers that country. Employers — employer accounts and their recruiters.
 
 Approving an institution's domain is the high-leverage action: every future student signing up with that domain is verified automatically, so getting the domain right matters more than any single account.`,
   msg`Several subjects have their own documents. Where one applies, it governs that subject and this document does not repeat it. The full set is listed under See also at the foot of this page.`,
@@ -2362,8 +2358,6 @@ Video is the exception: it is too large to upload. If you have a short pitch or 
   msg`Storage set by other services`,
   msg`Store records for as long as the purpose requires, and no longer.`,
   msg`Store your entry and show it to the judges and organisers of that competition.`,
-  msg`Structured platform feedback`,
-  msg`Structured usefulness and experience scores.`,
   msg`Student accounts cannot start one-to-one direct messages. This is a safeguarding rule built into the platform and cannot be turned off — not by the student, not by an administrator.
 
 Students communicate through supervised channels with a designated educator from their institution.
@@ -2387,6 +2381,7 @@ If your institution is not yet registered on KTIP, your account cannot be domain
   msg`Submissions holds your registrations. Projects is the equivalent tab for work you have published.`,
   msg`Submit a Resource`,
   msg`Submit a resource`,
+  msg`Submit your business to your business association to get it verified`,
   msg`Submitting an application grants the funder the right to read, assess and decide on it. It grants no licence to use, build, commercialise or file protection over what it describes — whether or not the application succeeds.`,
   msg`Submitting does not license your idea`,
   msg`Success Story`,
@@ -2538,6 +2533,9 @@ The count tells you how many are open versus closed, and Clear all filters reset
   msg`The first list is what you created — hover a row for the delete control.
 
 Underneath, Shared with me holds anything someone else gave you access to. Whether you can edit or only read is set by whoever shared it, and it is shown on the item itself once you open it.`,
+  msg`The first tab lists every funding call, with who posted it and for which organisation. Only the poster can edit a call. You can deactivate it, suspend it with a reason, or send the poster a note.
+
+Deactivating closes a call without deleting it, so its page and everyone’s applications survive. Suspending hides it from members until you restore it, and the poster sees your reason.`,
   msg`The floating button in the bottom right corner opens a stack of six shortcuts.
 
 Sticky notes — pin a note to the page you are on. Accessibility — text size, readable font and the other display controls. Feedback — tell us about a problem or an idea, and get a reply back in your Dashboard. Page tour — a walkthrough, on the pages that have one. Messages — your messaging panel. And a dark mode switch.
@@ -2545,11 +2543,11 @@ Sticky notes — pin a note to the page you are on. Accessibility — text size,
 It stays available on every page inside the app, so none of the six needs a trip back to the navigation bar.`,
   msg`The floor`,
   msg`The floorplan: rooms, who is online right now, and open audio`,
-  msg`The form is replaced by a status card — pending, verified or rejected — showing what you sent.
+  msg`The form is replaced by a status card showing what you sent and where it stands: waiting, verified or not accepted.
 
-Details cannot be edited after submission: a record that could change after review would end up carrying a verified badge over unchecked data. Corrections go through your Chamber directly.
+You can’t edit the details after you submit, so a verified badge never sits on details nobody checked. To correct something, contact your business association.
 
-Once verified, the badge shows on your profile and in the directory.`,
+Once verified, the badge shows on your business page, on your own profile and in the directory.`,
   msg`The four things admins do most often, plus section cards underneath for the busiest areas.
 
 Everything here is reachable from the rail as well — this is a shortcut, not a separate set of powers.`,
@@ -2651,6 +2649,9 @@ Grid view also unlocks a sort order back in the filter bar: what is coming up ne
   msg`The search box filters this board’s discussions as you type — titles and bodies both.
 
 New Discussion opens the editor. A discussion takes a title, a body with formatting, and lands in this board; you can edit yours afterwards.`,
+  msg`The second tab shows every submitted application and where it stands. It is read-only: the organisation that posted a call decides its applications.
+
+If a decision is stuck, send the poster a note from the first tab.`,
   msg`The section rail on long pages`,
   msg`The sections on your content (existing licences), limitation of liability, indemnity and governing law survive the end of this agreement.`,
   msg`The short version`,
@@ -2664,9 +2665,6 @@ New Discussion opens the editor. A discussion takes a title, a body with formatt
   msg`The top half assigns roles to members. The matrix below defines what each role can actually do — every permission, every role, one grid.
 
 A change here applies to everyone holding that role, immediately.`,
-  msg`The top half is the grants themselves — create one, edit it, or deactivate it. Deactivating closes a grant without deleting it, so its page and everyone’s applications survive.
-
-The lower half is the application queue.`,
   msg`The two administrator seats are exempt, so that somebody can always work through the review queue.`,
   msg`Theme and accessibility preferences`,
   msg`There are five types.
@@ -2694,6 +2692,9 @@ Otherwise you get KTIP's built-in six-step wizard, and the whole application —
 Either way, the deadline on the listing is the one that counts.`,
   msg`These Terms are governed by the laws of %jurisdiction%, and its courts have exclusive jurisdiction — without prejudice to any mandatory consumer-protection rights, or any right to bring a claim before a data-protection authority, in the country where you live.`,
   msg`These Terms of Use are an agreement between you and %entity%. By creating an account on KTIP, or by using the platform at %platformDomain% without one, you accept them and the Privacy Policy.`,
+  msg`These are the businesses that asked your association to verify them. You only see the countries your association covers.
+
+Waiting shows how many days each one has been in the queue, so start with the oldest.`,
   msg`These guidelines apply everywhere on the platform, including private messages, collaborative documents and video rooms — private does not mean unregulated.`,
   msg`These restrictions lift automatically when the account reaches 18. Nobody has to ask.`,
   msg`These terms bind any organisation granted programmatic access to KTIP data through the partner API. Accepting them is a condition of holding a partner key.`,
@@ -2710,16 +2711,16 @@ Be honest about phase. Investors and mentors filter on it, and “concept” att
   msg`This fills empty fields from your KTIP record — profile, public projects, badges, institution. It never overwrites something you have written.
 
 It does reload the document, so it asks you to save first if you have unsaved edits. Press it on a blank CV, or straight after saving.`,
-  msg`This goes to the Chamber of Commerce for the member state you pick, and they check it against the national corporate registry.
-
-The legal name and registration number have to match what is on that registry — the trading name people know you by goes in its own field.
-
-Member state is the one field to get right first: it decides which Chamber reviews you and it cannot be changed afterwards.`,
   msg`This goes to the OECS safety team, not to the person you are reporting. They are not told who filed it.
 
 Pick the category that fits best, then describe what happened — what was said or done, when, and anything that helps someone who was not there understand it. Twenty characters is the minimum; more is genuinely better.
 
 The two optional fields matter more than “optional” suggests: a link to the post or screenshot, and where on the platform it happened, are what let the team find the evidence themselves.`,
+  msg`This goes to the business association for the member state you pick, and they check it against the national company registry.
+
+The legal name and registration number have to match the registry. The trading name people know you by goes in its own field.
+
+Get the member state right first: it decides which association reviews you, and you can’t change it later.`,
   msg`This holds whether you win or not. A prize is a prize, not a purchase. If a particular competition needs different terms — because a sponsor is funding development of the winning entry, for example — those terms must be published in the competition rules before entries open, and you will be asked to accept them separately.`,
   msg`This is the PDF`,
   msg`This is the opposite of the default for projects and events. Publishing a project is a deliberate act with its own agreement; submitting an application is not publishing.`,
@@ -2799,7 +2800,6 @@ A figure shown as an em dash could not be read — that is a failed query, not a
 
 Each entry links to the thing itself, so you can read it in context before deciding.`,
   msg`Type what you are looking for — a page, a feature, or the name of a project, event or person.`,
-  msg`UAT feedback`,
   msg`Under Privacy, switch off "Show me on the leaderboard".`,
   msg`Under Review`,
   msg`Unsuccessful`,
@@ -2852,7 +2852,6 @@ The last step asks you to confirm, and warns that knowingly false reports are th
 
 To report one post or message rather than a person, use the report control on the content itself.`,
   msg`Use this route for copyright, and for trade mark or design-right complaints. For harassment, impersonation, fraud or content involving a minor, use the in-app report control instead — those reach a different queue that is triaged faster.`,
-  msg`User acceptance testing responses`,
   msg`Using AI features responsibly`,
   msg`Using code you find here`,
   msg`Using email codes instead of an app`,
@@ -2875,16 +2874,14 @@ To report one post or message rather than a person, use the report control on th
   msg`Verified employer and organisation data is also made available to approved partners through our partner API, where you have consented to appear in it. The rules those partners are bound by are published in the Partner API Terms.`,
   msg`Verify and support local businesses`,
   msg`Verify any funding opportunity independently before sending money, documents or personal data. No legitimate funder on this platform will ask you to pay a fee to receive a grant.`,
-  msg`Verify businesses in your member state`,
   msg`Verify employers and control what the partner API publishes`,
-  msg`Verify schools, universities and chambers`,
-  msg`Verify your identity`,
+  msg`Verify schools, universities and business associations`,
+  msg`Verify your identity, and your business if you have one`,
   msg`Verify your students, oversee submissions, and endorse applications.`,
   msg`Verifying`,
   msg`Verifying institutions and the domains they own.`,
   msg`Vet and support the businesses in your member state.`,
   msg`Vetting`,
-  msg`Vetting businesses against the corporate registry.`,
   msg`Video`,
   msg`Video Conference`,
   msg`Video and audio collaboration, recording where enabled`,
@@ -2984,7 +2981,6 @@ To report one post or message rather than a person, use the report control on th
   msg`What the verified badge means, the ways to earn it, how long it lasts, and what happens when it is removed.`,
   msg`What this document does not do`,
   msg`What this is for`,
-  msg`What to do with it`,
   msg`What types of events can I create?`,
   msg`What verification means`,
   msg`What we collect automatically`,
