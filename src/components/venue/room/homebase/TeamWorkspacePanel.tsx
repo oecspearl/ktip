@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { FolderOpen, KanbanSquare, PenTool, Users } from 'lucide-react'
+import { CalendarDays, FileText, Flag, FolderOpen, KanbanSquare, PenTool, Users } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useToast } from '../../../../contexts/ToastContext'
@@ -12,8 +12,12 @@ import type { VenueRoom } from '../../../../types'
 import { TeamTaskBoard } from './TeamTaskBoard'
 import { TeamWhiteboard } from './TeamWhiteboard'
 import { TeamFiles } from './TeamFiles'
+import { TeamDocs, type DocMessage } from './TeamDocs'
+import { TeamCalendar } from './TeamCalendar'
+import { TeamMilestones } from './TeamMilestones'
+import { TeamTimer, type TimerState } from './TeamTimer'
 
-type Tab = 'board' | 'whiteboard' | 'files'
+type Tab = 'board' | 'whiteboard' | 'docs' | 'calendar' | 'milestones' | 'files'
 
 interface Props {
   eventId: string
@@ -22,8 +26,8 @@ interface Props {
 }
 
 /**
- * The middle of a Homebase: the team's task board, whiteboard and files, in
- * tabs. The call strip sits above it and the team chat beside it, both from
+ * The middle of a Homebase: the team's task board, whiteboard, docs, calendar,
+ * milestones and files, in tabs, with the shared team timer in the header. The call strip sits above it and the team chat beside it, both from
  * the room's ordinary panels, which is why they are not repeated here.
  *
  * An unclaimed team room shows how to claim one. A room that belongs to
@@ -48,10 +52,24 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
   const onRemoteWb = useCallback((fn: ((diff: any) => void) | null) => {
     applyWb.current = fn
   }, [])
+  const applyDoc = useRef<((msg: DocMessage) => void) | null>(null)
+  const onRemoteDoc = useCallback((fn: ((msg: DocMessage) => void) | null) => {
+    applyDoc.current = fn
+  }, [])
+  const [remoteTimer, setRemoteTimer] = useState<TimerState | null>(null)
+  const refetch = (sub: string) => () => queryClient.invalidateQueries({ queryKey: keys.sub('venue', sub, team?.id) })
   const channel = useTeamChannel(team?.id, {
     wb: (diff: any) => applyWb.current?.(diff),
-    tasks: () => queryClient.invalidateQueries({ queryKey: keys.sub('venue', 'team-tasks', team?.id) }),
-    files: () => queryClient.invalidateQueries({ queryKey: keys.sub('venue', 'team-files', team?.id) }),
+    doc: (msg: DocMessage) => applyDoc.current?.(msg),
+    timer: (next: TimerState) => setRemoteTimer(next),
+    tasks: refetch('team-tasks'),
+    files: refetch('team-files'),
+    docs: refetch('team-docs'),
+    calendar: refetch('team-calendar'),
+    milestones: () => {
+      refetch('team-milestones')()
+      refetch('team-checklist')()
+    },
   })
 
   if (loading) return <div className="h-64 animate-pulse-soft rounded-2xl bg-ktip-sand-100" />
@@ -120,6 +138,9 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
   const tabs: Array<{ id: Tab; label: string; icon: typeof KanbanSquare }> = [
     { id: 'board', label: t`Task board`, icon: KanbanSquare },
     { id: 'whiteboard', label: t`Whiteboard`, icon: PenTool },
+    { id: 'docs', label: t`Docs`, icon: FileText },
+    { id: 'calendar', label: t`Calendar`, icon: CalendarDays },
+    { id: 'milestones', label: t`Milestones`, icon: Flag },
     { id: 'files', label: t`Files`, icon: FolderOpen },
   ]
 
@@ -130,6 +151,7 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
           <h3 className="font-display text-xl font-bold text-ktip-sand-900">{team.name}</h3>
           {team.tagline && <p className="truncate text-sm text-ktip-sand-600">{team.tagline}</p>}
         </div>
+        <TeamTimer teamId={team.id} send={channel.send} remote={remoteTimer} />
         <div className="flex items-center gap-1" aria-label={t`Team members`}>
           {team.members.map((m) => (
             <DiamondAvatar key={m.user_id} size={30} src={m.avatar_url} name={m.display_name || t`Teammate`} title={m.display_name || undefined} />
@@ -164,6 +186,15 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
         {tab === 'board' && <TeamTaskBoard team={team} ping={() => channel.send('tasks', {})} />}
         {tab === 'whiteboard' && (
           <TeamWhiteboard teamId={team.id} send={channel.send} connected={channel.connected} onRemote={onRemoteWb} />
+        )}
+        {tab === 'docs' && (
+          <TeamDocs teamId={team.id} send={channel.send} connected={channel.connected} onRemote={onRemoteDoc} />
+        )}
+        {tab === 'calendar' && (
+          <TeamCalendar eventId={eventId} teamId={team.id} teamName={team.name} ping={() => channel.send('calendar', {})} />
+        )}
+        {tab === 'milestones' && (
+          <TeamMilestones eventId={eventId} teamId={team.id} ping={() => channel.send('milestones', {})} />
         )}
         {tab === 'files' && <TeamFiles teamId={team.id} ping={() => channel.send('files', {})} />}
       </div>

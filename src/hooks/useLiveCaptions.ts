@@ -77,8 +77,15 @@ export interface LiveCaptions {
   error: string | null
 }
 
-export function useLiveCaptions(enabled: boolean): LiveCaptions {
+/**
+ * @param readerLang  Read captions in this language instead of the site's.
+ *                    A listener in an English site can follow a keynote in
+ *                    French without switching the whole site over. It never
+ *                    changes the language the local speaker is captioned in.
+ */
+export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCaptions {
   const { lang: contentLang } = useContentLanguage()
+  const readLang: UiLang = readerLang ?? contentLang
   const { localParticipant } = useLocalParticipant()
   const [captions, setCaptions] = useState<Caption[]>([])
   const [interim, setInterim] = useState('')
@@ -235,11 +242,11 @@ export function useLiveCaptions(enabled: boolean): LiveCaptions {
   const resolved = useMemo(
     () =>
       captions.map((caption) => {
-        const translation = caption.variants[contentLang]
-        const display = caption.lang === contentLang ? caption.text : translation ?? caption.text
-        return { ...caption, display, translated: Boolean(translation) && caption.lang !== contentLang }
+        const translation = caption.variants[readLang]
+        const display = caption.lang === readLang ? caption.text : translation ?? caption.text
+        return { ...caption, display, translated: Boolean(translation) && caption.lang !== readLang }
       }),
-    [captions, contentLang]
+    [captions, readLang]
   )
 
   return {

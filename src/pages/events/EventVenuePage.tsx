@@ -12,6 +12,7 @@ import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { VenueAwayBanner } from '../../components/venue/VenueAwayBanner'
 import { VenueFloorplan } from '../../components/venue/VenueFloorplan'
 import { VenueMapExplorer, canEnterRoom } from '../../components/venue/map/VenueMapExplorer'
+import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
 import { VenueRoomBrief } from '../../components/venue/map/VenueRoomBrief'
 import { RoomOccupantList } from '../../components/venue/RoomOccupantList'
 import { VenuePresencePanel } from '../../components/venue/VenuePresencePanel'
@@ -56,6 +57,20 @@ export default function EventVenuePage() {
   // before the map existed (or seeded from the room list) get auto-arranged, so
   // a venue is never a wall of cards just because nobody opened the builder.
   const mapConfig = useMemo(() => mapConfigOf(event), [event])
+  // Other teams' Homebases are locked on the map (190), unless you host.
+  const { teams } = useEventTeams(eventId)
+  const lockedRoomIds = useMemo(() => {
+    const out = new Set<string>()
+    if (!membership || membership.role === 'organizer') return out
+    for (const room of rooms || []) {
+      if (room.kind !== 'team') continue
+      if (!homebaseAccess(teams, room.id, auth.user?.id, false).canUse) out.add(room.id)
+    }
+    return out
+  }, [rooms, teams, membership, auth.user?.id])
+  const canEnterHere = (room: VenueRoom) =>
+    !!membership && canEnterRoom(room, membership.role) && !lockedRoomIds.has(room.id)
+
   const mapped = useMemo(
     () => autoLayout(rooms || [], mapConfig).filter(isPlaced),
     [rooms, mapConfig]
@@ -270,6 +285,7 @@ export default function EventVenuePage() {
               myName={auth.profile?.display_name || t`You`}
               myAvatarUrl={auth.profile?.avatar_url ?? null}
               myRole={membership.role}
+              lockedRoomIds={lockedRoomIds}
               peers={presence.positions.peers}
               // Set only when this member was inside a room a moment ago,
               // which is what plays the entry animation in reverse.
@@ -291,7 +307,7 @@ export default function EventVenuePage() {
                     room={briefRoom}
                     here={presence.occupancy[briefRoom.id] || 0}
                     occupants={occupantsInRoom(presence.occupants, briefRoom.id)}
-                    canEnter={canEnterRoom(briefRoom, membership.role)}
+                    canEnter={canEnterHere(briefRoom)}
                     mode={previewRoom ? 'preview' : 'standing'}
                     onDismiss={previewRoom ? () => setPreviewRoomId(null) : undefined}
                     onEnter={() => handleEnter(briefRoom)}
@@ -322,7 +338,7 @@ export default function EventVenuePage() {
                         <Button
                           size="sm"
                           variant="secondary"
-                          disabled={!canEnterRoom(room, membership.role)}
+                          disabled={!canEnterHere(room)}
                           onClick={() => handleEnter(room)}
                         >
                           <Trans>Enter</Trans>

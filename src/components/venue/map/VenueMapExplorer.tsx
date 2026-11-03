@@ -73,6 +73,12 @@ interface VenueMapExplorerProps {
    * chrome — for the immersive floorplan page, where the map is the page.
    */
   frameless?: boolean
+  /**
+   * Rooms this member may not go into for a reason the room row cannot say on
+   * its own: another team's Homebase (190). Drawn dimmed and refused like a
+   * room restricted by role.
+   */
+  lockedRoomIds?: Set<string>
 }
 
 type EnterPhase = 'idle' | 'walking' | 'zooming' | 'arriving'
@@ -135,8 +141,10 @@ export function VenueMapExplorer({
   onPreviewRoomChange,
   onEnter,
   frameless,
+  lockedRoomIds,
 }: VenueMapExplorerProps) {
   const { t } = useLingui()
+  const canEnter = (room: VenueRoom) => canEnterRoom(room, myRole) && !lockedRoomIds?.has(room.id)
   const myDisplayName = myName || t`You`
   const wrapRef = useRef<HTMLDivElement>(null)
   const size = useElementSize(wrapRef)
@@ -552,7 +560,7 @@ export function VenueMapExplorer({
 
   /** Walk to a room and go in. Crossing floors moves you there first. */
   const approach = (room: VenueRoom, geo: RoomGeometry<VenueRoom>, level: number) => {
-    if (!canEnterRoom(room, myRole)) return
+    if (!canEnter(room)) return
     if (level !== floor) goToFloor(level)
     pendingRoomRef.current = room
     targetRef.current = { x: geo.centroid[0], y: geo.centroid[1] }
@@ -633,7 +641,7 @@ export function VenueMapExplorer({
     lastFocusRef.current = focusRoom.nonce
     const geo = geometry[focusRoom.roomId]
     const room = roomsById.get(focusRoom.roomId)
-    if (!geo || !room || !canEnterRoom(room, myRole)) return
+    if (!geo || !room || !canEnter(room)) return
 
     if (geo.floor !== floor) goToFloor(geo.floor)
     pendingRoomRef.current = room
@@ -645,9 +653,9 @@ export function VenueMapExplorer({
 
   const mutedIds = useMemo(() => {
     const out = new Set<string>()
-    for (const room of rooms) if (!canEnterRoom(room, myRole)) out.add(room.id)
+    for (const room of rooms) if (!canEnter(room)) out.add(room.id)
     return out
-  }, [rooms, myRole])
+  }, [rooms, myRole, lockedRoomIds])
 
   const hoveredRoom = hoveredId ? roomsById.get(hoveredId) || null : null
   const hoveredGeo = hoveredId ? geometry[hoveredId] : null
@@ -788,7 +796,7 @@ export function VenueMapExplorer({
             const levelZ = levelZOf(g.floor)
             const [sx, sy] = projection.project(g.centroid[0], g.centroid[1], levelZ + g.height)
             const here = occupancy[room.id] || 0
-            const locked = !canEnterRoom(room, myRole)
+            const locked = !canEnter(room)
             const presence = alphaFor(g.floor)
             return (
               <div
@@ -896,9 +904,13 @@ export function VenueMapExplorer({
             {hoveredRoom.capacity ? t` · cap ${hoveredRoom.capacity}` : ''} ·{' '}
             {hoveredRoom.audio_mode.replace('_', ' ')}
           </p>
-          {!canEnterRoom(hoveredRoom, myRole) && (
+          {!canEnter(hoveredRoom) && (
             <p className="mt-1 text-[10px] font-semibold text-ktip-sand-500">
-              {hoveredRoom.is_open ? t`Restricted to other roles` : t`Closed right now`}
+              {lockedRoomIds?.has(hoveredRoom.id)
+                ? t`Another team's Homebase`
+                : hoveredRoom.is_open
+                  ? t`Restricted to other roles`
+                  : t`Closed right now`}
             </p>
           )}
         </div>
@@ -1007,10 +1019,10 @@ export function VenueMapExplorer({
           <button
             type="button"
             onClick={() => {
-              if (!canEnterRoom(standingRoom, myRole)) return
+              if (!canEnter(standingRoom)) return
               beginEntry(standingRoom)
             }}
-            disabled={!canEnterRoom(standingRoom, myRole)}
+            disabled={!canEnter(standingRoom)}
             // Wears the room's own colour: the button and the walls you are
             // standing between should not disagree about which room this is.
             style={{
