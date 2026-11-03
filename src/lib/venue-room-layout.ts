@@ -223,14 +223,17 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
 
   // A team space is a desk, not a broadcast. Cameras stay a strip along the
   // top, the timer and the objective are small and always visible.
+  // A Homebase: the team's call across the top, the workspace (board,
+  // whiteboard, files) as the big cell, the team chat beside it.
   team: {
-    hero: 'chat',
-    rail: 'occupants',
-    camera: 'huddle',
-    order: ['av_placeholder', 'chat', 'occupants', 'objectives'],
+    hero: 'team_workspace',
+    rail: 'chat',
+    camera: 'grid',
+    order: ['host_controls', 'av_placeholder', 'team_workspace', 'chat', 'occupants', 'objectives'],
     spans: {
       host_controls: 'wide',
       av_placeholder: 'wide',
+      occupants: 'third',
       objectives: 'half',
       resources: 'half',
       focus_timer: 'tile',

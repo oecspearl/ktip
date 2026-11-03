@@ -250,13 +250,14 @@ describe("the host's big panel", () => {
 describe('cameras', () => {
   it('defaults to the kind', () => {
     expect(cameraModeFor(room('judging'))).toBe('grid')
-    expect(cameraModeFor(room('team'))).toBe('huddle')
+    // A Homebase is the team's video call (190): everyone in a grid.
+    expect(cameraModeFor(room('team'))).toBe('grid')
     expect(cameraModeFor(room('stage'))).toBe('spotlight')
   })
 
   it('lets the host disagree', () => {
-    const sections = setCameraMode(room('team'), 'grid')
-    expect(cameraModeFor(room('team', sections))).toBe('grid')
+    const sections = setCameraMode(room('team'), 'huddle')
+    expect(cameraModeFor(room('team', sections))).toBe('huddle')
   })
 
   it('ignores junk in the stored config', () => {

@@ -11,6 +11,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { RoomSections } from '../../components/venue/room/RoomSections'
 import { HomebaseLookPanel } from '../../components/venue/room/HomebaseLookPanel'
+import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
 import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
@@ -82,6 +83,19 @@ export default function EventVenueRoomPage() {
     [membership, auth.user, auth.profile]
   )
 
+  // Who owns this room, if it is a Homebase (188/190). A claimed Homebase is
+  // its team's and the hosts'; the server refuses everyone else at the door,
+  // on the call and on the chat, and this page says so instead of rendering
+  // panels that would all fail.
+  const { teams } = useEventTeams(eventId)
+  const homebase = useMemo(
+    () =>
+      room && room.kind === 'team'
+        ? homebaseAccess(teams, room.id, auth.user?.id, membership?.role === 'organizer')
+        : null,
+    [room, teams, auth.user?.id, membership?.role]
+  )
+
   const inRoom = useMemo(
     () => (roomId ? occupantsInRoom(presence.occupants, roomId) : []),
     [presence.occupants, roomId]
@@ -103,7 +117,7 @@ export default function EventVenueRoomPage() {
     enabled:
       !!room &&
       room.is_open &&
-      room.kind !== 'team' &&
+      (room.kind !== 'team' || !!homebase?.canUse) &&
       !!membership &&
       (roomUsesSignals(room, membership.role, event?.event_type) ||
         roomUsesStage(room, membership.role)),
@@ -143,6 +157,23 @@ export default function EventVenueRoomPage() {
         </p>
         <Link to={entityPath('event', event)} className="mt-5 inline-block">
           <Button><Trans>Go to the event page</Trans></Button>
+        </Link>
+      </div>
+    )
+  }
+
+  if (homebase && !homebase.canUse) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-[calc(var(--nav-h)+4rem)] text-center">
+        <Lock size={28} className="mx-auto text-ktip-sand-400" aria-hidden="true" />
+        <h1 className="mt-3 font-display text-2xl font-bold text-ktip-sand-900">
+          <Trans>{homebase.team?.name}'s Homebase is private</Trans>
+        </h1>
+        <p className="mt-2 text-ktip-sand-600">
+          <Trans>Only the team and the organisers can come in. Find them in the Collab Commons or message a member.</Trans>
+        </p>
+        <Link to={venuePath(event)} className="mt-5 inline-block">
+          <Button variant="secondary"><Trans>Back to the map</Trans></Button>
         </Link>
       </div>
     )

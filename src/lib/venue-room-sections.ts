@@ -36,6 +36,7 @@ export type RoomSectionId =
   | 'showcase_gallery'
   | 'resources'
   | 'chat'
+  | 'team_workspace'
   | 'announcement_feed'
   | 'faq'
   | 'rules'
@@ -195,6 +196,14 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: 'all',
     order: 50,
+  },
+  {
+    id: 'team_workspace',
+    label: msg`Team workspace`,
+    blurb: msg`The team's task board, whiteboard and files. Only the team and organisers see it.`,
+    slot: 'main',
+    defaultFor: ['team'],
+    order: 45,
   },
   {
     id: 'announcement_feed',

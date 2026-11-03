@@ -51,6 +51,7 @@ import type {
 } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
 import { prefersReducedMotionNow } from '../../../a11y/store'
+import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 
 /**
  * Everything one section needs, gathered once by the page.
@@ -355,6 +356,9 @@ function RoomSection({
           />
         </div>
       )
+
+    case 'team_workspace':
+      return <TeamWorkspacePanel eventId={event.id} room={room} isHost={isHost} />
 
     // The same panel with posting closed to everyone but the host. A separate
     // id rather than a flag on `chat` so the host's picker offers the two as
