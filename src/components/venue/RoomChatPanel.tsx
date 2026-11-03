@@ -216,7 +216,7 @@ function PinnedHostMessage({
   const name = message.author?.display_name || t`Host`
 
   return (
-    <div className="absolute inset-x-2 top-2 z-10 flex items-center rounded-xl border border-ktip-tropical-200 border-l-3 border-l-ktip-tropical-500 bg-ktip-tropical-50 shadow-card">
+    <div className="absolute inset-x-2 top-2 z-raised flex items-center rounded-xl border border-ktip-tropical-200 border-l-3 border-l-ktip-tropical-500 bg-ktip-tropical-50 shadow-card">
       <button
         type="button"
         onClick={onJump}
