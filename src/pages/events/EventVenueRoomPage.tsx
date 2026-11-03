@@ -146,7 +146,7 @@ export default function EventVenueRoomPage() {
 
   if (eventLoading || roomLoading || joining) {
     return (
-      <div className="mx-auto max-w-7xl space-y-4 px-4 pb-8 pt-[calc(var(--nav-h)+2rem)]">
+      <div className="mx-auto max-w-[1640px] space-y-4 px-4 pb-8 pt-[calc(var(--nav-h)+2rem)]">
         <div className="h-14 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
         <div className="h-96 rounded-2xl bg-ktip-sand-100 animate-pulse-soft" />
       </div>
@@ -242,7 +242,7 @@ export default function EventVenueRoomPage() {
         backToMap
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mx-auto max-w-[1640px] px-3 py-6 sm:px-4">
         <div className="mb-6 flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ktip-ocean-50 text-ktip-ocean-700">
             <Icon size={20} aria-hidden="true" />

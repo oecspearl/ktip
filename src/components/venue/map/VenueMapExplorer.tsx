@@ -268,7 +268,10 @@ export function VenueMapExplorer({
       const flight = viaStairs
         ? flights.find((x) => x.from === Math.min(current, level) && Math.abs(level - current) === 1)
         : undefined
-      const landing = flight ? flightCentre(flight) : spawnAtDoor(config, geometry, level)
+      // Upper floors have no front door, so a jump by chip or list lands on
+      // that floor's stairs up from below.
+      const arrival = flight ?? (level > 0 ? flights.find((x) => x.from === level - 1) : undefined)
+      const landing = arrival ? flightCentre(arrival) : spawnAtDoor(config, geometry, level)
       posRef.current = landing
       targetRef.current = null
       pendingRoomRef.current = null
@@ -316,10 +319,12 @@ export function VenueMapExplorer({
       return
     }
 
-    // First arrival: through the front door, which is what a door is for.
-    posRef.current = spawnAtDoor(config, geometry, floor)
+    // First arrival: through the front door, which is what a door is for. An
+    // upper floor has none, so you start on its stairs.
+    const below = floor > 0 ? flights.find((x) => x.from === floor - 1) : undefined
+    posRef.current = below ? flightCentre(below) : spawnAtDoor(config, geometry, floor)
     onPositionChange({ ...posRef.current, f: floor })
-  }, [config, geometry, floor, size, topZ, arriveFromRoomId, onPositionChange])
+  }, [config, geometry, flights, floor, size, topZ, arriveFromRoomId, onPositionChange])
 
   // ---- keyboard -----------------------------------------------------------
 

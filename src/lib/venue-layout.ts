@@ -369,8 +369,45 @@ export function floorBlocked(
 }
 
 /**
+ * One floor, packed until everything fits: fresh shuffles first, and only if
+ * none of those fits every room, the stranded room loses a cell off its longer
+ * side and the floor tries again. Rooms never shrink below 3 by 3.
+ */
+function packFloorFully(
+  args: Omit<Parameters<typeof packFloor>[0], 'rng'>,
+  rng: () => number,
+  tries = 30
+): { placed: Record<string, Rect>; missing: string[] } {
+  let rooms = args.rooms
+  let best: { placed: Record<string, Rect>; missing: string[] } | null = null
+  for (let shrink = 0; shrink < 6; shrink++) {
+    for (let i = 0; i < tries; i++) {
+      const result = packFloor({ ...args, rooms, rng })
+      if (!result.missing.length) return result
+      if (!best || result.missing.length < best.missing.length) best = result
+    }
+    const stuck = new Set(best!.missing)
+    let changed = false
+    rooms = rooms.map((r) => {
+      if (!stuck.has(r.key)) return r
+      if (r.w >= r.h && r.w > 3) {
+        changed = true
+        return { ...r, w: r.w - 1 }
+      }
+      if (r.h > 3) {
+        changed = true
+        return { ...r, h: r.h - 1 }
+      }
+      return r
+    })
+    if (!changed) break
+  }
+  return best!
+}
+
+/**
  * A whole building: flights first, then each floor packed around them. Tries a
- * few seeds and keeps the first where every room fits.
+ * few stair plans, and on each packs every floor until its rooms all fit.
  */
 export function layoutBuilding(opts: {
   cols: number
@@ -379,7 +416,7 @@ export function layoutBuilding(opts: {
   seed?: number
   attempts?: number
 }): { flights: VenueFlight[]; rooms: Array<Record<string, Rect>>; missing: string[]; seed: number } {
-  const attempts = opts.attempts ?? 12
+  const attempts = opts.attempts ?? 6
   let best: ReturnType<typeof layoutBuilding> | null = null
   const base = opts.seed ?? Math.floor(Math.random() * 2 ** 31)
   for (let i = 0; i < attempts; i++) {
@@ -396,15 +433,17 @@ export function layoutBuilding(opts: {
     const missing: string[] = []
     opts.floors.forEach((floor, index) => {
       const { up, down } = flightsOn(flights, index)
-      const result = packFloor({
-        cols: opts.cols,
-        rows: opts.rows,
-        rooms: floor.rooms,
-        blocked: floorBlocked(opts.cols, opts.rows, index, flights, floor.door),
-        reach: [up, down].filter(Boolean) as Rect[],
-        door: floor.door,
-        rng,
-      })
+      const result = packFloorFully(
+        {
+          cols: opts.cols,
+          rows: opts.rows,
+          rooms: floor.rooms,
+          blocked: floorBlocked(opts.cols, opts.rows, index, flights, floor.door),
+          reach: [up, down].filter(Boolean) as Rect[],
+          door: floor.door,
+        },
+        rng
+      )
       rooms.push(result.placed)
       missing.push(...result.missing)
     })

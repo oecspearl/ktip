@@ -384,7 +384,9 @@ export function VenueMapStage({
       // ---- the way in ----
       // Drawn as a break in the perimeter with a threshold across it, so the
       // entrance reads as an opening rather than as a decal on a wall.
-      const door = config.floors[level]?.door
+      // One way into the building: the gateway stands on the ground floor only.
+      // Upper floors are reached by their stairs.
+      const door = level === 0 ? config.floors[level]?.door : undefined
       if (door) {
         // Edge-local axes: `u` runs along the wall, `n` points into the floor.
         // Every side is then the same drawing, which is why there is no switch
