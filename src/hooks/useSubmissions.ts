@@ -54,6 +54,8 @@ export interface TeamSubmissionState {
   deadline: string | null
   locked: boolean
   results_published_at: string | null
+  /** No team, and allowed to enter alone (198): a venue participant who neither judges nor runs it. */
+  solo_allowed: boolean
   criteria: DeskCriterion[]
   team: { id: string; name: string; members: DeskTeamMember[] } | null
   solution: TeamEntry | null
@@ -92,6 +94,7 @@ export function useTeamSubmission(eventId: string | undefined) {
         deadline: data.deadline ?? null,
         locked: !!data.locked,
         results_published_at: data.results_published_at ?? null,
+        solo_allowed: !!data.solo_allowed,
         criteria: data.criteria ?? [],
         team: data.team ?? null,
         solution: data.solution ?? null,

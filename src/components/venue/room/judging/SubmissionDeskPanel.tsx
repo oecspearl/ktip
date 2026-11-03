@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useToast } from '../../../../contexts/ToastContext'
+import { useAuth } from '../../../../contexts/AuthContext'
 import { Button } from '../../../ui/Button'
 import { Input } from '../../../ui/Input'
 import { Textarea } from '../../../ui/Textarea'
@@ -99,6 +100,7 @@ function evidenceList(draft: Draft): ChecklistEvidence[] {
 export function SubmissionDeskPanel({ event, isHost }: { event: Event; isHost: boolean }) {
   const { t } = useLingui()
   const toast = useToast()
+  const auth = useAuth()
   const { desk, loading } = useTeamSubmission(event.id)
   const save = useSaveSubmission(event.id)
   const submit = useSubmitSubmission(event.id)
@@ -154,14 +156,17 @@ export function SubmissionDeskPanel({ event, isHost }: { event: Event; isHost: b
     )
   }
 
-  if (!desk.team) {
+  // 198: no team and allowed to enter alone, so the desk is theirs.
+  const solo = !desk.team && desk.solo_allowed
+
+  if (!desk.team && !solo) {
     return (
       <Shell deadline={desk.deadline} now={now}>
         <p className="text-sm text-ktip-sand-600">
           {isHost ? (
             <Trans>Teams hand in their entries here. You are not on a team, so there is nothing for you to fill in. The results board lists every entry.</Trans>
           ) : (
-            <Trans>Each team hands in one entry. Form a team or join one first, then come back here.</Trans>
+            <Trans>Each team hands in one entry. Judges, mentors and spectators do not enter.</Trans>
           )}
         </p>
       </Shell>
@@ -318,7 +323,12 @@ export function SubmissionDeskPanel({ event, isHost }: { event: Event; isHost: b
       : t`Draft. Not submitted yet.`
 
   return (
-    <Shell deadline={desk.deadline} now={now} teamName={desk.team.name}>
+    <Shell deadline={desk.deadline} now={now} teamName={desk.team?.name ?? t`Entering on your own`}>
+      {solo && (
+        <p className="rounded-lg bg-ktip-sand-50 px-3 py-2 text-sm text-ktip-sand-700">
+          <Trans>You are not on a team, so this entry is yours alone. If you join a team later, hand in the team's entry instead.</Trans>
+        </p>
+      )}
       <p
         className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
           submittedAt && !changedSinceSubmit
@@ -568,7 +578,11 @@ export function SubmissionDeskPanel({ event, isHost }: { event: Event; isHost: b
           <div className="flex flex-col gap-4">
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <ReviewItem label={t`Project title`} value={draft.title} />
-              <ReviewItem label={t`Team`} value={desk.team.members.map((m) => m.display_name).filter(Boolean).join(', ')} />
+              {desk.team ? (
+                <ReviewItem label={t`Team`} value={desk.team.members.map((m) => m.display_name).filter(Boolean).join(', ')} />
+              ) : (
+                <ReviewItem label={t`Entrant`} value={auth.profile?.display_name ?? ''} />
+              )}
               <ReviewItem label={t`Summary`} value={draft.description} wide />
               <ReviewItem label={t`Code repository`} value={draft.repo_url} link />
               <ReviewItem
@@ -607,7 +621,11 @@ export function SubmissionDeskPanel({ event, isHost }: { event: Event; isHost: b
             ) : (
               <div className="flex flex-col items-start gap-3">
                 <p className="text-sm text-ktip-sand-700">
-                  <Trans>Everything is in. Submitting saves a copy for every teammate. You can still edit and submit again until the deadline.</Trans>
+                  {solo ? (
+                    <Trans>Everything is in. Submitting saves a copy to your dashboard. You can still edit and submit again until the deadline.</Trans>
+                  ) : (
+                    <Trans>Everything is in. Submitting saves a copy for every teammate. You can still edit and submit again until the deadline.</Trans>
+                  )}
                 </p>
                 <Button
                   onClick={onSubmit}
