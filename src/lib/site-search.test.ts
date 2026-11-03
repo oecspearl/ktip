@@ -125,13 +125,13 @@ describe('filterByAccess', () => {
     expect(ids).toContain('discover')
   })
 
-  it('shows the business profile and Chamber rows only to organisation accounts', () => {
+  it('shows the business profile and business verification rows only to organisation accounts', () => {
     const person = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, isOrgAccount: false }).map((e) => e.id)
     const org = filterByAccess(SITE_MAP, { signedIn: true, isOecs: false, isOrgAccount: true }).map((e) => e.id)
     expect(person).not.toContain('org.profile')
-    expect(person).not.toContain('org.chamber-verification')
+    expect(person).not.toContain('org.business-verification')
     expect(org).toContain('org.profile')
-    expect(org).toContain('org.chamber-verification')
+    expect(org).toContain('org.business-verification')
   })
 
   it('keeps every row for a caller that only knows the coarse levels', () => {

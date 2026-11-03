@@ -498,7 +498,7 @@ function FieldModal({
                 <p className="mb-2 text-xs leading-relaxed text-ktip-sand-600">
                   <Trans>
                     Granted by verification. These can only be changed by your institution, your
-                    Chamber of Commerce, or an OECS administrator.
+                    business association, or an OECS administrator.
                   </Trans>
                 </p>
                 <div className="flex flex-wrap gap-1.5">

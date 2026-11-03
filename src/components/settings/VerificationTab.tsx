@@ -60,6 +60,8 @@ export function VerificationTab() {
         return t`Verified by a KTIP administrator.`
       case 'org_code':
         return t`Verified with a code from your organisation.`
+      case 'association':
+        return t`Verified through your business, which your business association checked.`
       default:
         return null
     }

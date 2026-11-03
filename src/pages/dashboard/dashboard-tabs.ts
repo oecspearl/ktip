@@ -124,7 +124,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   { to: 'security', label: msg`Security`, icon: KeyRound, description: msg`Password, two-step and your addresses`, group: msg`Account` },
   { to: 'preferences', label: msg`Preferences`, icon: Bell, description: msg`Notifications, privacy and display` },
   { to: 'personalization', label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see` },
-  { to: 'verification', label: msg`Verification`, icon: BadgeCheck, description: msg`Verify your identity` },
+  { to: 'verification', label: msg`Verification`, icon: BadgeCheck, description: msg`Your identity, and your business if you have one` },
   { to: 'legal', label: msg`Legal & Consent`, icon: ScrollText, description: msg`What you agreed to` },
 
   { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'admin', 'safety_admin'], external: true, group: msg`Administration` },

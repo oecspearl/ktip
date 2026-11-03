@@ -39,12 +39,12 @@ import type { MessageDescriptor } from '@lingui/core'
 const STATUS_COPY: Record<string, { title: MessageDescriptor; body: MessageDescriptor; tone: string }> = {
   unverified: {
     title: msg`Not yet verified`,
-    body: msg`Your profile is private until a Chamber of Commerce verifies the business.`,
+    body: msg`Your profile stays private until your business association verifies the business.`,
     tone: 'bg-ktip-sand-50 border-ktip-sand-200 text-ktip-sand-700',
   },
   pending: {
-    title: msg`Awaiting Chamber review`,
-    body: msg`You can write your profile and portfolio now. Both go public the moment your Chamber approves the registration.`,
+    title: msg`Waiting for your business association`,
+    body: msg`You can write your profile and portfolio now. Both go public as soon as your business association verifies the business.`,
     tone: 'bg-ktip-sun-50 border-ktip-sun-200 text-ktip-sun-800',
   },
   verified: {
@@ -54,7 +54,7 @@ const STATUS_COPY: Record<string, { title: MessageDescriptor; body: MessageDescr
   },
   rejected: {
     title: msg`Not accepted`,
-    body: msg`Your Chamber did not accept this registration, so nothing here is public. Contact them to resolve it.`,
+    body: msg`Your business association did not accept this registration, so nothing here is public. Contact them to sort it out.`,
     tone: 'bg-red-50 border-red-200 text-red-700',
   },
   revoked: {
@@ -84,8 +84,8 @@ const EMPTY_ITEM: PortfolioItemInput = {
  * This is where a business writes what it does and publishes the work it wants
  * to be judged on.
  *
- * Registration itself still lives on the Chamber page. The identity fields the
- * Chamber checked — legal name, member state, registration number — are not
+ * Registration itself lives on the Verification tab. The identity fields the
+ * business association checked — legal name, member state, registration number — are not
  * editable here by design (see migration 081).
  *
  * `embedded` renders the same page as a dashboard panel (see BusinessTab):
@@ -245,10 +245,10 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
               </h2>
             </div>
             <p className="mb-5 text-sm text-ktip-sand-600">
-              <Trans>A business profile hangs off a registered organisation, so your Chamber of Commerce has something to verify. Registration takes a few minutes.</Trans>
+              <Trans>A business profile needs a registered business behind it, so your business association has something to verify. Registration takes a few minutes.</Trans>
             </p>
-            <Link to="/sme/verification">
-              <Button><Trans>Register with your Chamber</Trans></Button>
+            <Link to="/dashboard/verification">
+              <Button><Trans>Register your business</Trans></Button>
             </Link>
           </Card>
         )}
@@ -281,7 +281,7 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
             )}
 
             {/* Presentation only. Legal name, member state and registration
-                number were checked by the Chamber and are not editable here —
+                number were checked by the association and are not editable here —
                 a row that could be rewritten after verification would carry a
                 verified badge over unchecked data (see 058 / 081). */}
             <Card>
@@ -290,8 +290,8 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
               </h2>
               <p className="mb-5 text-sm text-ktip-sand-600">
                 <Trans>
-                  Registered as {employer.legal_name} in {employer.country_code}. Contact your
-                  Chamber to correct any of that; everything below is yours to change.
+                  Registered as {employer.legal_name} in {employer.country_code}. To correct any of
+                  that, contact your business association. Everything below is yours to change.
                 </Trans>
               </p>
 

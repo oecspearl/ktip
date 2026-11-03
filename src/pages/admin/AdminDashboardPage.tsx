@@ -154,9 +154,9 @@ export default function AdminDashboardPage() {
     },
     {
       key: 'employers',
-      label: 'Chamber review',
+      label: 'Association review',
       noun: 'businesses waiting',
-      to: '/admin/chamber',
+      to: '/admin/association',
       icon: <Landmark size={20} className="text-ktip-sun-700" />,
     },
     {

@@ -259,7 +259,7 @@ export function useAdminAttention(scopes: AttentionScopes) {
         },
         {
           key: 'employers',
-          reason: 'Could not read the chamber queue',
+          reason: 'Could not read the association queue',
           build: () => table('employers').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending'),
         },
         {

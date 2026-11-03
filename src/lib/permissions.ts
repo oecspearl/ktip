@@ -90,7 +90,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     slug: 'people_supervisor',
     label: msg`People & Trust Supervisor`,
     tier: 'admin',
-    description: msg`Owns who people are and how they behave: member records (read-only), verification, institutions, chamber review, moderation and grievances.`,
+    description: msg`Owns who people are and how they behave: member records (read-only), verification, institutions, association review, moderation and grievances.`,
     selfAssignable: false,
     requiresVerification: true,
     sortOrder: 12,
@@ -138,7 +138,7 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     slug: 'private_sector',
     label: msg`Private Sector`,
     tier: 'organization',
-    description: msg`Business account. A Chamber of Commerce can verify the business, which marks the owner verified.`,
+    description: msg`Business account. Its business association can verify the business, which marks the owner verified.`,
     selfAssignable: true,
     requiresVerification: false,
     sortOrder: 50,
@@ -518,8 +518,8 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   { key: 'dm:supervise', label: msg`Supervise student channels`, description: msg`Counts as the designated educator that makes a student channel monitored.`, category: 'messaging', safeguard: true, sortOrder: 200 },
 
   // Verification
-  { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Chamber or BSO review of corporate registry data; marks the business owner verified.`, category: 'verification', safeguard: false, sortOrder: 210 },
-  { key: 'institution:verify', label: msg`Verify institutions`, description: msg`Approve schools and chambers, and the email domains they own.`, category: 'verification', safeguard: false, sortOrder: 220 },
+  { key: 'sme:verify', label: msg`Verify SMEs`, description: msg`Business association review of company registry details; marks the business owner verified.`, category: 'verification', safeguard: false, sortOrder: 210 },
+  { key: 'institution:verify', label: msg`Verify institutions`, description: msg`Approve schools and business associations, and the email domains they own.`, category: 'verification', safeguard: false, sortOrder: 220 },
   { key: 'institution:approve_students', label: msg`Approve student accounts`, description: msg`Approve students registering on the institution’s verified email domain.`, category: 'verification', safeguard: true, sortOrder: 230 },
   { key: 'verification:review', label: msg`Review verification requests`, description: msg`Work the /admin/verification queue and set a member’s verified badge.`, category: 'verification', safeguard: false, sortOrder: 235 },
 

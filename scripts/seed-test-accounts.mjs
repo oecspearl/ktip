@@ -31,6 +31,16 @@
  *                             duties derive from one (student, faculty,
  *                             post-secondary institution, chamber).
  *
+ * ASSOCIATION REVIEW (186)
+ * ------------------------
+ *   Six test businesses, each with its own owner login (test.assoc-owner-N):
+ *   three pending in Saint Lucia (submitted 2, 6 and 15 days ago), one
+ *   verified and one not accepted there, and one pending in Grenada, which
+ *   has no test association, so the admin queue shows it as Unassigned.
+ *   Upserted by slug; re-running moves the submission dates back to those
+ *   offsets. Skipped when --only is given without association_review.
+ *   supabase/seed_association_review.sql is the SQL twin for a fresh database.
+ *
  * WHAT IS NOT CREATED
  * -------------------
  *   super_admin  migration 143 caps the seat at 1 and it is held. The cap's
@@ -314,6 +324,142 @@ for (const account of ACCOUNTS) {
   }
   results.push(row)
   console.log(`${row.role.padEnd(22)} ${email.padEnd(42)} ${row.status}`)
+}
+
+// ── Association review (186) ────────────────────────────────────────────────
+// Businesses waiting on the test association, so /association/review and
+// /admin/association have something to show. Each has its own owner, because
+// the Verification tab shows an owner's latest business only.
+const ASSOCIATION_BUSINESSES = [
+  { n: 1, slug: 'ktip-test-assoc-breadfruit-lc', name: 'Test Breadfruit Bakery Ltd', country: 'LC', status: 'pending', daysAgo: 2, industry: 'Food and beverage', reg: 'LC-C-2026-0412' },
+  { n: 2, slug: 'ktip-test-assoc-pitons-lc', name: 'Test Pitons Solar Installers Inc', country: 'LC', status: 'pending', daysAgo: 6, industry: 'Renewable energy', reg: 'LC-C-2025-1187' },
+  { n: 3, slug: 'ktip-test-assoc-soufriere-lc', name: 'Test Soufriere Craft Collective', country: 'LC', status: 'pending', daysAgo: 15, industry: 'Creative industries', reg: null },
+  { n: 4, slug: 'ktip-test-assoc-castries-lc', name: 'Test Castries Code Studio Ltd', country: 'LC', status: 'verified', daysAgo: 40, reviewedDaysAgo: 30, industry: 'Software', reg: 'LC-C-2024-0098' },
+  { n: 5, slug: 'ktip-test-assoc-vieux-fort-lc', name: 'Test Vieux Fort Freight Ltd', country: 'LC', status: 'rejected', daysAgo: 20, reviewedDaysAgo: 10, industry: 'Logistics', reg: 'LC-C-2023-7741', note: 'The registration number does not match the registry. Check it and submit again.' },
+  { n: 6, slug: 'ktip-test-assoc-spice-gd', name: 'Test Spice Isle Agro Ltd', country: 'GD', status: 'pending', daysAgo: 9, industry: 'Agriculture', reg: 'GD-2026-3310' },
+]
+const COUNTRY_NAMES = { LC: 'Saint Lucia', GD: 'Grenada' }
+const seedAssociation = !only || only.includes('association_review')
+const daysAgoIso = (days) => new Date(Date.now() - days * 86_400_000).toISOString()
+
+async function findUserIdOrNull(email) {
+  try {
+    return await findUserId(email)
+  } catch {
+    return null
+  }
+}
+
+async function seedAssociationBusiness(biz, reviewerId, associationId) {
+  const ownerSlug = `assoc_owner_${biz.n}`
+  const email = emailFor(ownerSlug)
+  const ownerName = `Test Owner, ${biz.name.replace(/^Test /, '')}`
+  const { id: ownerId, created } = await upsertAuthUser(email, ownerName)
+  await waitForProfile(ownerId)
+  await onboardAsUser(email)
+
+  const verified = biz.status === 'verified'
+  const ownerProfile = {
+    roles: ['private_sector'],
+    active_role: null,
+    display_name: ownerName,
+    organization: biz.name,
+    country: COUNTRY_NAMES[biz.country],
+    bio: 'Shared test account that owns a test business for association review. Data here is not real.',
+    is_verified: verified,
+    // 186: a badge that came from a verified business.
+    verified_via: verified ? 'association' : null,
+    verified_at: verified ? daysAgoIso(biz.reviewedDaysAgo) : null,
+    is_suspended: false,
+    mfa_grandfathered: true,
+    requires_mfa_enrollment: false,
+  }
+  let { error: profileError } = await admin.from('profiles').update(ownerProfile).eq('id', ownerId)
+  if (profileError && verified && /verified_via/.test(profileError.message)) {
+    // 186 not applied yet: its CHECK does not know 'association'.
+    ;({ error: profileError } = await admin
+      .from('profiles')
+      .update({ ...ownerProfile, verified_via: 'admin' })
+      .eq('id', ownerId))
+  }
+  if (profileError) throw new Error(`owner profile: ${profileError.message}`)
+
+  const reviewed = biz.reviewedDaysAgo !== undefined
+  const { data: employer, error: employerError } = await admin
+    .from('employers')
+    .upsert(
+      {
+        slug: biz.slug,
+        legal_name: biz.name,
+        industry: biz.industry,
+        country_code: biz.country,
+        contact_email: email,
+        registration_number: biz.reg,
+        description: `${biz.name} is a test business. Nothing about it is real.`,
+        verification_status: biz.status,
+        verification_method: verified ? 'chamber_attestation' : null,
+        verified_at: verified ? daysAgoIso(biz.reviewedDaysAgo) : null,
+        verified_by: verified ? reviewerId : null,
+        verification_note: biz.note ?? null,
+        chamber_institution_id: reviewed ? associationId : null,
+        chamber_reviewed_by: reviewed ? reviewerId : null,
+        chamber_reviewed_at: reviewed ? daysAgoIso(biz.reviewedDaysAgo) : null,
+        share_externally: false,
+        created_by: ownerId,
+        created_at: daysAgoIso(biz.daysAgo),
+      },
+      { onConflict: 'slug' }
+    )
+    .select('id')
+    .single()
+  if (employerError) throw new Error(`employer ${biz.slug}: ${employerError.message}`)
+
+  // The decision's audit row, once.
+  if (reviewed) {
+    const { data: existing, error: eventsError } = await admin
+      .from('employer_verification_events')
+      .select('id')
+      .eq('employer_id', employer.id)
+      .eq('to_status', biz.status)
+      .limit(1)
+    if (eventsError) throw new Error(`employer_verification_events: ${eventsError.message}`)
+    if (!existing?.length) {
+      const { error: insertError } = await admin.from('employer_verification_events').insert({
+        employer_id: employer.id,
+        from_status: 'pending',
+        to_status: biz.status,
+        method: 'chamber_attestation',
+        note: biz.note ?? null,
+        actor_id: reviewerId,
+        created_at: daysAgoIso(biz.reviewedDaysAgo),
+      })
+      if (insertError) throw new Error(`employer_verification_events: ${insertError.message}`)
+    }
+  }
+
+  return { email, created, ownerSlug }
+}
+
+if (seedAssociation) {
+  console.log('\nAssociation review businesses\n')
+  const reviewerId = await findUserIdOrNull(emailFor('chamber_admin'))
+  const { data: association } = await admin
+    .from('institutions')
+    .select('id')
+    .eq('slug', TEST_INSTITUTIONS.chamber.slug)
+    .maybeSingle()
+
+  for (const biz of ASSOCIATION_BUSINESSES) {
+    const row = { role: `assoc_owner_${biz.n}`, email: emailFor(`assoc_owner_${biz.n}`), password, status: '' }
+    try {
+      const { created } = await seedAssociationBusiness(biz, reviewerId, association?.id ?? null)
+      row.status = `${created ? 'created' : 'reset'}, owns ${biz.slug} (${biz.country}, ${biz.status}), ${await verifyAsUser(row.email)}`
+    } catch (e) {
+      row.status = `FAILED: ${e.message}`
+    }
+    results.push(row)
+    console.log(`${row.role.padEnd(22)} ${row.email.padEnd(42)} ${row.status}`)
+  }
 }
 
 mkdirSync('docs', { recursive: true })

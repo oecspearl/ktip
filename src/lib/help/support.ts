@@ -108,7 +108,7 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-overview',
       title: 'What is in the admin console?',
-      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and error reports.\n\nWhat you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
+      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, association review, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and error reports.\n\nWhat you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, association review, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
       tags: ['admin', 'console', 'overview', 'oecs', 'management'],
     },
     {
@@ -132,8 +132,8 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-verification-queues',
       title: 'Verification and vetting queues',
-      content: `Several queues sit behind the verified badges.\n\nVerification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Chamber — Chambers of Commerce and the SME submissions they handle. Employers — employer accounts and their recruiters.\n\nApproving an institution's domain is the high-leverage action: every future student signing up with that domain is verified automatically, so getting the domain right matters more than any single account.`,
-      tags: ['verification', 'institutions', 'chamber', 'sme', 'employers', 'queue', 'admin'],
+      content: `Several queues sit behind the verified badges.\n\nVerification — individual identity requests, with the evidence members uploaded. Institutions — schools and universities, including the email domains that then auto-verify their students. Association Review — every country’s business verification queue, how long each business has waited, and which business association covers that country. Employers — employer accounts and their recruiters.\n\nApproving an institution's domain is the high-leverage action: every future student signing up with that domain is verified automatically, so getting the domain right matters more than any single account.`,
+      tags: ['verification', 'institutions', 'business association', 'chamber', 'sme', 'employers', 'queue', 'admin'],
     },
     {
       id: 'admin-publishing',

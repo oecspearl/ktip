@@ -89,7 +89,7 @@ const adminNavItems: {
   { href: '/admin/achievements', label: 'Achievements', icon: Trophy, requires: 'achievement:manage' },
   { href: '/admin/moderation', label: 'Moderation', icon: ShieldAlert, requires: 'moderation:view' },
   { href: '/admin/institutions', label: 'Institutions', icon: GraduationCap, requires: 'institution:verify' },
-  { href: '/admin/chamber', label: 'Chamber Review', icon: Landmark, requires: 'sme:verify' },
+  { href: '/admin/association', label: 'Association Review', icon: Landmark, requires: 'sme:verify' },
   { href: '/admin/grants', label: 'Grants', icon: DollarSign, requires: 'grant:manage' },
   { href: '/admin/forums', label: 'Forums', icon: MessageSquare, requires: 'forum:manage' },
   { href: '/admin/resources', label: 'Resources', icon: BookOpen, requires: 'resource:manage' },

@@ -53,14 +53,14 @@ const SEATS = {
   people: {
     slug: 'people_supervisor',
     label: 'People & Trust Supervisor',
-    owns: 'users (read-only), verification, institutions, chamber review, moderation, grievances',
+    owns: 'users (read-only), verification, institutions, association review, moderation, grievances',
     expect: [
       ['members:view', '/admin/users, read-only'],
       ['verification:review', '/admin/verification and the verified badge'],
       ['moderation:view', '/admin/moderation, /admin/grievances'],
       ['moderation:action', 'quarantine, restore, remove'],
       ['moderation:escalate', 'suspensions'],
-      ['sme:verify', '/admin/chamber'],
+      ['sme:verify', '/admin/association'],
       ['institution:verify', '/admin/institutions'],
       ['audit:view', 'the permission and moderation trails'],
     ],

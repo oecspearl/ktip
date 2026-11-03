@@ -279,7 +279,7 @@ export function useRequestStudentVerification() {
   }
 }
 
-/** Chamber-scoped SME verification. Country is enforced server-side. */
+/** Association-scoped SME verification. Country is enforced server-side. */
 export function useChamberVerifyEmployer() {
   const queryClient = useQueryClient()
 
@@ -300,8 +300,8 @@ export function useChamberVerifyEmployer() {
       if (error) throw error
       if (data && data.ok === false) {
         const messages: Record<string, string> = {
-          forbidden: 'You are not a Chamber of Commerce reviewer.',
-          wrong_country: `This business is registered in ${data.country}, outside your Chamber's jurisdiction.`,
+          forbidden: 'You are not a business association reviewer.',
+          wrong_country: `This business is registered in ${data.country}, outside your association's countries.`,
           bad_status: 'Invalid verification status.',
           not_found: 'Business not found.',
         }
@@ -335,4 +335,144 @@ export function useChamberCountries(userId: string | undefined) {
   })
 
   return { countries: query.data ?? [], loading: query.isPending }
+}
+
+/** One row of association_review_queue() (186). */
+export interface AssociationQueueRow {
+  id: string
+  slug: string
+  legal_name: string
+  trading_name: string | null
+  industry: string | null
+  description: string | null
+  website_url: string | null
+  country_code: string
+  country_name: string | null
+  contact_email: string
+  contact_phone: string | null
+  registration_number: string | null
+  verification_status: 'unverified' | 'pending' | 'verified' | 'rejected' | 'revoked'
+  verification_method: string | null
+  verification_note: string | null
+  verified_at: string | null
+  created_by: string | null
+  owner_name: string | null
+  created_at: string
+  updated_at: string
+  submitted_at: string
+  /** Days since the latest move to pending; NULL unless pending. */
+  waiting_days: number | null
+  assigned_institution_id: string | null
+  assigned_institution_name: string | null
+  reviewer_count: number
+  reviewed_by_institution_name: string | null
+  chamber_reviewed_at: string | null
+}
+
+/**
+ * Every country's queue for OECS staff; an association reviewer calling it
+ * gets their own countries only. The status and country filters run in SQL.
+ */
+export function useAssociationReviewQueue(
+  filters: { status?: string; country?: string },
+  enabled = true
+) {
+  const query = useQuery({
+    queryKey: keys.list('association-queue', filters),
+    queryFn: async (): Promise<AssociationQueueRow[]> => {
+      const { data, error } = await (supabase as any).rpc('association_review_queue', {
+        p_status: filters.status || null,
+        p_country: filters.country || null,
+      })
+      if (error) throw error
+      return (data as AssociationQueueRow[]) || []
+    },
+    enabled,
+  })
+
+  return { rows: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+/**
+ * The OECS override: set_employer_verification (116, restated in 186 so the
+ * owner is marked verified too). Needs employer:manage.
+ */
+export function useAdminEmployerDecision() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (params: {
+      employerId: string
+      status: 'pending' | 'verified' | 'rejected' | 'revoked'
+      registrationNumber?: string
+      note?: string
+    }) => {
+      const { data, error } = await (supabase as any).rpc('set_employer_verification', {
+        p_employer_id: params.employerId,
+        p_status: params.status,
+        // A registry number confirmed by the reviewer is a registry lookup;
+        // without one, OECS is attesting on what it was shown.
+        p_method:
+          params.status === 'verified'
+            ? params.registrationNumber
+              ? 'registry_lookup'
+              : 'manual_attestation'
+            : null,
+        p_note: params.note ?? null,
+        p_registration_number: params.registrationNumber ?? null,
+      })
+      if (error) throw error
+      if (data && data.ok === false) {
+        const messages: Record<string, string> = {
+          forbidden: 'You need the Administer employers permission to decide for an association.',
+          not_found: 'Business not found.',
+        }
+        throw new Error(messages[data.reason] || 'Verification failed.')
+      }
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('employers') })
+      queryClient.invalidateQueries({ queryKey: keys.all('association-queue') })
+      queryClient.invalidateQueries({ queryKey: keys.all('admin-employers') })
+    },
+  })
+
+  return { decide: mutation.mutateAsync, loading: mutation.isPending }
+}
+
+/**
+ * Links an account to a verified association as an approved admin (186).
+ * That row is what gives the account a country to review.
+ */
+export function useAddAssociationAdmin() {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: async (params: { institutionId: string; userId: string }) => {
+      const { data, error } = await (supabase as any).rpc('add_association_admin', {
+        p_institution: params.institutionId,
+        p_user: params.userId,
+      })
+      if (error) throw error
+      if (data && data.ok === false) {
+        const messages: Record<string, string> = {
+          forbidden: 'You need the Verify institutions permission.',
+          not_association: 'Only a business association can have association admins.',
+          not_verified: 'Verify the association first.',
+          user_not_found: 'That account no longer exists.',
+          on_hold: "This account's verification is on hold. A verification reviewer has to add it.",
+        }
+        throw new Error(messages[data.reason] || 'Could not add the admin.')
+      }
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.all('institution-members') })
+      queryClient.invalidateQueries({ queryKey: keys.all('association-queue') })
+      queryClient.invalidateQueries({ queryKey: keys.all('role-members') })
+    },
+  })
+
+  return { addAdmin: mutation.mutateAsync, loading: mutation.isPending }
 }

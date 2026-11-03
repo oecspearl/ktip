@@ -35,6 +35,7 @@ import {
   FileText,
   Building2,
   Landmark,
+  BadgeCheck,
   UserPlus,
   FilePlus,
   Wallet,
@@ -452,6 +453,13 @@ export function Navbar() {
   // Mirrors AdminRoute exactly. Kept as one value so the desktop bar and the
   // mobile menu can never drift apart.
   const canSeeAdmin = opensAdminConsole(auth.can)
+
+  // The business association's queue (/association/review). sme:verify is not
+  // an admin console key, so this is the association's only way in. Staff who
+  // hold the key reach the same queue from the console instead, unless they
+  // also hold the association role themselves.
+  const canReviewAssociation =
+    auth.can('sme:verify') && (!canSeeAdmin || auth.roles.includes('chamber_admin'))
 
   /**
    * Dropdown entries this viewer can act on.
@@ -1353,17 +1361,25 @@ export function Navbar() {
                         {isOrgAccount ? <Building2 size={18} /> : <FileText size={18} />}
                         <span>{isOrgAccount ? <Trans>Business profile</Trans> : <Trans>My CV</Trans>}</span>
                       </Link>
-                      {/* The Chamber registration had no way in from anywhere in
-                          the app; it lives beside the business profile because it
-                          is the business's other piece of paperwork. */}
-                      {isOrgAccount && (
+                      {/* Everyone: identity for a person, and the business as
+                          well for an organisation account. Beside the profile
+                          because it is the account's other piece of paperwork. */}
+                      <Link
+                        to="/dashboard/verification"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
+                      >
+                        <BadgeCheck size={18} />
+                        <span><Trans>Verification</Trans></span>
+                      </Link>
+                      {canReviewAssociation && (
                         <Link
-                          to="/sme/verification"
+                          to="/association/review"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-ktip-sand-700 hover:bg-ktip-sand-50 transition-colors"
                         >
                           <Landmark size={18} />
-                          <span><Trans>Chamber verification</Trans></span>
+                          <span><Trans>Association review</Trans></span>
                         </Link>
                       )}
                       <Link
@@ -1823,6 +1839,29 @@ export function Navbar() {
         >
           <Flag size={18} className="text-white/60" />
         </Link>
+        {/* Same two entries as the desktop dropdown. */}
+        <Link
+          to="/dashboard/verification"
+          data-span="col-span-1"
+          title={t`Verification`}
+          aria-label={t`Verification`}
+          onClick={() => setMobileMenuOpen(false)}
+          className={cn(BENTO_TILE_CLASS, 'h-full min-h-13 items-center justify-center', BENTO_TILE_IDLE)}
+        >
+          <BadgeCheck size={18} className="text-white/60" />
+        </Link>
+        {canReviewAssociation && (
+          <Link
+            to="/association/review"
+            data-span="col-span-1"
+            title={t`Association review`}
+            aria-label={t`Association review`}
+            onClick={() => setMobileMenuOpen(false)}
+            className={cn(BENTO_TILE_CLASS, 'h-full min-h-13 items-center justify-center', BENTO_TILE_IDLE)}
+          >
+            <Landmark size={18} className="text-white/60" />
+          </Link>
+        )}
         {/* Last, and the one tile allowed to stay two wide in compact: nothing
             follows it, so there is no square left for it to strand. */}
         <button

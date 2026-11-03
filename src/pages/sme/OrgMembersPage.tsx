@@ -164,8 +164,8 @@ export default function OrgMembersPage({ embedded = false }: { embedded?: boolea
             <p className="mb-5 text-sm text-ktip-sand-600">
               <Trans>A team hangs off a registered organisation. Registration takes a few minutes.</Trans>
             </p>
-            <Link to="/sme/verification">
-              <Button><Trans>Register with your Chamber</Trans></Button>
+            <Link to="/dashboard/verification">
+              <Button><Trans>Register your business</Trans></Button>
             </Link>
           </Card>
         )}

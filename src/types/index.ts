@@ -1418,6 +1418,8 @@ export type VerifiedVia =
   | 'grandfathered'
   /** Migration 176 — a single-use code from a verified organisation. */
   | 'org_code'
+  /** Migration 186 — the member's business was verified. */
+  | 'association'
 
 /** What apply_verified_email() decided about a proven address (145). */
 export type VerificationOutcome =

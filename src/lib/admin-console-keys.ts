@@ -12,8 +12,9 @@ import type { PermissionKey } from '../types'
  * two console pages require them. Chambers, BSOs, governments, diaspora bodies
  * and IGOs all hold one or the other — they vet the members they are competent
  * to vet — and listing them would hand five organisation roles the admin
- * console. Everyone who should reach /admin/chamber or /admin/institutions is
- * admitted by another key on this list.
+ * console. Everyone who should reach /admin/association or /admin/institutions
+ * is admitted by another key on this list. Associations review from
+ * /association/review instead, which sits outside the console.
  *
  * Lives in its own Lingui-free module because api/ai-search.ts needs the same
  * list to work out, server-side, whether the caller may be pointed at admin

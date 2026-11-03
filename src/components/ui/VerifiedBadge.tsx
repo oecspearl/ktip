@@ -19,7 +19,7 @@ interface VerifiedBadgeProps {
   tone?: 'brand' | 'inverse'
   /** `icon` sits beside a name; `pill` carries the word, for tables and heroes. */
   variant?: 'icon' | 'pill'
-  /** Overrides the wording. Organisations say "Chamber verified". */
+  /** Overrides the wording. Organisations say "Verified business". */
   label?: string
   /** Hover text. Defaults to the label — the org pill adds the date. */
   title?: string

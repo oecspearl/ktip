@@ -284,7 +284,7 @@ export default function AdminRolesPage() {
 
         <p className="px-4 py-3 text-sm text-ktip-sand-600 border-t border-ktip-sand-100">
           Global roles apply across the platform. Roles marked as requiring verification are granted by
-          an institution, a Chamber of Commerce, or an OECS administrator — not chosen by the member.
+          an institution, a business association, or an OECS administrator — not chosen by the member.
         </p>
       </div>
 

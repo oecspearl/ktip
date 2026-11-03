@@ -691,7 +691,18 @@ const router = createBrowserRouter([
               { path: '/collaborate/code/:id', lazy: lazyPage(() => import('./pages/collaborate/CodeEditorPage')) },
               { path: '/collaborate/video', lazy: lazyPage(() => import('./pages/collaborate/VideoConferencePage')) },
               { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
-              { path: '/sme/verification', lazy: lazyPage(() => import('./pages/sme/ChamberOnboardingPage')) },
+              // Business verification is a section of the Verification tab
+              // now, beside identity. Notifications written before 186 link here.
+              { path: '/sme/verification', element: <Navigate to="/dashboard/verification" replace /> },
+              // The business association's queue. Outside AdminRoute on
+              // purpose: sme:verify is not a console key, so an association
+              // account could never open /admin/chamber.
+              {
+                element: <PermissionRoute require="sme:verify" />,
+                children: [
+                  { path: '/association/review', lazy: lazyPage(() => import('./pages/association/AssociationReviewPage')) },
+                ],
+              },
               // The business profile lives in the dashboard now (BusinessTab);
               // the old page address keeps resolving for bookmarks.
               { path: '/org/edit', element: <Navigate to="/dashboard/business" replace /> },
@@ -780,11 +791,14 @@ const router = createBrowserRouter([
                     ],
                   },
                   {
+                    // Every country's queue. The override on the page also
+                    // needs employer:manage, checked in-page and in SQL.
                     element: <PermissionRoute require="sme:verify" />,
                     children: [
-                      { path: '/admin/chamber', lazy: lazyPage(() => import('./pages/admin/chamber/AdminChamberPage')) },
+                      { path: '/admin/association', lazy: lazyPage(() => import('./pages/admin/association/AdminAssociationPage')) },
                     ],
                   },
+                  { path: '/admin/chamber', element: <Navigate to="/admin/association" replace /> },
                   {
                     element: <PermissionRoute require="grant:manage" />,
                     children: [

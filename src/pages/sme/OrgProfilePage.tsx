@@ -37,7 +37,7 @@ export default function OrgProfilePage() {
         <Building2 size={32} className="mx-auto mb-3 text-ktip-sand-400" aria-hidden="true" />
         <h1 className="font-display text-2xl font-bold text-ktip-sand-900"><Trans>Business not found</Trans></h1>
         <p className="mt-2 text-ktip-sand-600">
-          <Trans>This organisation does not exist, or has not been verified by its Chamber of Commerce yet.</Trans>
+          <Trans>This organisation does not exist, or its business association has not verified it yet.</Trans>
         </p>
         <Link to="/directory" className="mt-4 inline-block text-ktip-ocean-600 hover:underline">
           <Trans>Browse the directory</Trans>
@@ -90,11 +90,11 @@ export default function OrgProfilePage() {
                   verified={isVerified}
                   variant="pill"
                   size={13}
-                  label={t`Chamber verified`}
+                  label={t`Verified business`}
                   title={
                     employer.verified_at
                       ? t`Verified ${formatDate(employer.verified_at, 'MMM dd, yyyy')}`
-                      : t`Chamber verified`
+                      : t`Verified business`
                   }
                 />
               </h1>

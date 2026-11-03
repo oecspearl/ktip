@@ -177,6 +177,8 @@ function describeVia(status: MyVerificationStatus, t: ReturnType<typeof useLingu
       return label ? t`Verified through ${label}.` : t`Verified through your institution.`
     case 'org_code':
       return label ? t`Verified with a code from ${label}.` : t`Verified with a code from your organisation.`
+    case 'association':
+      return label ? t`Verified through your business, ${label}.` : t`Verified through your business.`
     case 'admin':
       return t`Verified by a KTIP administrator.`
     default:

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BadgeCheck, Building2, Filter, GraduationCap, ListChecks, Trash2, Users, X } from 'lucide-react'
+import { BadgeCheck, Building2, Filter, GraduationCap, ListChecks, Search, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
@@ -10,6 +10,7 @@ import { usePageTitle } from '../../../hooks/usePageTitle'
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
+  useAddAssociationAdmin,
   useInstitutionMembers,
   useInstitutions,
   useReviewInstitution,
@@ -21,15 +22,16 @@ import {
   useSetAutoApproveStudents,
   useUpsertInstitutionRoster,
 } from '../../../hooks/useEmailVerification'
+import { useSearchUsers } from '../../../hooks/useMessages'
 import { parseRosterInput } from '../../../lib/email-domain'
 import { formatDate } from '../../../lib/utils'
-import type { Institution, InstitutionKind, InstitutionStatus } from '../../../types'
+import type { Institution, InstitutionKind, InstitutionStatus, Profile } from '../../../types'
 
 const KIND_LABELS: Record<InstitutionKind, string> = {
   school: 'School',
   university: 'University',
   tvet: 'TVET',
-  chamber: 'Chamber of Commerce',
+  chamber: 'Business association',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -69,6 +71,16 @@ export default function AdminInstitutionsPage() {
   const [rosterRole, setRosterRole] = useState<'student' | 'educator'>('student')
 
   const { members, refetch: refetchMembers } = useInstitutionMembers(rosterFor?.id, 'pending')
+
+  // 186: a business association's admins, every status. Rejected rows are
+  // people who were removed, so they are left out of the list.
+  const [adminsFor, setAdminsFor] = useState<Institution | null>(null)
+  const [adminQuery, setAdminQuery] = useState('')
+  const [adminResults, setAdminResults] = useState<Profile[]>([])
+  const { members: associationRows, refetch: refetchAssociationMembers } = useInstitutionMembers(adminsFor?.id)
+  const associationMembers = (associationRows ?? []).filter((m) => m.status !== 'rejected')
+  const { searchUsers, loading: searchingUsers } = useSearchUsers()
+  const { addAdmin, loading: addingAdmin } = useAddAssociationAdmin()
 
   // 145: the zero-click controls. A switch for "approve anyone on our domain",
   // and a list of addresses the institution vouches for by name.
@@ -138,6 +150,40 @@ export default function AdminInstitutionsPage() {
     }
   }
 
+  const handleAdminSearch = async () => {
+    const query = adminQuery.trim()
+    if (query.length < 2 || !auth.user) return
+    try {
+      const found = await searchUsers(query, auth.user.id)
+      if (found) setAdminResults(found)
+    } catch (err: any) {
+      toast.error(err.message || 'Search failed')
+    }
+  }
+
+  const handleAddAdmin = async (userId: string, name: string | null | undefined) => {
+    if (!adminsFor) return
+    try {
+      await addAdmin({ institutionId: adminsFor.id, userId })
+      toast.success(`${name || 'The account'} can now review businesses for ${adminsFor.name}`)
+      refetchAssociationMembers()
+    } catch (err: any) {
+      toast.error(err.message || 'Could not add the admin')
+    }
+  }
+
+  // Approve goes through review_institution_member, which grants the role;
+  // Remove marks the row rejected, which takes the country away.
+  const handleAssociationMember = async (memberId: string, approve: boolean) => {
+    try {
+      await reviewMember({ memberId, approve, role: 'admin' })
+      toast.success(approve ? 'Admin approved' : 'Admin removed')
+      refetchAssociationMembers()
+    } catch (err: any) {
+      toast.error(err.message || 'Could not update the admin')
+    }
+  }
+
   const handleMemberReview = async (memberId: string, approve: boolean) => {
     try {
       await reviewMember({ memberId, approve })
@@ -155,7 +201,7 @@ export default function AdminInstitutionsPage() {
         compact
         eyebrow="Administration"
         title="Institutions"
-        subtitle="Verify schools, universities and Chambers of Commerce, and the email domains they own"
+        subtitle="Verify schools, universities and business associations, and the email domains they own"
         imageSeed="admin-institutions"
       />
 
@@ -243,6 +289,16 @@ export default function AdminInstitutionsPage() {
                 </div>
 
                 <div className="flex gap-2 shrink-0">
+                  {institution.status === 'verified' && institution.kind === 'chamber' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={<Users size={14} />}
+                      onClick={() => setAdminsFor(institution)}
+                    >
+                      Admins
+                    </Button>
+                  )}
                   {institution.status === 'verified' && institution.kind !== 'chamber' && (
                     <>
                       <Button
@@ -462,6 +518,126 @@ export default function AdminInstitutionsPage() {
               </li>
             ))}
           </ul>
+        )}
+      </Modal>
+
+      {/* Association admins (186). An approved admin row is what gives an
+          account a country to review at /association/review. */}
+      <Modal
+        open={!!adminsFor}
+        onClose={() => {
+          setAdminsFor(null)
+          setAdminQuery('')
+          setAdminResults([])
+        }}
+        title={adminsFor ? `Association admins — ${adminsFor.name}` : ''}
+        description={
+          adminsFor
+            ? `Admins review the businesses waiting in ${adminsFor.country?.name || adminsFor.country_code}. Adding someone gives them the Business Association role and a verified badge.`
+            : ''
+        }
+        size="md"
+      >
+        {adminsFor && (
+          <div className="space-y-5">
+            {associationMembers.length === 0 ? (
+              <p className="text-sm text-ktip-sand-600">
+                Nobody is linked yet, so this country's businesses show as unassigned.
+              </p>
+            ) : (
+              <ul className="divide-y divide-ktip-sand-100">
+                {associationMembers.map((member) => (
+                  <li key={member.id} className="py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ktip-sand-900 truncate">
+                        {member.user?.display_name || 'Unnamed'}
+                      </p>
+                      <p className="text-xs text-ktip-sand-500">
+                        {member.status === 'approved' ? 'Can review' : 'Waiting for approval'}
+                        {' · '}
+                        {formatDate(member.approved_at || member.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {member.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          disabled={reviewingMember}
+                          onClick={() => handleAssociationMember(member.id, true)}
+                        >
+                          Approve
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={reviewingMember}
+                        onClick={() => handleAssociationMember(member.id, false)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="text-xs text-ktip-sand-500">
+              Removing someone ends their access to this queue. Their Business Association role
+              stays until you change it on the Users page.
+            </p>
+
+            <div className="pt-4 border-t border-ktip-sand-100 space-y-3">
+              <p className="text-sm font-medium text-ktip-sand-900">Add association admin</p>
+              <div className="flex gap-2">
+                <Input
+                  value={adminQuery}
+                  onChange={(e) => setAdminQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAdminSearch()
+                  }}
+                  placeholder="Search by name"
+                  aria-label="Search accounts by name"
+                  fullWidth
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={<Search size={14} />}
+                  loading={searchingUsers}
+                  onClick={handleAdminSearch}
+                >
+                  Search
+                </Button>
+              </div>
+              {adminResults.length > 0 && (
+                <ul className="divide-y divide-ktip-sand-100 max-h-60 overflow-y-auto">
+                  {adminResults.map((person) => {
+                    const linked = associationMembers.some(
+                      (m) => m.user_id === person.id && m.status === 'approved'
+                    )
+                    return (
+                      <li key={person.id} className="py-2 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm text-ktip-sand-900 truncate">{person.display_name || 'Unnamed'}</p>
+                          {person.username && (
+                            <p className="text-xs text-ktip-sand-500 truncate">@{person.username}</p>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          icon={<UserPlus size={14} />}
+                          disabled={linked || addingAdmin}
+                          onClick={() => handleAddAdmin(person.id, person.display_name)}
+                        >
+                          {linked ? 'Linked' : 'Add'}
+                        </Button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
         )}
       </Modal>
     </div>

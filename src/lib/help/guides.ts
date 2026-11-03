@@ -116,13 +116,13 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     description: 'Find partnerships, attend events, and support innovation.',
     steps: [
       'Create your account and set your role to Private Sector',
-      'Submit your business to your business support organisation to have it verified',
+      'Submit your business to your business association to have it verified',
       'Browse projects for partnership opportunities',
       'Attend events to meet the innovation community',
       'Use the collaboration tools for joint work',
     ],
     quickLinks: [
-      { label: 'Business Verification', href: '/sme/verification' },
+      { label: 'Business Verification', href: '/dashboard/verification' },
       { label: 'Browse Projects', href: '/projects' },
       { label: 'Find Events', href: '/events' },
     ],
@@ -149,14 +149,14 @@ export const GETTING_STARTED_GUIDES: GettingStartedGuide[] = [
     title: 'Business Associations',
     description: 'Vet and support the businesses in your member state.',
     steps: [
-      'Get your business association account granted by OECS',
-      'Work through the business submissions queued for your member state',
+      'Ask OECS to link your account to your business association',
+      'Open Association review from your profile menu to see the businesses waiting in your country',
       'Check each legal name and registration number against your own records',
       'Approve to mark the business verified, or decline with a reason',
       'Keep an eye on the queue — an unverified business carries no badge',
     ],
     quickLinks: [
-      { label: 'Admin Console', href: '/admin/chamber' },
+      { label: 'Association Review', href: '/association/review' },
       { label: 'Member Directory', href: '/directory' },
       { label: 'Resources', href: '/resources' },
     ],

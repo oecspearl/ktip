@@ -37,6 +37,7 @@ const VIA_LABELS: Record<string, string> = {
   admin: 'Administrator',
   grandfathered: 'Pilot',
   org_code: 'Organisation code',
+  association: 'Verified business',
 }
 
 const EVENT_TONE: Record<string, string> = {

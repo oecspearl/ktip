@@ -22,7 +22,7 @@ import {
   adminUsersTutorialSteps,
   adminVerificationTutorialSteps,
 } from './admin-sections'
-import { chamberTutorialSteps } from './chamber'
+import { associationReviewTutorialSteps, chamberTutorialSteps } from './chamber'
 import {
   codeTutorialSteps,
   collabListTutorialSteps,
@@ -121,7 +121,9 @@ export const TUTORIAL_IDS = {
   CV: 'cv',
   CV_EDIT: 'cv-edit',
   REPORT_USER: 'report-user',
+  // Ids are kept from before the rename: completion is stored against them.
   CHAMBER: 'chamber',
+  ASSOCIATION_REVIEW: 'association-review',
   ADMIN: 'admin',
   ADMIN_PROJECTS: 'admin-projects',
   ADMIN_EVENTS: 'admin-events',
@@ -575,10 +577,17 @@ const REGISTRY: RegisteredTutorial[] = [
   },
   {
     id: TUTORIAL_IDS.CHAMBER,
-    route: '/sme/verification',
-    name: 'Chamber verification',
-    description: 'Getting your business verified by your Chamber.',
+    route: '/dashboard/verification',
+    name: 'Business verification',
+    description: 'Getting your business verified by your business association.',
     steps: chamberTutorialSteps,
+  },
+  {
+    id: TUTORIAL_IDS.ASSOCIATION_REVIEW,
+    route: '/association/review',
+    name: 'Association review',
+    description: 'Checking the businesses waiting in your country.',
+    steps: associationReviewTutorialSteps,
   },
 
   // ------------------------------------------------------------------- Admin
@@ -641,9 +650,9 @@ const REGISTRY: RegisteredTutorial[] = [
   },
   {
     id: TUTORIAL_IDS.ADMIN_CHAMBER,
-    route: '/admin/chamber',
-    name: 'Admin — Chamber Review',
-    description: 'Vetting businesses against the corporate registry.',
+    route: '/admin/association',
+    name: 'Admin — Association Review',
+    description: 'Every country’s queue, waiting times and the association covering each.',
     steps: adminChamberTutorialSteps,
   },
   {

@@ -351,7 +351,7 @@ export default function DirectoryPage() {
                   <Trans>No businesses found</Trans>
                 </h3>
                 <p className="text-gray-500">
-                  <Trans>Only Chamber-verified organisations are listed here.</Trans>
+                  <Trans>Only verified businesses are listed here.</Trans>
                 </p>
               </div>
             )}

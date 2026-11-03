@@ -111,24 +111,24 @@ export const adminModerationTutorialSteps: TutorialStep[] = [
 
 export const adminInstitutionsTutorialSteps: TutorialStep[] = [
   section(
-    'Schools, universities and Chambers',
+    'Schools, universities and business associations',
     'Institutions that can vouch for their members, each with the email domains it owns.\n\nThose domains are load-bearing: a member signing up with an address at a verified domain can be recognised as belonging to that institution automatically.'
   ),
   section(
     'Review and rosters',
-    'Reviewing an institution is what turns it live. Check the domain genuinely belongs to it — a domain attached to the wrong institution hands its members that institution’s standing.\n\nPending members lists people waiting to be confirmed onto a roster.'
+    'Reviewing an institution is what turns it live. Check the domain genuinely belongs to it — a domain attached to the wrong institution hands its members that institution’s standing.\n\nPending members lists people waiting to be confirmed onto a roster. For a business association, Admins lists who reviews its country, and Add association admin links a new reviewer.'
   ),
   replayStep,
 ]
 
 export const adminChamberTutorialSteps: TutorialStep[] = [
   section(
-    'Businesses waiting on your Chamber',
-    'SME verification submissions routed to your member state. Each carries the legal name, registration number and industry the applicant entered.\n\nYou see submissions for your own member state, which is why this list is shorter than the platform’s total.'
+    'Every country’s queue',
+    'Business verification submissions from every member state, oldest first. Waiting shows how many days each has sat in the queue. Association shows who covers that country; Unassigned means nobody can act on it yet.\n\nTo fix an unassigned country, open Institutions and add an association admin.'
   ),
   section(
-    'Verifying',
-    'Check the legal name and registration number against the national corporate registry — that check is the entire value of the badge you are about to grant.\n\nApplicants cannot edit their submission after sending it, so a correction means rejecting with a reason and having them resubmit. Verified businesses show the badge on their profile and in the directory.'
+    'Deciding for an association',
+    'Review lets you verify, decline or revoke on OECS’s behalf. Use it when no association can act. Check the legal name and registration number against the national company registry first, because that check is what the badge means.\n\nVerifying also marks the owner verified. Revoking takes the owner’s badge back if it came from this business.'
   ),
   replayStep,
 ]
