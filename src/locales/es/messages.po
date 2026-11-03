@@ -17,6 +17,10 @@ msgstr ""
 msgid "Discussion Board"
 msgstr ""
 
+#: src/lib/venue-templates.ts
+msgid "Hand in your project before the deadline."
+msgstr ""
+
 #: src/components/venue/room/CollabCommonsPanel.tsx
 msgid "Post a note"
 msgstr "Publicar una nota"
@@ -2099,6 +2103,10 @@ msgid "The row at the top picks the month, quarter, year or a custom range, and 
 "Tiles report the selected period; the trend charts look back further, so the shape is visible around the number."
 msgstr ""
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "Single floor layouts"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Supervised mode"
 msgstr ""
@@ -2587,6 +2595,10 @@ msgstr "¡Proyecto actualizado correctamente!"
 msgid "Don't have an account? <0>Sign up</0>"
 msgstr "¿No tiene una cuenta? <0>Regístrese</0>"
 
+#: src/lib/venue-templates.ts
+msgid "Hackathon Tower"
+msgstr ""
+
 #: src/components/events/EventDetailsForm.tsx
 msgid "Failed to update event"
 msgstr "Error al actualizar el evento"
@@ -3047,6 +3059,10 @@ msgstr ""
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "arrows / WASD to walk · click a room to go in"
 msgstr "flechas / WASD para caminar · haga clic en una sala para entrar"
+
+#: src/lib/venue-templates.ts
+msgid "Where the judges agree the results."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Achievements turns the same activity into badges and points. Submissions keeps the copies of anything you sent."
@@ -3942,6 +3958,10 @@ msgstr "Detalles del error"
 
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "Some could not be deleted"
+msgstr ""
+
+#: src/lib/venue-templates.ts
+msgid "Watch the demos and vote for a favourite."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -4920,6 +4940,10 @@ msgstr ""
 msgid "Could not save the new look"
 msgstr "No se pudo guardar el nuevo aspecto"
 
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "{floorCount, plural, one {# floor} other {# floors}}"
+msgstr ""
+
 #: src/a11y/routes.ts
 #: src/components/layout/Navbar.tsx
 #: src/components/profile/BannerStudio.tsx
@@ -5566,6 +5590,10 @@ msgstr "El enlace tiene un formato incorrecto"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Key information"
 msgstr "Información clave"
+
+#: src/lib/venue-templates.ts
+msgid "What teams offer and need, and the bridges open between them."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Intellectual Property Infringement"
@@ -8308,6 +8336,10 @@ msgstr "Filtrar la biblioteca"
 msgid "Failed to upload the background photo"
 msgstr ""
 
+#: src/pages/events/CreateEventPage.tsx
+msgid "Event created, but its building could not be set up. You can build it in the venue editor."
+msgstr ""
+
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Make this Homebase yours"
 msgstr "Haga suyo este Homebase"
@@ -8565,6 +8597,10 @@ msgstr "Comunidad"
 #: src/pages/events/EventsPage.tsx
 msgid "Event Archives"
 msgstr "Archivo de eventos"
+
+#: src/lib/venue-templates.ts
+msgid "Big Hall"
+msgstr ""
 
 #: src/i18n/harvested.ts
 #: src/pages/resources/MySubmissionsPage.tsx
@@ -10054,6 +10090,10 @@ msgstr ""
 msgid "Could not remove that person"
 msgstr ""
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "Whole buildings"
+msgstr ""
+
 #: src/components/help/HelpRoleQuickStart.tsx
 msgid "Choose a role"
 msgstr ""
@@ -10557,6 +10597,10 @@ msgstr "Esperando a su escuela"
 msgid "Verified employer and organisation data is also made available to approved partners through our partner API, where you have consented to appear in it. The rules those partners are bound by are published in the Partner API Terms."
 msgstr ""
 
+#: src/lib/venue-templates.ts
+msgid "Teams with open places, and people looking for one."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Basics"
 msgstr "Aspectos básicos"
@@ -10707,6 +10751,11 @@ msgstr "Mis plantillas"
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Feature"
 msgstr "Destacar"
+
+#: src/components/venue/map/BuildingChooser.tsx
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "{floorText}, {roomText}"
+msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Go back a page"
@@ -11384,6 +11433,10 @@ msgstr ""
 msgid "Notion page"
 msgstr "Página de Notion"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Replace every floor and room with this building? Rooms that are not in it are deleted when the map saves."
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Manage funds"
 msgstr "Gestionar fondos"
@@ -11926,6 +11979,10 @@ msgstr "Introduzca una dirección de correo electrónico de respaldo"
 msgid "The reviewer checks that the name matches your profile, that the document is readable and current, and that it supports the role you asked for. You can cover your document number and anything else the reviewer does not need. Never upload bank details or card numbers."
 msgstr ""
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "{floors, plural, one {# floor} other {# floors}}"
+msgstr ""
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Clear Formatting"
 msgstr "Borrar formato"
@@ -11939,6 +11996,10 @@ msgstr "{0} celdas · {1}"
 #: src/hooks/useAIAssistant.ts
 msgid "Something went wrong. Please try again."
 msgstr "Ha ocurrido un error. Vuelva a intentarlo."
+
+#: src/lib/venue-templates.ts
+msgid "Campus"
+msgstr ""
 
 #: src/hooks/useInstitutions.ts
 msgid "No email address is attached to this account."
@@ -12225,6 +12286,10 @@ msgstr ""
 msgid "Animations and page transitions stop."
 msgstr ""
 
+#: src/lib/venue-templates.ts
+msgid "Arrivals on the ground floor, two Homebase floors for up to nine teams, then demos, then judging and organiser HQ at the top."
+msgstr ""
+
 #. placeholder {0}: alias.email
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "<0>{0}</0> is now your primary email address, so it no longer works as a secondary one. You can remove it and add a different backup address."
@@ -12375,6 +12440,10 @@ msgid "Each card carries a member’s role, country, skills and connection count
 "Click a card and their profile slides in from the side without losing your place in the results. From there you can send a connection request or start a message. The Connect button is on the card itself when you want to skip the panel."
 msgstr "Cada tarjeta muestra el rol, el país, las competencias y el número de conexiones de un miembro, a menos que haya elegido ocultarlo.\n"
 ""
+
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "These add rooms to the floors you already have."
+msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "A private countdown for a heads-down room. Nobody else sees it."
@@ -13448,6 +13517,10 @@ msgstr ""
 msgid "Assign {0}"
 msgstr "Asignar {0}"
 
+#: src/lib/venue-templates.ts
+msgid "An auditorium and sponsors on the ground floor, classrooms above, and team studios with a maker lab at the top."
+msgstr ""
+
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 msgid "In a room"
 msgstr "En una sala"
@@ -13706,6 +13779,10 @@ msgstr "Crear proyectos"
 msgid "Live presence connected"
 msgstr "Presencia en vivo conectada"
 
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "The venue people walk around in. Pick a building or start from scratch. You can change any room later in the venue editor."
+msgstr ""
+
 #: src/components/messages/ChatSidebar.tsx
 msgid "Search contacts"
 msgstr "Buscar contactos"
@@ -13772,6 +13849,10 @@ msgstr "Asistencia y solicitudes de ayuda en este momento, y cómo van los nivel
 #: src/components/events/EventRegistrationForm.tsx
 msgid "Select an option"
 msgstr "Seleccione una opción"
+
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "{rooms, plural, one {# room} other {# rooms}}"
+msgstr ""
 
 #: src/lib/grant-application-template.ts
 msgid "Detail the financial requirements and the team behind the project."
@@ -15977,6 +16058,10 @@ msgstr "Insertar tabla"
 
 #: src/a11y/messages.ts
 msgid "Numbers are showing. Say a number to click it."
+msgstr ""
+
+#: src/lib/venue-templates.ts
+msgid "Compact Hackathon"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18320,6 +18405,10 @@ msgstr ""
 msgid "Open your Dashboard and choose Security, under Account on the rail."
 msgstr ""
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "A whole building in one click. Every room stays editable afterwards, and Undo takes a pick back."
+msgstr ""
+
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/components/events/EventSolutionsPanel.tsx
@@ -19474,6 +19563,10 @@ msgstr ""
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Inactive"
 msgstr "Inactivo"
+
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "Some rooms did not fit this layout. They are kept off the map for you to place, or shuffle for another layout."
+msgstr ""
 
 #: src/components/profile/PortraitStudio.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
@@ -20748,6 +20841,10 @@ msgstr ""
 msgid "Tell us a bit about yourself. These details are optional — you can add or change them later in Settings."
 msgstr "Cuéntenos un poco sobre usted. Estos datos son opcionales: podrá añadirlos o modificarlos más tarde en Configuración."
 
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "Building"
+msgstr ""
+
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "Vouch for people who work or study with you but have no work email."
 msgstr ""
@@ -21129,6 +21226,10 @@ msgstr "<0>{titleDisplay}</0> se eliminará permanentemente, junto con:"
 msgid "Following the defaults for {0}."
 msgstr "Sigue los valores predeterminados de {0}."
 
+#: src/components/venue/map/VenueTemplatePicker.tsx
+msgid "These replace every floor and room, laid out afresh each time. Team rooms you already have are kept and moved into the new team rooms."
+msgstr ""
+
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "My Snippets"
 msgstr "Mis fragmentos"
@@ -21430,6 +21531,10 @@ msgstr "Insignias obtenidas"
 
 #: src/a11y/messages.ts
 msgid "I use a screen reader"
+msgstr ""
+
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "Empty floors with a door each and stairs between them. You draw the rooms."
 msgstr ""
 
 #: src/components/events/EventDetailsForm.tsx
@@ -22074,6 +22179,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Open Resources and click Submit."
+msgstr ""
+
+#: src/pages/events/CreateEventPage.tsx
+msgid "Setting up the building…"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -22848,6 +22957,10 @@ msgstr "Los participantes dejarán de ver la clasificación. Los jueces podrán 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr "Si no se marca nada, se incluye a todos en el recinto. Los organizadores siempre tienen acceso."
+
+#: src/lib/venue-templates.ts
+msgid "Talks and demos downstairs. Upstairs, six team rooms, a workshop, mentors and judging."
+msgstr ""
 
 #: src/components/venue/room/CoffeeTablesPanel.tsx
 msgid "Coffee tables are for participants and mentors."
@@ -27708,6 +27821,10 @@ msgstr ""
 msgid "Strikethrough"
 msgstr "Tachado"
 
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "Shuffle layout"
+msgstr ""
+
 #: src/pages/courses/CourseDetailPage.tsx
 msgid "Grade level"
 msgstr ""
@@ -28150,10 +28267,6 @@ msgstr "El monto, el financiador, la fecha límite y el tipo de subvención, tod
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Nobody has been added yet."
 msgstr ""
-
-#: src/components/venue/map/VenueTemplatePicker.tsx
-msgid "A whole building in one click. Every room stays editable afterwards, and nothing is saved until you press Save."
-msgstr "Un edificio entero en un clic. Cada sala sigue siendo editable después, y nada se guarda hasta que pulse Guardar."
 
 #: src/pages/NotFoundPage.tsx
 msgid "Error 404"
@@ -28699,6 +28812,10 @@ msgstr "No se encontraron recursos"
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Virtual Hackathon"
 msgstr "Hackatón virtual"
+
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "From scratch"
+msgstr ""
 
 #: src/components/venue/room/CoffeeTablesPanel.tsx
 msgid "Drop in"
@@ -29899,6 +30016,10 @@ msgstr "Si se deja en blanco, se utiliza la descripción de la sala."
 msgid "{0, plural, one {Delete # account?} other {Delete # accounts?}}"
 msgstr ""
 
+#: src/components/venue/map/BuildingChooser.tsx
+msgid "{roomCount, plural, one {# room} other {# rooms}}"
+msgstr ""
+
 #: src/components/projects/ProjectCard.tsx
 msgid "View Project"
 msgstr "Ver proyecto"
@@ -30521,6 +30642,10 @@ msgstr ""
 msgid "Remove mural"
 msgstr "Quitar mural"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Templates and buildings"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Scroll to the Comments section on any project to leave a comment or ask a question.\n"
 "\n"
@@ -30773,6 +30898,10 @@ msgstr "Participantes en línea ahora"
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Shows on the banner and the rug. PNG, JPEG, WebP or GIF, up to 2 MB."
 msgstr "Aparece en el banner y en la alfombra. PNG, JPEG, WebP o GIF, hasta 2 MB."
+
+#: src/lib/venue-templates.ts
+msgid "One large room for everyone, with a registration desk, a help desk and a coffee corner."
+msgstr ""
 
 #. placeholder {0}: applications.length
 #: src/pages/grants/GrantApplicationsPage.tsx
@@ -31079,6 +31208,7 @@ msgstr "Python"
 msgid "Application sent to {0}"
 msgstr "Postulación enviada a {0}"
 
+#: src/components/venue/map/BuildingChooser.tsx
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Floors"
 msgstr "Pisos"

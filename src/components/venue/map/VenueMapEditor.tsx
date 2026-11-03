@@ -49,7 +49,8 @@ import {
   uniqueRoomKey,
   type VenueRoomPreset,
 } from '../../../lib/venue-room-presets'
-import type { VenueTemplate } from '../../../lib/venue-templates'
+import { isLaidOut, type VenueTemplate } from '../../../lib/venue-templates'
+import { planRoomInputs, planTemplate } from '../../../lib/venue-building'
 import {
   FLIGHT_H,
   FLIGHT_W,
@@ -490,6 +491,10 @@ export function VenueMapEditor({
    * not have yet lands on the ground floor rather than nowhere.
    */
   const applyTemplate = (template: VenueTemplate) => {
+    if (isLaidOut(template)) {
+      applyBuilding(template)
+      return
+    }
     const additions: DraftRoom[] = []
     const keys = state.rooms.map((r) => r.key)
     const takenOn = floorOccupancy(state.rooms)
@@ -531,6 +536,71 @@ export function VenueMapEditor({
     }
 
     if (additions.length) commit((prev) => ({ ...prev, rooms: [...prev.rooms, ...additions] }))
+  }
+
+  /**
+   * Swap the whole building for a laid-out template: new floors, doors, stairs
+   * and rooms, laid out afresh, as one undo step.
+   *
+   * Team rooms are the exception. A team may have claimed one as its Homebase
+   * (and save_venue_map never deletes a team room), so each existing team room
+   * moves into one of the new building's team rooms, keeping its key, name and
+   * id. Any left over stay in the venue, off the map, for the host to place.
+   */
+  const applyBuilding = (template: VenueTemplate) => {
+    const teams = state.rooms.filter((r) => r.kind === 'team')
+    if (
+      state.rooms.length > teams.length &&
+      !window.confirm(
+        t`Replace every floor and room with this building? Rooms that are not in it are deleted when the map saves.`
+      )
+    ) {
+      return
+    }
+
+    const plan = planTemplate(template)
+    const inputs = planRoomInputs(plan, (d) => i18n._(d))
+    const slots = inputs.filter((r) => r.kind === 'team')
+    const lastFloor = plan.config.floors.length - 1
+    const moved: DraftRoom[] = teams.map((room, i) => {
+      const slot = slots[i]
+      return slot
+        ? { ...room, floor: slot.floor, cells: slot.cells }
+        : { ...room, floor: Math.min(room.floor, lastFloor), cells: [] }
+    })
+    const used = new Set(slots.slice(0, teams.length).map((s) => s.key))
+    const keys = teams.map((r) => r.key)
+    const fresh: DraftRoom[] = inputs
+      .filter((input) => !used.has(input.key))
+      .map((input) => {
+        const key = uniqueRoomKey(input.key, keys)
+        keys.push(key)
+        return {
+          id: `draft-${key}`,
+          key,
+          name: input.name,
+          kind: input.kind,
+          description: input.description ?? '',
+          color: input.color,
+          wall_height: input.wall_height,
+          capacity: input.capacity,
+          audio_mode: input.audio_mode,
+          recording_enabled: input.recording_enabled,
+          is_open: input.is_open,
+          allowed_roles: [...input.allowed_roles],
+          floor: input.floor,
+          cells: input.cells,
+          sponsor_name: null,
+          sponsor_url: null,
+          sections: input.sections ?? [],
+          furniture: parseFurniture(input.furniture),
+        }
+      })
+
+    commit({ config: plan.config, rooms: [...fresh, ...moved] })
+    setFloor(0)
+    setSelectedId(null)
+    setArmed(null)
   }
 
   /**
@@ -1448,16 +1518,23 @@ export function VenueMapEditor({
             })}
           </div>
 
-          {state.rooms.length === 0 && (
-            <button
-              type="button"
-              onClick={() => setTemplatesOpen(true)}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-ktip-tropical-300 bg-ktip-tropical-50 px-3 py-2 text-xs font-semibold text-ktip-tropical-800 hover:border-ktip-tropical-500"
-            >
-              <Sparkles size={13} aria-hidden="true" />
-              <Trans>Start from a template</Trans>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setTemplatesOpen(true)}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-ktip-tropical-300 bg-ktip-tropical-50 px-3 py-2 text-xs font-semibold text-ktip-tropical-800 hover:border-ktip-tropical-500"
+          >
+            {state.rooms.length === 0 ? (
+              <>
+                <Sparkles size={13} aria-hidden="true" />
+                <Trans>Start from a template</Trans>
+              </>
+            ) : (
+              <>
+                <Building2 size={13} aria-hidden="true" />
+                <Trans>Templates and buildings</Trans>
+              </>
+            )}
+          </button>
 
           <VenueTemplatePicker
             open={templatesOpen}

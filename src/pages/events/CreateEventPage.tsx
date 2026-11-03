@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -10,6 +10,14 @@ import { Stepper } from '../../components/ui/Stepper'
 import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useCreateEvent } from '../../hooks/useEvents'
+import { useSaveVenueMap } from '../../hooks/useVenueMap'
+import { BuildingChooser } from '../../components/venue/map/BuildingChooser'
+import {
+  defaultBuildingFor,
+  planBuilding,
+  planRoomInputs,
+  randomSeed,
+} from '../../lib/venue-building'
 import { readDraft, useFormDraft } from '../../hooks/useFormDraft'
 import { useUploadDocument } from '../../hooks/useEntityDocuments'
 import { DetailsEditor, cleanDetails } from '../../components/shared/DetailsEditor'
@@ -89,15 +97,19 @@ type EventDraft = {
   presetIds: string[]
   employerId: string | null
   allowMemberEngagement: boolean | null
+  /** A venue template id or 'scratch'. Empty means the type's default. */
+  buildingChoice: string
+  scratchFloors: number
 }
 
 
 export default function CreateEventPage() {
-    const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
   const { createEvent, loading } = useCreateEvent()
+  const { saveMap, saving: savingBuilding } = useSaveVenueMap()
 
   // Read once, before the state it seeds. Anything typed here survives leaving
   // the page and comes back until the tab is closed — see useFormDraft.
@@ -158,6 +170,10 @@ export default function CreateEventPage() {
   const [allowMemberEngagement, setAllowMemberEngagement] = useState<boolean | null>(
     draftSeed.allowMemberEngagement ?? null
   )
+  const [buildingChoice, setBuildingChoice] = useState(draftSeed.buildingChoice ?? '')
+  const [scratchFloors, setScratchFloors] = useState(draftSeed.scratchFloors ?? 1)
+  // Not part of the draft: a fresh visit gets a fresh layout.
+  const [buildingSeed, setBuildingSeed] = useState(randomSeed)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -195,6 +211,8 @@ export default function CreateEventPage() {
     presetIds,
     employerId,
     allowMemberEngagement,
+    buildingChoice,
+    scratchFloors,
   })
 
   // Controls the draft/published selector. Capability, not slug: the literal
@@ -213,6 +231,16 @@ export default function CreateEventPage() {
   const virtual = blueprint.format === 'virtual-only' ? true : isVirtual
   const showLocation = !virtual && blueprint.location !== 'hidden'
 
+  // A type with a venue (a hackathon always has one) starts with a building.
+  // The plan is laid out here, once per choice and seed, so the preview the
+  // host sees is exactly what gets saved.
+  const hasVenue = !!blueprint.onCreate.has_venue
+  const building = buildingChoice || defaultBuildingFor(eventType)
+  const buildingPlan = useMemo(
+    () => (hasVenue ? planBuilding(building, scratchFloors, buildingSeed, eventType) : null),
+    [hasVenue, building, scratchFloors, buildingSeed, eventType]
+  )
+
   const { uploadDocument } = useUploadDocument()
 
   const formRef = useRef<HTMLFormElement>(null)
@@ -228,6 +256,8 @@ export default function CreateEventPage() {
 
     setEventType(next)
     setIsVirtual(nextBlueprint.defaultVirtual)
+    // Back to the building suggested for the new type.
+    setBuildingChoice('')
     setErrors({})
 
     if (nextBlueprint.endDate === 'hidden') {
@@ -446,10 +476,27 @@ export default function CreateEventPage() {
         ...(isAdmin ? { status: eventStatus } : {}),
       })
 
-      // The event exists from here on. Documents are attachments — a failure
-      // downgrades to a warning (they can be added from the event page), it
+      // The event exists from here on. The building and the documents are
+      // extras on top of it: a failure downgrades to a warning (the host can
+      // build the venue in the editor and add files from the event page), it
       // never strands the user on the form with a created event behind it.
       setFinishing(true)
+
+      // save_venue_map replaces every room the event has, so whatever a new
+      // event might already hold gives way to the chosen building.
+      let buildingFailed = false
+      if (buildingPlan && event.has_venue !== false) {
+        try {
+          await saveMap({
+            eventId: event.id,
+            map: buildingPlan.config,
+            rooms: planRoomInputs(buildingPlan, (d) => i18n._(d)),
+          })
+        } catch {
+          buildingFailed = true
+        }
+      }
+
       const attachmentErrors: string[] = []
 
       for (const file of documents) {
@@ -474,12 +521,17 @@ export default function CreateEventPage() {
       clearDraft()
 
       analytics.feature('event', 'created')
+      if (buildingFailed) {
+        toast.error(
+          t`Event created, but its building could not be set up. You can build it in the venue editor.`
+        )
+      }
       if (attachmentErrors.length > 0) {
         const failedNames = attachmentErrors.join(', ')
         toast.error(
           t`Event created, but some attachments failed: ${failedNames}. You can add them from the event page.`
         )
-      } else {
+      } else if (!buildingFailed) {
         toast.success(t`Event created successfully!`)
       }
       // Most types are a two-step job: the listing, then the thing that makes
@@ -972,6 +1024,22 @@ export default function CreateEventPage() {
               </div>
             )}
 
+            {/* Building — for the types that come with a venue */}
+            {buildingPlan && (
+              <BuildingChooser
+                eventType={eventType}
+                value={building}
+                onChange={(choice) => {
+                  setBuildingChoice(choice)
+                  setBuildingSeed(randomSeed())
+                }}
+                scratchFloors={scratchFloors}
+                onScratchFloorsChange={setScratchFloors}
+                plan={buildingPlan}
+                onShuffle={() => setBuildingSeed(randomSeed())}
+              />
+            )}
+
             {/* Documents */}
             <div>
               <label className="block text-sm font-medium text-ktip-sand-700 mb-1">
@@ -1054,11 +1122,13 @@ export default function CreateEventPage() {
             <div className="flex items-center gap-4">
               <Button
                 type="submit"
-                loading={loading || finishing}
+                loading={loading || finishing || savingBuilding}
                 icon={blueprint.setup ? <ArrowRight size={20} /> : <Save size={20} />}
                 fullWidth
               >
-                {finishing
+                {savingBuilding
+                  ? t`Setting up the building…`
+                  : finishing
                   ? t`Uploading attachments…`
                   : blueprint.setup && typeChosen
                     ? t`Next: ${blueprint.setup.label}`
@@ -1073,7 +1143,7 @@ export default function CreateEventPage() {
                   clearDraft()
                   navigate('/events')
                 }}
-                disabled={loading || finishing}
+                disabled={loading || finishing || savingBuilding}
                 className="text-sm text-ktip-sand-500 hover:text-ktip-sand-700 transition-colors whitespace-nowrap"
               >
                 <Trans>Cancel</Trans>

@@ -56,9 +56,10 @@ describe('the template gallery', () => {
   })
 
   it('puts the suggested building first for each type, without filtering any out', () => {
-    expect(templatesForType('conference')[0].id).toBe('conference-center')
-    expect(templatesForType('hackathon')[0].id).toBe('hackathon-hq')
+    expect(templatesForType('conference')[0].id).toBe('campus')
+    expect(templatesForType('hackathon')[0].id).toBe('hackathon-tower')
     expect(templatesForType('workshop')[0].id).toBe('workshop-studio')
+    expect(templatesForType('meetup')[0].id).toBe('big-hall')
     for (const type of ['conference', 'hackathon', null, 'symposium']) {
       expect(templatesForType(type)).toHaveLength(VENUE_TEMPLATES.length)
     }
