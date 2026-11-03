@@ -99,6 +99,11 @@ let pendingLang: TargetLang | null = null
  * into a cache table it was explicitly excluded from.
  */
 let pendingStore = true
+/**
+ * The venue room and surface the open batch is billed to. Same rule as
+ * `pendingStore`: one request names one, so a change flushes what is open.
+ */
+let pendingMeter: TranslationMeter | undefined
 let timer: ReturnType<typeof setTimeout> | null = null
 let inflight = 0
 const waiting: (() => void)[] = []
@@ -130,7 +135,23 @@ export interface RequestOptions {
    * localStorage, so it does not outlive the tab either.
    */
   store?: boolean
+  /**
+   * Which venue room and surface this text belongs to, for the organiser's
+   * usage ledger (migration 193). Absent everywhere outside the venue.
+   *
+   * A metered request carries the member's token so the server can say whose
+   * characters they were. It changes nothing about the translation itself.
+   */
+  meter?: TranslationMeter
 }
+
+export interface TranslationMeter {
+  surface: 'chat' | 'captions'
+  roomId: string
+}
+
+const meterKey = (meter: TranslationMeter | undefined) =>
+  meter ? `${meter.surface}:${meter.roomId}` : ''
 
 /**
  * Ask for a translation. Resolves with the translation, or with `text` itself if
@@ -155,7 +176,14 @@ export function request(
 
   if (Date.now() < backoffUntil) return Promise.resolve(text)
 
-  if (pendingLang !== null && (pendingLang !== target || pendingStore !== store)) flush()
+  if (
+    pendingLang !== null &&
+    (pendingLang !== target ||
+      pendingStore !== store ||
+      meterKey(pendingMeter) !== meterKey(opts.meter))
+  ) {
+    flush()
+  }
 
   return new Promise<string>((resolve) => {
     const key = `${format}:${text}`
@@ -169,6 +197,7 @@ export function request(
     pendingChars += text.length
     pendingLang = target
     pendingStore = store
+    pendingMeter = opts.meter
 
     // Flush early when the batch is already full rather than waiting out the
     // window — a long list should not sit idle behind an arbitrary 50 ms.
@@ -200,14 +229,16 @@ function flush(): void {
   const batch = pending
   const lang = pendingLang
   const store = pendingStore
+  const meter = pendingMeter
   pending = new Map()
   pendingChars = 0
   pendingLang = null
   pendingStore = true
+  pendingMeter = undefined
 
   const run = () => {
     inflight++
-    void send(batch, lang, store).finally(() => {
+    void send(batch, lang, store, meter).finally(() => {
       inflight--
       const next = waiting.shift()
       if (next) next()
@@ -220,10 +251,27 @@ function flush(): void {
   else waiting.push(run)
 }
 
+/**
+ * The member's access token, for a metered request only.
+ *
+ * Imported lazily: the Supabase client throws at module load without its env,
+ * and this module runs on public pages and in unit tests that never need it.
+ */
+async function accessToken(): Promise<string | null> {
+  try {
+    const { supabase } = await import('../supabase')
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token ?? null
+  } catch {
+    return null
+  }
+}
+
 async function send(
   batch: Map<string, Pending>,
   lang: TargetLang,
-  store: boolean
+  store: boolean,
+  meter?: TranslationMeter
 ): Promise<void> {
   const entries = [...batch.values()]
   let results: TranslateResponse['results'] = {}
@@ -232,15 +280,24 @@ async function send(
   let persistable = true
 
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    // Only a metered (venue) request carries the token. Every other caller
+    // keeps sending exactly what it sent before, anonymously.
+    if (meter) {
+      const token = await accessToken()
+      if (token) headers.Authorization = `Bearer ${token}`
+    }
+
     const res = await fetch(ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         to: lang,
         items: entries.map((entry, i) => ({ i, t: entry.text, f: entry.format })),
         // Only sent when false. The server defaults to true, and an omitted
         // field keeps the request identical to what it was before this existed.
         ...(store ? {} : { store: false }),
+        ...(meter ? { ctx: { s: meter.surface, r: meter.roomId } } : {}),
       }),
     })
 
@@ -286,6 +343,7 @@ export function resetBatcher(): void {
   pendingChars = 0
   pendingLang = null
   pendingStore = true
+  pendingMeter = undefined
   if (timer !== null) clearTimeout(timer)
   timer = null
   inflight = 0

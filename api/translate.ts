@@ -1,6 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { getProvider } from './_lib/translate-provider'
 import { clientIp } from './_lib/client-ip'
+import {
+  afterResponse,
+  parseTranslationContext,
+  recordTranslationUsage,
+  type EdgeContext,
+} from './_lib/venue-usage'
 import { contentHash } from '../src/lib/i18n/hash'
 import { isTargetLang } from '../src/lib/i18n/protocol'
 import {
@@ -107,10 +113,13 @@ function makeStore(ipHash: string, cap: number, authenticated: boolean): Transla
   }
 }
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(request: Request, context?: EdgeContext): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
-  let body: { to?: unknown; items?: unknown; store?: unknown }
+  // `ctx` is optional and only sent by venue callers (room chat, captions):
+  // { s: 'chat' | 'captions', r: <venue room id> }. It changes nothing about the
+  // translation; it only says whose ledger the provider characters go on.
+  let body: { to?: unknown; items?: unknown; store?: unknown; ctx?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -153,14 +162,38 @@ export default async function handler(request: Request): Promise<Response> {
   // the caller a larger rate-limit bucket and nothing else.
   const authenticated = Boolean(request.headers.get('authorization'))
 
+  const venue = parseTranslationContext(body.ctx)
+  let providerChars = 0
+
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS)
   try {
+    const provider = getProvider()
     const response = await translateBatch(to, items, body.store !== false, {
-      provider: getProvider(),
+      provider,
       store: makeStore(ipHash, Number.isFinite(cap) ? cap : 1_800_000, authenticated),
       signal: controller.signal,
+      onProviderChars: (chars) => {
+        providerChars += chars
+      },
     })
+
+    // Usage ledger (migration 193). One unawaited write after the answer is
+    // built; the reader never waits on it. Only characters the provider was
+    // actually sent are counted, so a cache hit records nothing.
+    if (venue && providerChars > 0) {
+      afterResponse(
+        context,
+        recordTranslationUsage({
+          authHeader: request.headers.get('authorization'),
+          roomId: venue.roomId,
+          surface: venue.surface,
+          chars: providerChars,
+          to,
+          provider: provider?.id ?? null,
+        })
+      )
+    }
 
     // Explicitly uncacheable. The sharing happens in Postgres, where it is keyed
     // by content and governed by RLS; an HTTP cache here would be keyed by URL

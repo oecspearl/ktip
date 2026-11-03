@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { acquireMic } from '@a11y-kit'
-import { useDataChannel, useLocalParticipant } from '@livekit/components-react'
+import { useDataChannel, useLocalParticipant, useRoomContext } from '@livekit/components-react'
 import { useContentLanguage } from '../i18n/useContentLanguage'
 import { request } from '../lib/i18n/batcher'
 import { shouldTranslate } from '../lib/i18n/should-translate'
@@ -154,6 +154,11 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   langRef.current = contentLang
   const nameRef = useRef('')
   nameRef.current = localParticipant?.name || ''
+  // The LiveKit room name is the venue room id (api/venue/room-token.ts), which
+  // is what the organiser's usage ledger bills caption translation to.
+  const room = useRoomContext()
+  const roomIdRef = useRef('')
+  roomIdRef.current = room?.name || ''
 
   const onFinal = useCallback((text: string) => {
     const spoken = langRef.current
@@ -169,12 +174,15 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     if (!shouldTranslate(text)) return
 
     const targets = UI_LANGS.filter((target) => target !== spoken)
+    const roomId = roomIdRef.current
+    const meter = roomId ? { surface: 'captions' as const, roomId } : undefined
     void Promise.all(
       targets.map(async (target) => {
         const translated = await request(text, 'text', target, {
           from: spoken,
           // Spoken words leave no trace in the shared cache. See migration 097.
           store: false,
+          meter,
         })
         return [target, translated] as const
       })

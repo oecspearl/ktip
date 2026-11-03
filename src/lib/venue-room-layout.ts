@@ -251,10 +251,12 @@ export const ROOM_LAYOUTS: Record<VenueRoomKind, RoomLayoutDef> = {
     hero: 'chat',
     rail: 'occupants',
     camera: 'huddle',
-    order: ['host_controls', 'quest_board', 'av_placeholder', 'chat', 'occupants'],
+    order: ['host_controls', 'organiser_ops', 'quest_board', 'av_placeholder', 'chat', 'occupants'],
     spans: {
       host_controls: 'wide',
       quest_board: 'wide',
+      // Organiser HQ is a breakout. The usage table needs the full width.
+      organiser_ops: 'wide',
       av_placeholder: 'band',
       objectives: 'half',
       rules: 'half',

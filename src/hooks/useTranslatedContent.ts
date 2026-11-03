@@ -5,6 +5,7 @@ import { shouldTranslate } from '@/lib/i18n/should-translate'
 import { UI_LANGS, isUiLang } from '@/lib/i18n/protocol'
 import type { TextFormat } from '@/lib/i18n/hash'
 import type { UiLang } from '@/lib/i18n/protocol'
+import type { TranslationMeter } from '@/lib/i18n/batcher'
 
 /**
  * Translation for text whose SOURCE LANGUAGE IS KNOWN.
@@ -78,6 +79,11 @@ export interface TranslatedContentOptions {
    * of what must never be written to that table in migration 097.
    */
   store?: boolean
+  /**
+   * The venue room and surface, for the organiser's usage ledger. Only venue
+   * callers pass it; see TranslationMeter in the batcher.
+   */
+  meter?: TranslationMeter
 }
 
 /**
@@ -94,6 +100,10 @@ export function useTranslatedContent(
 ): TranslatedContent {
   const format: TextFormat = opts.format ?? 'text'
   const store = opts.store !== false
+  // Split into primitives so an inline `{ surface, roomId }` from the caller
+  // does not re-run the effect on every render.
+  const meterSurface = opts.meter?.surface
+  const meterRoom = opts.meter?.roomId
   const { lang, autoTranslate } = useContentLanguage()
   useTranslationStore()
 
@@ -110,13 +120,15 @@ export function useTranslatedContent(
     if (skip || known !== undefined) return
     setSettled(false)
     let cancelled = false
-    void request(source, format, lang, { from: written, store }).then(() => {
+    const meter =
+      meterSurface && meterRoom ? { surface: meterSurface, roomId: meterRoom } : undefined
+    void request(source, format, lang, { from: written, store, meter }).then(() => {
       if (!cancelled) setSettled(true)
     })
     return () => {
       cancelled = true
     }
-  }, [skip, known, source, format, lang, written, store])
+  }, [skip, known, source, format, lang, written, store, meterSurface, meterRoom])
 
   const resolved = known ?? source
   return {
@@ -163,7 +175,7 @@ export function useWarmContentTranslations(): (
     const written = sourceLang(from)
     for (const target of UI_LANGS) {
       if (target === written) continue
-      void request(source, format, target, { from: written, store })
+      void request(source, format, target, { from: written, store, meter: opts.meter })
     }
   }, [])
 }
@@ -182,6 +194,8 @@ export function usePrefetchTranslatedContent(
 ): void {
   const format: TextFormat = opts.format ?? 'text'
   const store = opts.store !== false
+  const meterSurface = opts.meter?.surface
+  const meterRoom = opts.meter?.roomId
   const { lang, autoTranslate } = useContentLanguage()
 
   // Length rather than the array itself: the caller's list is rebuilt on every
@@ -204,9 +218,11 @@ export function usePrefetchTranslatedContent(
       if (bucket) bucket.push(source)
       else byLang.set(written, [source])
     }
+    const meter =
+      meterSurface && meterRoom ? { surface: meterSurface, roomId: meterRoom } : undefined
     for (const [written, texts] of byLang) {
-      prefetch(texts, format, lang, { from: written, store })
+      prefetch(texts, format, lang, { from: written, store, meter })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, format, lang, autoTranslate, store])
+  }, [count, format, lang, autoTranslate, store, meterSurface, meterRoom])
 }

@@ -237,6 +237,48 @@ describe('translateBatch — the cache is what makes it free', () => {
     expect(touched[0]).toMatchObject({ hits: 1, misses: 1 })
     expect(touched[0].hashes).toEqual([hash])
   })
+
+  it('reports provider characters for the venue ledger, never cache hits', async () => {
+    const hash = await contentHash('Solar irrigation', 'text')
+    const { provider } = makeProvider()
+    const { store } = makeStore({
+      async lookup() {
+        return [{ hash, translated_text: 'Irrigation solaire' }]
+      },
+    })
+    const reported: number[] = []
+
+    await translateBatch('fr', items('Solar irrigation', 'Community workshop'), true, {
+      ...deps(provider, store),
+      onProviderChars: (chars) => reported.push(chars),
+    })
+
+    expect(reported).toEqual(['Community workshop'.length])
+  })
+
+  it('reports nothing for a fully cached batch, and survives a throwing listener', async () => {
+    const hash = await contentHash('Solar irrigation', 'text')
+    const { store } = makeStore({
+      async lookup() {
+        return [{ hash, translated_text: 'Irrigation solaire' }]
+      },
+    })
+    const reported: number[] = []
+    await translateBatch('fr', items('Solar irrigation'), true, {
+      ...deps(makeProvider().provider, store),
+      onProviderChars: (chars) => reported.push(chars),
+    })
+    expect(reported).toEqual([])
+
+    const res = await translateBatch('fr', items('Community workshop'), true, {
+      ...deps(makeProvider().provider, makeStore().store),
+      onProviderChars: () => {
+        throw new Error('ledger down')
+      },
+    })
+    expect(res.degraded).toBeUndefined()
+    expect(res.results['0'].t).toBe('[fr] Community workshop')
+  })
 })
 
 describe('translateBatch — degradation is invisible, never fatal', () => {

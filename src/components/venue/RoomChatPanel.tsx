@@ -62,7 +62,8 @@ function RoomChatMessage({
   const [showSource, setShowSource] = useState(false)
   const { text, source, translated, pending, from } = useTranslatedContent(
     message.body,
-    message.lang
+    message.lang,
+    { meter: { surface: 'chat', roomId: message.room_id } }
   )
 
   const name = message.author?.display_name || t`Member`
@@ -191,8 +192,11 @@ export function RoomChatPanel({
 
   // One pass over the whole thread before it paints, so a roomful of messages
   // is a single request rather than one per bubble.
+  // Metered against this room, so the organiser can see what chat costs.
+  const meter = { surface: 'chat' as const, roomId: room.id }
   usePrefetchTranslatedContent(
-    (messages ?? []).map((m) => ({ text: m.body, lang: m.lang }))
+    (messages ?? []).map((m) => ({ text: m.body, lang: m.lang })),
+    { meter }
   )
 
   const submit = async () => {
@@ -203,7 +207,7 @@ export function RoomChatPanel({
       await sendMessage(room.id, body, { lang: contentLang })
       // The sender pays for the other languages while they are still looking at
       // their own message, so it reaches everyone else already translated.
-      warm(body, contentLang)
+      warm(body, contentLang, { meter })
     } catch (err: any) {
       setDraft(body)
       toast.error(err?.message || t`Could not send that message`)

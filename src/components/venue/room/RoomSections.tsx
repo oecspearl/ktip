@@ -55,6 +55,7 @@ import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { TeamFinderPanel } from './TeamFinderPanel'
+import { OrganiserOpsPanel } from './OrganiserOpsPanel'
 
 /**
  * Everything one section needs, gathered once by the page.
@@ -303,6 +304,9 @@ function RoomSection({
 
     case 'host_controls':
       return <HostControlsPanel room={room} signals={signals} />
+
+    case 'organiser_ops':
+      return <OrganiserOpsPanel event={event} occupants={occupants} isHost={isHost} />
 
     case 'av_placeholder':
       return (

@@ -28,6 +28,7 @@ export type RoomSectionId =
   | 'sponsor_hero'
   | 'check_in'
   | 'host_controls'
+  | 'organiser_ops'
   | 'av_placeholder'
   | 'reactions'
   | 'focus_timer'
@@ -135,6 +136,16 @@ export const SECTIONS: RoomSectionDef[] = [
     roles: ['organizer'],
     defaultFor: 'all',
     order: 18,
+  },
+  {
+    id: 'organiser_ops',
+    label: msg`Organiser ops`,
+    blurb: msg`Headcount and help requests now, and where the free tiers are going. Only organisers see it.`,
+    slot: 'main',
+    roles: ['organizer'],
+    // Opt-in. It belongs in the organisers' own room, not in every room.
+    defaultFor: [],
+    order: 19,
   },
   {
     id: 'av_placeholder',

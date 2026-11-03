@@ -76,6 +76,12 @@ export interface TranslateDeps {
   signal: AbortSignal
   /** Injected so the housekeeping sample is deterministic under test. */
   random?: () => number
+  /**
+   * Told the characters each successful provider call carried. Cache hits are
+   * never reported: they cost nothing. Used for the venue usage ledger
+   * (migration 193); a throwing listener is ignored.
+   */
+  onProviderChars?: (chars: number) => void
 }
 
 /** Guard rails on one request. Beyond these the caller gets a 413 from the handler. */
@@ -246,6 +252,11 @@ export async function translateBatch(
         chunk[0].unit.format,
         deps.signal
       )
+      try {
+        deps.onProviderChars?.(chunk.reduce((n, c) => n + c.unit.text.length, 0))
+      } catch {
+        /* metering must not fail a translation */
+      }
       chunk.forEach(({ unit, indices }, n) => {
         const answer = out[n]
         if (!answer) return

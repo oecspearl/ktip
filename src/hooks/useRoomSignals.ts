@@ -241,8 +241,18 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
         event: 'hand',
         payload: { up, user_id: me.userId, name: me.name, avatar_url: me.avatarUrl },
       })
+      // The one durable trace of a hand: a count of 1 on the organiser's usage
+      // ledger (migration 193). The function rate limits itself, and before
+      // that migration it does not exist; either way the error is ignored and
+      // the hand still goes up.
+      if (up && roomId) {
+        void (supabase as any).rpc('log_help_request', { p_room_id: roomId }).then(
+          () => {},
+          () => {}
+        )
+      }
     },
-    [me]
+    [me, roomId]
   )
 
   const setPresenting = useCallback(
