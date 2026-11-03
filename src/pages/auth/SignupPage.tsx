@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../../contexts/AuthContext'
+import { useToast } from '../../contexts/ToastContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -15,6 +16,7 @@ import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
 import { canCheckEmail, checkEmailAvailable } from '../../lib/email-available'
 import { supabase } from '../../lib/supabase'
 import { roleRequiresMfa } from '../../lib/permissions'
+import { rememberReturnTo, takeReturnTo } from '../../lib/return-to'
 import {
   APP_FULL_NAME,
   SKILL_SUGGESTIONS,
@@ -94,8 +96,32 @@ const nameFromEmail = (email: string) => {
   return trimmed.split('@')[0] || trimmed
 }
 
+/**
+ * Registers the optional backup address through the route Settings → Security
+ * already uses (api/auth/add-alias.ts), which stores it unverified and mails it
+ * a confirmation link. True when the route accepted it; a refusal, a missing
+ * session or a network failure is false, and the caller only reports it.
+ */
+async function addBackupEmail(accessToken: string | undefined, email: string): Promise<boolean> {
+  if (!accessToken) return false
+  try {
+    const res = await fetch('/api/auth/add-alias', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 const ALL_STEP1_TOUCHED: Record<string, boolean> = {
   email: true,
+  backup_email: true,
   password: true,
   confirm_password: true,
   date_of_birth: true,
@@ -106,11 +132,30 @@ export default function SignupPage() {
     const { t, i18n } = useLingui()
   const auth = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const toast = useToast()
+
+  // Where the visitor was headed when a gated page (AccountRoute) or the login
+  // page sent them here. Parked in the tab for the same reason LoginPage does:
+  // the OAuth buttons leave the page and come back through /auth/callback,
+  // which takes it back out. The email path takes it in verifyCode below.
+  const fromState = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from
+  useEffect(() => {
+    rememberReturnTo(fromState)
+    // Arrival only — the slot must not be rewritten as the form re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [step, setStep] = useState(1)
 
   // Step 1 — required account fields
   const [email, setEmail] = useState('')
+  // Optional. Becomes a secondary address (user_email_aliases) once the account
+  // exists — see addBackupEmail. Nothing is sent before then: the alias route
+  // needs a session, and signUp() returns none.
+  const [backupEmail, setBackupEmail] = useState('')
+  const [takenBackup, setTakenBackup] = useState<string | null>(null)
+  const backupCheck = useRef<AbortController | null>(null)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
@@ -149,6 +194,20 @@ export default function SignupPage() {
   const emailCheck = useRef<AbortController | null>(null)
   const normalisedEmail = email.trim().toLowerCase()
   const emailTaken = takenEmail !== null && takenEmail === normalisedEmail
+
+  // Live from the values, like accountComplete below. Empty is valid: the
+  // field is optional. A taken address is refused here because the alias route
+  // would refuse it after signup anyway, when it is too late to fix in place.
+  const normalisedBackup = backupEmail.trim().toLowerCase()
+  const backupError: string | undefined = !normalisedBackup
+    ? undefined
+    : !canCheckEmail(normalisedBackup)
+      ? t`Enter a valid email address.`
+      : normalisedBackup === normalisedEmail
+        ? t`Use a different address from your main email.`
+        : takenBackup === normalisedBackup
+          ? t`That email address is already in use.`
+          : undefined
   const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
 
@@ -231,8 +290,24 @@ export default function SignupPage() {
     })
   }
 
+  // Same shape as handleEmailBlur, for the backup address. Checked only once it
+  // is well formed and different from the main email; an 'unknown' answer lets
+  // it through, since the alias route checks again after signup.
+  const handleBackupBlur = () => {
+    markTouched('backup_email')
+    const address = backupEmail.trim().toLowerCase()
+    backupCheck.current?.abort()
+    if (!canCheckEmail(address) || address === normalisedEmail || address === takenBackup) return
+    const controller = new AbortController()
+    backupCheck.current = controller
+    void checkEmailAvailable(address, controller.signal).then((result) => {
+      if (controller.signal.aborted) return
+      if (result === 'taken') setTakenBackup(address)
+    })
+  }
+
   const accountValid = (fieldErrors: Record<string, string>) =>
-    !emailTaken && ACCOUNT_FIELDS.every((field) => !fieldErrors[field])
+    !emailTaken && !backupError && ACCOUNT_FIELDS.every((field) => !fieldErrors[field])
 
   // Live, from the values themselves rather than from `errors` — that map is
   // only refreshed on blur, and autofill or a click straight into a later field
@@ -257,7 +332,7 @@ export default function SignupPage() {
     if (step === 1) {
       const fieldErrors = validateStep1()
       setErrors(fieldErrors)
-      if (Object.keys(fieldErrors).length > 0 || emailTaken) {
+      if (Object.keys(fieldErrors).length > 0 || emailTaken || backupError) {
         setTouched(ALL_STEP1_TOUCHED)
         // An error inside a folded section is an error nobody can see.
         if (!accountValid(fieldErrors)) setAccountOpen(true)
@@ -369,11 +444,33 @@ export default function SignupPage() {
         void seedPersonalizationTopics(otpData.user.id, interests)
       }
 
+      // The backup address goes out now, not at signUp(): the alias route proves
+      // account ownership with a session, and this is the first moment there
+      // is one. Not awaited, and a failure never blocks the account — it only
+      // says where to add the address by hand.
+      const backup = backupEmail.trim().toLowerCase()
+      // An address found to be taken after step 1 is not sent, only reported.
+      const accessToken = backupError ? undefined : otpData?.session?.access_token
+      if (backup) {
+        void addBackupEmail(accessToken, backup).then((sent) => {
+          if (sent) toast.success(t`We sent a link to ${backup}. Open it to confirm your backup email.`)
+          else toast.warning(t`Your backup email was not added. You can add it in Settings → Security.`)
+        })
+      }
+
       // Navigate straight to enrolment rather than letting ProtectedRoute bounce
       // them there, purely so there is no flash of the dashboard. If the
       // compiled role catalog ever disagrees with role_definitions the gate
       // still catches it — a flash, never a bypass.
-      navigate(roleRequiresMfa(selectedRole) ? '/security/set-up' : '/', { replace: true })
+      //
+      // Two-step set-up wins over the page the visitor was headed for. That
+      // path stays parked in the tab, and MfaSetupPage takes it once the
+      // factor is on.
+      if (roleRequiresMfa(selectedRole)) {
+        navigate('/security/set-up', { replace: true })
+      } else {
+        navigate(takeReturnTo() ?? '/', { replace: true })
+      }
     } catch (error: any) {
       setOtpCode('')
       const message: string = error?.message ?? ''
@@ -409,7 +506,11 @@ export default function SignupPage() {
           otpSent ? undefined : (
             <Trans>
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+              <Link
+                to="/login"
+                state={fromState ? { from: fromState } : undefined}
+                className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
+              >
                 Log in
               </Link>
             </Trans>
@@ -460,7 +561,11 @@ export default function SignupPage() {
               >
                 {resendIn > 0 ? t`Send another code in ${resendIn}s` : t`Send another code`}
               </button>
-              <Link to="/login" className="text-ktip-sand-500 hover:text-ktip-sand-700">
+              <Link
+                to="/login"
+                state={fromState ? { from: fromState } : undefined}
+                className="text-ktip-sand-500 hover:text-ktip-sand-700"
+              >
                 <Trans>Go to Sign In</Trans>
               </Link>
             </div>
@@ -494,6 +599,22 @@ export default function SignupPage() {
                       icon={<Mail size={20} />}
                       fullWidth
                       required
+                    />
+
+                    <Input
+                      type="email"
+                      label={t`Backup email (optional)`}
+                      placeholder={t`A second address you can use`}
+                      value={backupEmail}
+                      onChange={(e) => setBackupEmail(e.target.value)}
+                      onBlur={handleBackupBlur}
+                      error={touched.backup_email ? backupError : undefined}
+                      helperText={t`For signing in and account recovery. We email it a link to confirm.`}
+                      icon={<Mail size={20} />}
+                      // Not "email": autofill would copy the main address in
+                      // here and trip the "different address" check.
+                      autoComplete="off"
+                      fullWidth
                     />
 
                     <div>

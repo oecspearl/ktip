@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
+import { useParams, useNavigate, useLocation, useSearchParams, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { ReportInfringementLink } from '../../components/legal/ReportInfringementLink'
 import { Button } from '../../components/ui/Button'
@@ -78,6 +78,7 @@ export default function EventDetailPage() {
     const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const auth = useAuth()
   const { openMember } = useMemberPanel()
   // The setup run's last step sends the host here to look at what they built,
@@ -200,7 +201,13 @@ export default function EventDetailPage() {
   const registrantName = auth.profile?.display_name || t`Someone`
 
   const handleRSVP = async () => {
-    if (!auth.user || !event) return
+    if (!event) return
+    // AccountRoute keeps signed-out visitors off this page; this covers a
+    // session that ended while it was open, where the button used to do nothing.
+    if (!auth.user) {
+      navigate('/signup', { state: { from: location } })
+      return
+    }
     const entering =
       (!myRsvp || myRsvp.status === 'declined') &&
       !!event.has_challenge &&

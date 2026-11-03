@@ -1,26 +1,37 @@
-import { ExternalLink, Puzzle } from 'lucide-react'
+import { Link } from 'react-router'
+import { ArrowRight, Puzzle } from 'lucide-react'
 import { INTEGRATION_CATEGORY_LABELS } from '../../lib/constants'
+import { integrationPath } from '../../hooks/useIntegrations'
 import type { Integration } from '../../types'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
-/** Kept short — the card sits in a 3-up grid with no detail page to spill into. */
+/** Kept short — the card sits in a 3-up grid; the detail page lists them all. */
 const MAX_TAGS = 4
 
 interface IntegrationCardProps {
   integration: Integration
 }
 
+/**
+ * One partner tool in the Resources grid. The whole card opens its page on
+ * KTIP; the partner's own site is linked from there only, so a visitor without
+ * an account meets the sign-up step before leaving the platform.
+ */
 export function IntegrationCard({ integration }: IntegrationCardProps) {
-  const { i18n } = useLingui()
+  const { t, i18n } = useLingui()
   const categoryLabel = INTEGRATION_CATEGORY_LABELS[integration.category]
+  const hiddenTags = integration.tags?.length > MAX_TAGS ? integration.tags.length - MAX_TAGS : 0
   return (
-    <div className="bg-ktip-cream border border-ktip-sand-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
+    <Link
+      to={integrationPath(integration)}
+      className="group bg-ktip-cream border border-ktip-sand-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow focus-visible:outline-2 focus-visible:outline-ktip-ocean-500"
+    >
       <div className="flex items-center gap-3 mb-3">
         {integration.logo_url ? (
           <img
             src={integration.logo_url}
-            alt={integration.name}
+            alt=""
             className="w-12 h-12 rounded-xl object-contain bg-ktip-sand-50 border border-ktip-sand-100 p-1 shrink-0"
             loading="lazy"
           />
@@ -30,7 +41,7 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
           </div>
         )}
         <div className="min-w-0">
-          <h3 className="font-display font-bold text-ktip-sand-900 truncate">
+          <h3 className="font-display font-bold text-ktip-sand-900 truncate group-hover:text-ktip-ocean-700">
             {integration.name}
           </h3>
           <span className="text-xs text-ktip-ocean-600 font-medium">
@@ -51,22 +62,20 @@ export function IntegrationCard({ integration }: IntegrationCardProps) {
               {tag}
             </span>
           ))}
-          {integration.tags.length > MAX_TAGS && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium text-ktip-sand-500">
-              +{integration.tags.length - MAX_TAGS}
+          {hiddenTags > 0 && (
+            <span
+              className="px-2 py-0.5 rounded-full text-[11px] font-medium text-ktip-sand-500"
+              aria-label={t`${hiddenTags} more tags`}
+            >
+              +{hiddenTags}
             </span>
           )}
         </div>
       )}
-      <a
-        href={integration.website_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 btn-brand text-sm font-bold rounded-lg"
-      >
-        Visit
-        <ExternalLink size={14} />
-      </a>
-    </div>
+      <span className="mt-auto inline-flex items-center justify-end gap-1 text-sm font-bold text-ktip-ocean-600 group-hover:text-ktip-ocean-700">
+        <Trans>View details</Trans>
+        <ArrowRight size={14} />
+      </span>
+    </Link>
   )
 }

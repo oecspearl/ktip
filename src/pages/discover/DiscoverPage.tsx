@@ -29,8 +29,13 @@ import type { DetailEntry, Grant, PermissionKey } from '../../types'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { entityPath } from '../../lib/slug'
 import { useAuth } from '../../contexts/AuthContext'
-import { ForYouRail } from '../../components/personalization/ForYouRail'
-import { defaultModeFor, type DiscoverMode } from '../../lib/personalization'
+import { usePersonalizedFeed, type FeedItem } from '../../hooks/usePersonalizedFeed'
+import {
+  defaultModeFor,
+  personalizedHref,
+  type DiscoverMode,
+  type RankableEntity,
+} from '../../lib/personalization'
 import { canUseGrantApplications } from '../../lib/permissions'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import {
@@ -59,7 +64,24 @@ interface HeroItem {
   details?: DetailEntry[]
   href: string
   image: string | null
+  /** Came from the member's personalized feed; the hero badges it "For you". */
+  forYou?: boolean
 }
+
+/**
+ * Which feed rows each hero tab draws on. The feed is fetched once for all
+ * three, so switching tabs never waits on a second request.
+ */
+const MODE_ENTITY: Record<Mode, RankableEntity> = {
+  grants: 'grant',
+  projects: 'project',
+  events: 'event',
+}
+const HERO_FEED_ENTITIES: RankableEntity[] = ['grant', 'project', 'event']
+/** Enough rows that each tab can still fill its slides from the feed alone. */
+const HERO_FEED_LIMIT = 18
+/** Stable stand-in while the feed has no data, so the slide memo is not rebuilt every render. */
+const NO_FEED: FeedItem[] = []
 
 const MAX_ITEMS = 6
 const VISIBLE_COUNT = 5
@@ -456,7 +478,7 @@ export default function DiscoverPage() {
   const { stats, loading: statsLoading } = usePlatformStats()
 
   // The one action this member can take from here, by mode and capability.
-  // Signed-out visitors keep the browse CTA (it routes to login where needed).
+  // Signed-out visitors keep the details CTA; AccountRoute sends it to signup.
   const canApplyGrant = !!auth.user && canUseGrantApplications(auth.can)
   const canPostGrant = !!auth.user && auth.can('grant:post')
   const canStartProject = !!auth.user && auth.can('project:create')
@@ -473,42 +495,80 @@ export default function DiscoverPage() {
   // resolves; if there is no seed this is undefined and nothing changes.
   const seededGrants = (grants ?? readHeroSeed() ?? undefined) as Grant[] | undefined
 
+  // Signed in with personalization on, the hero leads with the member's own
+  // recommendations: this replaced the separate "For You" rail on home (the
+  // dashboard overview keeps that one). Empty for everyone else, signed out,
+  // switched off or with nothing to recommend, and each tab then shows the
+  // lists above exactly as it always did.
+  const { items: feedRows } = usePersonalizedFeed({ limit: HERO_FEED_LIMIT, entities: HERO_FEED_ENTITIES })
+  const feed = feedRows.length ? feedRows : NO_FEED
+
   const items = useMemo<HeroItem[]>(() => {
+    const grantFallback = t`Funding opportunity for Caribbean innovators.`
+    const projectFallback = t`An innovation project from the OECS community.`
+    const eventFallback = t`An upcoming event for the OECS community.`
+
+    let listed: HeroItem[]
     if (mode === 'grants') {
-      return (seededGrants || []).slice(0, MAX_ITEMS).map((g) => ({
+      listed = (seededGrants || []).map((g) => ({
         id: g.id,
         title: g.title,
         meta: grantAmount(g),
-        description: g.summary || g.description || t`Funding opportunity for Caribbean innovators.`,
+        description: g.summary || g.description || grantFallback,
         // Hand-authored details win; otherwise synthesise a block from the
         // columns the record already has, so no hero item reads bare
         details: g.details?.length ? g.details : grantHeroDetails(g),
         href: entityPath('grant', g),
         image: grantImageFor(g.id, g.grant_type),
       }))
-    }
-    if (mode === 'projects') {
-      return (projects || []).slice(0, MAX_ITEMS).map((p) => ({
+    } else if (mode === 'projects') {
+      listed = (projects || []).map((p) => ({
         id: p.id,
         title: p.title,
         meta: (p.category as string) || t`Project`,
-        description: p.summary || p.description || t`An innovation project from the OECS community.`,
+        description: p.summary || p.description || projectFallback,
         details: p.details?.length ? p.details : projectHeroDetails(p),
         href: entityPath('project', p),
         image: p.image_url || heroImageFor(p.id),
       }))
+    } else {
+      listed = (events || []).map((e) => ({
+        id: e.id,
+        title: e.title,
+        meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
+        description: e.summary || e.description || eventFallback,
+        details: e.details?.length ? e.details : eventHeroDetails(e),
+        href: entityPath('event', e),
+        image: e.image_url || heroImageFor(e.id),
+      }))
     }
-    return (events || []).slice(0, MAX_ITEMS).map((e) => ({
-      id: e.id,
-      title: e.title,
-      meta: `${format(new Date(e.start_date), 'MMM d, yyyy')}${e.location ? ` · ${e.location}` : ''}`,
-      description: e.summary || e.description || t`An upcoming event for the OECS community.`,
-      details: e.details?.length ? e.details : eventHeroDetails(e),
-      href: entityPath('event', e),
-      image: e.image_url || heroImageFor(e.id),
-    }))
+
+    const entity = MODE_ENTITY[mode]
+    const picks = feed.filter((f) => f.entity === entity).slice(0, MAX_ITEMS)
+    if (!picks.length) return listed.slice(0, MAX_ITEMS)
+
+    // A pick that is also in this tab's list renders from that row, so it
+    // keeps the amount, details and slug link the list already has. One the
+    // list does not hold is drawn from the feed's own, thinner, columns.
+    const fromFeed = (f: FeedItem): HeroItem => ({
+      id: f.id,
+      title: f.title,
+      meta:
+        f.entity === 'event' && f.occurs_at
+          ? format(new Date(f.occurs_at), 'MMM d, yyyy')
+          : f.category || (f.entity === 'grant' ? t`Funding` : f.entity === 'project' ? t`Project` : t`Event`),
+      description:
+        f.summary || (f.entity === 'grant' ? grantFallback : f.entity === 'project' ? projectFallback : eventFallback),
+      href: personalizedHref(f.entity, f.id),
+      image: f.entity === 'grant' ? grantImageFor(f.id, f.type_key) : f.image_url || heroImageFor(f.id),
+    })
+    const byId = new Map(listed.map((item) => [item.id, item]))
+    const recommended = picks.map((f) => ({ ...(byId.get(f.id) ?? fromFeed(f)), forYou: true }))
+    // Too few picks to fill the strip: the list tops it up, unbadged.
+    const picked = new Set(recommended.map((item) => item.id))
+    return [...recommended, ...listed.filter((item) => !picked.has(item.id))].slice(0, MAX_ITEMS)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, seededGrants, projects, events, t])
+  }, [mode, seededGrants, projects, events, feed, t])
 
   const activeMode = MODES.find((m) => m.id === mode)!
   const modeLabel = i18n._(activeMode.label)
@@ -1332,6 +1392,13 @@ export default function DiscoverPage() {
                 className="max-w-[42em] landscape-short:max-w-[24em] animate-reveal-up text-right text-shadow-hero"
               >
                 <p className="text-[var(--hero-label)] font-semibold uppercase tracking-[0.3em] mb-[0.75em] text-white/60">
+                  {/* Marks a slide picked from the member's personalized
+                      feed rather than the tab's plain list. */}
+                  {active.forYou && (
+                    <span className="inline-block mr-[0.75em] px-[0.75em] py-[0.2em] rounded-full bg-white/15 text-white tracking-[0.2em]">
+                      <Trans>For you</Trans>
+                    </span>
+                  )}
                   {i18n._(activeMode.label)} &middot; {active.meta}
                 </p>
                 <h1
@@ -1674,12 +1741,6 @@ export default function DiscoverPage() {
         />
 
         <div className="relative container mx-auto px-6 md:px-12">
-          {/* The member's own recommendations, on the first light band rather
-              than bare on the dark hero: the rail's cream cards were drawn for
-              a light canvas. Renders nothing signed out, switched off or with
-              no signals, so visitors see the page exactly as before. */}
-          {auth.user && <ForYouRail title={t`For You`} limit={12} />}
-
           <div className="mb-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-ktip-sand-500 mb-3">
               <Trans>The Platform</Trans>

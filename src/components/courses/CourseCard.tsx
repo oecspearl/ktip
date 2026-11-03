@@ -1,43 +1,30 @@
-import { ExternalLink, GraduationCap } from 'lucide-react'
-import { useEnrollInCourse } from '../../hooks/useEnrollInCourse'
-import { useToast } from '../../contexts/ToastContext'
+import { Link } from 'react-router'
+import { ArrowRight, CheckCircle, GraduationCap } from 'lucide-react'
 import type { ExternalCourse, KtipEnrollment } from '../../types'
-import { Trans, useLingui } from '@lingui/react/macro'
+import { coursePath } from '../../hooks/useExternalCourses'
+import { Trans } from '@lingui/react/macro'
 
 interface CourseCardProps {
   course: ExternalCourse
   enrollment?: KtipEnrollment | null
-  onEnrolled?: () => void
 }
 
-export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) {
-    const { t } = useLingui()
-  const { enroll, enrolling } = useEnrollInCourse()
-  const toast = useToast()
-
-  const courseUrl = enrollment?.course_url
-
-  const handleEnroll = async () => {
-    try {
-      const res = await enroll(course.course_id)
-      onEnrolled?.()
-      toast.success(
-        res.is_new_user
-          ? t`Enrolled! Check your email to set up your Virtual Campus sign-in.`
-          : t`Enrolled! You can access the course now.`
-      )
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t`Could not enroll in this course.`)
-    }
-  }
-
+/**
+ * One Virtual Campus course in the Resources grid. The whole card opens the
+ * course's page on KTIP; enrolling and the one link out to the campus live
+ * there, so a visitor without an account meets the sign-up step first.
+ */
+export function CourseCard({ course, enrollment }: CourseCardProps) {
   return (
-    <div className="bg-ktip-cream border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow">
+    <Link
+      to={coursePath(course.course_id)}
+      className="group bg-ktip-cream border border-gray-200 rounded-xl p-5 flex flex-col hover:shadow-md transition-shadow focus-visible:outline-2 focus-visible:outline-ktip-ocean-500"
+    >
       <div className="flex items-center gap-3 mb-3">
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}
-            alt={course.title}
+            alt=""
             className="w-12 h-12 rounded-xl object-cover bg-ktip-sand-50 border border-ktip-sand-100 shrink-0"
             loading="lazy"
           />
@@ -47,7 +34,9 @@ export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) 
           </div>
         )}
         <div className="min-w-0">
-          <h3 className="font-display font-bold text-ktip-sand-900 truncate">{course.title}</h3>
+          <h3 className="font-display font-bold text-ktip-sand-900 truncate group-hover:text-ktip-ocean-700">
+            {course.title}
+          </h3>
           {course.subject_area && (
             <span className="text-xs text-ktip-ocean-600 font-medium">{course.subject_area}</span>
           )}
@@ -75,30 +64,24 @@ export function CourseCard({ course, enrollment, onEnrolled }: CourseCardProps) 
         </div>
       )}
 
-      {courseUrl ? (
-        <a
-          href={courseUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-tropical-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-tropical-700 transition-colors"
-        >
-          <Trans>Go to course</Trans>
-          <ExternalLink size={14} />
-        </a>
-      ) : course.enrollable === false ? (
-        <span className="inline-flex items-center justify-center px-4 py-2 bg-ktip-sand-100 text-ktip-sand-500 text-sm font-bold rounded-lg cursor-not-allowed">
-          <Trans>Not open for enrollment</Trans>
+      <div className="mt-auto flex items-center justify-between gap-2 text-sm font-bold">
+        {enrollment ? (
+          <span className="inline-flex items-center gap-1.5 text-ktip-tropical-700">
+            <CheckCircle size={14} />
+            <Trans>Enrolled</Trans>
+          </span>
+        ) : course.enrollable === false ? (
+          <span className="text-ktip-sand-500">
+            <Trans>Not open for enrollment</Trans>
+          </span>
+        ) : (
+          <span />
+        )}
+        <span className="inline-flex items-center gap-1 text-ktip-ocean-600 group-hover:text-ktip-ocean-700">
+          <Trans>View course</Trans>
+          <ArrowRight size={14} />
         </span>
-      ) : (
-        <button
-          type="button"
-          onClick={handleEnroll}
-          disabled={enrolling}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-ktip-ocean-600 text-white text-sm font-bold rounded-lg hover:bg-ktip-ocean-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-        >
-          {enrolling ? t`Enrolling…` : t`Enroll`}
-        </button>
-      )}
-    </div>
+      </div>
+    </Link>
   )
 }

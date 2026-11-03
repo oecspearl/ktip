@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Disclaimer } from '../../components/legal/Disclaimer'
-import { useParams, useNavigate, Link } from 'react-router'
+import { useParams, useNavigate, useLocation, Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { DetailsList } from '../../components/shared/DetailsList'
@@ -35,6 +35,7 @@ export default function GrantDetailPage() {
     const { t } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const auth = useAuth()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
@@ -65,6 +66,7 @@ export default function GrantDetailPage() {
   const canApply = !!(
     grant &&
     grant.is_active &&
+    grant.moderation_status !== 'suspended' &&
     !isExpired &&
     !hasApplied &&
     auth.can('grant:apply') &&
@@ -77,6 +79,13 @@ export default function GrantDetailPage() {
   // documents, exactly as the RLS policies on grants and entity documents say.
   const ownsGrant = !!grant && !!auth.user && grant.created_by === auth.user.id
   const canManageThisGrant = isOecs || (ownsGrant && auth.can('grant:post'))
+  // 181: editing is the poster's alone. An administrator still sees the strip
+  // (and the read-only applications list) but not the Edit button.
+  const canEditThisGrant = ownsGrant && auth.can('grant:post')
+  // 181: the reason is shown to the poster and to administrators. RLS hides a
+  // suspended call from everybody else, so nobody else reaches this page.
+  const isSuspended = grant?.moderation_status === 'suspended'
+  const showSuspension = isSuspended && (ownsGrant || isOecs)
 
   // Load submitted-application count
   useEffect(() => {
@@ -158,6 +167,9 @@ export default function GrantDetailPage() {
           {!grant.is_active && (
             <Badge variant="default"><Trans>Inactive</Trans></Badge>
           )}
+          {isSuspended && (
+            <Badge variant="danger"><Trans>Suspended</Trans></Badge>
+          )}
           {isExpired && (
             <Badge variant="danger"><Trans>Expired</Trans></Badge>
           )}
@@ -187,11 +199,39 @@ export default function GrantDetailPage() {
                       <Trans>Applications</Trans>
                     </Button>
                   </Link>
-                  <Link to={`/grants/${grant.slug || grant.id}/edit`}>
-                    <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
-                      <Trans>Edit Grant</Trans>
-                    </Button>
-                  </Link>
+                  {canEditThisGrant && (
+                    <Link to={`/grants/${grant.slug || grant.id}/edit`}>
+                      <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
+                        <Trans>Edit Grant</Trans>
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 181: why KTIP suspended the call. Poster and administrators only. */}
+            {showSuspension && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-start gap-2 text-red-700">
+                  <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      <Trans>KTIP has suspended this funding call. Members cannot see it.</Trans>
+                    </p>
+                    {grant.suspension_reason && (
+                      <p className="mt-1 text-sm text-red-800 whitespace-pre-wrap">
+                        <Trans>Reason: {grant.suspension_reason}</Trans>
+                      </p>
+                    )}
+                    {ownsGrant && (
+                      <p className="mt-2 text-sm">
+                        <Link to="/dashboard/feedback" className="font-medium underline">
+                          <Trans>Reply in Notes from KTIP</Trans>
+                        </Link>
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -371,6 +411,19 @@ export default function GrantDetailPage() {
                     <p className="text-sm text-ktip-sand-600">
                       <Trans>Your account does not have permission to apply for grants.</Trans>
                     </p>
+                  )}
+
+                  {/* AccountRoute keeps signed-out visitors off this page, so
+                      this is a fallback for a session that ended while it was
+                      open: it used to show no way forward at all. */}
+                  {!auth.user && !isExpired && grant.is_active && (
+                    <Button
+                      fullWidth
+                      onClick={() => navigate('/signup', { state: { from: location } })}
+                      icon={<FileText size={20} />}
+                    >
+                      <Trans>Sign up to apply</Trans>
+                    </Button>
                   )}
                 </>
               )}

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { escapeIlike, sanitizeTag } from '../lib/utils'
 import { keys } from '../queries/keys'
+import { isUuid } from '../lib/slug'
 import type { Integration } from '../types'
 
 // Public: published integrations with search/category filter
@@ -47,6 +48,38 @@ export function useIntegrations(filters?: { category?: string; search?: string; 
   })
 
   return { integrations: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
+}
+
+/**
+ * The detail page's address. By id: the integrations table has no slug column
+ * (038), and the page is not meant to be shared outside the platform.
+ */
+export function integrationPath(integration: Pick<Integration, 'id'>): string {
+  return `/integrations/${integration.id}`
+}
+
+// Public: one published integration, for its detail page
+export function useIntegration(id: string | undefined) {
+  const fetchIntegration = async (): Promise<Integration | null> => {
+    // A mistyped address is "not found", not a PostgREST cast error.
+    if (!id || !isUuid(id)) return null
+    const { data, error } = await (supabase as any)
+      .from('integrations')
+      .select('*')
+      .eq('id', id)
+      .eq('is_published', true)
+      .maybeSingle()
+    if (error) throw error
+    return (data as Integration | null) ?? null
+  }
+
+  const query = useQuery({
+    queryKey: keys.detail('integrations', id),
+    queryFn: fetchIntegration,
+    enabled: !!id,
+  })
+
+  return { integration: query.data ?? null, loading: query.isPending && !!id, error: query.error }
 }
 
 // Admin: all integrations (published + drafts)

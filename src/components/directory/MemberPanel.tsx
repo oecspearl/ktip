@@ -354,7 +354,7 @@ export function MemberPanel() {
                         <Trans>Sign in</Trans>
                       </Button>
                     </Link>
-                    <Link to="/register">
+                    <Link to="/signup" state={{ from: { pathname, search: window.location.search } }}>
                       <Button variant="outline" size="sm">
                         <Trans>Create an account</Trans>
                       </Button>

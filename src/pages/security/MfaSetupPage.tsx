@@ -16,6 +16,7 @@ import { useMfaFactors, useMfaMutations } from '../../hooks/useMfa'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { analytics } from '../../hooks/useAnalytics'
 import { APP_FULL_NAME } from '../../lib/constants'
+import { takeReturnTo } from '../../lib/return-to'
 import type { MfaMethod } from '../../types'
 
 /**
@@ -159,7 +160,9 @@ export default function MfaSetupPage() {
     await auth.refreshProfile()
     await auth.recheckMfaChallenge()
     toast.success(t`Two-step verification is on.`)
-    navigate('/', { replace: true })
+    // A new account that was headed for a gated page (AccountRoute) had that
+    // path parked before signup sent it here. Empty otherwise, so home.
+    navigate(takeReturnTo() ?? '/', { replace: true })
   }
 
   const chooseStep: AuthStep = { title: t`Choose`, caption: t`One more step. Then your account is yours alone.` }
@@ -275,7 +278,7 @@ export default function MfaSetupPage() {
           confirmLabel={t`Finish and go to KTIP`}
           onConfirm={() => {
             toast.success(t`Two-step verification is on.`)
-            navigate('/', { replace: true })
+            navigate(takeReturnTo() ?? '/', { replace: true })
           }}
           confirming={issuing}
         />

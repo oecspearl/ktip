@@ -63,3 +63,22 @@ export function useExternalCourses(filters?: {
     refetch: query.refetch,
   }
 }
+
+/** The KTIP page for a catalog course. course_id is the campus's own, so it is encoded. */
+export function coursePath(courseId: string): string {
+  return `/courses/${encodeURIComponent(courseId)}`
+}
+
+/**
+ * One course, picked out of the same catalog the Resources tab lists. The
+ * campus API has no single-course endpoint, and the list is already cached
+ * whenever someone arrives from the grid, so this costs no extra request then.
+ */
+export function useExternalCourse(courseId: string | undefined) {
+  const { allCourses, loading, error, refetch } = useExternalCourses()
+  const course = useMemo(
+    () => (courseId ? (allCourses ?? []).find((c) => c.course_id === courseId) ?? null : null),
+    [allCourses, courseId],
+  )
+  return { course, loading, error, refetch }
+}

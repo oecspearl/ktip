@@ -532,7 +532,7 @@ function CoursesTab() {
     gradeLevel,
     search: debouncedSearch,
   })
-  const { enrollmentsByCourseId, refetch: refetchEnrollments } = useMyKtipEnrollments()
+  const { enrollmentsByCourseId } = useMyKtipEnrollments()
 
   // Subject/grade values are free text set by Virtual Campus course admins,
   // not a closed KTIP-owned enum — so options come from the live catalog
@@ -606,9 +606,6 @@ function CoursesTab() {
                 key={course.course_id}
                 course={course}
                 enrollment={enrollmentsByCourseId.get(course.course_id)}
-                onEnrolled={() => {
-                  void refetchEnrollments()
-                }}
               />
             ))}
           </div>

@@ -19,6 +19,7 @@ import { A11yHost } from './a11y/A11yHost'
 import { A11yRouterBridge } from './a11y/navigation'
 import { AnalyticsProvider } from './hooks/useAnalytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AccountRoute } from './components/AccountRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
 import type { AgreementRoute as AgreementRouteType } from './components/legal/AgreementRoute'
@@ -287,9 +288,7 @@ const router = createBrowserRouter([
           { path: '/', lazy: lazyPage(() => import('./pages/discover/DiscoverPage')) },
           { path: '/projects', lazy: lazyPage(() => import('./pages/projects/ProjectsPage')) },
           { path: '/events', lazy: lazyPage(() => import('./pages/events/EventsPage')) },
-          { path: '/events/:id', lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
           { path: '/grants', lazy: lazyPage(() => import('./pages/grants/GrantsPage')) },
-          { path: '/grants/:id', lazy: lazyPage(() => import('./pages/grants/GrantDetailPage')) },
           // Pathless layout (171): the community notice once per member, and
           // the guidelines line under every public forum page.
           {
@@ -323,11 +322,34 @@ const router = createBrowserRouter([
           // as a credential by having a page at all.
           { path: '/org/:slug', lazy: lazyPage(() => import('./pages/sme/OrgProfilePage')) },
           { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
-          { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
           { path: '/accessibility', lazy: lazyPage(() => import('./pages/AccessibilityStatementPage')) },
           { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
           { path: '/integrations', element: <Navigate to="/resources?tab=integrations" replace /> },
+
+          // Lists stay open; opening one item takes an account. Signed out,
+          // AccountRoute sends the visitor to /signup and parks the path
+          // (src/lib/return-to.ts), so a shared link still lands on the item
+          // once the account exists. Signed in, these render as they always did.
+          {
+            Component: AccountRoute,
+            children: [
+              { path: '/grants/:id', lazy: lazyPage(() => import('./pages/grants/GrantDetailPage')) },
+              { path: '/events/:id', lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
+              { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
+              { path: '/courses/:id', lazy: lazyPage(() => import('./pages/courses/CourseDetailPage')) },
+              { path: '/integrations/:id', lazy: lazyPage(() => import('./pages/integrations/IntegrationDetailPage')) },
+              // A project page also needs ProtectedRoute's onboarding and
+              // two-step checks, which it had before. AccountRoute sits
+              // outside it so a signed-out visitor meets /signup, not /login.
+              {
+                Component: ProtectedRoute,
+                children: [
+                  { path: '/projects/:id', lazy: lazyPage(() => import('./pages/projects/ProjectDetailPage')) },
+                ],
+              },
+            ],
+          },
 
           // Legal. Public on purpose, and above ProtectedRoute for a reason: a
           // policy you must sign in to read is not a published policy, and the
@@ -412,12 +434,8 @@ const router = createBrowserRouter([
               },
               // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
-              // The same split as /directory and /user/:id. The list at
-              // /projects and the homepage hero stay open, so a visitor can see
-              // what is being built; opening one takes an account. A shared link
-              // still lands on the project, because LoginPage parks `state.from`
-              // (src/lib/return-to.ts) and the sign-in hands it back.
-              { path: '/projects/:id', lazy: lazyPage(() => import('./pages/projects/ProjectDetailPage')) },
+              // /projects/:id lives under AccountRoute above, with this guard
+              // nested inside it, so a signed-out visitor goes to /signup.
               // Creating a project needs project:create (migration 064 put that
               // check in the INSERT policy). Gated here so a role without it —
               // investor, say — gets told why instead of filling in the whole

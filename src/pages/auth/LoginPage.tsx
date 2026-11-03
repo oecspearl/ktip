@@ -64,8 +64,10 @@ export default function LoginPage() {
   // ProtectedRoute sends `state.from`. Parked in the tab's storage rather than
   // read at submit time, because the OAuth buttons leave the page and come back
   // through /auth/callback, where router state no longer exists.
+  // Also handed on by the "Sign up" link, so switching pages keeps the target.
+  const fromState = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from
   useEffect(() => {
-    rememberReturnTo((location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from)
+    rememberReturnTo(fromState)
     // Arrival only — the slot must not be rewritten as the form re-renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -242,7 +244,11 @@ export default function LoginPage() {
         <p className="mt-8 text-center text-sm text-ktip-sand-600">
           <Trans>
             Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700">
+            <Link
+              to="/signup"
+              state={fromState ? { from: fromState } : undefined}
+              className="font-medium text-ktip-ocean-600 hover:text-ktip-ocean-700"
+            >
               Sign up
             </Link>
           </Trans>
