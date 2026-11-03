@@ -188,7 +188,7 @@ export const adminFeedbackTutorialSteps: TutorialStep[] = [
   ),
   section(
     'Triage',
-    'Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.\n\nThe UAT section next door is the structured version of the same signal.'
+    'Nothing here notifies the sender, so this queue is for you rather than a conversation. If a report needs a reply, reach the member directly.'
   ),
   replayStep,
 ]
@@ -257,18 +257,6 @@ export const adminAnalyticsTutorialSteps: TutorialStep[] = [
   section(
     'What needs consent',
     'Member counts, active days and the roadmap KPIs need no consent. Page views, funnels and feature usage are written only for visitors who accepted the analytics banner, so they undercount. Treat them as a floor.'
-  ),
-  replayStep,
-]
-
-export const adminUatTutorialSteps: TutorialStep[] = [
-  section(
-    'Structured platform feedback',
-    'Responses to the usefulness and experience questions, collected during user acceptance testing.\n\nUnlike the free-text feedback queue, these are comparable across members — which is what makes them worth charting.'
-  ),
-  section(
-    'What to do with it',
-    'Look for the questions where the spread is wide rather than the average is low: a feature half of members rate highly and half cannot use at all is a discoverability problem, and it reads as mediocre in the average.'
   ),
   replayStep,
 ]

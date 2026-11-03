@@ -20,7 +20,7 @@ export const adminTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="admin-sidebar"]',
     title: 'Every section',
     description:
-      'Content first — Projects, Events, Grants, Forums, Resources, Achievements. Then people: Users, Roles & Permissions, Institutions, Chamber Review, Employers, Verification.\n\nThe safety group is Moderation and Grievances. Integrations, Partner API, Analytics, UAT Feedback and Errors are the operational end.\n\nThis rail is on every admin page, so it is always the way back out.',
+      'Content first — Projects, Events, Grants, Forums, Resources, Achievements. Then people: Users, Roles & Permissions, Institutions, Chamber Review, Employers, Verification.\n\nThe safety group is Moderation and Grievances. Integrations, Partner API, Analytics and Errors are the operational end.\n\nThis rail is on every admin page, so it is always the way back out.',
     position: 'right',
     scrollMode: 'top',
   },

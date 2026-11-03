@@ -1314,16 +1314,6 @@ export const SITE_MAP: SiteEntry[] = [
     icon: 'BarChart3',
   },
   {
-    id: 'admin.uat',
-    title: 'UAT feedback',
-    category: 'Admin',
-    description: 'User acceptance testing responses',
-    keywords: ['uat', 'testing', 'acceptance', 'tester feedback'],
-    href: '/admin/uat',
-    access: 'oecs',
-    icon: 'ClipboardCheck',
-  },
-  {
     id: 'admin.errors',
     title: 'Errors',
     category: 'Admin',

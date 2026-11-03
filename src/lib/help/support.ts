@@ -108,7 +108,7 @@ export const ADMIN_CATEGORY: HelpCategory = {
     {
       id: 'admin-overview',
       title: 'What is in the admin console?',
-      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics, error reports and UAT feedback.\n\nWhat you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
+      content: `Administrators reach the console from the Admin entry on the dashboard rail. It is only visible to accounts holding an admin role.\n\nIt covers projects, events, users, roles, achievements, moderation, institutions, chambers, funding, forums, resources, grievances, feedback, verification, integrations, employers, the partner API, analytics and error reports.\n\nWhat you see depends on your seat. Safety administrators see the moderation and grievance side. The People & Trust Supervisor owns verification, institutions, chambers, moderation and grievances; the Programmes Supervisor owns projects, funding, forums, resources, achievements and employers. Super administrators see everything.\n\nActions here apply platform-wide, so they are worth being deliberate about.`,
       tags: ['admin', 'console', 'overview', 'oecs', 'management'],
     },
     {
@@ -143,9 +143,9 @@ export const ADMIN_CATEGORY: HelpCategory = {
     },
     {
       id: 'admin-api-analytics',
-      title: 'Partner API, analytics and UAT feedback',
-      content: `Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n\nAnalytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.\n\nUAT — feedback submitted during user acceptance testing, with its state.\n\nMember feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback.`,
-      tags: ['api', 'partner', 'keys', 'analytics', 'uat', 'feedback', 'admin'],
+      title: 'Partner API, analytics and feedback',
+      content: `Partner API — issue and revoke API keys for partner organisations. Treat a key as a credential: revoke rather than reuse when a partner relationship changes.\n\nAnalytics — a hub rather than a single page: usage across projects, events, funding and members, a results framework, and reports that are drafted, reviewed, published and printed.\n\nMember feedback — the Feedback action on the floating button reaches an admin queue, and your reply comes back to the member on their own Dashboard, under Feedback.`,
+      tags: ['api', 'partner', 'keys', 'analytics', 'feedback', 'admin'],
     },
   ],
 }

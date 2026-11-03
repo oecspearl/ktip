@@ -1,0 +1,21 @@
+-- ============================================================================
+-- 179_drop_uat_responses.sql — the UAT survey is retired
+-- ============================================================================
+-- The UAT survey (023) collected structured usefulness scores during user
+-- acceptance testing. The in-app survey button was unmounted long ago, and
+-- the admin "UAT Feedback" page is removed in the same change as this file.
+-- Member feedback keeps flowing through the `feedback` table (037/093/127).
+--
+-- DATA LOSS: this drops every row in uat_responses. Export first if the
+-- results are wanted for a report:
+--
+--   \copy (SELECT * FROM uat_responses ORDER BY created_at) TO 'uat_responses.csv' CSV HEADER
+--
+-- or Table editor → uat_responses → Export to CSV in the Supabase dashboard.
+--
+-- Nothing else reads the table: 093 and 133 mention it in comments only, and
+-- no view, function or trigger references it. CASCADE takes its policies.
+-- Idempotent — safe to re-run.
+-- ============================================================================
+
+DROP TABLE IF EXISTS uat_responses CASCADE;

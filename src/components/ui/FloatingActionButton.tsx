@@ -92,9 +92,8 @@ interface FabAction {
  * Add future actions by appending to the `actions` array below — each needs a
  * `tone`, and the array order is the on-screen order, so keep two warm hues
  * from ending up adjacent.
- * Note: this corner is also reserved by the (currently unmounted)
- * UATFeedbackButton and the older feedback/FeedbackButton pill — this cluster
- * is now the single entry point for both, so neither should be mounted.
+ * Note: this cluster replaced the older feedback/FeedbackButton pill and is
+ * the single entry point for feedback, so that pill should not be mounted.
  */
 export function FloatingActionButton() {
   const { t } = useLingui()

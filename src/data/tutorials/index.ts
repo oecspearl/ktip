@@ -19,7 +19,6 @@ import {
   adminProjectsTutorialSteps,
   adminResourcesTutorialSteps,
   adminRolesTutorialSteps,
-  adminUatTutorialSteps,
   adminUsersTutorialSteps,
   adminVerificationTutorialSteps,
 } from './admin-sections'
@@ -143,7 +142,6 @@ export const TUTORIAL_IDS = {
   ADMIN_EMPLOYERS: 'admin-employers',
   ADMIN_PARTNER_API: 'admin-partner-api',
   ADMIN_ANALYTICS: 'admin-analytics',
-  ADMIN_UAT: 'admin-uat',
   ADMIN_ERRORS: 'admin-errors',
 } as const
 
@@ -717,13 +715,6 @@ const REGISTRY: RegisteredTutorial[] = [
     name: 'Admin — Analytics',
     description: 'Views, features, funnels and what they undercount.',
     steps: adminAnalyticsTutorialSteps,
-  },
-  {
-    id: TUTORIAL_IDS.ADMIN_UAT,
-    route: '/admin/uat',
-    name: 'Admin — UAT Feedback',
-    description: 'Structured usefulness and experience scores.',
-    steps: adminUatTutorialSteps,
   },
   {
     id: TUTORIAL_IDS.ADMIN_ERRORS,

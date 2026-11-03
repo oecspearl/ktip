@@ -10,7 +10,6 @@ import {
   BookOpen,
   Flag,
   BarChart3,
-  ClipboardCheck,
   BadgeCheck,
   MessageCircle,
   Puzzle,
@@ -67,7 +66,7 @@ function usePendingVerificationCount(enabled: boolean) {
  * administrators. Fifteen of the entries below read `org:manage` until then,
  * which is why handing out part of the console was impossible: one key opened
  * Grants and the Error Simulator alike. What is left on org:manage is the
- * residual operator surface — analytics, UAT, feedback, integrations, partner
+ * residual operator surface — analytics, feedback, integrations, partner
  * API and the error console.
  *
  * A super_admin or admin holds every permission, so their sidebar is unchanged.
@@ -105,7 +104,6 @@ const adminNavItems: {
   // entries and three pages; they are tabs of one hub now, with one period
   // and country filter between them.
   { href: '/admin/analytics', label: 'Analytics & Reports', icon: BarChart3, requires: 'org:manage' },
-  { href: '/admin/uat', label: 'UAT Feedback', icon: ClipboardCheck, requires: 'org:manage' },
   // exact, or the simulator route below would light both entries up.
   { href: '/admin/errors', label: 'Errors', icon: Bug, exact: true, requires: 'org:manage' },
   { href: '/admin/errors/simulate', label: 'Error Simulator', icon: FlaskConical, requires: 'org:manage' },

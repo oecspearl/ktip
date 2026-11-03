@@ -5,8 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
- * Floating "Send Feedback" trigger (bottom-left; the UAT survey
- * button occupies bottom-right). Only shown to signed-in users.
+ * Floating "Send Feedback" trigger (bottom-left). Only shown to signed-in users.
  */
 export function FeedbackButton() {
     const { t } = useLingui()
