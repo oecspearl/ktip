@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { RouteSplash } from './RouteSplash'
+import { suspensionRedirect } from '../lib/suspension'
 
 export const ProtectedRoute = () => {
   const auth = useAuth()
@@ -19,6 +20,15 @@ export const ProtectedRoute = () => {
   // reach pages whose writes RLS then refused with a bare 403.
   if (auth.profileLoading) {
     return <RouteSplash />
+  }
+
+  // A suspended session is held on one page (184). Before onboarding and the
+  // second factor: none of those can help an account that may not act, and the
+  // page it lands on is the only one that says why. MainLayout applies the same
+  // rule to public pages.
+  const held = suspensionRedirect(location.pathname, auth.suspension)
+  if (held) {
+    return <Navigate to={held} replace />
   }
 
   // OAuth users who never finished onboarding have no role yet — send them

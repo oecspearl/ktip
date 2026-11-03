@@ -32,6 +32,13 @@ import {
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 import { useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../../i18n/copy'
+import { CheckSquare } from 'lucide-react'
+import { SuspendAccountsModal, type SuspendAccountTarget } from '../../../components/admin/SuspendAccountsModal'
+import { BulkActionBar } from '../../../components/shared/BulkActionBar'
+import { BulkDeleteDialog } from '../../../components/shared/BulkDeleteDialog'
+import { useSelection } from '../../../hooks/useSelection'
+import { settleEach } from '../../../lib/bulk'
+import { describeAccountDeletion, type BulkDeleteItem } from '../../../lib/delete-guard'
 
 /**
  * Every assignable role, in catalog order.
@@ -48,7 +55,7 @@ import { resolveCopy } from '../../../i18n/copy'
 const ALL_ROLES: UserRole[] = ROLE_DEFINITIONS.filter((r) => !r.aliasOf).map((r) => r.slug)
 
 export default function AdminUsersPage() {
-    const { i18n } = useLingui()
+    const { i18n, t } = useLingui()
   const toast = useToast()
   const auth = useAuth()
 
@@ -141,13 +148,34 @@ export default function AdminUsersPage() {
     userName: string
   } | null>(null)
 
-  // Suspend / reinstate (124)
-  const [suspendTarget, setSuspendTarget] = useState<{
-    userId: string
-    userName: string
-    suspend: boolean
+  // Suspend / reinstate (124, 184), one account or a selection. Each target is
+  // its own request, so the Super Admin ceiling refuses row by row.
+  const [suspendModal, setSuspendModal] = useState<{
+    mode: 'suspend' | 'reinstate'
+    targets: SuspendAccountTarget[]
   } | null>(null)
-  const [suspendReason, setSuspendReason] = useState('')
+
+  // Select mode: bulk suspend, reinstate and delete.
+  const [selecting, setSelecting] = useState(false)
+  const userIds = useMemo(() => (users ?? []).map((u) => u.id), [users])
+  const selection = useSelection(userIds)
+  const [bulkDeleteItems, setBulkDeleteItems] = useState<BulkDeleteItem[] | null>(null)
+  const nameOf = (user: Profile) => user.display_name || 'this user'
+  const chosenUsers = () => (users ?? []).filter((u) => selection.isSelected(u.id))
+  const stopSelecting = () => {
+    setSelecting(false)
+    selection.clear()
+  }
+  const openSuspend = (mode: 'suspend' | 'reinstate', picked: Profile[]) => {
+    if (picked.length === 0) return
+    setSuspendModal({ mode, targets: picked.map((u) => ({ id: u.id, name: nameOf(u) })) })
+  }
+  const openBulkDelete = (picked: Profile[]) => {
+    if (picked.length === 0) return
+    setBulkDeleteItems(
+      picked.map((u) => ({ id: u.id, title: u.display_name || u.id, impact: describeAccountDeletion() }))
+    )
+  }
 
   const openEditRoles = (user: Profile) => {
     setEditingUser(user)
@@ -262,31 +290,6 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleSuspension = async () => {
-    const action = suspendTarget
-    if (!action) return
-
-    try {
-      const result = await setSuspension(action.userId, action.suspend, suspendReason || undefined)
-      // The route reports 200 with a warning when the profile row changed but
-      // the sign-in ban did not follow. That half-state is worth a red toast:
-      // the account is inert but not locked out, or reinstated but still
-      // banned, and the operator should press the button again.
-      if (result.warning) toast.error(result.warning)
-      else
-        toast.success(
-          action.suspend
-            ? `${action.userName} has been suspended and cannot sign in`
-            : `${action.userName} has been reinstated`
-        )
-      setSuspendTarget(null)
-      setSuspendReason('')
-      refetch()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update the suspension')
-    }
-  }
-
   const handleDeleteUser = async () => {
     const action = confirmDelete
     if (!action) return
@@ -367,14 +370,40 @@ export default function AdminUsersPage() {
               Clear all
             </button>
           )}
+          {canManageMembers && !selecting && !!users?.length && (
+            <Button variant="secondary" icon={<CheckSquare size={16} />} onClick={() => setSelecting(true)} className="sm:ml-auto shrink-0">
+              {t`Select`}
+            </Button>
+          )}
           {canManageMembers && (
-            <Button onClick={() => setCreateModalOpen(true)} className="sm:ml-auto shrink-0">
+            <Button onClick={() => setCreateModalOpen(true)} className={`${selecting || !users?.length ? 'sm:ml-auto ' : ''}shrink-0`}>
               <UserPlus size={16} />
               Create User
             </Button>
           )}
         </div>
       </div>
+
+      {selecting && (
+        <BulkActionBar
+          count={selection.count}
+          total={users?.length ?? 0}
+          allSelected={selection.allSelected}
+          onSelectAll={selection.selectAll}
+          onClear={selection.clear}
+          onDone={stopSelecting}
+        >
+          <Button variant="secondary" size="sm" icon={<Ban size={16} />} disabled={!selection.count} onClick={() => openSuspend('suspend', chosenUsers().filter((u) => !u.is_suspended))}>
+            {t`Suspend`}
+          </Button>
+          <Button variant="secondary" size="sm" icon={<UserCheck size={16} />} disabled={!selection.count} onClick={() => openSuspend('reinstate', chosenUsers().filter((u) => u.is_suspended))}>
+            {t`Reinstate`}
+          </Button>
+          <Button variant="danger" size="sm" icon={<Trash2 size={16} />} disabled={!selection.count} onClick={() => openBulkDelete(chosenUsers())}>
+            {t`Delete`}
+          </Button>
+        </BulkActionBar>
+      )}
 
       {/* Users Table */}
       <div className="overflow-hidden">
@@ -397,6 +426,11 @@ export default function AdminUsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ktip-sand-200">
+                  {selecting && (
+                    <th className="w-10 px-4 py-3">
+                      <span className="sr-only">{t`Select`}</span>
+                    </th>
+                  )}
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Roles</th>
@@ -407,6 +441,17 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-ktip-sand-200 stagger-rows">
                 {users.map((user) => (
                   <tr className="hover:bg-ktip-sand-50 transition-colors" key={user.id}>
+                    {selecting && (
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selection.isSelected(user.id)}
+                          onChange={() => selection.toggle(user.id)}
+                          aria-label={t`Select ${nameOf(user)}`}
+                          className="w-4 h-4 rounded border-ktip-sand-300 text-ktip-ocean-600 focus:ring-ktip-ocean-500"
+                        />
+                      </td>
+                    )}
                     {/* User */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -533,14 +578,7 @@ export default function AdminUsersPage() {
                         {canManageMembers && canActOn(user) && (
                           <button
                             type="button"
-                            onClick={() => {
-                              setSuspendReason('')
-                              setSuspendTarget({
-                                userId: user.id,
-                                userName: user.display_name || 'this user',
-                                suspend: !user.is_suspended,
-                              })
-                            }}
+                            onClick={() => openSuspend(user.is_suspended ? 'reinstate' : 'suspend', [user])}
                             className={`icon-hit p-1.5 text-gray-400 transition-colors ${
                               user.is_suspended ? 'hover:text-ktip-tropical-600' : 'hover:text-red-600'
                             }`}
@@ -817,58 +855,31 @@ export default function AdminUsersPage() {
         onCancel={() => setConfirmResetMfa(null)}
       />
 
-      {/* Suspend / Reinstate Modal (124) */}
-      <Modal
-        open={!!suspendTarget}
-        onClose={() => {
-          setSuspendTarget(null)
-          setSuspendReason('')
+      {/* Suspend / Reinstate, one or many (124, 184) */}
+      <SuspendAccountsModal
+        targets={suspendModal?.targets ?? null}
+        mode={suspendModal?.mode ?? 'suspend'}
+        onClose={() => setSuspendModal(null)}
+        setSuspension={setSuspension}
+        onDone={() => {
+          selection.clear()
+          refetch()
         }}
-        title={suspendTarget?.suspend ? 'Suspend User' : 'Reinstate User'}
-        size="md"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            {suspendTarget?.suspend
-              ? `Suspend "${suspendTarget?.userName}"? They lose every permission immediately and are blocked from signing in until reinstated. Anything they have open stops working within the hour.`
-              : `Reinstate "${suspendTarget?.userName}"? Their permissions return and they can sign in again.`}
-          </p>
-          {suspendTarget?.suspend && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
-              <textarea
-                value={suspendReason}
-                onChange={(e) => setSuspendReason(e.currentTarget.value)}
-                rows={3}
-                maxLength={500}
-                placeholder="Recorded on the account for other administrators"
-                className="w-full px-3 py-2 border border-ktip-sand-200 rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden"
-              />
-            </div>
-          )}
-          <div className="flex justify-end gap-3 pt-4 border-t border-ktip-sand-100">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSuspendTarget(null)
-                setSuspendReason('')
-              }}
-              disabled={actionLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              variant={suspendTarget?.suspend ? 'danger' : 'primary'}
-              onClick={handleSuspension}
-              loading={actionLoading}
-            >
-              {suspendTarget?.suspend ? 'Suspend' : 'Reinstate'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      />
+
+      {/* Bulk delete. Each account is its own request, so the ceiling
+          refuses row by row. */}
+      <BulkDeleteDialog
+        open={!!bulkDeleteItems}
+        kind="account"
+        items={bulkDeleteItems}
+        onClose={() => setBulkDeleteItems(null)}
+        onDelete={(ids, onProgress) => settleEach(ids, (id) => deleteUser(id), { onProgress })}
+        onDeleted={() => {
+          selection.clear()
+          refetch()
+        }}
+      />
 
       {/* Confirm Delete User Modal */}
       <ConfirmModal

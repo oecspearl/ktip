@@ -1,6 +1,10 @@
-import { useState } from 'react'
-import { AlertTriangle, ExternalLink, Gavel, Scale } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
+import { useQuery } from '@tanstack/react-query'
+import { AlertTriangle, ExternalLink, Gavel, Link2, Scale } from 'lucide-react'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { Button } from '../../../components/ui/Button'
+import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Modal } from '../../../components/ui/Modal'
 import { Badge } from '../../../components/ui/Badge'
@@ -9,11 +13,168 @@ import { useAuth } from '../../../contexts/AuthContext'
 import {
   useApplyTakedownOutcome,
   useCounterNotices,
+  useSetTakedownTarget,
   useTakedownQueue,
+  type TakedownContentEffect,
   type TakedownNotice,
   type TakedownStatus,
 } from '../../../hooks/useTakedowns'
 import { formatDate } from '../../../lib/utils'
+import { isUuid } from '../../../lib/slug'
+import { parseTakedownTarget, type TakedownTargetType } from '../../../lib/takedown-target'
+import { supabase } from '../../../lib/supabase'
+
+/** Targets apply_takedown_outcome() can hide and restore (185). */
+const HOLDABLE = new Set([
+  'project', 'resource', 'event', 'forum_post', 'forum_reply', 'project_comment', 'event_solution',
+])
+
+const TARGET_TABLE: Record<TakedownTargetType, string> = {
+  resource: 'resources',
+  project: 'projects',
+  event: 'events',
+}
+
+const TARGET_PATH: Record<TakedownTargetType, string> = {
+  resource: '/resources',
+  project: '/projects',
+  event: '/events',
+}
+
+/** Looks up a page by id or slug. Staff read past the status filter. */
+async function findTarget(type: TakedownTargetType, key: string): Promise<{ id: string; title: string } | null> {
+  const { data, error } = await (supabase as any)
+    .from(TARGET_TABLE[type])
+    .select('id, title')
+    .eq(isUuid(key) ? 'id' : 'slug', key)
+    .maybeSingle()
+  if (error || !data) return null
+  return data as { id: string; title: string }
+}
+
+/**
+ * Which piece of KTIP content the notice is about. Starting a review hides it,
+ * so the moderator confirms it first; a notice from a "Report infringement"
+ * link arrives with it already filled in, and a pasted URL pre-fills the rest.
+ */
+function TakedownTargetPanel({ notice, canAction }: { notice: TakedownNotice; canAction: boolean }) {
+  const { t } = useLingui()
+  const toast = useToast()
+  const setTarget = useSetTakedownTarget()
+  const guess = parseTakedownTarget(notice.target_url)
+  const [type, setType] = useState<TakedownTargetType>(guess?.type ?? 'resource')
+  const [key, setKey] = useState(guess?.key ?? '')
+  const [editing, setEditing] = useState(false)
+
+  useEffect(() => {
+    setType(guess?.type ?? 'resource')
+    setKey(guess?.key ?? '')
+    setEditing(false)
+    // Reset per notice; `guess` is derived from it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notice.id])
+
+  const linkedType = notice.target_type as TakedownTargetType | null
+  const { data: linked } = useQuery({
+    queryKey: ['takedowns', 'target', notice.target_type, notice.target_id],
+    queryFn: () => findTarget(linkedType!, notice.target_id!),
+    enabled: !!notice.target_id && !!linkedType && linkedType in TARGET_TABLE,
+  })
+
+  const link = async () => {
+    const parsed = parseTakedownTarget(key)
+    const lookupType = parsed?.type ?? type
+    const lookupKey = (parsed?.key ?? key).trim()
+    if (!lookupKey) return
+    const found = await findTarget(lookupType, lookupKey)
+    if (!found) {
+      toast.error(t`Nothing on KTIP matches that link or ID.`)
+      return
+    }
+    try {
+      await setTarget.mutateAsync({ noticeId: notice.id, targetType: lookupType, targetId: found.id })
+      toast.success(t`Linked to "${found.title}".`)
+      setEditing(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t`Could not link the content`)
+    }
+  }
+
+  const hasTarget = !!notice.target_id && !!notice.target_type
+
+  return (
+    <div className="rounded-xl border border-ktip-sand-200 p-4">
+      <p className="text-sm font-semibold text-ktip-sand-900">
+        <Trans>Content on KTIP</Trans>
+      </p>
+      {hasTarget ? (
+        <p className="mt-1 text-sm text-ktip-sand-700">
+          {linked && linkedType && linkedType in TARGET_PATH ? (
+            <Link
+              to={`${TARGET_PATH[linkedType]}/${linked.id}`}
+              target="_blank"
+              className="inline-flex items-center gap-1 text-ktip-ocean-700 hover:underline"
+            >
+              {linked.title}
+              <ExternalLink size={13} aria-hidden />
+            </Link>
+          ) : (
+            <span className="font-mono text-xs">
+              {notice.target_type} · {notice.target_id}
+            </span>
+          )}
+          {notice.held_content && (
+            <span className="ml-2 text-caption text-ktip-sun-700">
+              <Trans>Hidden by this notice</Trans>
+            </span>
+          )}
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-ktip-sand-600">
+          <Trans>Not linked yet. Starting a review hides nothing until you link the content.</Trans>
+        </p>
+      )}
+
+      {canAction && !notice.held_content && (editing || !hasTarget) && (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="flex flex-col gap-1 text-label font-medium text-ktip-sand-700">
+            <Trans>Type</Trans>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as TakedownTargetType)}
+              className="rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm focus:border-ktip-ocean-500 focus:outline-hidden"
+            >
+              <option value="resource">{t`Resource`}</option>
+              <option value="project">{t`Project`}</option>
+              <option value="event">{t`Event`}</option>
+            </select>
+          </label>
+          <div className="flex-1">
+            <Input
+              label={t`Link or ID`}
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              fullWidth
+            />
+          </div>
+          <Button size="sm" variant="secondary" icon={<Link2 size={16} />} onClick={link} loading={setTarget.isPending}>
+            <Trans>Link content</Trans>
+          </Button>
+        </div>
+      )}
+
+      {canAction && !notice.held_content && hasTarget && !editing && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="mt-2 text-caption font-medium text-ktip-ocean-700 hover:underline"
+        >
+          <Trans>Change</Trans>
+        </button>
+      )}
+    </div>
+  )
+}
 
 /**
  * The copyright queue, alongside the conduct queue it sits next to.
@@ -44,18 +205,53 @@ const STATUS_LABEL: Record<TakedownStatus, string> = {
 }
 
 export function TakedownQueue() {
+  const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
 
   const [statusFilter, setStatusFilter] = useState<TakedownStatus | 'all'>('all')
-  const [selected, setSelected] = useState<TakedownNotice | null>(null)
+  const [picked, setSelected] = useState<TakedownNotice | null>(null)
   const [notes, setNotes] = useState('')
 
   const { data: notices, isPending } = useTakedownQueue(statusFilter)
+  // Read through the live list, so linking a target updates the open modal.
+  const selected = picked ? (notices?.find((n) => n.id === picked.id) ?? picked) : null
   const { data: counters } = useCounterNotices(selected?.id ?? null)
   const applyOutcome = useApplyTakedownOutcome()
 
   const canAction = auth.can('moderation:action')
+
+  // What each button actually does to the content, so the label never
+  // promises a removal that will not happen (185).
+  const linked = !!selected?.target_id && HOLDABLE.has(selected?.target_type ?? '')
+  const held = !!selected?.held_content
+  const labels = {
+    reviewing: linked ? t`Start review and hide content` : t`Start review`,
+    rejected: held ? t`Reject and restore content` : t`Reject`,
+    restored: held ? t`Restore content` : t`Mark restored`,
+    actioned: linked ? t`Uphold and remove content` : t`Uphold notice`,
+  }
+
+  const contentMessage = (effect: TakedownContentEffect | undefined, status: TakedownStatus): string => {
+    switch (effect) {
+      case 'quarantined':
+        return t`The content is hidden while you review it.`
+      case 'removed':
+        return t`The content has been removed.`
+      case 'restored':
+        return t`The content is visible again.`
+      case 'still_held':
+        return t`Another notice still holds this content, so it stays hidden.`
+      case 'unsupported':
+        return t`This content can't be hidden from here. Act on it by hand.`
+      case 'no_target':
+        return status === 'reviewing' || status === 'actioned'
+          ? t`No content is linked, so nothing was hidden.`
+          : ''
+      default:
+        return ''
+    }
+  }
 
   const open = (notice: TakedownNotice) => {
     setSelected(notice)
@@ -74,12 +270,17 @@ export function TakedownQueue() {
       })
       // Surfaced, never executed automatically. Terminating an account is a
       // decision someone makes with the queue in front of them.
+      const effect = contentMessage(result.content, status)
       if (result.at_limit) {
         toast.error(
           `This account is now at ${result.strikes} of ${result.limit} standing notices. Review it for termination.`
         )
       } else {
         toast.success(`Notice ${STATUS_LABEL[status].toLowerCase()}. Strikes: ${result.strikes}`)
+      }
+      if (effect) {
+        if (result.content === 'unsupported' || result.content === 'no_target') toast.warning(effect)
+        else toast.info(effect)
       }
       setSelected(null)
     } catch (error) {
@@ -225,6 +426,8 @@ export function TakedownQueue() {
               </div>
             )}
 
+            <TakedownTargetPanel notice={selected} canAction={canAction} />
+
             <Textarea
               label="Internal notes"
               value={notes}
@@ -235,14 +438,16 @@ export function TakedownQueue() {
 
             {canAction ? (
               <div className="flex flex-wrap justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={() => decide('reviewing')} loading={applyOutcome.isPending}>
-                  Mark reviewing
-                </Button>
+                {selected.status !== 'reviewing' && (
+                  <Button variant="ghost" size="sm" onClick={() => decide('reviewing')} loading={applyOutcome.isPending}>
+                    {labels.reviewing}
+                  </Button>
+                )}
                 <Button variant="secondary" size="sm" onClick={() => decide('rejected')} loading={applyOutcome.isPending}>
-                  Reject
+                  {labels.rejected}
                 </Button>
                 <Button variant="secondary" size="sm" onClick={() => decide('restored')} loading={applyOutcome.isPending}>
-                  Restore
+                  {labels.restored}
                 </Button>
                 <Button
                   variant="danger"
@@ -251,7 +456,7 @@ export function TakedownQueue() {
                   onClick={() => decide('actioned')}
                   loading={applyOutcome.isPending}
                 >
-                  Action — remove content
+                  {labels.actioned}
                 </Button>
               </div>
             ) : (

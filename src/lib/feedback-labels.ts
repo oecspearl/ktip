@@ -18,6 +18,8 @@ export const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
   general: 'General',
   content: 'Content',
   praise: 'Praise',
+  // 184. Filed from /account/suspended.
+  appeal: 'Suspension appeal',
 }
 
 export const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
@@ -26,6 +28,7 @@ export const FEEDBACK_CATEGORY_COLORS: Record<string, string> = {
   general: 'bg-ktip-ocean-100 text-ktip-ocean-700 border-ktip-ocean-200',
   content: 'bg-ktip-sun-100 text-ktip-sun-700 border-ktip-sun-200',
   praise: 'bg-ktip-tropical-100 text-ktip-tropical-800 border-ktip-tropical-200',
+  appeal: 'bg-red-100 text-red-700 border-red-200',
 }
 
 export const FEEDBACK_STATUS_LABELS: Record<string, string> = {
@@ -89,6 +92,8 @@ export const FEEDBACK_STATUS_RANK: Record<string, number> = {
 }
 
 export const FEEDBACK_CATEGORY_RANK: Record<string, number> = {
+  // A locked-out member waiting on an answer comes first.
+  appeal: -1,
   bug: 0,
   feature_request: 1,
   content: 2,

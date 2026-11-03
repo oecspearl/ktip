@@ -19,6 +19,7 @@ import {
   VERIFICATION_GATED_PERMISSIONS,
 } from '../lib/permissions'
 import { forgetDeviceToken, readDeviceToken } from '../lib/mfa'
+import { toSuspension, type MySuspensionRow, type Suspension } from '../lib/suspension'
 import type { User, Session } from '@supabase/supabase-js'
 import type {
   AccountStatus,
@@ -155,6 +156,12 @@ interface AuthContextType {
   accountStatus: AccountStatus
   /** When the retention window closes, or null while active. */
   purgeAfter: string | null
+  /**
+   * Migration 184 — the member's own suspension, from my_suspension(), or the
+   * profile row's columns until that answers. Null when signed out. Read it
+   * through isSuspendedNow(): an end date that has passed means lifted.
+   */
+  suspension: Suspension | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -299,6 +306,31 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     enabled: !!user?.id && !(bootstrapExpected && profilePending),
     retry: 1,
   })
+
+  // 184. Whether the session is held on /account/suspended. The profile row
+  // already carries the columns, so it answers first; my_suspension() is the
+  // authoritative read, and refetching on focus is how a suspension made
+  // mid-session reaches an open tab. Null (the migration is not deployed yet)
+  // leaves the profile row standing.
+  const { data: suspensionRow } = useQuery({
+    queryKey: ['suspension', user?.id],
+    queryFn: async (): Promise<MySuspensionRow | null> =>
+      (await callOptionalRpc<MySuspensionRow | null>('my_suspension')) ?? null,
+    enabled: !!user?.id,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    retry: 1,
+  })
+  const suspension = useMemo<Suspension | null>(() => {
+    if (!user) return null
+    if (suspensionRow) return toSuspension(suspensionRow)
+    if (!profile) return null
+    return toSuspension({
+      is_suspended: profile.is_suspended,
+      suspended_until: profile.suspended_until,
+      suspension_reason: profile.suspension_reason,
+    })
+  }, [user, suspensionRow, profile])
 
   // profiles.is_minor is a cache of a value that changes on a birthday, and
   // this project has no pg_cron to sweep it (see 068). So it is corrected here,
@@ -1011,6 +1043,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       reopenAccount,
       accountStatus,
       purgeAfter,
+      suspension,
     }),
     [
       user,
@@ -1046,6 +1079,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       reopenAccount,
       accountStatus,
       purgeAfter,
+      suspension,
     ]
   )
 

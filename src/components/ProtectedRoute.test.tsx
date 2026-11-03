@@ -48,10 +48,43 @@ function renderAt(path = '/dashboard') {
         <Route path="/onboarding" element={<div>ONBOARDING</div>} />
         <Route path="/security/set-up" element={<div>MFA_SETUP</div>} />
         <Route path="/security/verify" element={<div>MFA_CHALLENGE</div>} />
+        <Route path="/account/suspended" element={<div>SUSPENDED</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
+
+// 184. The session is held on one page; the lift is read from the end date.
+describe('ProtectedRoute suspension hold', () => {
+  const suspended = (until: string | null) => ({
+    suspension: { isSuspended: true, until, reason: 'Spam', since: null },
+  })
+
+  it('sends a suspended account to the suspended page', () => {
+    mockAuth.mockReturnValue(auth(suspended(null)))
+    renderAt()
+    expect(screen.getByText('SUSPENDED')).toBeTruthy()
+    expect(screen.queryByText('DASHBOARD')).toBeNull()
+  })
+
+  it('holds before onboarding is asked for', () => {
+    mockAuth.mockReturnValue(auth(suspended(null), { roles: [] }))
+    renderAt()
+    expect(screen.getByText('SUSPENDED')).toBeTruthy()
+  })
+
+  it('lets the account through once the end date has passed', () => {
+    mockAuth.mockReturnValue(auth(suspended('2000-01-01T00:00:00Z')))
+    renderAt()
+    expect(screen.getByText('DASHBOARD')).toBeTruthy()
+  })
+
+  it('lets a reinstated account through', () => {
+    mockAuth.mockReturnValue(auth({ suspension: { isSuspended: false, until: null, reason: null, since: null } }))
+    renderAt()
+    expect(screen.getByText('DASHBOARD')).toBeTruthy()
+  })
+})
 
 describe('ProtectedRoute gate ordering', () => {
   it('waits for the challenge answer rather than reading unknown as nothing owed', () => {

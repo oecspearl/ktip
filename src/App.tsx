@@ -280,6 +280,10 @@ const router = createBrowserRouter([
       // has no session, and the page needs none — it only says where the apps
       // are and how to add KTIP to one.
       { path: '/get-authenticator', lazy: lazyPage(() => import('./pages/security/GetAuthenticatorPage')) },
+      // 184. Where a suspended session is held. Bare for the same loop reason
+      // as the two above, and so the navbar's panels (messages, notifications)
+      // are not on offer to an account that may not use them. Guards itself.
+      { path: '/account/suspended', lazy: lazyPage(() => import('./pages/account/AccountSuspendedPage')) },
 
       {
         Component: MainLayout,

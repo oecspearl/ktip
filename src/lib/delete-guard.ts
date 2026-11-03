@@ -228,6 +228,52 @@ export function describeForumBoardDeletion(facts: ForumBoardDeleteFacts): Delete
   }
 }
 
+export interface ResourceDeleteFacts {
+  isPublished: boolean
+  /** A member's submission rather than an entry the library team wrote. */
+  hasAuthor: boolean
+}
+
+/**
+ * The admin library's delete. A published entry has readers and links; a
+ * member's submission is somebody else's work, and they are not told.
+ */
+export function describeResourceDeletion(facts: ResourceDeleteFacts): DeleteImpact {
+  const { isPublished, hasAuthor } = facts
+
+  const cascades = [i18n._(msg`The resource entry and its page`)]
+
+  let warning: string | null = null
+  if (hasAuthor) {
+    warning = i18n._(msg`A member submitted this. It will be gone from their submissions and they will not be notified.`)
+  } else if (isPublished) {
+    warning = i18n._(msg`This resource is published. Existing links to it will break.`)
+  }
+
+  return {
+    cascades,
+    affectsOthers: hasAuthor,
+    requiresTitleConfirmation: hasAuthor || isPublished,
+    warning,
+  }
+}
+
+/**
+ * Deleting an account from the console. Always typed: it takes a person's
+ * whole history, and api/admin/delete-user.ts cannot be undone.
+ */
+export function describeAccountDeletion(): DeleteImpact {
+  return {
+    cascades: [
+      i18n._(msg`The account and its sign-in`),
+      i18n._(msg`Their profile, projects, posts and messages`),
+    ],
+    affectsOthers: true,
+    requiresTitleConfirmation: true,
+    warning: i18n._(msg`This deletes the member's data for good. They will not be notified.`),
+  }
+}
+
 /**
  * Titles get copy-pasted, and a stray trailing space or a doubled space
  * between words is not the mistake the typed confirmation is meant to catch.

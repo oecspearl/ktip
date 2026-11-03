@@ -4,6 +4,8 @@ import {
   describeForumBoardDeletion,
   describeGrantDeletion,
   describeProjectDeletion,
+  describeResourceDeletion,
+  describeAccountDeletion,
   describeBulkDeletion,
   isBulkDeleteConfirmed,
   isDeleteConfirmed,
@@ -301,5 +303,31 @@ describe('describeBulkDeletion', () => {
 
   it('confirms nothing when nothing is selected', () => {
     expect(isBulkDeleteConfirmed(describeBulkDeletion([]), '0')).toBe(false)
+  })
+})
+
+describe('describeResourceDeletion', () => {
+  it('lets an unpublished library draft go with a plain confirm', () => {
+    const impact = describeResourceDeletion({ isPublished: false, hasAuthor: false })
+    expect(impact.requiresTitleConfirmation).toBe(false)
+    expect(impact.warning).toBeNull()
+  })
+
+  it('asks for the title on a published entry', () => {
+    expect(describeResourceDeletion({ isPublished: true, hasAuthor: false }).requiresTitleConfirmation).toBe(true)
+  })
+
+  it('treats a member submission as work belonging to someone else', () => {
+    const impact = describeResourceDeletion({ isPublished: false, hasAuthor: true })
+    expect(impact.affectsOthers).toBe(true)
+    expect(impact.requiresTitleConfirmation).toBe(true)
+  })
+})
+
+describe('describeAccountDeletion', () => {
+  it('always asks for the name', () => {
+    const impact = describeAccountDeletion()
+    expect(impact.requiresTitleConfirmation).toBe(true)
+    expect(impact.affectsOthers).toBe(true)
   })
 })

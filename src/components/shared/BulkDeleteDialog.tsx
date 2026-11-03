@@ -13,7 +13,7 @@ import {
 } from '../../lib/delete-guard'
 import type { SettledBatch } from '../../lib/bulk'
 
-type Kind = 'event' | 'project'
+type Kind = 'event' | 'project' | 'resource' | 'account'
 
 interface BulkDeleteDialogProps {
   open: boolean
@@ -70,12 +70,26 @@ export function BulkDeleteDialog({ open, kind, items, onClose, onDelete, onDelet
           typeTitle: t`Type the event title to confirm`,
           deleted: (n: number) => plural(n, { one: '# event deleted', other: '# events deleted' }),
         }
-      : {
-          title: plural(bulk.count, { one: 'Delete # project?', other: 'Delete # projects?' }),
-          confirm: plural(bulk.count, { one: 'Delete # project', other: 'Delete # projects' }),
-          typeTitle: t`Type the project title to confirm`,
-          deleted: (n: number) => plural(n, { one: '# project deleted', other: '# projects deleted' }),
-        }
+      : kind === 'resource'
+        ? {
+            title: plural(bulk.count, { one: 'Delete # resource?', other: 'Delete # resources?' }),
+            confirm: plural(bulk.count, { one: 'Delete # resource', other: 'Delete # resources' }),
+            typeTitle: t`Type the resource title to confirm`,
+            deleted: (n: number) => plural(n, { one: '# resource deleted', other: '# resources deleted' }),
+          }
+        : kind === 'account'
+          ? {
+              title: plural(bulk.count, { one: 'Delete # account?', other: 'Delete # accounts?' }),
+              confirm: plural(bulk.count, { one: 'Delete # account', other: 'Delete # accounts' }),
+              typeTitle: t`Type the member's name to confirm`,
+              deleted: (n: number) => plural(n, { one: '# account deleted', other: '# accounts deleted' }),
+            }
+          : {
+              title: plural(bulk.count, { one: 'Delete # project?', other: 'Delete # projects?' }),
+              confirm: plural(bulk.count, { one: 'Delete # project', other: 'Delete # projects' }),
+              typeTitle: t`Type the project title to confirm`,
+              deleted: (n: number) => plural(n, { one: '# project deleted', other: '# projects deleted' }),
+            }
 
   const handleConfirm = async () => {
     if (!items || !confirmed) return

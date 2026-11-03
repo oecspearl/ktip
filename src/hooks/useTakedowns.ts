@@ -30,10 +30,22 @@ export interface TakedownNotice {
   infringement_detail: string
   status: TakedownStatus
   counts_as_strike: boolean
+  /** 185 — this notice has hidden or removed its target. Absent before 185. */
+  held_content?: boolean
   admin_notes: string | null
   resolved_at: string | null
   created_at: string
 }
+
+/** What apply_takedown_outcome() did to the content (185). Absent before 185. */
+export type TakedownContentEffect =
+  | 'no_target'
+  | 'unsupported'
+  | 'kept'
+  | 'still_held'
+  | 'quarantined'
+  | 'removed'
+  | 'restored'
 
 /** One row of get_my_takedown_notices() — the accused author's view. */
 export interface MyTakedownNotice {
@@ -117,7 +129,50 @@ export function useApplyTakedownOutcome() {
       })
       if (error) throw error
       if (data?.ok !== true) throw new Error(String(data?.reason ?? 'failed'))
-      return data as { ok: true; strikes: number; limit: number; at_limit: boolean }
+      return data as {
+        ok: true
+        strikes: number
+        limit: number
+        at_limit: boolean
+        content?: TakedownContentEffect
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['takedowns'] })
+      // The target's status may have moved with the notice (185).
+      void queryClient.invalidateQueries({ queryKey: ['resources'] })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+      void queryClient.invalidateQueries({ queryKey: ['events'] })
+    },
+  })
+}
+
+/**
+ * Confirms which piece of KTIP content a notice is about (185). Fills the
+ * accused author too, so they can see the notice and answer it. Refused while
+ * the notice is holding content.
+ */
+export function useSetTakedownTarget() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      noticeId,
+      targetType,
+      targetId,
+    }: {
+      noticeId: string
+      targetType: string
+      targetId: string
+    }) => {
+      const { data, error } = await (supabase as any).rpc('set_takedown_target', {
+        p_notice_id: noticeId,
+        p_target_type: targetType,
+        p_target_id: targetId,
+      })
+      if (error) throw error
+      if (data?.ok !== true) throw new Error(String(data?.reason ?? 'failed'))
+      return data as { ok: true; target_author_id: string | null }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['takedowns'] })

@@ -40,6 +40,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useOrientationTransition } from '../../hooks/useOrientationTransition'
 import { useModerationRules } from '../../hooks/useModerationRules'
 import { shellKey } from '../../lib/routeTransitions'
+import { suspensionRedirect } from '../../lib/suspension'
 
 /**
  * The three overlay panels, each mounted only once its own trigger has fired.
@@ -124,6 +125,15 @@ export function MainLayout() {
   // pages must not wait on it, and the redirect follows as soon as it lands.
   if (auth.user && !auth.mfaChallengeLoading && auth.mfaChallengeRequired) {
     return <Navigate to="/security/verify" replace state={{ from: location }} />
+  }
+
+  // A suspended session sees one page (184), plus the policies under /legal.
+  // Here rather than only in ProtectedRoute because the public pages are where
+  // a signed-in member lands first. After the challenge: the second factor is
+  // owed before anything about the account is shown.
+  const held = auth.user ? suspensionRedirect(pathname, auth.suspension) : null
+  if (held) {
+    return <Navigate to={held} replace />
   }
 
   return (
