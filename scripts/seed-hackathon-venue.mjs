@@ -5,7 +5,11 @@
  * furniture, team Homebases, calls and captions can be tried end to end.
  *
  * Usage, from the repo root:
- *   node --env-file=.env scripts/seed-hackathon-venue.mjs [--domain ktip.test] [--organiser you@oecs.int] [--dry-run]
+ *   node --env-file=.env scripts/seed-hackathon-venue.mjs [--domain ktip.test] [--organiser you@oecs.int] [--layout-seed 42] [--dry-run]
+ *
+ * Every run lays the building out afresh (src/lib/venue-layout.ts): one
+ * staircase per pair of floors, then each floor's rooms packed around them.
+ * --layout-seed repeats a layout; the seed used is printed either way.
  *
  * --organiser names a real account as the event's host (organizer_id and the
  * organiser venue role). Without it the host is test.programme-supervisor.
@@ -33,6 +37,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { layoutBuilding } from '../src/lib/venue-layout.ts'
 
 const url = process.env.VITE_SUPABASE_URL
 const secret = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -190,6 +195,30 @@ const ROOMS = [
   R(34, 4, 'green-room', 'Green Room', 'breakout', 'lounge', rect(3, 11, 9, 15), '#7AB000', 1, { description: 'Pitchers wait here before going on stage.' }),
 ]
 
+// ---- layout: stairs first, then each floor packed around them ----
+// The coordinates written above only give each room its size.
+const LAYOUT_SEED = arg('layout-seed') ? Number(arg('layout-seed')) : Math.floor(Math.random() * 2 ** 31)
+const LAYOUT = layoutBuilding({
+  cols: 28,
+  rows: 18,
+  seed: LAYOUT_SEED,
+  floors: FLOORS.map((floor, index) => ({
+    door: floor.door,
+    rooms: ROOMS.filter((r) => r.floor === index).map((r) => {
+      const xs = r.cells.map((c) => c[0])
+      const ys = r.cells.map((c) => c[1])
+      return { key: r.key, w: Math.max(...xs) - Math.min(...xs) + 1, h: Math.max(...ys) - Math.min(...ys) + 1 }
+    }),
+  })),
+})
+if (LAYOUT.missing.length) {
+  throw new Error(`These rooms did not fit: ${LAYOUT.missing.join(', ')}`)
+}
+for (const r of ROOMS) {
+  const p = LAYOUT.rooms[r.floor][r.key]
+  r.cells = rect(p.x, p.y, p.x + p.w - 1, p.y + p.h - 1)
+}
+
 const TEAMS = [
   { n: 1, name: 'Team Alpha', tagline: 'Catch logs that fishers fill in by voice, in any language', room: 10 },
   { n: 2, name: 'Breadfruit Labs', tagline: 'Cold-chain alerts for small produce vendors', room: 11 },
@@ -266,7 +295,7 @@ async function main() {
     venue_closes_at: hours(24 * 6),
     spectators_enabled: true,
     spectator_scope: 'members',
-    venue_map: { v: 1, cols: 28, rows: 18, floors: FLOORS, stairs: { x: 0, y: 0, w: 2, h: 2 } },
+    venue_map: { v: 1, cols: 28, rows: 18, floors: FLOORS, flights: LAYOUT.flights },
   }
   {
     const { error } = await admin.from('events').upsert(event, { onConflict: 'id' })
@@ -293,7 +322,7 @@ async function main() {
       .not('id', 'in', `(${keep.join(',')})`)
     if (delErr) throw new Error(`prune rooms: ${delErr.message}`)
   }
-  console.log(`  ${ROOMS.length} rooms on ${FLOORS.length} floors`)
+  console.log(`  ${ROOMS.length} rooms on ${FLOORS.length} floors (layout seed ${LAYOUT.seed})`)
 
   // ---- registrations + venue members
   {
