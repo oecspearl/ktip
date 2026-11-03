@@ -58,7 +58,12 @@ export function useSendEmailProof() {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async (email: string): Promise<SendProofResult> => {
+    // 175: { purpose: 'renewal' } mails even the sign-in address, because a
+    // renewal has to prove the mailbox again.
+    mutationFn: async (
+      input: string | { email: string; purpose?: 'renewal' }
+    ): Promise<SendProofResult> => {
+      const { email, purpose } = typeof input === 'string' ? { email: input, purpose: undefined } : input
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error(t`No active session`)
 
@@ -68,7 +73,7 @@ export function useSendEmailProof() {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(purpose ? { email, purpose } : { email }),
       })
 
       const failed = t`Could not send the confirmation email`

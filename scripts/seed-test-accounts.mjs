@@ -288,6 +288,9 @@ for (const account of ACCOUNTS) {
         country: COUNTRY,
         bio: `Shared test account for the ${account.slug} role. Data here is not real.`,
         is_verified: true,
+        // 145: nobody verified is without a reason. These are set by hand.
+        verified_via: 'admin',
+        verified_at: new Date().toISOString(),
         is_suspended: false,
         mfa_grandfathered: true,
         requires_mfa_enrollment: false,

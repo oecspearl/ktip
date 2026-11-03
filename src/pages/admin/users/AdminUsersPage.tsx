@@ -4,6 +4,7 @@ import { VerifiedBadge } from '../../../components/ui/VerifiedBadge'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
 import { ConfirmModal } from '../../../components/admin/ConfirmModal'
+import { RevokeVerificationModal } from '../../../components/admin/RevokeVerificationModal'
 import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -780,9 +781,17 @@ export default function AdminUsersPage() {
         </div>
       </Modal>
 
-      {/* Confirm Verify/Unverify Modal */}
+      {/* 174: removing a badge goes through revoke_verification(), with a
+          reason the member is shown and an optional hold. */}
+      <RevokeVerificationModal
+        target={confirmVerify && !confirmVerify.newVerified ? confirmVerify : null}
+        onClose={() => setConfirmVerify(null)}
+        onDone={refetch}
+      />
+
+      {/* Confirm Verify Modal */}
       <ConfirmModal
-        open={!!confirmVerify}
+        open={!!confirmVerify?.newVerified}
         title={confirmVerify?.newVerified ? 'Verify User' : 'Unverify User'}
         message={
           confirmVerify?.newVerified

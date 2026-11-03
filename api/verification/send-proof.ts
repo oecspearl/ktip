@@ -62,7 +62,11 @@ export default async function handler(request: Request) {
   if (!EMAIL_RE.test(email) || email.length > 254) {
     return json({ error: 'Enter a valid email address.' }, 400)
   }
-  if (email === caller.email?.toLowerCase()) {
+  // 175: a renewal proves the mailbox again, so it mails even the sign-in
+  // address and never short-circuits on a proof made in the past. Supabase's
+  // confirmation at sign-up says the person had the mailbox then, not now.
+  const renewal = body?.purpose === 'renewal'
+  if (!renewal && email === caller.email?.toLowerCase()) {
     // Already proven by Supabase. The client calls claim_email_verification().
     return json({ error: 'use_primary' }, 409)
   }
@@ -101,7 +105,7 @@ export default async function handler(request: Request) {
 
   const mineRow = mine as { id: string; verified_at: string | null; send_count: number } | null
 
-  if (mineRow?.verified_at) {
+  if (mineRow?.verified_at && !renewal) {
     // Already proven. Re-run the decision rather than re-mailing: a domain
     // may have been trusted since, or an institution may have opted in.
     const { data: result } = await admin.rpc('apply_verified_email', {
@@ -109,7 +113,11 @@ export default async function handler(request: Request) {
       p_email: email,
       p_source: 'proof',
     })
-    return json({ success: true, already_verified: true, result }, 200)
+    // 175: a lapsed term is not renewed by an old proof. Fall through and
+    // mail a new link.
+    if ((result as { reason?: string } | null)?.reason !== 'renewal_required') {
+      return json({ success: true, already_verified: true, result }, 200)
+    }
   }
 
   const token = mintProofToken()

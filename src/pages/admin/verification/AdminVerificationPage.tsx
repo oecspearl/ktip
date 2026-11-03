@@ -20,6 +20,7 @@ import { usePageTitle } from '../../../hooks/usePageTitle'
 import { PageHero } from '../../../components/layout/PageHero'
 import { DiamondAvatar } from '../../../components/ui/DiamondAvatar'
 import { TrustedDomainsPanel } from './TrustedDomainsPanel'
+import { VerificationCodesAdminPanel, VerificationHistoryPanel } from './VerificationHistoryPanel'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -190,6 +191,10 @@ export default function AdminVerificationPage() {
           </div>
         )}
       </div>
+
+      {/* 174 / 176: what happened after the queue, and the codes organisations issued. */}
+      <VerificationHistoryPanel />
+      <VerificationCodesAdminPanel />
 
       {/* Detail Modal */}
       {selected && (

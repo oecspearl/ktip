@@ -22,6 +22,7 @@ import { FUNDING_DISCLAIMER } from './funding-disclaimer'
 import { TRADEMARK } from './trademark'
 import { CODE_CONTRIBUTION } from './code-contribution'
 import { PARTNER_API } from './partner-api'
+import { VERIFICATION } from './verification'
 
 export * from './types'
 export { LEGAL_TOKENS, fillTokens, extractTokens } from './parties'
@@ -57,6 +58,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
   TRADEMARK,
   CODE_CONTRIBUTION,
   PARTNER_API,
+  VERIFICATION,
 ]
 
 const BY_KEY = new Map<LegalDocumentKey, LegalDocument>(

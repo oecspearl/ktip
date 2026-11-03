@@ -121,6 +121,10 @@
       "schedule": "20 3 * * *"
     },
     {
+      "path": "/api/cron/verification-expiry",
+      "schedule": "40 3 * * *"
+    },
+    {
       "path": "/api/cron/monthly-report",
       "schedule": "0 6 1 * *"
     },

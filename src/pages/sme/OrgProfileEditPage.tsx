@@ -18,6 +18,7 @@ import { Modal } from '../../components/ui/Modal'
 import { ImageUpload } from '../../components/ui/ImageUpload'
 import { PageHero } from '../../components/layout/PageHero'
 import { AgreementGateModal } from '../../components/legal/AgreementGate'
+import { OrgCodesPanel } from '../../components/verification/OrgCodesPanel'
 import { useAgreementGate } from '../../hooks/useAgreementGate'
 import { legalPath } from '../../lib/legal/manifest'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -422,6 +423,13 @@ export default function OrgProfileEditPage({ embedded = false }: { embedded?: bo
                 </ul>
               )}
             </Card>
+          </div>
+        )}
+
+        {/* 176: a verified business vouches for staff with no work email. */}
+        {employer?.verification_status === 'verified' && (
+          <div className="mt-6">
+            <OrgCodesPanel orgId={employer.id} />
           </div>
         )}
       </div>

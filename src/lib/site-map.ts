@@ -1122,6 +1122,15 @@ export const SITE_MAP: SiteEntry[] = [
     icon: 'Plug',
   },
   {
+    id: 'legal.verification',
+    title: 'Verification Policy',
+    category: 'Support',
+    description: 'How accounts get verified, how long it lasts, and how to ask for a review',
+    keywords: ['verification', 'verified', 'badge', 'code', 'renew', 'identity', 'appeal'],
+    href: '/legal/verification',
+    icon: 'BadgeCheck',
+  },
+  {
     id: 'legal.consents',
     title: 'What you have agreed to',
     category: 'Account',

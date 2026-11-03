@@ -94,6 +94,10 @@ msgid "Applies to projects and resources — events and grants are sorted by typ
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "PDF, JPEG, PNG or WebP files, up to 10 MB each, and up to three files per request."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Open the board you want to post in and click \"New Discussion\".\n"
 "\n"
 "Give it a title and write the body. Be specific — a discussion that says what you already tried gets better answers than one that just describes the problem.\n"
@@ -278,6 +282,10 @@ msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Warning: This will permanently delete:"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Codes"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -485,6 +493,10 @@ msgid "Removed from your team"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Acceptable Use Policy"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Pick members from the invite panel and KTIP sends each of them the room link as a message and a notification — no email addresses to copy around.\n"
 "\n"
 "The same link works for anyone you paste it to, so you can pull in someone outside the platform when you need to."
@@ -645,6 +657,15 @@ msgid "This event has no virtual venue"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "What the verified badge means, the ways to earn it, how long it lasts, and what happens when it is removed."
+msgstr ""
+
+#. placeholder {0}: org.org_name
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Verification codes for {0}"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Publishing grants, resources and integrations"
 msgstr ""
 
@@ -693,6 +714,10 @@ msgstr ""
 msgid "An agent authorised to act for the owner"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Who is it for?"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your recovery codes stay valid but stop being useful — there will be no second step for them to recover."
 msgstr ""
@@ -707,6 +732,10 @@ msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Skills"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "What we keep"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -735,6 +764,10 @@ msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Motion makes me feel unwell"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Could not cancel the code"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -958,6 +991,10 @@ msgid "This address"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "When verification is removed"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Every submitted application and every completed registration form files an immutable copy under Submissions on your Dashboard.\n"
 "\n"
 "Open one to see exactly what you sent and when — not the current state of the record, but the snapshot at the moment of submission.\n"
@@ -977,8 +1014,16 @@ msgstr ""
 msgid "Embedded content — a video, a map, a slide deck someone linked — can set storage under its own provider’s terms once you play or open it."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "No codes yet."
+msgstr ""
+
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Remove from team"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "History"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1038,6 +1083,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
 msgid "View as a visitor"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "You have issued 50 codes today. Try again tomorrow."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1126,22 +1175,16 @@ msgstr ""
 msgid "Group name (e.g. Funding)"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Valid for"
+msgstr ""
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "This grant is currently inactive."
 msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Work through the five steps: Basics, Summary & Problem, Solution & Plan, Budget & Team, Impact & Review."
-msgstr ""
-
-#: src/i18n/harvested.ts
-msgid "Business verification is done by a Business Support Organisation, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.\n"
-"\n"
-"Open the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.\n"
-"\n"
-"The reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.\n"
-"\n"
-"A Private Sector account is the unverified state of the same thing — everything keeps working while you wait."
 msgstr ""
 
 #. placeholder {0}: params.projectTitle
@@ -1272,11 +1315,6 @@ msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "Full name"
-msgstr ""
-
-#: src/hooks/useAIAssistant.ts
-#: src/i18n/harvested.ts
-msgid "Faculty/Researcher"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1520,6 +1558,10 @@ msgstr ""
 
 #: src/lib/resume-designs.ts
 msgid "Classic"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "What issuing a code means"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1816,6 +1858,10 @@ msgstr ""
 msgid "What kinds of rooms will I see?"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Badge only"
+msgstr ""
+
 #: src/components/achievements/AchievementUnlockModal.tsx
 msgid "Nice"
 msgstr ""
@@ -1942,6 +1988,14 @@ msgstr ""
 
 #: src/pages/forums/BoardFormPage.tsx
 msgid "Only the person who opened this board, or a forum administrator, can edit it."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Verify your own account before issuing codes."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "An identity document"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -2124,6 +2178,10 @@ msgstr ""
 
 #: src/components/notes/StickyNote.tsx
 msgid "Expand note"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "e.g. Left the company in October"
 msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
@@ -2372,6 +2430,10 @@ msgstr ""
 msgid "Can I message more than one person at once?"
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "A reviewer removed the verified badge from this account, so confirming an address cannot bring it back. Open Settings, Verification, to see why and how to ask for a review."
+msgstr ""
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Context too long (max 1000 characters)"
 msgstr ""
@@ -2554,6 +2616,10 @@ msgstr ""
 msgid "Verification evidence for student, faculty or organisational status"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Cancel any code that was given to the wrong person or never used."
+msgstr ""
+
 #: src/components/notes/StickyNoteGroup.tsx
 msgid "Minimize"
 msgstr ""
@@ -2636,6 +2702,10 @@ msgstr ""
 msgid "Search the whole platform"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Business Associations"
+msgstr ""
+
 #: src/pages/cv/CvPage.tsx
 msgid "{courses, plural, one {Synced # course} other {Synced # courses}}"
 msgstr ""
@@ -2650,6 +2720,10 @@ msgstr ""
 
 #: src/pages/InvitationsPage.tsx
 msgid "KTIP invitation"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "It lasted 12 months. Renew it, or verify another way below."
 msgstr ""
 
 #: src/pages/forums/PostDetailPage.tsx
@@ -3213,6 +3287,10 @@ msgstr ""
 msgid "Join Video Call"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Verification Policy"
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Define the expected outcomes, then review and submit your application."
 msgstr ""
@@ -3282,6 +3360,7 @@ msgid "Constraint"
 msgstr ""
 
 #: src/components/legal/ReconsentBanner.tsx
+#: src/i18n/harvested.ts
 msgid "Review"
 msgstr ""
 
@@ -3445,6 +3524,7 @@ msgid "One line, shown on the card and the homepage"
 msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
+#: src/components/verification/VerificationStatusCard.tsx
 msgid "Open the email and press Confirm. The link works for 24 hours."
 msgstr ""
 
@@ -3890,6 +3970,16 @@ msgid "If we act on it, the content is removed or made inaccessible, and the mem
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Business verification is done by a business association, not by OECS directly. In most member states that is your national Chamber of Commerce; it can also be an incubator, an accelerator or an MSME agency.\n"
+"\n"
+"Open the SME verification page — it is also the Business profile entry on your dashboard rail if you hold an organisation role. Enter your legal business name, your member state and your business registration number, then submit.\n"
+"\n"
+"The reviewing organisation checks the submission against its own records. Once approved, your business is verified and a verified badge shows to funders and partners.\n"
+"\n"
+"A Private Sector account is the unverified state of the same thing — everything keeps working while you wait."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "The dashboard calendar pulls four things together so you have one place to look.\n"
 "\n"
 "Events — events on the platform. My Registrations — events you have RSVP'd to. Funding Deadlines — closing dates for the calls you are tracking. Applications — dates attached to your own funding applications.\n"
@@ -3928,6 +4018,7 @@ msgid "Only Chamber-verified organisations are listed here."
 msgstr ""
 
 #: src/components/security/BackupCodesSheet.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 msgid "Copied"
 msgstr ""
 
@@ -3951,6 +4042,11 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
+#. placeholder {0}: issued.label
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "For {0}. Copy it now: it is not shown again."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Single sign-on and catalogue integration"
 msgstr ""
@@ -3965,6 +4061,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Alter a logo — recolour it, crop it, stretch it, add to it, or combine it with your own mark."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Withdraw the badge from the Verification page when someone leaves."
 msgstr ""
 
 #: src/pages/collaborate/WhiteboardsListPage.tsx
@@ -4170,6 +4270,10 @@ msgstr ""
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "14 days"
+msgstr ""
+
 #: src/components/ErrorBoundary.tsx
 #: src/pages/NotFoundPage.tsx
 msgid "Go Home"
@@ -4225,7 +4329,7 @@ msgstr ""
 msgid "Hosted by <0>{0}</0>"
 msgstr ""
 
-#: src/i18n/harvested.ts
+#: src/lib/permissions.ts
 msgid "OECS Admin"
 msgstr ""
 
@@ -4380,6 +4484,10 @@ msgstr ""
 msgid "Tell us about yourself..."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Some roles need more than the badge. Government, intergovernmental, NGO, research institution and diaspora roles are confirmed by a trusted email domain or by a reviewer. Student and faculty roles are confirmed by the institution. Administrator roles are only ever given by hand."
+msgstr ""
+
 #: src/hooks/useAIAssistant.ts
 msgid "{greeting} I am the KTIP Assistant.{roleHint}\n"
 "\n"
@@ -4475,6 +4583,10 @@ msgstr ""
 msgid "Confirmation sent! Check your new email to verify the change."
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "That code did not work. Check it with the person who gave it to you. Codes work once and expire."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Check the legal entity’s name and registration, not just its brand."
 msgstr ""
@@ -4522,6 +4634,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "OECS Commons and catalogue APIs — course and catalogue records linked to your account where you use those integrations."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "3 days"
 msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
@@ -4632,6 +4748,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Co-founders/Project Partners"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Say who the code is for."
 msgstr ""
 
 #. placeholder {0}: codeStatus.remaining
@@ -5189,6 +5309,10 @@ msgstr ""
 msgid "Don't post anyone's private details."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "You need it to post or sponsor a funding call, apply for funding, create a project or an event, post or comment in the forums, submit a resource, offer mentorship, or start a conversation with someone new."
+msgstr ""
+
 #: src/lib/countries.ts
 msgid "All other countries"
 msgstr ""
@@ -5213,6 +5337,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Declaring your date of birth"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "When you issue a code, you are telling KTIP that the person who uses it works or studies with you. In return:"
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -5464,6 +5592,10 @@ msgstr ""
 msgid "Publish your own"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "How accounts get verified, how long it lasts, and how to ask for a review"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "This decides what else we ask you for, and what you set up next."
 msgstr ""
@@ -5476,6 +5608,8 @@ msgstr ""
 msgid "Pinned notes"
 msgstr ""
 
+#: src/hooks/useAIAssistant.ts
+#: src/lib/permissions.ts
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Student"
 msgstr ""
@@ -5580,6 +5714,10 @@ msgstr ""
 msgid "Sorry, I ran into an issue. Please try asking again in a moment."
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "A reviewer removed the badge from this account, so a code cannot restore it."
+msgstr ""
+
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Every page has an accessibility button. On most pages it is in the round button at the bottom right; on the sign-in pages it stands on its own. <0>Open accessibility settings</0>."
 msgstr ""
@@ -5673,6 +5811,10 @@ msgstr ""
 msgid "Recorded. Thank you."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Unused"
+msgstr ""
+
 #: src/lib/funding-types.ts
 msgid "Convertible note"
 msgstr ""
@@ -5690,6 +5832,7 @@ msgstr ""
 msgid "Log In"
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
 #: src/pages/auth/SignupPage.tsx
 msgid "Verification code"
 msgstr ""
@@ -5900,6 +6043,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Applications are saved as you work, so that a closed tab does not cost you an afternoon. A draft is visible only to you until you submit it — the funder sees nothing, not even that a draft exists."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Used"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6428,6 +6575,10 @@ msgid "Watch the video"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "How long"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Report any breach affecting KTIP data to %privacyEmail% within 72 hours of becoming aware of it."
 msgstr ""
 
@@ -6759,10 +6910,6 @@ msgstr ""
 msgid "Owns who people are and how they behave: member records (read-only), verification, institutions, chamber review, moderation and grievances."
 msgstr ""
 
-#: src/hooks/useAIAssistant.ts
-msgid "Business Support Organisation Administrator"
-msgstr ""
-
 #: src/pages/resources/ResourcesPage.tsx
 msgid "No integrations found"
 msgstr ""
@@ -6794,8 +6941,18 @@ msgstr ""
 msgid "Experience"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Their email (optional)"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your new recovery codes"
+msgstr ""
+
+#. placeholder {0}: formatDate(code.issued_at)
+#. placeholder {1}: formatDate(code.expires_at)
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "issued {0}, expires {1}"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6968,6 +7125,10 @@ msgstr ""
 msgid "What organisers and sponsors may not do"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "A badge from an email address, institution or code lasts 12 months and can be renewed."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Team / Personnel"
 msgstr ""
@@ -7121,6 +7282,10 @@ msgid "Applying in KTIP versus on an external site"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "We record who issued each code and who used it. An organisation whose codes are misused can lose the ability to issue them, and its own verification may be reviewed."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Government"
 msgstr ""
 
@@ -7223,6 +7388,7 @@ msgstr ""
 msgid "Print"
 msgstr ""
 
+#: src/hooks/useAIAssistant.ts
 #: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Faculty"
@@ -7388,6 +7554,10 @@ msgid "Joining for an organisation"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "A verified badge means we hold evidence that the account belongs to a real person, and, where it says so, that they work or study where they claim. You can browse KTIP without it."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "How do I change my primary email address?"
 msgstr ""
 
@@ -7395,18 +7565,8 @@ msgstr ""
 msgid "All stored platform data"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Roles are a list, not a single choice — an account can hold several. They sit in three tiers.\n"
-"\n"
-"Admin — Super Admin (system-wide management, policy, audit logs), Admin, People & Trust Supervisor (verification, institutions, moderation and grievances), Programmes Supervisor (projects, funding, forums, resources and achievements) and Safety Admin (moderation queues and escalations). \"OECS Admin\" is a legacy label that resolves to Super Admin.\n"
-"\n"
-"Organisation — Investor / Funding Agency, Private Sector, Business Support Organisation, Post-Secondary Institution, NGO, Research Institution, Government, Diaspora and IGO.\n"
-"\n"
-"Individual — Entrepreneur, Faculty / Researcher, Researcher, Mentor and Student / Youth Innovator.\n"
-"\n"
-"Investor, Private Sector, Entrepreneur, Mentor and Researcher are self-assignable: you pick them yourself. Student, Faculty, the organisation roles and the admin roles are granted only after review by an institution, a business support organisation or OECS.\n"
-"\n"
-"What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Students carry one standing restriction of their own: they cannot start unmonitored direct messages."
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "If you fill this in, only an account with that confirmed address can use the code."
 msgstr ""
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -7496,6 +7656,10 @@ msgstr ""
 #: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/ui/EmojiPicker.tsx
 msgid "Recent"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "a member"
 msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
@@ -8005,7 +8169,6 @@ msgid "Your use of the platform"
 msgstr ""
 
 #: src/hooks/useAIAssistant.ts
-#: src/i18n/harvested.ts
 #: src/lib/permissions.ts
 msgid "Entrepreneur"
 msgstr ""
@@ -8055,6 +8218,10 @@ msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Redirecting you to <0>My Reports</0>. Click the link if you are not redirected automatically."
+msgstr ""
+
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "A reviewer removed the badge from this account, so an email address cannot bring it back."
 msgstr ""
 
 #: src/pages/cv/PublicCvPage.tsx
@@ -8196,6 +8363,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Why is the Funding, Mentees or Research tab empty?"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A passport, a national identity card or a driving licence, valid on the day you upload it."
 msgstr ""
 
 #: src/components/shared/ReceiptDocument.tsx
@@ -8471,6 +8642,7 @@ msgstr ""
 #: src/components/projects/RequestCollaborationModal.tsx
 #: src/components/settings/LegalSettingsTab.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 #: src/pages/achievements/AchievementsPage.tsx
 #: src/pages/cv/CvEditPage.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
@@ -8497,6 +8669,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The tabs"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "To renew, confirm the same address again. If you are no longer there, verify another way. A code-based badge renews with a new code."
 msgstr ""
 
 #: src/components/messages/GroupSettingsModal.tsx
@@ -8655,6 +8831,10 @@ msgstr ""
 msgid "Previous quarter"
 msgstr ""
 
+#: src/components/verification/InstitutionalEmailCard.tsx
+msgid "A reviewer needs to restore your badge."
+msgstr ""
+
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "Remove {removeLabel}"
 msgstr ""
@@ -8746,6 +8926,7 @@ msgstr ""
 #: src/components/documents/DocumentUploadModal.tsx
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/components/shared/BulkActionBar.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 #: src/lib/calendar-note-item.ts
 msgid "Done"
 msgstr ""
@@ -8917,6 +9098,10 @@ msgstr ""
 
 #: src/lib/resume-designs.ts
 msgid "Editorial single column with headings set in a left gutter. Wide margins, hairline rules."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Asking for a decision to be reviewed"
 msgstr ""
 
 #: src/pages/events/EventsPage.tsx
@@ -9098,8 +9283,8 @@ msgstr ""
 msgid "Project"
 msgstr ""
 
-#: src/lib/permissions.ts
-msgid "OECS Admin (legacy)"
+#: src/i18n/harvested.ts
+msgid "At a partner institution, students are approved automatically, from a list of addresses the institution gave us, or by one of its educators. Teaching staff are added by the institution."
 msgstr ""
 
 #: src/hooks/useAIAssistant.ts
@@ -9172,6 +9357,14 @@ msgstr ""
 
 #: src/components/venue/AvailabilityPicker.tsx
 msgid "Please do not interrupt"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Withdraw badge"
+msgstr ""
+
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Did your school or college give you a code?"
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -9509,6 +9702,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Publishing and removing"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Codes, stored only in a scrambled form that cannot be turned back into the code."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10203,6 +10400,10 @@ msgstr ""
 msgid "Improve"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "If the badge ends, nothing you published is removed. You can keep reading, but the actions listed above are locked until you verify again."
+msgstr ""
+
 #: src/pages/dashboard/tabs/EventsTab.tsx
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Past"
@@ -10310,6 +10511,10 @@ msgstr ""
 msgid "Close preview"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "A badge earned with an identity document, or given by a reviewer, does not expire. It can still be reviewed."
+msgstr ""
+
 #: src/lib/venue-room-sections.ts
 msgid "The other rooms, busiest first, with the way back to the map."
 msgstr ""
@@ -10359,6 +10564,10 @@ msgstr ""
 
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Featured"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Your rights over this information are set out in the Privacy Policy."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10438,6 +10647,10 @@ msgstr ""
 msgid "Failed to load whiteboard"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "The code could not be issued."
+msgstr ""
+
 #: src/pages/forums/BoardFormPage.tsx
 msgid "Not your board"
 msgstr ""
@@ -10446,8 +10659,16 @@ msgstr ""
 msgid "Achievements you earn on the platform show here."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Your new code"
+msgstr ""
+
 #: src/lib/authenticator-apps.ts
 msgid "Tap the + button in the bottom corner."
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Ask your organisation for a new code and enter it here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -10488,6 +10709,10 @@ msgid "Every KTIP workshop, webinar, conference, training and field activity acr
 "You can browse it two ways, filter it half a dozen ways, and add your own event with the Create Event button in this banner.\n"
 "\n"
 "This tour takes about a minute. Leave any time with Escape or the red button at the top."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A badge is a check made at a point in time. It is not an endorsement by %entityShort%, and it tells you nothing about someone’s finances, qualifications or intentions. Before sending money or documents to anyone, read the Grant and Funding Disclaimer."
 msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
@@ -10640,6 +10865,10 @@ msgstr ""
 msgid "Enter a backup email address"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "The reviewer checks that the name matches your profile, that the document is readable and current, and that it supports the role you asked for. You can cover your document number and anything else the reviewer does not need. Never upload bank details or card numbers."
+msgstr ""
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Clear Formatting"
 msgstr ""
@@ -10709,6 +10938,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Support, feedback, testing and grievance submissions"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "How to ask for a review"
 msgstr ""
 
 #: src/components/moderation/QuarantineNotice.tsx
@@ -10815,6 +11048,10 @@ msgid "Accept"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Ways to verify"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Yes. In Messages, click \"New\" and select several people to create a named group chat. Group admins can rename the group and add or remove members; anyone can leave."
 msgstr ""
 
@@ -10852,8 +11089,16 @@ msgstr ""
 msgid "Organizer"
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "Use code"
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "Go to a page"
+msgstr ""
+
+#: src/components/settings/VerificationTab.tsx
+msgid "How verification works"
 msgstr ""
 
 #: src/pages/security/GetAuthenticatorPage.tsx
@@ -10862,6 +11107,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Case Study"
+msgstr ""
+
+#: src/components/settings/VerificationTab.tsx
+msgid "Verified with a code from your organisation."
 msgstr ""
 
 #: src/a11y/setup.ts
@@ -11009,6 +11258,7 @@ msgid "{teamCount, plural, one {# team member} other {# team members}}"
 msgstr ""
 
 #: src/components/personalization/SignalSummary.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 msgid "Role"
 msgstr ""
 
@@ -11274,6 +11524,11 @@ msgstr ""
 msgid "{0} points so far."
 msgstr ""
 
+#. placeholder {0}: status.label
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "It came from {0} and lasted 12 months. Renew it, or verify another way below."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Help article — Forums"
 msgstr ""
@@ -11429,6 +11684,10 @@ msgstr ""
 msgid "What this room is for"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "What a badge does not tell you"
+msgstr ""
+
 #: src/components/collaboration/editor/ImageModal.tsx
 #: src/components/ui/ImageUpload.tsx
 msgid "Uploading..."
@@ -11569,11 +11828,6 @@ msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Choose any that apply"
-msgstr ""
-
-#: src/hooks/useAIAssistant.ts
-#: src/i18n/harvested.ts
-msgid "Student/Youth Innovator"
 msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
@@ -11725,6 +11979,7 @@ msgstr ""
 msgid "Close this folder?"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
 msgid "Copy"
 msgstr ""
@@ -11782,6 +12037,10 @@ msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "a document"
+msgstr ""
+
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "Your verification is renewed for 12 months."
 msgstr ""
 
 #: src/pages/security/MfaRecoverPage.tsx
@@ -11868,6 +12127,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Start a forum discussion"
+msgstr ""
+
+#. placeholder {0}: formatDate(status.verified_until)
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Valid until {0}."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12064,6 +12328,11 @@ msgstr ""
 msgid "{0, plural, one {# question answered here — for anything else, send us feedback.} other {# questions answered here — for anything else, send us feedback.}}"
 msgstr ""
 
+#. placeholder {0}: result.org_name
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "{0} vouched for you."
+msgstr ""
+
 #: src/components/profile/PortraitStudio.tsx
 msgid "Behind you on your member page"
 msgstr ""
@@ -12107,6 +12376,7 @@ msgid "Each card carries the project’s title, summary, category and phase, plu
 "Click any card for the full project: its story, team, updates, and how to ask to join."
 msgstr ""
 
+#: src/components/verification/VerificationStatusCard.tsx
 #: src/hooks/useEmailVerification.ts
 msgid "Could not send the confirmation email"
 msgstr ""
@@ -12180,6 +12450,14 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The licence you grant so the competition can run"
+msgstr ""
+
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "A verified business, school or college can vouch for you with a one-time code."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Give each code to one person you know, directly. Never post codes in public."
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -12695,6 +12973,10 @@ msgid "Required — the applicant is told they cannot submit without it"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "A reviewer can remove a badge if the evidence was false or given in error, if the person has left the organisation the badge relied on, or if the account breaks the Acceptable Use Policy. An organisation can withdraw a badge that rests on its own code."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Agent"
 msgstr ""
 
@@ -12976,6 +13258,10 @@ msgstr ""
 msgid "We do not check"
 msgstr ""
 
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "A reviewer needs to restore your badge"
+msgstr ""
+
 #: src/lib/authenticator-apps.ts
 msgid "Choose + to add a code."
 msgstr ""
@@ -13048,8 +13334,10 @@ msgstr ""
 msgid "Link already used, or not valid"
 msgstr ""
 
+#. placeholder {0}: resolveCopy(i18n, ROLE_LABELS[result.granted_role] ?? result.granted_role)
 #. placeholder {0}: roleLabel(outcome.role)
 #: src/components/verification/InstitutionalEmailCard.tsx
+#: src/components/verification/RedeemCodeCard.tsx
 msgid "Your account now holds the {0} role."
 msgstr ""
 
@@ -13093,6 +13381,10 @@ msgstr ""
 
 #: src/components/messages/ChatSidebar.tsx
 msgid "No contacts match."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "For an organisation role, a letter on the organisation’s letterhead, dated in the last three months, saying what you do there and giving a contact who can confirm it."
 msgstr ""
 
 #: src/components/profile/PortraitStudio.tsx
@@ -14010,6 +14302,10 @@ msgid "Flagged:"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "The two administrator seats are exempt, so that somebody can always work through the review queue."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Start or join a video call"
 msgstr ""
 
@@ -14023,6 +14319,10 @@ msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Save Funding"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A badge earned through a work or school address, an institution or a code depends on you still being there, so it lasts 12 months. We remind you 30 days and 7 days before it ends."
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -14689,6 +14989,10 @@ msgstr ""
 msgid "You have not submitted anything yet"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "What it means"
+msgstr ""
+
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "You can write your profile and portfolio now. Both go public the moment your Chamber approves the registration."
 msgstr ""
@@ -15218,6 +15522,10 @@ msgstr ""
 msgid "Registration sent — the organizer will approve it."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "If we stop trusting an email domain, people already verified through it keep their badge until it next needs renewing."
+msgstr ""
+
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Join discussions, share knowledge, and engage with the community."
 msgstr ""
@@ -15228,6 +15536,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/EventsTab.tsx
 msgid "{n, plural, one {Cancel event} other {Cancel events}}"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "An organisation that issues a code is vouching for the person who uses it."
 msgstr ""
 
 #: src/components/collaboration/editor/ImageModal.tsx
@@ -15262,6 +15574,10 @@ msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Table (3x3)"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Anyone can read KTIP. Posting, applying and messaging need a verified account."
 msgstr ""
 
 #: src/components/notes/StickyNoteGroup.tsx
@@ -15424,9 +15740,17 @@ msgstr ""
 msgid "Open Community → Forums and click Start a Board. The button appears for organisation accounts and administrators."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "If your organisation has no email domain we trust, an administrator of a verified business, school or college can give you a one-time code. Type it into the Verification page."
+msgstr ""
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Create code"
 msgstr ""
 
 #: src/components/notes/StickyNote.tsx
@@ -15623,6 +15947,10 @@ msgstr ""
 msgid "Open a draft from My Applications."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Ways to get verified"
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Leave a blank line between paragraphs."
 msgstr ""
@@ -15681,6 +16009,10 @@ msgstr ""
 
 #: src/components/projects/ManageTeamModal.tsx
 msgid "No team members yet. Invite someone above."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Whoever removes a badge must record a reason, and we send that reason to you. A reviewer can also pause the automatic routes, so that the same email address or code cannot verify the account again until a reviewer lifts the pause."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15963,6 +16295,7 @@ msgid "The sections on your content (existing licences), limitation of liability
 msgstr ""
 
 #: src/components/grants/GrantCard.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Expired"
 msgstr ""
@@ -16214,6 +16547,11 @@ msgstr ""
 msgid "Close messages"
 msgstr ""
 
+#. placeholder {0}: confirmed.email ?? 'This address'
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "{0} still works, so your badge is good for another 12 months."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Field extraction"
 msgstr ""
@@ -16342,6 +16680,10 @@ msgstr ""
 msgid "Events you created, upcoming and past. Open one to edit it, see who registered, post updates, or set up its virtual venue.\n"
 "\n"
 "Events you merely registered for are not here — your copy of that registration is under Submissions."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A work or school email, your institution, a code from your organisation, or an identity document."
 msgstr ""
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
@@ -16559,11 +16901,6 @@ msgstr ""
 msgid "Read aloud: whole tour"
 msgstr ""
 
-#: src/hooks/useAIAssistant.ts
-#: src/i18n/harvested.ts
-msgid "Investor/Funding Agency"
-msgstr ""
-
 #: src/components/security/TotpEnrollCard.tsx
 #: src/pages/auth/SignupPage.tsx
 msgid "Verify and continue"
@@ -16673,6 +17010,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The agreement between you and %entityShort% for using KTIP — who may hold an account, how you must behave, and where the limits of our responsibility sit."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A code from your organisation"
 msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
@@ -17214,6 +17555,12 @@ msgstr ""
 msgid "Click up to {MAX_SHOWCASE} earned trophies — {pinnedCount} picked so far. Locked trophies cannot be pinned."
 msgstr ""
 
+#. placeholder {0}: code.redeemed_by_name ?? t`a member`
+#. placeholder {1}: formatDate(code.redeemed_at)
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "used by {0} on {1}"
+msgstr ""
+
 #: src/components/projects/CommentSection.tsx
 msgid "Delete comment"
 msgstr ""
@@ -17240,6 +17587,10 @@ msgstr ""
 
 #: src/components/legal/ReconsentBanner.tsx
 msgid "These documents changed again while this page was open. Please reload."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Only a business, school or college that is itself verified can issue codes. Within it, only its owners and administrators can do so, or its educators, for students. Each code works once, lasts up to 30 days and can be tied to one email address."
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -17378,6 +17729,10 @@ msgstr ""
 #: src/components/profile/PortraitStudio.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Right"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "If you think a refusal or a removal is wrong, email %supportEmail% from the address on your account. Say which decision you mean and why. A reviewer who did not make the original decision will look at it, and we will reply within %verificationReviewPeriod%."
 msgstr ""
 
 #: src/pages/dashboard/tabs/ConnectionsTab.tsx
@@ -17577,6 +17932,10 @@ msgstr ""
 msgid "Deactivate my account"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Could not withdraw the badge"
+msgstr ""
+
 #. placeholder {0}: pendingRequests.length
 #: src/components/projects/TeamWidget.tsx
 msgid "{0, plural, one {# request to collaborate} other {# requests to collaborate}}"
@@ -17753,10 +18112,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The licence is non-exclusive, so you remain free to publish the same work anywhere else, on any terms you like."
-msgstr ""
-
-#: src/lib/permissions.ts
-msgid "Programmes Supervisor (Royston)"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17941,6 +18296,10 @@ msgstr ""
 msgid "Reading the document…"
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "Have a code from your organisation?"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Sell, rent, sublicense or otherwise transfer the data to anyone else, including within a corporate group, unless the agreement names them."
 msgstr ""
@@ -18093,6 +18452,10 @@ msgstr ""
 
 #: src/hooks/useExternalCourses.ts
 msgid "Could not load courses"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Copy failed. Select the code and copy it by hand."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18276,6 +18639,10 @@ msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
 msgid "Search members by name..."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "You are not allowed to issue this kind of code here."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -18462,6 +18829,10 @@ msgstr ""
 msgid "One agreement covers every application you submit. It opens each time you start or return to an application."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "New code"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Where an entry is submitted by a team, the member who submits it confirms that every contributor has agreed to it being entered on these terms. Ownership between team members is a matter between you — KTIP records who submitted and who was credited, and takes no view on the shares."
 msgstr ""
@@ -18499,6 +18870,10 @@ msgstr ""
 
 #: src/pages/auth/SignupPage.tsx
 msgid "Tell us a bit about yourself. These details are optional — you can add or change them later in Settings."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Vouch for people who work or study with you but have no work email."
 msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
@@ -18696,6 +19071,10 @@ msgstr ""
 msgid "Sign-in providers, the OECS Virtual Campus and Commons, video collaboration, machine translation and partner APIs are operated by other organisations under their own terms. We are not responsible for their availability, their conduct, or the content they supply. The providers who process your data on our behalf are listed in the Privacy Policy."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "30 days"
+msgstr ""
+
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Stack"
 msgstr ""
@@ -18831,6 +19210,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I know if I am eligible?"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "That code can no longer be cancelled."
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -19301,6 +19684,10 @@ msgstr ""
 msgid "I have read and agree to the documents above."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Records"
+msgstr ""
+
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/components/documents/DocumentAccessModal.tsx
 #: src/components/documents/DocumentContentModal.tsx
@@ -19359,6 +19746,10 @@ msgstr ""
 
 #: src/components/messages/MessagingPanel.tsx
 msgid "Wake — brings the panel back without unpinning it"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Until a reviewer restores it, email addresses and codes cannot verify this account. The reason is in your notifications and in the history below."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -19460,6 +19851,7 @@ msgid "Reading a project, and joining one."
 msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
+#: src/components/verification/RedeemCodeCard.tsx
 msgid "Your account is verified."
 msgstr ""
 
@@ -19475,6 +19867,10 @@ msgstr ""
 
 #: src/components/shared/BulkActionBar.tsx
 msgid "Select all {total}"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "A reviewer removed your verified badge"
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -19504,6 +19900,18 @@ msgstr ""
 #: src/pages/dashboard/dashboard-tabs.ts
 #: src/pages/dashboard/tabs/PreferencesTab.tsx
 msgid "Preferences"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Click \"Sign Up\" in the top right corner of any page.\n"
+"\n"
+"Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Association, NGO, Post-Secondary Institution and the rest).\n"
+"\n"
+"There is no name field. Your display name starts as the first part of your email address, and you change it on your Dashboard whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.\n"
+"\n"
+"Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.\n"
+"\n"
+"After you submit, check your email for a confirmation link. Roles that need review (such as Student or Faculty) are confirmed by your institution or an OECS reviewer after you sign up."
 msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
@@ -19917,6 +20325,10 @@ msgstr ""
 msgid "{0, plural, one {# field found} other {# fields found}}"
 msgstr ""
 
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Your verification is up to date."
+msgstr ""
+
 #: src/components/directory/PeopleLikeYouRail.tsx
 msgid "Mentors for you"
 msgstr ""
@@ -20024,6 +20436,10 @@ msgstr ""
 msgid "You are filing as"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Give a reason of at least 10 characters. The member sees it."
+msgstr ""
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Unhide"
 msgstr ""
@@ -20060,6 +20476,10 @@ msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Search funding..."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "That role cannot be given with a code."
 msgstr ""
 
 #: src/pages/dashboard/SubmissionReceiptPage.tsx
@@ -20109,6 +20529,10 @@ msgstr ""
 msgid "Work"
 msgstr ""
 
+#: src/lib/permissions.ts
+msgid "People & Trust Supervisor"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Your content"
 msgstr ""
@@ -20151,10 +20575,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Only publish material you own or are licensed to publish, and follow the attribution terms of anything you use under a licence. If you include third-party material — a photograph, a dataset, a library, a figure from a paper — say where it came from."
-msgstr ""
-
-#: src/lib/permissions.ts
-msgid "Student (school-verified)"
 msgstr ""
 
 #: src/components/layout/Navbar.tsx
@@ -20254,10 +20674,6 @@ msgstr ""
 
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "To see which versions you have accepted and when, open your legal settings."
-msgstr ""
-
-#: src/components/verification/VerificationNotice.tsx
-msgid "Browsing is open to everyone. Publishing, applying for funding and messaging other members need one identity check first. Have a work or school email? That verifies you instantly."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20524,6 +20940,10 @@ msgstr ""
 msgid "Before you submit your entry"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Badge withdrawn"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Events, registrations, speakers, schedule and page builder"
 msgstr ""
@@ -20573,6 +20993,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Records of which policies you accepted"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Reason (the member sees this)"
 msgstr ""
 
 #: src/components/moderation/ReportModal.tsx
@@ -20713,6 +21137,10 @@ msgid "Only the current step’s questions show, and required fields are validat
 "Some grants ask for documents; those upload here and stay attached to the draft."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "7 days"
+msgstr ""
+
 #: src/components/settings/PreferencesTab.tsx
 msgid "Privacy"
 msgstr ""
@@ -20833,6 +21261,10 @@ msgstr ""
 msgid "Application deadline"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Enter a valid email address, or leave it empty."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Shared with no declared licence means: readable, not reusable."
 msgstr ""
@@ -20917,6 +21349,10 @@ msgstr ""
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
 msgid "e.g., Caribbean Tech Summit 2025"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Code cancelled"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -21097,6 +21533,10 @@ msgstr ""
 msgid "Yes — this is the one you choose"
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "Confirm your sign-in email first, then enter the code."
+msgstr ""
+
 #: src/pages/dashboard/tabs/ResearchTab.tsx
 msgid "Your publications, student projects and the research collaborations you're part of."
 msgstr ""
@@ -21206,6 +21646,10 @@ msgstr ""
 msgid "Keeping the notes puts all {0} back on the page. Deleting removes them for good."
 msgstr ""
 
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Renew now"
+msgstr ""
+
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "Display Text"
 msgstr ""
@@ -21269,6 +21713,7 @@ msgstr ""
 msgid "Sending…"
 msgstr ""
 
+#: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Investor / Funding Agency"
 msgstr ""
@@ -21361,6 +21806,10 @@ msgstr ""
 
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Difficult"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "We email {email} a link to confirm you are still there."
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -21511,6 +21960,10 @@ msgstr ""
 msgid "We could not file your counter-notice. Please try again."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "This member's badge no longer rests on your code."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Reserve your place at an upcoming event"
 msgstr ""
@@ -21616,6 +22069,10 @@ msgstr ""
 msgid "The content and the work"
 msgstr ""
 
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "The code could not be checked."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Provide the foundational details of your application."
 msgstr ""
@@ -21672,6 +22129,10 @@ msgstr ""
 
 #: src/components/ui/SpyRail.tsx
 msgid "Page sections"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "A work or school email address"
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -21757,6 +22218,10 @@ msgstr ""
 
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Try the brain icon to ask in your own words."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Upload it, and a KTIP reviewer checks it. Reviewers are told as soon as a document arrives."
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -21933,6 +22398,10 @@ msgid "A verified student account keeps a safeguarding record with your institut
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Identity documents"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Your uploads"
 msgstr ""
 
@@ -22028,6 +22497,10 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Failed to save preferences"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Name and job, e.g. Jane Charles, field officer"
 msgstr ""
 
 #: src/pages/auth/VerifyEmailProofPage.tsx
@@ -22835,6 +23308,7 @@ msgid "Project Not Found"
 msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
+#: src/components/verification/VerificationStatusCard.tsx
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Your account is verified"
 msgstr ""
@@ -23124,6 +23598,10 @@ msgstr ""
 msgid "Why was this a mistake?"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "If your address is at an organisation we trust, such as oecs.int or a member-state ministry, confirming it verifies you straight away. If it is not the address you signed up with, we email it a link and you press Confirm on the page that opens. Gmail, Outlook, Yahoo and other free email services never count."
+msgstr ""
+
 #: src/components/uat/UATFeedbackForm.tsx
 msgid "Help us improve KTIP. Your responses are anonymous and only take a few minutes."
 msgstr ""
@@ -23283,6 +23761,10 @@ msgstr ""
 #. placeholder {0}: bulk.count
 #: src/components/shared/BulkDeleteDialog.tsx
 msgid "{0, plural, one {Delete # project?} other {Delete # projects?}}"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Your verified badge has ended"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -23499,6 +23981,10 @@ msgid "Click a button or link by its name"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Your school or college"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Refusal to put terms in writing, or a written agreement with no named legal entity in it."
 msgstr ""
 
@@ -23550,6 +24036,10 @@ msgstr ""
 
 #: src/components/notes/StickyNoteGroupExpanded.tsx
 msgid "Keep notes"
+msgstr ""
+
+#: src/pages/auth/VerifyEmailProofPage.tsx
+msgid "Verification renewed"
 msgstr ""
 
 #: src/lib/emoji-catalog.ts
@@ -23649,6 +24139,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Participant"
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Keep badge"
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -23905,18 +24399,6 @@ msgstr ""
 msgid "Project Owner"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Click \"Sign Up\" in the top right corner of any page.\n"
-"\n"
-"Step 1 asks for your email, a password, your date of birth and a role. The role picker is split in two — the roles you join as an individual (Entrepreneur, Student, Faculty, Mentor) and the roles you join for an organisation (Investor, Private Sector, Business Support Organisation, NGO, Post-Secondary Institution and the rest).\n"
-"\n"
-"There is no name field. Your display name starts as the first part of your email address, and you change it on your Dashboard whenever you like. Step 2 is optional and covers your organisation, industry, country, bio, skills, interests and what kind of collaboration you are open to.\n"
-"\n"
-"Your password must be at least 8 characters and include a number, a symbol and both upper and lowercase letters. The checklist under the field ticks off each rule as you type.\n"
-"\n"
-"After you submit, check your email for a confirmation link. Roles that need review (such as Student or Faculty) are confirmed by your institution or an OECS reviewer after you sign up."
-msgstr ""
-
 #: src/pages/cv/CvPage.tsx
 #: src/pages/cv/PublicCvPage.tsx
 msgid "Download Color (A4)"
@@ -24026,6 +24508,10 @@ msgstr ""
 msgid "Your password has been updated. You'll be redirected shortly."
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "This member"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Reading it"
 msgstr ""
@@ -24079,6 +24565,10 @@ msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
 msgid "{firstName} has no public projects yet."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Codes from your organisation"
 msgstr ""
 
 #: src/components/legal/ReconsentBanner.tsx
@@ -24224,6 +24714,10 @@ msgstr ""
 msgid "at sign-up"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Open Settings, then Verification. The page offers the routes that fit your account. They are listed here from the quickest to the slowest."
+msgstr ""
+
 #: src/components/settings/PreferencesTab.tsx
 msgid "Use a dark color theme across the site. Applies immediately and follows you to your other devices."
 msgstr ""
@@ -24281,6 +24775,7 @@ msgid "Describe your event, agenda, and what participants can expect..."
 msgstr ""
 
 #: src/components/events/EventCard.tsx
+#: src/components/verification/OrgCodesPanel.tsx
 #: src/hooks/useCalendarFeed.ts
 #: src/i18n/harvested.ts
 msgid "Cancelled"
@@ -24464,6 +24959,11 @@ msgstr ""
 #: src/pages/sme/ChamberOnboardingPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Verification withdrawn"
+msgstr ""
+
+#: src/hooks/useAIAssistant.ts
+#: src/lib/permissions.ts
+msgid "Business Association"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -24804,6 +25304,10 @@ msgstr ""
 msgid "Edit {label}"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Each code works once. Hand it to one person you know, and withdraw their badge when they leave."
+msgstr ""
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Back to setup"
 msgstr ""
@@ -25110,10 +25614,6 @@ msgid "The month grid shows what is happening on each day; multi-day events span
 "When you would rather browse than plan around dates, switch to Grid using the toggle up in the filter bar."
 msgstr ""
 
-#: src/lib/permissions.ts
-msgid "People & Trust Supervisor (Marvin)"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "UAT feedback"
 msgstr ""
@@ -25409,6 +25909,11 @@ msgstr ""
 msgid "Present the data as endorsed, verified or warranted by %entityShort% beyond what the record itself states."
 msgstr ""
 
+#. placeholder {0}: withdrawTarget.redeemed_by_name ?? t`This member`
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "{0} loses the verified badge your code gave them. They can verify again another way. Any role stays until a KTIP administrator removes it."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The Grant Application Confidentiality & IP Terms apply the first time you submit an application to a funder."
 msgstr ""
@@ -25506,6 +26011,11 @@ msgid "Everything here narrows the grid below, and the filters stack.\n"
 "• The grid icon changes how many columns the cards sit in\n"
 "\n"
 "The count in the middle updates as you go, and a Clear all filters link appears underneath once anything is active."
+msgstr ""
+
+#. placeholder {0}: formatDate(status.verified_until)
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Ends on {0}. Renew it to keep posting and applying."
 msgstr ""
 
 #: src/pages/security/MfaChallengePage.tsx
@@ -25837,6 +26347,10 @@ msgstr ""
 msgid "Enter a valid email address."
 msgstr ""
 
+#: src/components/verification/VerificationNotice.tsx
+msgid "Browsing is open to everyone. Publishing, applying for funding and messaging other members need one identity check first. A work or school email, or a code from your organisation, verifies you instantly."
+msgstr ""
+
 #. placeholder {0}: board.name
 #: src/pages/forums/BoardPage.tsx
 msgid "{0} — Forums"
@@ -25921,10 +26435,6 @@ msgstr ""
 msgid "No mentors in the venue yet."
 msgstr ""
 
-#: src/lib/permissions.ts
-msgid "Business Support Organisation"
-msgstr ""
-
 #: src/components/security/MethodPicker.tsx
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Email code"
@@ -26002,6 +26512,10 @@ msgstr ""
 msgid "Sign-up or onboarding age declaration"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Removal"
+msgstr ""
+
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Manage your achievements"
 msgstr ""
@@ -26048,6 +26562,10 @@ msgid "Go to the Projects page and click \"Create Project\".\n"
 "Required: a title of at least 3 characters and a category. You also pick a phase — Concept, Prototype, Funding or Launch.\n"
 "\n"
 "Optional: a description, a short summary used on cards and previews, a Details section where you add your own key/value rows, up to 10 hashtags, and whether the project is public or private."
+msgstr ""
+
+#: src/components/verification/RedeemCodeCard.tsx
+msgid "Too many tries. Wait an hour and try again."
 msgstr ""
 
 #: src/pages/achievements/AchievementsPage.tsx
@@ -26131,6 +26649,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Abusive Interactions"
+msgstr ""
+
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "Check {sentTo}."
 msgstr ""
 
 #: src/components/shared/ReceiptDocument.tsx
@@ -26591,6 +27113,10 @@ msgstr ""
 msgid "Follow our organisation setting"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "This organisation already has 25 unused codes. Cancel some first."
+msgstr ""
+
 #: src/pages/events/EventsPage.tsx
 msgid "Filter by event type"
 msgstr ""
@@ -26607,6 +27133,10 @@ msgstr ""
 msgid "Tick “virtual” and the location field disappears; leave it off and you are asked for a physical address.\n"
 "\n"
 "Start date and time are required, end date and time optional — a multi-day event spans those dates across the calendar grid. Capacity is optional too; leave it empty for unlimited."
+msgstr ""
+
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "This organisation is not verified, so it cannot issue codes."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26643,6 +27173,10 @@ msgstr ""
 
 #: src/components/personalization/ForYouRail.tsx
 msgid "Tune this"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "How long it lasts"
 msgstr ""
 
 #: src/components/messages/ChatSidebar.tsx
@@ -26736,6 +27270,10 @@ msgstr ""
 
 #: src/components/ui/ToolPanelShell.tsx
 msgid "{what} not found"
+msgstr ""
+
+#: src/lib/permissions.ts
+msgid "Programmes Supervisor"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26856,12 +27394,30 @@ msgstr ""
 msgid "Knowledge Base"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "Roles are a list, not a single choice — an account can hold several. They sit in three tiers.\n"
+"\n"
+"Admin — Super Admin (system-wide management, policy, audit logs), Admin, People & Trust Supervisor (verification, institutions, moderation and grievances), Programmes Supervisor (projects, funding, forums, resources and achievements) and Safety Admin (moderation queues and escalations). \"OECS Admin\" is a legacy label that resolves to Super Admin.\n"
+"\n"
+"Organisation — Investor / Funding Agency, Private Sector, Business Association, Post-Secondary Institution, NGO, Research Institution, Government, Diaspora and IGO.\n"
+"\n"
+"Individual — Entrepreneur, Faculty, Researcher, IP / Legal Professional, Mentor and Student.\n"
+"\n"
+"Investor, Private Sector, Entrepreneur, Mentor and Researcher are self-assignable: you pick them yourself. Student, Faculty, the organisation roles and the admin roles are granted only after review by an institution, a business association or OECS.\n"
+"\n"
+"What each role can do is controlled by a permission matrix that OECS administrators maintain, so some buttons appear for one role and not another. Students carry one standing restriction of their own: they cannot start unmonitored direct messages."
+msgstr ""
+
 #: src/pages/grants/GrantsPage.tsx
 msgid "No funding found"
 msgstr ""
 
 #: src/a11y/messages.ts
 msgid "High"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "What verification means"
 msgstr ""
 
 #: src/lib/achievement-copy.ts
@@ -27081,6 +27637,10 @@ msgstr ""
 msgid "Love it"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "How and when each account was verified, renewed or removed, who decided, and why. You can see your own history on the Verification page, without the reviewer’s name."
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "Photo brightness"
 msgstr ""
@@ -27156,6 +27716,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "You can request deletion of an unsuccessful application at %privacyEmail%. Where an audit obligation prevents deletion we will tell you, and say when it expires."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Identity documents, in private storage that only reviewers can open, through links that stop working after an hour. They are kept while your account is open. After a decision, you can ask %privacyEmail% to delete them, and your badge stays."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -27240,6 +27804,7 @@ msgid "Do not paste code you are contractually barred from disclosing, including
 msgstr ""
 
 #: src/components/verification/InstitutionalEmailCard.tsx
+#: src/components/verification/VerificationStatusCard.tsx
 msgid "Development link:"
 msgstr ""
 
@@ -27350,9 +27915,18 @@ msgstr ""
 msgid "Signing in from the OECS Virtual Campus"
 msgstr ""
 
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Withdraw this badge?"
+msgstr ""
+
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
 msgid "Topics attendees can filter and search by."
+msgstr ""
+
+#. placeholder {0}: formatDate(issued.expires)
+#: src/components/verification/OrgCodesPanel.tsx
+msgid "Works once, until {0}. They enter it under Settings, Verification."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -27506,10 +28080,6 @@ msgstr ""
 msgid "New note"
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Business Support Organisations"
-msgstr ""
-
 #: src/components/messages/MessagingPanel.tsx
 msgid "{threadCount, plural, one {# conversation} other {# conversations}}"
 msgstr ""
@@ -27536,6 +28106,11 @@ msgid "Your choice, on your Dashboard under Preferences.\n"
 "Everyone — the count is on your public page for anyone, signed in or not. My connections — only members you are connected to. Only me — nobody else sees it.\n"
 "\n"
 "This controls the visible count, not the connections themselves. Changing it does not disconnect anyone."
+msgstr ""
+
+#. placeholder {0}: r.domain
+#: src/components/verification/VerificationStatusCard.tsx
+msgid "@{0} no longer verifies accounts on KTIP. Use a code or an identity document instead."
 msgstr ""
 
 #: src/i18n/harvested.ts

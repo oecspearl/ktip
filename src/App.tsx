@@ -355,6 +355,7 @@ const router = createBrowserRouter([
           { path: '/legal/trademark', lazy: lazyPage(() => import('./pages/legal/TrademarkPage')) },
           { path: '/legal/code-contribution', lazy: lazyPage(() => import('./pages/legal/CodeContributionPage')) },
           { path: '/legal/partner-api', lazy: lazyPage(() => import('./pages/legal/PartnerApiPage')) },
+          { path: '/legal/verification', lazy: lazyPage(() => import('./pages/legal/VerificationPolicyPage')) },
           // The bare spellings are what people type, what gets printed on a
           // slide, and what docs/PRIVACY-AND-TERMS.md's checklist asked for.
           { path: '/terms', element: <Navigate to="/legal/terms" replace /> },

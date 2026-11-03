@@ -100,6 +100,10 @@ export default async function handler(request: Request) {
   switch (result?.reason) {
     case 'expired':
       return json({ error: 'expired' }, 410)
+    case 'on_hold':
+      // 174: a reviewer removed the badge. The address is proven, but only a
+      // reviewer can give the badge back.
+      return json({ error: 'on_hold' }, 403)
     default:
       // Consumed tokens are nulled rather than stored, so a second click on a
       // link that worked also lands here.

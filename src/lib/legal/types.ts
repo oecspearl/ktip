@@ -23,6 +23,7 @@ export type LegalDocumentKey =
   | 'copyright'
   | 'safeguarding'
   | 'funding-disclaimer'
+  | 'verification'
   // IP extension
   | 'competition-ip'
   | 'application-confidentiality'

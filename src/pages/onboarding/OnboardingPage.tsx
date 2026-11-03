@@ -33,6 +33,7 @@ import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { ConsentDocument } from '../../components/legal/ConsentDocument'
 import { CONSENT_BUNDLES, bundleVersion } from '../../lib/legal'
 import { takeReturnTo } from '../../lib/return-to'
+import { RedeemCodeCard } from '../../components/verification/RedeemCodeCard'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 const TODAY_ISO = todayIso()
@@ -445,6 +446,23 @@ export default function OnboardingPage() {
               <Trans>Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — you can still verify with your school later from Settings.</Trans>
             )}
           </p>
+
+          {/* 176: a school or college can skip the wait with a code. A
+              full reload, because the waiting state above is local and would
+              otherwise outlive the role the code just granted. */}
+          {!isOrg && !isAdminReviewed && (
+            <div className="rounded-xl border border-ktip-sand-200 bg-ktip-cream px-4 py-3">
+              <p className="text-sm font-medium text-ktip-sand-900 mb-2">
+                <Trans>Did your school or college give you a code?</Trans>
+              </p>
+              <RedeemCodeCard
+                compact
+                onRedeemed={(r) => {
+                  if (r.granted_role) window.location.replace(takeReturnTo() ?? '/')
+                }}
+              />
+            </div>
+          )}
 
           <Button type="button" variant="secondary" fullWidth onClick={chooseDifferentRole}>
             <Trans>Choose a different role</Trans>

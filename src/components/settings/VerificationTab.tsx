@@ -13,6 +13,11 @@ import { resolveCopy } from '../../i18n/copy'
 import { StudentVerificationCard } from '../../components/safeguarding/StudentVerificationCard'
 import { InstitutionalEmailCard } from '../../components/verification/InstitutionalEmailCard'
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection'
+import { VerificationStatusCard } from '../../components/verification/VerificationStatusCard'
+import { RedeemCodeCard } from '../../components/verification/RedeemCodeCard'
+import { OrgCodesPanel } from '../../components/verification/OrgCodesPanel'
+import { useMyVerificationStatus } from '../../hooks/useVerificationLifecycle'
+import { Link } from 'react-router'
 import { Trans, useLingui } from '@lingui/react/macro'
 import type { VerifiedVia } from '../../types'
 
@@ -26,12 +31,19 @@ export function VerificationTab() {
   const toast = useToast()
   const { request, loading } = useMyVerificationRequest(auth.user?.id)
   const { submitRequest, loading: submitting } = useSubmitVerification()
+  // 174–176. NULL until those migrations are applied; the page then falls
+  // back to exactly what it showed before.
+  const { status } = useMyVerificationStatus(auth.user?.id)
 
   const [files, setFiles] = useState<File[]>([])
   const [note, setNote] = useState('')
 
   const isVerified = auth.profile?.is_verified
   const verifiedVia = (auth.profile?.verified_via ?? null) as VerifiedVia | null
+  const onHold = !!status?.on_hold
+  const lapsed = !!status?.lapsed
+  // A lapsed code-based badge already shows the code box inside the status card.
+  const showRedeem = !!status && !isVerified && !onHold && !(lapsed && status.renew_method === 'code')
 
   // How the badge was earned (145). Grandfathered members are simply verified;
   // saying "we never checked" to the pilot cohort helps nobody.
@@ -46,6 +58,8 @@ export function VerificationTab() {
         return t`Verified through your institution.`
       case 'admin':
         return t`Verified by a KTIP administrator.`
+      case 'org_code':
+        return t`Verified with a code from your organisation.`
       default:
         return null
     }
@@ -107,7 +121,13 @@ export function VerificationTab() {
     // data-spy-off: three short cards at most — the other settings tabs are
     // long enough to earn a rail, this one is not.
     <div data-spy-off className="space-y-6">
-      {isVerified ? (
+      {status && (isVerified || onHold || lapsed) ? (
+        <div id="status" className="scroll-mt-24">
+          <VerificationStatusCard status={status} />
+        </div>
+      ) : null}
+
+      {status && (isVerified || onHold) ? null : isVerified ? (
         <Card id="identity" data-spy="Identity" className="scroll-mt-24">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-ktip-tropical-100 rounded-xl flex items-center justify-center">
@@ -129,13 +149,20 @@ export function VerificationTab() {
         </div>
       )}
 
+      {/* 176: for people whose organisation has no trusted email domain. */}
+      {showRedeem && (
+        <div id="code" className="scroll-mt-24">
+          <RedeemCodeCard />
+        </div>
+      )}
+
       {/* Where a student stands with their institution. Renders nothing for
           an account with no student relationship. */}
       <div id="student" data-spy="Student" className="scroll-mt-24">
         <StudentVerificationCard />
       </div>
 
-      {!isVerified && (
+      {!isVerified && !onHold && (
       <div id="identity" data-spy="Identity" className="scroll-mt-24">
       <CollapsibleSection
         title={t`No work or school email? Upload an identity document`}
@@ -241,6 +268,15 @@ export function VerificationTab() {
       </CollapsibleSection>
       </div>
       )}
+
+      {/* 176: shown only to admins of a verified business, school or college. */}
+      <OrgCodesPanel />
+
+      <p className="text-xs text-ktip-sand-500">
+        <Link to="/legal/verification" className="text-ktip-ocean-600 underline">
+          <Trans>How verification works</Trans>
+        </Link>
+      </p>
     </div>
   )
 }

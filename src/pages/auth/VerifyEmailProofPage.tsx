@@ -32,6 +32,10 @@ const FAILURE_COPY: Record<string, { title: MessageDescriptor; body: MessageDesc
     title: msg`Something went wrong`,
     body: msg`Try the link again in a moment.`,
   },
+  on_hold: {
+    title: msg`A reviewer needs to restore your badge`,
+    body: msg`A reviewer removed the verified badge from this account, so confirming an address cannot bring it back. Open Settings, Verification, to see why and how to ask for a review.`,
+  },
 }
 
 interface Confirmed {
@@ -110,6 +114,13 @@ export default function VerifyEmailProofPage() {
   const okCopy = (() => {
     if (!confirmed) return null
     switch (confirmed.outcome) {
+      case 'renewed':
+        return {
+          icon: <BadgeCheck size={28} className="text-ktip-tropical-700" />,
+          tone: 'bg-ktip-tropical-100',
+          title: t`Verification renewed`,
+          body: t`${confirmed.email ?? 'This address'} still works, so your badge is good for another 12 months.`,
+        }
       case 'verified':
       case 'already_verified':
         return {

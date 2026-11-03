@@ -44,6 +44,8 @@ export const LEGAL_TOKENS = {
   noticePeriod: '14 days',
   /** Response deadline for a data-rights request. */
   rightsResponsePeriod: '30 days',
+  /** Reply deadline for a member asking for a verification decision to be reviewed (Verification Policy). */
+  verificationReviewPeriod: '10 working days',
   analyticsRetention: '24 months',
   caseRetention: '5 years',
   /** Actioned-and-unreversed copyright notices before an account is terminated. */

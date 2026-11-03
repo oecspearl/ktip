@@ -32,6 +32,7 @@ export const LEGAL_MANIFEST: ReadonlyArray<{
   { key: 'trademark', bundle: 'informational', version: 1 },
   { key: 'code-contribution', bundle: 'informational', version: 1 },
   { key: 'partner-api', bundle: 'informational', version: 1 },
+  { key: 'verification', bundle: 'informational', version: 1 },
 ]
 
 /** Route for a document page. One place, so the footer, site map and See-also cannot drift apart. */

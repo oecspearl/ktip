@@ -81,8 +81,8 @@ export function VerificationNotice({ action, className }: VerificationNoticeProp
             ) : (
               <Trans>
                 Browsing is open to everyone. Publishing, applying for funding and messaging other
-                members need one identity check first. Have a work or school email? That verifies
-                you instantly.
+                members need one identity check first. A work or school email, or a code from your
+                organisation, verifies you instantly.
               </Trans>
             )}
           </p>

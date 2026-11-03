@@ -1372,6 +1372,8 @@ export type VerifiedVia =
   | 'roster'
   | 'admin'
   | 'grandfathered'
+  /** Migration 176 — a single-use code from a verified organisation. */
+  | 'org_code'
 
 /** What apply_verified_email() decided about a proven address (145). */
 export type VerificationOutcome =
@@ -1380,11 +1382,22 @@ export type VerificationOutcome =
   | 'student_approved'
   | 'student_pending'
   | 'already_member'
+  /** 175: a fresh proof restarted the term. */
+  | 'renewed'
 
 export interface EmailVerificationResult {
   ok: boolean
   outcome?: VerificationOutcome
-  reason?: 'unauthenticated' | 'no_email' | 'no_profile' | 'email_unconfirmed' | 'domain_not_recognised'
+  reason?:
+    | 'unauthenticated'
+    | 'no_email'
+    | 'no_profile'
+    | 'email_unconfirmed'
+    | 'domain_not_recognised'
+    /** 174: a reviewer removed the badge; nothing automatic restores it. */
+    | 'on_hold'
+    /** 175: the term lapsed; only a fresh mailbox proof renews it. */
+    | 'renewal_required'
   domain?: string
   /** Trusted-domain label, when the outcome came from one. */
   label?: string

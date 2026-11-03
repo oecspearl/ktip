@@ -25,6 +25,7 @@ type Outcome =
   | { kind: 'sent'; email: string; devLink?: string }
   | { kind: 'not_recognised'; domain: string }
   | { kind: 'unconfirmed' }
+  | { kind: 'on_hold' }
 
 /**
  * The one button (migration 145): "Verify with a work or school email".
@@ -55,11 +56,13 @@ export function InstitutionalEmailCard() {
         return { kind: 'not_recognised', domain: result.domain ?? email.split('@')[1] ?? '' }
       }
       if (result.reason === 'email_unconfirmed') return { kind: 'unconfirmed' }
+      if (result.reason === 'on_hold') return { kind: 'on_hold' }
       return null
     }
     switch (result.outcome) {
       case 'verified':
       case 'already_verified':
+      case 'renewed':
         return { kind: 'verified', label: result.label, role: result.granted_role ?? null }
       case 'student_approved':
       case 'already_member':
@@ -81,6 +84,19 @@ export function InstitutionalEmailCard() {
     try {
       if (normalised === primary) {
         const result = await claim()
+        // 175: the term lapsed. Signing up proved the mailbox back then, not
+        // now, so mail it a fresh link like any other address.
+        if (result.reason === 'renewal_required') {
+          const sent = await sendProof({ email: normalised, purpose: 'renewal' })
+          if (sent.status === 'sent') {
+            setOutcome({ kind: 'sent', email: normalised, devLink: sent.dev_link })
+          } else if (sent.status === 'domain_not_recognised') {
+            setOutcome({ kind: 'not_recognised', domain: sent.domain })
+          } else if (sent.status === 'already_verified') {
+            setOutcome(describeResult(sent.result))
+          }
+          return
+        }
         const next = describeResult(result)
         if (!next) throw new Error(t`Verification could not be completed.`)
         setOutcome(next)
@@ -214,6 +230,14 @@ export function InstitutionalEmailCard() {
                   If your organisation or school should be recognised, ask them to register on
                   KTIP. Otherwise, upload an identity document below.
                 </Trans>
+              </p>
+            </Notice>
+          )}
+          {outcome.kind === 'on_hold' && (
+            <Notice tone="neutral" icon={<Building2 size={20} />}>
+              <p className="font-medium"><Trans>A reviewer needs to restore your badge.</Trans></p>
+              <p className="text-sm mt-1">
+                <Trans>A reviewer removed the badge from this account, so an email address cannot bring it back.</Trans>
               </p>
             </Notice>
           )}
