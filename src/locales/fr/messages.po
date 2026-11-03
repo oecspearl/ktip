@@ -569,6 +569,10 @@ msgstr "Votre CV est maintenant public."
 msgid "You will be told, and you can have it restored by filing a counter-notice."
 msgstr ""
 
+#: src/lib/venue-room-presets.ts
+msgid "Organisers only."
+msgstr ""
+
 #: src/pages/cv/CvEditPage.tsx
 msgid "Headline"
 msgstr "Titre"
@@ -1486,6 +1490,11 @@ msgstr ""
 msgid "Upload a logo only if your organisation owns it or is authorised to use it. Uploading one confirms that."
 msgstr ""
 
+#. placeholder {0}: board.name
+#: src/pages/forums/BoardPage.tsx
+msgid "{0} | Forums"
+msgstr "{0} | Forums"
+
 #. placeholder {0}: saved.length
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "{0, plural, one {Delete # saved?} other {Delete # saved?}}"
@@ -1795,11 +1804,6 @@ msgstr "L'organisateur est encore en train de tout préparer. Revenez bientôt."
 msgid "Attendees are given a goal to accomplish. Objectives, constraints, deliverables and judging criteria are managed from the event's Challenge tab."
 msgstr "Les participants reçoivent un objectif à atteindre. Les objectifs, contraintes, livrables et critères de jugement se gèrent depuis l'onglet Défi de l'événement."
 
-#. placeholder {0}: resource.title
-#: src/pages/resources/ResourceDetailPage.tsx
-msgid "{0} | Resources"
-msgstr "{0} | Ressources"
-
 #: src/i18n/harvested.ts
 msgid "Entrepreneurs"
 msgstr "Entrepreneurs"
@@ -2036,11 +2040,6 @@ msgstr ""
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Add to portfolio"
 msgstr "Ajouter au portfolio"
-
-#. placeholder {0}: integration.name
-#: src/pages/integrations/IntegrationDetailPage.tsx
-msgid "{0} | Integrations"
-msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I reply to a discussion?"
@@ -2518,6 +2517,10 @@ msgstr ""
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "Rank"
 msgstr "Rang"
+
+#: src/lib/venue-room-presets.ts
+msgid "Datasets and APIs to build on, plus past winning entries."
+msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/components/venue/room/AvStage.tsx
@@ -4135,6 +4138,10 @@ msgstr "Démarrez une nouvelle conversation !"
 msgid "KTIP is provided \"as is\" and \"as available\". We do not warrant uninterrupted or error-free operation, and we may change, suspend or discontinue features. Planned maintenance is announced where practical."
 msgstr ""
 
+#: src/lib/venue-furniture.ts
+msgid "Team Homebase with a video wall and boards"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Display name, email address, password (stored hashed)"
 msgstr ""
@@ -4826,6 +4833,10 @@ msgstr ""
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Circle"
 msgstr "Cercle"
+
+#: src/lib/venue-room-presets.ts
+msgid "A quiet corner to read the brief."
+msgstr ""
 
 #: src/components/profile/PortraitStudio.tsx
 msgid "Uploading photo…"
@@ -5675,12 +5686,6 @@ msgstr "Les ressources textuelles sont lisibles intégralement sur cette page �
 #: src/pages/dashboard/tabs/my-profile/ProfilePreviewToolbar.tsx
 msgid "Any member can see your full profile."
 msgstr ""
-
-#. placeholder {0}: room.name
-#. placeholder {1}: event?.title ?? venueFallbackTitle
-#: src/pages/events/EventVenueRoomPage.tsx
-msgid "{0} | {1}"
-msgstr "{0} | {1}"
 
 #: src/hooks/useVerification.ts
 msgid "Your organisation was approved. Your account now holds the {grantedLabel} role."
@@ -7263,6 +7268,11 @@ msgstr "Parcourez les opportunités de subventions publiques."
 msgid "Experience"
 msgstr "Expérience"
 
+#. placeholder {0}: course.title
+#: src/pages/courses/CourseDetailPage.tsx
+msgid "{0} | Courses"
+msgstr ""
+
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "Their email (optional)"
 msgstr ""
@@ -8569,10 +8579,6 @@ msgstr "Redirection vers <0>Mes signalements</0>. Cliquez sur le lien si vous n'
 msgid "A reviewer removed the badge from this account, so an email address cannot bring it back."
 msgstr ""
 
-#: src/pages/cv/PublicCvPage.tsx
-msgid "{name} | CV"
-msgstr "{name} | CV"
-
 #: src/components/resume/sheets/LedgerSheet.tsx
 msgid "End of résumé"
 msgstr ""
@@ -8636,6 +8642,10 @@ msgstr "Mettez à jour l'adresse avec laquelle vous vous connectez"
 
 #: src/a11y/setup.ts
 msgid "Underlined links and larger buttons make a page of people easier to scan and to click."
+msgstr ""
+
+#: src/lib/venue-room-presets.ts
+msgid "A team's own room. The team that claims it picks its colour, what goes in it and its logo."
 msgstr ""
 
 #: src/components/projects/CommentSection.tsx
@@ -8791,6 +8801,11 @@ msgstr ""
 #: src/pages/events/EventDetailPage.tsx
 msgid "Withdraw registration"
 msgstr "Retirer l'inscription"
+
+#. placeholder {0}: integration.name
+#: src/pages/integrations/IntegrationDetailPage.tsx
+msgid "{0} | Integrations"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Open Collaborate, click Whiteboard, then create a new board or open an existing one.\n"
@@ -10226,11 +10241,6 @@ msgstr ""
 msgid "Removed"
 msgstr "Supprimé"
 
-#. placeholder {0}: grant.title
-#: src/pages/grants/GrantApplicationsPage.tsx
-msgid "Applications | {0}"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Keeps you signed in between page loads. Without it you would sign in on every navigation."
 msgstr ""
@@ -10554,6 +10564,11 @@ msgstr "Article"
 #: src/components/ui/SortSelect.tsx
 msgid "Sort"
 msgstr "Trier"
+
+#. placeholder {0}: event.title
+#: src/pages/events/EventVenuePage.tsx
+msgid "Venue | {0}"
+msgstr "Lieu | {0}"
 
 #: src/components/admin/ModerationStatusBadge.tsx
 #: src/pages/grants/GrantDetailPage.tsx
@@ -12329,6 +12344,10 @@ msgstr ""
 msgid "Month"
 msgstr "Mois"
 
+#: src/lib/venue-room-presets.ts
+msgid "Drop one for every team you expect."
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Manage members"
 msgstr "Gérer les membres"
@@ -12375,6 +12394,10 @@ msgstr "Aucune notification pour l’instant"
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Could not save the draft — try again before uploading"
 msgstr "Impossible d'enregistrer le brouillon — réessayez avant de téléverser"
+
+#: src/lib/venue-room-presets.ts
+msgid "Put it where people pass on the way to the stage."
+msgstr ""
 
 #: src/components/profile/PortraitStudio.tsx
 msgid "The photo exactly as you uploaded it, background and all. Pick Backdrops or Gradient to use the cut-out instead."
@@ -12673,10 +12696,6 @@ msgid "Open a listing and click \"Apply Now\". Once you have a draft for it, the
 "Your work is saved automatically every few seconds, and you can also save a draft explicitly at any point. Leaving the page does not lose anything.\n"
 "\n"
 "The final step shows the whole application for review before you submit."
-msgstr ""
-
-#: src/lib/venue-furniture.ts
-msgid "Team Homebase: video wall, boards, desks"
 msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
@@ -13315,6 +13334,10 @@ msgstr ""
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "URL"
 msgstr "URL"
+
+#: src/lib/venue-room-presets.ts
+msgid "Team points, side quests and who is in the lead."
+msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "The maximum cannot be smaller than the minimum"
@@ -14016,6 +14039,10 @@ msgstr "Rechercher des ressources..."
 msgid "End your session on this device"
 msgstr "Terminer votre session sur cet appareil"
 
+#: src/lib/venue-room-presets.ts
+msgid "Where the organising team runs the event."
+msgstr ""
+
 #: src/hooks/useMfa.ts
 msgid "You've asked for the most codes allowed in an hour. Try again later."
 msgstr ""
@@ -14050,6 +14077,10 @@ msgstr ""
 
 #: src/a11y/messages.ts
 msgid "mentors"
+msgstr ""
+
+#: src/lib/venue-room-presets.ts
+msgid "For events with a hardware track."
 msgstr ""
 
 #: src/pages/grants/GrantApplicationPage.tsx
@@ -14228,6 +14259,12 @@ msgstr "CV"
 #: src/pages/grants/GrantFormPage.tsx
 msgid "funding call"
 msgstr ""
+
+#. placeholder {0}: room.name
+#. placeholder {1}: event?.title ?? venueFallbackTitle
+#: src/pages/events/EventVenueRoomPage.tsx
+msgid "{0} | {1}"
+msgstr "{0} | {1}"
 
 #: src/lib/permissions.ts
 msgid "Owns who people are and how they behave: member records (read-only), verification, institutions, association review, moderation and grievances."
@@ -14870,6 +14907,11 @@ msgstr "E-mail, mot de passe et date de naissance"
 #: src/pages/directory/DirectoryPage.tsx
 msgid "Open to anything"
 msgstr ""
+
+#. placeholder {0}: grant.title
+#: src/pages/grants/GrantApplicationPage.tsx
+msgid "Apply | {0}"
+msgstr "Postuler | {0}"
 
 #: src/components/calendar/CalendarGrid.tsx
 msgid "+{overflow} more"
@@ -17301,6 +17343,10 @@ msgstr "Trouvez des projets sur toute la plateforme"
 msgid "Free, from the Proton Mail people. Phone and computer."
 msgstr ""
 
+#: src/pages/cv/PublicCvPage.tsx
+msgid "{name} | CV"
+msgstr "{name} | CV"
+
 #: src/i18n/harvested.ts
 msgid "If your account is linked to the OECS Virtual Campus, course records sync across automatically. Those entries are read-only in KTIP — the Campus owns them.\n"
 "\n"
@@ -17313,6 +17359,11 @@ msgstr "Si votre compte est lié au Campus virtuel de l'OECS, les dossiers de co
 #: src/i18n/harvested.ts
 msgid "Open the whiteboard or document you want to share."
 msgstr "Ouvrez le tableau blanc ou le document que vous souhaitez partager."
+
+#. placeholder {0}: resource.title
+#: src/pages/resources/ResourceDetailPage.tsx
+msgid "{0} | Resources"
+msgstr "{0} | Ressources"
 
 #: src/i18n/harvested.ts
 msgid "Warning signs of a funding scam"
@@ -17688,11 +17739,6 @@ msgstr "Aucune invitation"
 #: src/lib/resume-designs.ts
 msgid "Signature"
 msgstr "Signature"
-
-#. placeholder {0}: course.title
-#: src/pages/courses/CourseDetailPage.tsx
-msgid "{0} | Courses"
-msgstr ""
 
 #. placeholder {0}: room.name
 #: src/components/venue/RoomChatPanel.tsx
@@ -19588,6 +19634,10 @@ msgstr "Sujets qui vous intéressent — utilisés pour mettre en avant des pers
 msgid "Could not open the original file"
 msgstr "Impossible d'ouvrir le fichier original"
 
+#: src/pages/dashboard/SubmissionReceiptPage.tsx
+msgid "Copy | {receiptTitle}"
+msgstr "Copie | {receiptTitle}"
+
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "We send the acknowledgement and the outcome here."
 msgstr ""
@@ -21381,10 +21431,6 @@ msgstr ""
 msgid "Help us locate the incident by describing where it occurred on the platform"
 msgstr "Aidez-nous à localiser l'incident en décrivant où il s'est produit sur la plateforme"
 
-#: src/pages/dashboard/SubmissionReceiptPage.tsx
-msgid "Copy | {receiptTitle}"
-msgstr "Copie | {receiptTitle}"
-
 #. placeholder {0}: requiredDocuments.filter((d) => d.required && matches(d).length > 0).length
 #. placeholder {1}: requiredDocuments.filter((d) => d.required).length
 #: src/components/grants/application/ApplicationDocumentsField.tsx
@@ -21565,6 +21611,10 @@ msgstr ""
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Only {displayName}'s connections can see their full profile or send them a message. Send a connection request to ask."
 msgstr "Seules les relations de {displayName} peuvent voir son profil complet ou lui envoyer un message. Envoyez une demande de connexion pour en faire la demande."
+
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Match the room type"
+msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
 msgid "Before you submit your entry"
@@ -22132,6 +22182,11 @@ msgstr "Fermer la fenêtre"
 
 #: src/i18n/harvested.ts
 msgid "You must also affirm, separately, all three of the following:"
+msgstr ""
+
+#. placeholder {0}: grant.title
+#: src/pages/grants/GrantApplicationsPage.tsx
+msgid "Applications | {0}"
 msgstr ""
 
 #: src/components/dashboard/TimelineSection.tsx
@@ -22847,6 +22902,10 @@ msgstr "Imprimer / Enregistrer en PDF"
 msgid "Submitting an application grants the funder the right to read, assess and decide on it. It grants no licence to use, build, commercialise or file protection over what it describes — whether or not the application succeeds."
 msgstr ""
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Furniture"
+msgstr ""
+
 #: src/components/settings/VerificationTab.tsx
 msgid "Upload an identity document (national ID, passport, or business registration) as PDF or image. Documents are stored privately and only visible to OECS administrators."
 msgstr "Téléversez un document d'identité (carte d'identité nationale, passeport ou immatriculation d'entreprise) au format PDF ou image. Les documents sont stockés de manière privée et visibles uniquement par les administrateurs de l'OECS."
@@ -23062,6 +23121,10 @@ msgstr "Bac à sable de code"
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Try the link again in a moment."
 msgstr "Réessayez le lien dans un instant."
+
+#: src/lib/venue-room-presets.ts
+msgid "Sensors and boards to borrow. Someone here can help with wiring."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A verified student account keeps a safeguarding record with your institution, and that record carries the year you were born — the year only, never the full date.\n"
@@ -24970,6 +25033,10 @@ msgstr ""
 msgid "Registration cannot close after the event starts"
 msgstr "L'inscription ne peut pas se clôturer après le début de l'événement"
 
+#: src/lib/venue-furniture.ts
+msgid "Stage and screen facing rows of seats"
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 msgid "Close menu"
 msgstr ""
@@ -25966,11 +26033,6 @@ msgstr "Personne à la caméra pour l'instant"
 msgid "You haven't applied for any grants yet. Browse available opportunities and submit your first application."
 msgstr "Vous n'avez encore postulé à aucune subvention. Parcourez les opportunités disponibles et soumettez votre première candidature."
 
-#. placeholder {0}: grant.title
-#: src/pages/grants/GrantApplicationPage.tsx
-msgid "Apply | {0}"
-msgstr "Postuler | {0}"
-
 #: src/pages/resources/ResourcesPage.tsx
 msgid "The catalog is being curated — check back soon."
 msgstr "Le catalogue est en cours de préparation — revenez bientôt."
@@ -26053,11 +26115,6 @@ msgstr ""
 #: src/pages/events/EventDetailPage.tsx
 msgid "Back to setup"
 msgstr ""
-
-#. placeholder {0}: event.title
-#: src/pages/events/EventVenuePage.tsx
-msgid "Venue | {0}"
-msgstr "Lieu | {0}"
 
 #: src/i18n/harvested.ts
 msgid "Find partnerships, attend events, and support innovation."
@@ -27028,10 +27085,6 @@ msgstr "Intervenants"
 msgid "Private equity"
 msgstr ""
 
-#: src/lib/venue-furniture.ts
-msgid "Stage, screen and rows of seats"
-msgstr ""
-
 #: src/components/association/AssociationReviewQueue.tsx
 msgid "No association yet"
 msgstr ""
@@ -27111,11 +27164,6 @@ msgstr "Saisissez une adresse e-mail valide."
 #: src/components/verification/VerificationNotice.tsx
 msgid "Browsing is open to everyone. Publishing, applying for funding and messaging other members need one identity check first. A work or school email, or a code from your organisation, verifies you instantly."
 msgstr ""
-
-#. placeholder {0}: board.name
-#: src/pages/forums/BoardPage.tsx
-msgid "{0} | Forums"
-msgstr "{0} | Forums"
 
 #. placeholder {0}: verdict.employerName
 #: src/components/shared/EngagementNotice.tsx
