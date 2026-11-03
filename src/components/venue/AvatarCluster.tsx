@@ -48,7 +48,7 @@ export function AvatarCluster({
             size={s.box}
             title={name}
             onClick={onSelect ? () => onSelect(o.user_id) : undefined}
-            className="-ml-2 first:ml-0 transition-transform hover:z-10 hover:-translate-y-0.5"
+            className="-ml-2 first:ml-0 transition-transform hover:z-raised hover:-translate-y-0.5"
             frameClassName="ring-2 ring-ktip-cream"
           >
             {/* On the lower-right edge rather than the corner: a diamond has no

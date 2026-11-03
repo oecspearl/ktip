@@ -241,7 +241,7 @@ export function StickyNoteGroup({
         <div
           role="dialog"
           aria-label={t`Close this folder?`}
-          className="no-drag absolute left-1/2 top-full z-10 mt-2 w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream p-3 shadow-fab-hover"
+          className="no-drag absolute left-1/2 top-full z-raised mt-2 w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream p-3 shadow-fab-hover"
         >
           <p className="text-sm font-semibold text-ktip-sand-900"><Trans>Close this folder?</Trans></p>
           <p className="mt-1 text-xs text-ktip-sand-600">

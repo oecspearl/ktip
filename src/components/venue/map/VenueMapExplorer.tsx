@@ -878,7 +878,7 @@ export function VenueMapExplorer({
       {/* ---- hover card ---- */}
       {hoveredRoom && hoveredGeo && phase === 'idle' && (
         <div
-          className="pointer-events-none absolute z-10 max-w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream/95 p-2.5 text-xs shadow-card backdrop-blur"
+          className="pointer-events-none absolute z-raised max-w-56 -translate-x-1/2 rounded-xl border border-ktip-sand-200 bg-ktip-cream/95 p-2.5 text-xs shadow-card backdrop-blur"
           style={{
             left: projection.project(
               hoveredGeo.centroid[0],

@@ -178,7 +178,7 @@ export function RoomSections({
                 onClick={() => hero.promote(id)}
                 aria-label={isHero ? t`Stop keeping this panel large` : t`Make this the big panel`}
                 title={isHero ? t`Stop keeping this large` : t`Make this the big panel`}
-                className="absolute right-2 top-2 z-20 hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 p-1.5 text-ktip-sand-500 opacity-0 shadow-card transition-opacity hover:text-ktip-ocean-700 focus-visible:opacity-100 group-focus-within/cell:opacity-100 group-hover/cell:opacity-100 lg:block"
+                className="absolute right-2 top-2 z-sticky hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 p-1.5 text-ktip-sand-500 opacity-0 shadow-card transition-opacity hover:text-ktip-ocean-700 focus-visible:opacity-100 group-focus-within/cell:opacity-100 group-hover/cell:opacity-100 lg:block"
               >
                 {isHero ? (
                   <Minimize2 size={13} aria-hidden="true" />

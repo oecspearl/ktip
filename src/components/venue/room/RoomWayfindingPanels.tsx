@@ -83,7 +83,7 @@ export function WayfindingPanel({
           {groups.map((group) => (
             <div key={group.index}>
               {multiFloor && (
-                <p className="sticky top-0 z-10 flex items-center gap-1.5 border-b border-ktip-sand-100 bg-ktip-cream px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-500">
+                <p className="sticky top-0 z-raised flex items-center gap-1.5 border-b border-ktip-sand-100 bg-ktip-cream px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ktip-sand-500">
                   <span className="rounded border border-ktip-sand-200 px-1 py-0.5 font-mono text-[9px] text-ktip-sand-500">
                     {floorBadge(group.index)}
                   </span>
