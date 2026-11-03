@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, FileText, Flag, FolderOpen, KanbanSquare, PenTool, Users } from 'lucide-react'
+import { CalendarDays, FileText, Flag, FolderOpen, KanbanSquare, Link2, PenTool, Users } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useToast } from '../../../../contexts/ToastContext'
@@ -16,8 +16,9 @@ import { TeamDocs, type DocMessage } from './TeamDocs'
 import { TeamCalendar } from './TeamCalendar'
 import { TeamMilestones } from './TeamMilestones'
 import { TeamTimer, type TimerState } from './TeamTimer'
+import { TeamIntegrations } from './TeamIntegrations'
 
-type Tab = 'board' | 'whiteboard' | 'docs' | 'calendar' | 'milestones' | 'files'
+type Tab = 'board' | 'whiteboard' | 'docs' | 'calendar' | 'milestones' | 'files' | 'links'
 
 interface Props {
   eventId: string
@@ -66,6 +67,7 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
     files: refetch('team-files'),
     docs: refetch('team-docs'),
     calendar: refetch('team-calendar'),
+    links: refetch('team-links'),
     milestones: () => {
       refetch('team-milestones')()
       refetch('team-checklist')()
@@ -142,6 +144,7 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
     { id: 'calendar', label: t`Calendar`, icon: CalendarDays },
     { id: 'milestones', label: t`Milestones`, icon: Flag },
     { id: 'files', label: t`Files`, icon: FolderOpen },
+    { id: 'links', label: t`Integrations`, icon: Link2 },
   ]
 
   return (
@@ -197,6 +200,7 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
           <TeamMilestones eventId={eventId} teamId={team.id} ping={() => channel.send('milestones', {})} />
         )}
         {tab === 'files' && <TeamFiles teamId={team.id} ping={() => channel.send('files', {})} />}
+        {tab === 'links' && <TeamIntegrations teamId={team.id} ping={() => channel.send('links', {})} />}
       </div>
     </section>
   )
