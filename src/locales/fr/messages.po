@@ -1857,6 +1857,11 @@ msgstr "Ignorer"
 msgid "An authenticator app shows a 6-digit code that changes every 30 seconds. KTIP asks for it when you sign in, so a stolen password is not enough to get in. Pick an app below to install it and see how to add KTIP."
 msgstr ""
 
+#. placeholder {0}: state.waiting
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Waiting for more people. A table needs at least three, and {0} are here."
+msgstr ""
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Attach a file to your solution. The organizer can always open what you attach."
 msgstr "Joignez un fichier à votre solution. L'organisateur peut toujours ouvrir ce que vous joignez."
@@ -4411,6 +4416,10 @@ msgstr "Échec de la suggestion de l'IA"
 msgid "Back to My Snippets"
 msgstr "Retour à Mes extraits"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Click where the stairs up from this floor go. They arrive in the same spot on the floor above, so it has to be clear on both."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "If we act on it, the content is removed or made inaccessible, and the member who posted it is told what was removed, why, and who filed the notice."
 msgstr ""
@@ -5604,6 +5613,11 @@ msgstr ""
 msgid "Generate AI suggestion for this section"
 msgstr "Générer une suggestion IA pour cette section"
 
+#. placeholder {0}: state.waiting
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "{0} waiting"
+msgstr ""
+
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Console Output"
 msgstr "Sortie de la console"
@@ -5978,6 +5992,10 @@ msgstr "{0, plural, one {# candidature} other {# candidatures}}"
 
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Approved by your institution"
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "Ten minutes of video with three or four people from other teams. Never one-to-one, and organisers can drop in."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6587,6 +6605,7 @@ msgid "What is it, who is it for, and what will they get out of it?"
 msgstr ""
 
 #: src/components/profile/ProfileCanvas.tsx
+#: src/components/venue/RoomChatPanel.tsx
 msgid "Host"
 msgstr ""
 
@@ -7660,6 +7679,10 @@ msgstr ""
 msgid "Browse public grant opportunities."
 msgstr "Parcourez les opportunités de subventions publiques."
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Too close to the other stairs on this floor."
+msgstr ""
+
 #: src/components/profile/ProfileCanvas.tsx
 #: src/components/resume/ResumeOutline.tsx
 #: src/components/resume/sheets/AtlasSheet.tsx
@@ -8360,6 +8383,10 @@ msgstr ""
 msgid "Trading name"
 msgstr ""
 
+#: src/components/venue/RoomChatPanel.tsx
+msgid "Go to this message"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-Step Verification"
 msgstr ""
@@ -8809,6 +8836,10 @@ msgstr "Capacité (facultatif)"
 msgid "Folder name"
 msgstr "Nom du dossier"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "{left} min left"
+msgstr ""
+
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Everything you attach here is private to you and the people assessing this grant. It is not listed on the public grant page, and other applicants cannot see it."
 msgstr "Tout ce que vous joignez ici reste privé, visible uniquement par vous et les personnes évaluant cette subvention. Cela n'apparaît pas sur la page publique de la subvention, et les autres candidats ne peuvent pas le voir."
@@ -9171,6 +9202,10 @@ msgstr ""
 #: src/components/venue/RoomOccupantList.tsx
 msgid "Collapse the list"
 msgstr "Réduire la liste"
+
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Those rooms do not all fit with corridors between them. Make one smaller, or the floor bigger."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Why is the Funding, Mentees or Research tab empty?"
@@ -9877,6 +9912,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Connect with a member"
 msgstr "Se connecter avec un membre"
+
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Entrance: {doorSide}"
+msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Waiting on KTIP review"
@@ -11008,6 +11047,10 @@ msgstr ""
 msgid "Harassment"
 msgstr "Harcèlement"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Leave the table"
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "You have left this stop."
 msgstr ""
@@ -11344,10 +11387,6 @@ msgstr "Page Notion"
 #: src/lib/permissions.ts
 msgid "Manage funds"
 msgstr "Gérer les fonds"
-
-#: src/components/venue/map/VenueMapEditor.tsx
-msgid "Click where the stairs go. They sit in the same place on every floor, so the spot has to be clear on all of them."
-msgstr "Cliquez à l'endroit où placer l'escalier. Il se trouve au même endroit à chaque étage, l'emplacement doit donc être libre sur tous les étages."
 
 #: src/i18n/harvested.ts
 msgid "Six languages, picked from the dropdown in the toolbar — changing it re-highlights what you have already written rather than clearing it.\n"
@@ -12837,6 +12876,10 @@ msgstr ""
 msgid "Send a connection request to someone on KTIP"
 msgstr "Envoyez une demande de connexion à quelqu'un sur KTIP"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Stop waiting"
+msgstr ""
+
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Why do you believe it infringes?"
 msgstr ""
@@ -14051,6 +14094,10 @@ msgstr "Rechercher des intégrations"
 msgid "Add someone"
 msgstr ""
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Tables now"
+msgstr ""
+
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Enter your new password below"
 msgstr "Saisissez votre nouveau mot de passe ci-dessous"
@@ -14775,6 +14822,11 @@ msgstr ""
 msgid "Please select an image file"
 msgstr "Veuillez sélectionner un fichier image"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Coffee tables"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What happens when a rule is broken"
 msgstr ""
@@ -14815,6 +14867,10 @@ msgstr "Rechercher des ressources..."
 #: src/i18n/harvested.ts
 msgid "End your session on this device"
 msgstr "Terminer votre session sur cet appareil"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Sit down with three or four people from other teams for ten minutes. Every table is listed below, and organisers can drop in."
+msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Where the organising team runs the event."
@@ -15043,6 +15099,10 @@ msgstr "CV"
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "funding call"
+msgstr ""
+
+#: src/components/venue/VenueTopBar.tsx
+msgid "Submissions closed"
 msgstr ""
 
 #. placeholder {0}: room.name
@@ -15431,6 +15491,12 @@ msgstr ""
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "esc close"
 msgstr "échap fermer"
+
+#. placeholder {0}: up.x
+#. placeholder {1}: up.y
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Up at {0},{1}"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Notification & display preferences"
@@ -16261,6 +16327,10 @@ msgstr ""
 msgid "Delete {noun}"
 msgstr "Supprimer {noun}"
 
+#: src/components/venue/RoomChatPanel.tsx
+msgid "Pinned host message."
+msgstr ""
+
 #: src/components/ErrorBoundary.tsx
 msgid "An unexpected error occurred. Please try refreshing the page or go back to the home page."
 msgstr "Une erreur inattendue s'est produite. Veuillez actualiser la page ou revenir à la page d'accueil."
@@ -16600,6 +16670,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Go to the Member Directory, or open someone's profile."
 msgstr "Rendez-vous dans l'Annuaire des membres, ou ouvrez le profil d'une personne."
+
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Rearrange rooms"
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "This goes to the OECS safety team, not to the person you are reporting. They are not told who filed it.\n"
@@ -17761,6 +17835,11 @@ msgstr "Exécution…"
 
 #: src/i18n/harvested.ts
 msgid "Grants, funding and events"
+msgstr ""
+
+#. placeholder {0}: minutesLeft(table.ends_at, now)
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "{0} min left"
 msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
@@ -19008,6 +19087,10 @@ msgstr "Vérifiez les employeurs et contrôlez ce que l'API partenaire publie"
 msgid "Integrations"
 msgstr "Intégrations"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Get up"
+msgstr ""
+
 #: src/components/profile/BannerStudio.tsx
 msgid "Failed to upload banner"
 msgstr ""
@@ -19015,6 +19098,10 @@ msgstr ""
 #: src/pages/collaborate/DocumentEditorPage.tsx
 msgid "Back to My Documents"
 msgstr "Retour à Mes documents"
+
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "This is the top floor, so it only has the stairs coming up from below. Pick a lower floor to move a flight."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Retention"
@@ -19107,6 +19194,10 @@ msgstr "Activé, tout membre connecté peut voir votre profil complet et vous en
 
 #: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Started in the last 6 months"
+msgstr ""
+
+#: src/components/venue/VenueTopBar.tsx
+msgid "Submissions close in"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -20385,10 +20476,6 @@ msgstr "Réseau"
 #: src/i18n/harvested.ts
 msgid "What do the application statuses mean?"
 msgstr "Que signifient les statuts de candidature ?"
-
-#: src/components/venue/map/VenueMapEditor.tsx
-msgid "Entrance: {doorSide} · No stairs yet"
-msgstr "Entrée : {doorSide} · Pas encore d'escalier"
 
 #. placeholder {0}: myTeam.name
 #: src/components/venue/room/CollabCommonsPanel.tsx
@@ -21780,12 +21867,6 @@ msgstr "{trimmed} possède déjà un compte KTIP — nous lui avons plutôt envo
 msgid "Create project"
 msgstr ""
 
-#. placeholder {0}: state.config.stairs.x
-#. placeholder {1}: state.config.stairs.y
-#: src/components/venue/map/VenueMapEditor.tsx
-msgid "Entrance: {doorSide} · Stairs at {0},{1}"
-msgstr "Entrée : {doorSide} · Escaliers à {0},{1}"
-
 #: src/i18n/harvested.ts
 msgid "• Download B&W or Color — opens the print dialog; choose “Save as PDF”\n"
 "• Read as text — the same content without page geometry, easier on a phone\n"
@@ -22768,6 +22849,10 @@ msgstr "Les participants ne verront plus le classement. Les juges pourront de no
 msgid "Nothing ticked means everyone in the venue. Organizers always get in."
 msgstr "Aucune case cochée signifie que tout le monde dans le lieu est concerné. Les organisateurs ont toujours accès."
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Coffee tables are for participants and mentors."
+msgstr ""
+
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "We could not save your date of birth. Please check it and try again."
 msgstr "Nous n'avons pas pu enregistrer votre date de naissance. Veuillez la vérifier et réessayer."
@@ -23034,6 +23119,10 @@ msgstr "E-mail de confirmation envoyé à votre nouvelle adresse !"
 msgid "All Phases"
 msgstr "Toutes les phases"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Find a table"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Search, tours, notifications and display options."
 msgstr "Recherche, visites guidées, notifications et options d'affichage."
@@ -23199,6 +23288,10 @@ msgstr ""
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "Restricted"
 msgstr "Restreint"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Could not join the queue"
+msgstr ""
 
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "Address confirmed, but not recognised"
@@ -23465,6 +23558,10 @@ msgstr "{here, plural, one {# personne à l'intérieur} other {# personnes à l'
 #: src/pages/cv/PublicCvPage.tsx
 msgid "This CV is not public"
 msgstr "Ce CV n'est pas public"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Could not leave"
+msgstr ""
 
 #: src/pages/projects/ProjectDetailPage.tsx
 #: src/pages/projects/ProjectsPage.tsx
@@ -25949,6 +26046,10 @@ msgstr "Ce qui a bien fonctionné…"
 msgid "Every place KTIP uses AI, what each feature does with your text, how reliable it is, and what it is never allowed to decide on its own."
 msgstr ""
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Participants and mentors sit down here. You can drop in to any table below."
+msgstr ""
+
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Search faculty by name"
 msgstr "Rechercher un enseignant par nom"
@@ -26793,6 +26894,7 @@ msgid "Prototype - Building MVP"
 msgstr "Prototype - Construction du MVP"
 
 #: src/components/venue/room/judging/ResultsBoardPanel.tsx
+#: src/components/venue/RoomChatPanel.tsx
 msgid "Hide"
 msgstr "Masquer"
 
@@ -28131,6 +28233,10 @@ msgstr ""
 msgid "Save Draft"
 msgstr "Enregistrer le brouillon"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "The top floor has no stairs up. Its stairs come up from the floor below."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Edit what other members see, and lock your profile so only connections can view it"
 msgstr ""
@@ -28594,6 +28700,10 @@ msgstr "Aucune ressource trouvée"
 msgid "Virtual Hackathon"
 msgstr "Hackathon virtuel"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Drop in"
+msgstr ""
+
 #: src/pages/auth/LoginPage.tsx
 msgid "A stale session may be blocking sign-in. Clear it and try again."
 msgstr "Une session expirée bloque peut-être la connexion. Effacez-la et réessayez."
@@ -28719,6 +28829,10 @@ msgstr ""
 msgid "Untitled Application"
 msgstr "Candidature sans titre"
 
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Pack this floor's rooms tightly around its stairs and door. Press again for another layout."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Members with posting rights can then start discussions on it straight away."
 msgstr ""
@@ -28775,6 +28889,11 @@ msgstr ""
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Demo video"
 msgstr "Vidéo de démo"
+
+#. placeholder {0}: state.waiting
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Finding you a table. {0} people are waiting."
+msgstr ""
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Try adjusting your search, subject or grade level filters."
@@ -29131,6 +29250,12 @@ msgstr "Voulez-vous vraiment envoyer ce signalement ?"
 msgid "south edge"
 msgstr "bord sud"
 
+#. placeholder {0}: down.x
+#. placeholder {1}: down.y
+#: src/components/venue/map/VenueMapEditor.tsx
+msgid "Down at {0},{1}"
+msgstr ""
+
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "{displayName} has asked to connect with you. Accept and you will both see each other's full profile."
 msgstr "{displayName} a demandé à se connecter avec vous. Acceptez et vous verrez tous deux le profil complet de l'autre."
@@ -29213,6 +29338,10 @@ msgstr "Premier arrêt. Enregistrez-vous et repérez les lieux."
 #: src/pages/dashboard/tabs/FeedbackTab.tsx
 msgid "My Feedback"
 msgstr "Mes retours"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Video is not switched on for this venue yet, so tables form but have no call."
+msgstr ""
 
 #: src/lib/delete-guard.ts
 msgid "This event is public. Existing links to it will break."
@@ -30475,6 +30604,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Signing in from the OECS Virtual Campus"
 msgstr "Connexion depuis le Virtual Campus de l'OECS"
+
+#: src/components/venue/RoomChatPanel.tsx
+msgid "Hide pinned message"
+msgstr ""
 
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "Withdraw this badge?"

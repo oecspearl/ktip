@@ -250,6 +250,7 @@ export default function EventVenuePage() {
         availability={presence.availability}
         isAuto={presence.manual === null || presence.manual !== presence.availability}
         onAvailabilityChange={presence.setAvailability}
+        submissionDeadline={event.submission_deadline}
         titleAs="h1"
         trailing={
           membership.role === 'organizer' && (

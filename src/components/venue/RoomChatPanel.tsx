@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { QuarantineNotice } from '../moderation/QuarantineNotice'
-import { Languages, Send, Trash2 } from 'lucide-react'
+import { Languages, Pin, Send, Trash2, X } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { cn, formatRelativeTime } from '../../lib/utils'
 import { useAuth } from '../../contexts/AuthContext'
@@ -8,6 +8,8 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useContentLanguage } from '../../i18n/useContentLanguage'
 import { LANGUAGE_NAMES } from '../../i18n/language'
+import { prefersReducedMotionNow } from '../../a11y/store'
+import { useVenueRoster } from '../../hooks/useVenue'
 import {
   useRealtimeRoomMessages,
   useRemoveRoomMessage,
@@ -19,6 +21,7 @@ import {
   useTranslatedContent,
   useWarmContentTranslations,
 } from '../../hooks/useTranslatedContent'
+import { firstVisibleRow, newestHostId, pickHostPin, type PinRow } from '../../lib/chat-host-pin'
 import type { VenueRoom, VenueRoomMessage } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { EmojiPickerButton, insertAtCaret } from '../ui/EmojiPicker'
@@ -30,7 +33,28 @@ interface RoomChatPanelProps {
   canPost: boolean
   /** Hosts may remove anyone's message. */
   canModerate?: boolean
+  /**
+   * Mark the organisers' posts and pin the latest one. Off for the
+   * announcements feed, where only hosts can post and every row would carry
+   * the badge.
+   */
+  highlightHosts?: boolean
   className?: string
+}
+
+/** Within this many px of the end counts as "at the bottom". */
+const BOTTOM_SLACK = 48
+/** Room the pin bar takes over the top of the list, so a jump clears it. */
+const PIN_CLEARANCE = 64
+const FLASH_MS = 1_600
+
+/** Fixed navy/green in both themes, flipped at night like the send button. */
+function HostBadge() {
+  return (
+    <span className="shrink-0 rounded-full bg-brand-navy px-1.5 py-px text-[10px] font-bold uppercase tracking-wider text-brand-green dark:bg-brand-green dark:text-brand-navy">
+      <Trans>Host</Trans>
+    </span>
+  )
 }
 
 /**
@@ -48,12 +72,18 @@ interface RoomChatPanelProps {
 function RoomChatMessage({
   message,
   mine,
+  host,
+  flash,
   canModerate,
   onOpenMember,
   onRemove,
 }: {
   message: VenueRoomMessage
   mine: boolean
+  /** Posted by one of the event's venue organisers. */
+  host: boolean
+  /** Briefly ringed after a jump from the pin. */
+  flash: boolean
   canModerate: boolean
   onOpenMember: (userId: string) => void
   onRemove: () => void
@@ -83,19 +113,32 @@ function RoomChatMessage({
   }
 
   return (
-    <div className="group flex items-start gap-2.5">
+    <div
+      className={cn(
+        'group flex items-start gap-2.5',
+        // A tinted card with a green rule: findable at a glance in a busy
+        // room, and the tokens flip with the theme so it reads in both.
+        host &&
+          '-mx-2 rounded-xl border-l-3 border-ktip-tropical-500 bg-ktip-tropical-50 p-2 transition-shadow duration-500',
+        flash && 'ring-2 ring-ktip-sun-400'
+      )}
+    >
       <DiamondAvatar src={message.author?.avatar_url} name={name} size={28} />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => message.author_id && onOpenMember(message.author_id)}
-            className="text-xs font-semibold text-ktip-sand-800 hover:text-ktip-ocean-600 hover:underline"
+            className={cn(
+              'min-w-0 truncate text-xs font-semibold hover:text-ktip-ocean-600 hover:underline',
+              host ? 'text-ktip-sand-900' : 'text-ktip-sand-800'
+            )}
           >
             {name}
           </button>
-          <span className="text-[10px] text-ktip-sand-400">
+          {host && <HostBadge />}
+          <span className="shrink-0 text-[10px] text-ktip-sand-400">
             {formatRelativeTime(message.created_at)}
           </span>
         </div>
@@ -153,6 +196,60 @@ function RoomChatMessage({
 }
 
 /**
+ * The host post pinned over the top of the list: the newest one that has
+ * scrolled out of view above. One line, translated like the row it points at
+ * (the prefetch has already warmed it), and a click takes the reader there.
+ */
+function PinnedHostMessage({
+  message,
+  onJump,
+  onDismiss,
+}: {
+  message: VenueRoomMessage
+  onJump: () => void
+  onDismiss: () => void
+}) {
+  const { t } = useLingui()
+  const { text } = useTranslatedContent(message.body, message.lang, {
+    meter: { surface: 'chat', roomId: message.room_id },
+  })
+  const name = message.author?.display_name || t`Host`
+
+  return (
+    <div className="absolute inset-x-2 top-2 z-10 flex items-center rounded-xl border border-ktip-tropical-200 border-l-3 border-l-ktip-tropical-500 bg-ktip-tropical-50 shadow-card">
+      <button
+        type="button"
+        onClick={onJump}
+        title={t`Go to this message`}
+        className="flex min-w-0 flex-1 items-center gap-2 rounded-l-xl py-2 pl-3 pr-1 text-left"
+      >
+        <Pin size={13} className="shrink-0 text-ktip-tropical-700" aria-hidden="true" />
+        <span className="sr-only">
+          <Trans>Pinned host message.</Trans>
+        </span>
+        <span className="max-w-[40%] shrink-0 truncate text-xs font-semibold text-ktip-sand-900">
+          {name}
+        </span>
+        <HostBadge />
+        <span className="min-w-0 flex-1 truncate text-xs text-ktip-sand-700">{text}</span>
+        <span className="shrink-0 text-[10px] text-ktip-sand-500">
+          {formatRelativeTime(message.created_at)}
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label={t`Hide pinned message`}
+        title={t`Hide`}
+        className="icon-hit mr-1 shrink-0 rounded-lg p-1 text-ktip-sand-500 hover:bg-ktip-tropical-100 hover:text-ktip-sand-900"
+      >
+        <X size={13} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+/**
  * Chat for one room.
  *
  * Room-scoped, always — there is no 1:1 shape in venue_room_messages, which is
@@ -163,6 +260,7 @@ export function RoomChatPanel({
   room,
   canPost,
   canModerate = false,
+  highlightHosts = true,
   className,
 }: RoomChatPanelProps) {
   const { t } = useLingui()
@@ -179,16 +277,115 @@ export function RoomChatPanel({
   const { lang: contentLang } = useContentLanguage()
   const warm = useWarmContentTranslations()
 
+  // Who the hosts are. Messages carry no role, so it comes from the roster,
+  // which the venue layout has already fetched under the same key: this is a
+  // cache read, not a request. `live` matches the layout's slower refetch.
+  const { roster } = useVenueRoster(highlightHosts ? room.event_id : undefined, { live: true })
+  const hostIds = useMemo(
+    () => new Set((roster ?? []).filter((m) => m.role === 'organizer').map((m) => m.user_id)),
+    [roster]
+  )
+  const isHostMessage = useCallback(
+    (m: VenueRoomMessage) =>
+      highlightHosts &&
+      m.kind !== 'system' &&
+      (!m.status || m.status === 'active') &&
+      !!m.author_id &&
+      hostIds.has(m.author_id),
+    [highlightHosts, hostIds]
+  )
+  const pinRows = useMemo<PinRow[]>(
+    () => (messages ?? []).map((m) => ({ id: m.id, host: isHostMessage(m) })),
+    [messages, isHostMessage]
+  )
+
   const [draft, setDraft] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   // So the emoji picker can insert at the caret, not on the end of the line.
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Stick to the bottom as messages arrive. Chat that does not is broken chat.
+  // Where the reader is. Only "at the bottom" decides whether new messages
+  // pull the list down; the first visible row decides the pin.
+  const atBottomRef = useRef(true)
+  const [firstVisible, setFirstVisible] = useState(0)
+  const [dismissedAt, setDismissedAt] = useState<string | null>(null)
+  const [flashId, setFlashId] = useState<string | null>(null)
+
+  // A binary search over the rows' rects: a handful of reads per frame, however
+  // long the thread. Rows are the scroll container's direct children.
+  const measure = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < BOTTOM_SLACK
+    const rows = el.children
+    const top = el.getBoundingClientRect().top
+    setFirstVisible(
+      firstVisibleRow(rows.length, (i) => rows[i].getBoundingClientRect().bottom, top)
+    )
+  }, [])
+
+  const frameRef = useRef(0)
+  const onScroll = useCallback(() => {
+    if (frameRef.current) return
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0
+      measure()
+    })
+  }, [measure])
+  useEffect(() => () => cancelAnimationFrame(frameRef.current), [])
+
+  // Stick to the bottom as messages arrive, but only for a reader who is
+  // already there: someone scrolled up to reread a host post should not be
+  // yanked away from it. Their own message always brings them down.
+  const lastIdRef = useRef<string | null>(null)
   useEffect(() => {
     const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [messages])
+    if (!el) return
+    const last = messages?.[messages.length - 1]
+    const sentByMe = !!last && last.id !== lastIdRef.current && last.author_id === auth.user?.id
+    lastIdRef.current = last?.id ?? null
+    if (atBottomRef.current || sentByMe) el.scrollTop = el.scrollHeight
+    measure()
+  }, [messages, measure, auth.user?.id])
+
+  // Rows grow after they paint (a translation lands, a link wraps). Keep a
+  // reader at the bottom there, and keep the pin honest.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(() => {
+      if (atBottomRef.current) el.scrollTop = el.scrollHeight
+      measure()
+    })
+    observer.observe(el)
+    for (const row of Array.from(el.children)) observer.observe(row)
+    return () => observer.disconnect()
+  }, [messages, measure])
+
+  useEffect(() => {
+    if (!flashId) return
+    const id = window.setTimeout(() => setFlashId(null), FLASH_MS)
+    return () => window.clearTimeout(id)
+  }, [flashId])
+
+  const pinnedId = pickHostPin(pinRows, firstVisible, dismissedAt)
+  const pinned = pinnedId ? messages?.find((m) => m.id === pinnedId) : undefined
+
+  const jumpTo = (id: string) => {
+    const el = scrollRef.current
+    if (!el) return
+    const row = Array.from(el.children).find(
+      (child) => (child as HTMLElement).dataset.msgId === id
+    ) as HTMLElement | undefined
+    if (!row) return
+    // Centred, or just below the pin bar for a post taller than the panel.
+    const offset = Math.max(PIN_CLEARANCE, (el.clientHeight - row.offsetHeight) / 2)
+    el.scrollTo({
+      top: Math.max(0, row.offsetTop - offset),
+      behavior: prefersReducedMotionNow() ? 'auto' : 'smooth',
+    })
+    setFlashId(id)
+  }
 
   // One pass over the whole thread before it paints, so a roomful of messages
   // is a single request rather than one per bubble.
@@ -227,28 +424,47 @@ export function RoomChatPanel({
         </h2>
       </div>
 
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-        {loading ? (
-          <>
-            <div className="h-10 rounded-xl bg-ktip-sand-100 animate-pulse-soft" />
-            <div className="h-10 w-3/4 rounded-xl bg-ktip-sand-100 animate-pulse-soft" />
-          </>
-        ) : !messages || messages.length === 0 ? (
-          <p className="py-6 text-center text-sm text-ktip-sand-500">
-            <Trans>No messages yet. Say hello.</Trans>
-          </p>
-        ) : (
-          messages.map((m) => (
-            <RoomChatMessage
-              key={m.id}
-              message={m}
-              mine={m.author_id === auth.user?.id}
-              canModerate={canModerate}
-              onOpenMember={openMember}
-              onRemove={() => removeMessage({ messageId: m.id, roomId: room.id })}
-            />
-          ))
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {pinned && (
+          <PinnedHostMessage
+            message={pinned}
+            onJump={() => jumpTo(pinned.id)}
+            onDismiss={() => setDismissedAt(newestHostId(pinRows))}
+          />
         )}
+
+        {/* relative: the rows' offsetTop is measured from here when jumping. */}
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="relative min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3"
+        >
+          {loading ? (
+            <>
+              <div className="h-10 rounded-xl bg-ktip-sand-100 animate-pulse-soft" />
+              <div className="h-10 w-3/4 rounded-xl bg-ktip-sand-100 animate-pulse-soft" />
+            </>
+          ) : !messages || messages.length === 0 ? (
+            <p className="py-6 text-center text-sm text-ktip-sand-500">
+              <Trans>No messages yet. Say hello.</Trans>
+            </p>
+          ) : (
+            messages.map((m, i) => (
+              // One wrapper per message, so child i is message i for the pin.
+              <div key={m.id} data-msg-id={m.id}>
+                <RoomChatMessage
+                  message={m}
+                  mine={m.author_id === auth.user?.id}
+                  host={pinRows[i]?.host ?? false}
+                  flash={flashId === m.id}
+                  canModerate={canModerate}
+                  onOpenMember={openMember}
+                  onRemove={() => removeMessage({ messageId: m.id, roomId: room.id })}
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {canPost ? (

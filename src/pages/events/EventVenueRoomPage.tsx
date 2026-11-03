@@ -239,6 +239,7 @@ export default function EventVenueRoomPage() {
         availability={presence.availability}
         isAuto={presence.manual === null || presence.manual !== presence.availability}
         onAvailabilityChange={presence.setAvailability}
+        submissionDeadline={event.submission_deadline}
         backToMap
       />
 

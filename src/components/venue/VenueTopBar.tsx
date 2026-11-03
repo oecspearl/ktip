@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowLeft, WifiOff } from 'lucide-react'
+import { ArrowLeft, Timer, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
 import { IrisLink } from '../ui/IrisTransition'
 import { AvailabilityPicker } from './AvailabilityPicker'
+import { clockLeft, useNowUntil } from './room/judging/judging-time'
 import type { VenueAvailability } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
 
@@ -21,6 +22,8 @@ interface VenueTopBarProps {
   /** True when the shown availability came from the idle timer. */
   isAuto: boolean
   onAvailabilityChange: (next: Exclude<VenueAvailability, 'offline'>) => void
+  /** events.submission_deadline. Set, the bar counts down to it. */
+  submissionDeadline?: string | null
   /** Set when inside a room, so the bar can offer a way back to the map. */
   backToMap?: boolean
   /** Extra chrome (e.g. the organizer's "Edit the map" button), before the picker. */
@@ -28,6 +31,46 @@ interface VenueTopBarProps {
   /** The floorplan page has no other h1; the room page keeps the default. */
   titleAs?: 'p' | 'h1'
   className?: string
+}
+
+/**
+ * "Submissions close in 18:41:24", ticking. Its own component so the per-second
+ * render stays inside this chip rather than the whole bar. Gold digits on a
+ * fixed navy chip: that pairing holds in both themes, which gold on the cream
+ * bar would not.
+ */
+function SubmissionCountdown({ deadline }: { deadline: string }) {
+  const { i18n } = useLingui()
+  const end = Date.parse(deadline)
+  const now = useNowUntil(end)
+  if (!Number.isFinite(end)) return null
+  const left = end - now
+  const at = i18n.date(new Date(end), { dateStyle: 'medium', timeStyle: 'short' })
+
+  return (
+    <span
+      title={at}
+      className="flex items-center gap-2 rounded-full bg-brand-navy px-3 py-1 text-xs font-medium text-white ring-1 ring-ktip-sun-200"
+    >
+      <Timer size={14} className="shrink-0 text-ktip-sun-600" aria-hidden="true" />
+      {left > 0 ? (
+        // role="timer" is polite by default: read on focus, not every second.
+        <span role="timer">
+          <span className="sr-only sm:not-sr-only">
+            <Trans>Submissions close in</Trans>{' '}
+          </span>
+          <time
+            dateTime={new Date(end).toISOString()}
+            className="font-display text-base font-bold tabular-nums text-ktip-sun-600"
+          >
+            {clockLeft(left)}
+          </time>
+        </span>
+      ) : (
+        <Trans>Submissions closed</Trans>
+      )}
+    </span>
+  )
 }
 
 /**
@@ -48,6 +91,7 @@ export function VenueTopBar({
   availability,
   isAuto,
   onAvailabilityChange,
+  submissionDeadline,
   backToMap,
   trailing,
   titleAs,
@@ -127,6 +171,8 @@ export function VenueTopBar({
           {connected ? <Trans>{headcount} here</Trans> : t`Reconnecting`}
         </span>
       )}
+
+      {submissionDeadline && <SubmissionCountdown deadline={submissionDeadline} />}
 
       {trailing}
 

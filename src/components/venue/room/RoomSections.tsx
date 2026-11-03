@@ -414,6 +414,7 @@ function RoomSection({
           room={room}
           canPost={isHost && room.is_open}
           canModerate={isHost}
+          highlightHosts={false}
           className={fill ? 'h-full min-h-[20rem]' : 'h-[24rem]'}
         />
       )
