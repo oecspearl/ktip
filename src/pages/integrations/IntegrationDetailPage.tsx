@@ -33,7 +33,7 @@ export default function IntegrationDetailPage() {
   const params = useParams()
   const { integration, loading } = useIntegration(params.id)
 
-  usePageTitle(integration?.name ? t`${integration.name} — Integrations` : t`Integration`)
+  usePageTitle(integration?.name ? t`${integration.name} | Integrations` : t`Integration`)
 
   if (loading) {
     return (

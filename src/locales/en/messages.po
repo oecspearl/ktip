@@ -2097,8 +2097,8 @@ msgstr "Add to portfolio"
 
 #. placeholder {0}: integration.name
 #: src/pages/integrations/IntegrationDetailPage.tsx
-msgid "{0} — Integrations"
-msgstr "{0} — Integrations"
+msgid "{0} | Integrations"
+msgstr "{0} | Integrations"
 
 #: src/i18n/harvested.ts
 msgid "How do I reply to a discussion?"
@@ -18281,8 +18281,8 @@ msgstr "Signature"
 
 #. placeholder {0}: course.title
 #: src/pages/courses/CourseDetailPage.tsx
-msgid "{0} — Courses"
-msgstr "{0} — Courses"
+msgid "{0} | Courses"
+msgstr "{0} | Courses"
 
 #. placeholder {0}: room.name
 #: src/components/venue/RoomChatPanel.tsx

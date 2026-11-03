@@ -34,7 +34,7 @@ export default function CourseDetailPage() {
   // carries the course link, so the button can switch over at once.
   const [enrolledUrl, setEnrolledUrl] = useState<string | null>(null)
 
-  usePageTitle(course?.title ? t`${course.title} — Courses` : t`Course`)
+  usePageTitle(course?.title ? t`${course.title} | Courses` : t`Course`)
 
   if (loading) {
     return (

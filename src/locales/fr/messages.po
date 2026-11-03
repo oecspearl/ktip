@@ -2039,7 +2039,7 @@ msgstr "Ajouter au portfolio"
 
 #. placeholder {0}: integration.name
 #: src/pages/integrations/IntegrationDetailPage.tsx
-msgid "{0} — Integrations"
+msgid "{0} | Integrations"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17691,7 +17691,7 @@ msgstr "Signature"
 
 #. placeholder {0}: course.title
 #: src/pages/courses/CourseDetailPage.tsx
-msgid "{0} — Courses"
+msgid "{0} | Courses"
 msgstr ""
 
 #. placeholder {0}: room.name
