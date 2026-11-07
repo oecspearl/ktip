@@ -461,6 +461,8 @@ function FreeTierMeters({
     if (!meters) return null
     const mine = (kind: string) => Number(meters.kinds?.[kind]?.this_event ?? 0) || 0
     switch (tier.id) {
+      case 'livekit_minutes':
+        return mine('call_seconds')
       case 'translator_chars':
         return mine('translate_chars') + mine('caption_chars')
       case 'speech_translation_seconds':

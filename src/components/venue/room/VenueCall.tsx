@@ -11,6 +11,7 @@ import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 import { CaptionStrip } from './CaptionStrip'
 import { cn } from '../../../lib/utils'
+import { LIVEKIT_ROOM_OPTIONS } from '../../../lib/livekit-options'
 import { LIVEKIT_URL, type VenueRoomGrant } from '../../../hooks/useVenueRoomToken'
 import type { RoomCameraMode } from '../../../lib/venue-room-layout'
 
@@ -63,6 +64,7 @@ export function VenueCall({
       serverUrl={LIVEKIT_URL}
       token={token}
       connect
+      options={LIVEKIT_ROOM_OPTIONS}
       // Publishing on connect only when the grant allows it. A listen-only room
       // or a full room hands back canPublish: false, and the camera never turns
       // on in the first place rather than turning on and being rejected.

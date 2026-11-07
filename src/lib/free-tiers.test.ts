@@ -14,6 +14,7 @@ const tier = (id: string) => FREE_TIERS.find((t) => t.id === id)!
 describe('free tier limits', () => {
   it('carries the published free allowances', () => {
     expect(tier('livekit_concurrent').limit).toBe(100)
+    expect(tier('livekit_minutes').limit).toBe(5_000 * 60)
     expect(tier('translator_chars').limit).toBe(2_000_000)
     expect(tier('speech_translation_seconds').limit).toBe(5 * 3600)
     expect(tier('tts_chars').limit).toBe(500_000)
@@ -103,6 +104,14 @@ describe('usageForTier', () => {
 
   it('reads people in calls for the concurrency cap', () => {
     expect(usageForTier('livekit_concurrent', meters())).toBe(7)
+  })
+
+  it('reads call seconds across every event for the minutes cap', () => {
+    expect(usageForTier('livekit_minutes', meters())).toBe(0)
+    const withCalls = meters({
+      kinds: { call_seconds: { all_events: 36_000, this_event: 1_200 } },
+    })
+    expect(usageForTier('livekit_minutes', withCalls)).toBe(36_000)
   })
 
   it('adds chat and captions when there is no site-wide ledger', () => {

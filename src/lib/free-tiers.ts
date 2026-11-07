@@ -23,6 +23,7 @@ import type { MessageDescriptor } from '@lingui/core'
 
 export type FreeTierId =
   | 'livekit_concurrent'
+  | 'livekit_minutes'
   | 'translator_chars'
   | 'speech_translation_seconds'
   | 'tts_chars'
@@ -47,11 +48,23 @@ export const FREE_TIERS: readonly FreeTier[] = [
     id: 'livekit_concurrent',
     plan: 'LiveKit Cloud Build',
     label: msg`People in calls now`,
-    note: msg`The Build plan allows 100 people in calls at the same time, across every room.`,
+    note: msg`The Build plan allows 100 people in calls at the same time, across every room. It also caps video sent out at 50 GB a month, which only the LiveKit dashboard can show.`,
     limit: 100,
     unit: 'people',
     period: 'concurrent',
     envKey: 'VITE_FREE_TIER_LIVEKIT_CONCURRENT',
+  },
+  {
+    // Every call shares this: venue rooms, coffee tables and the calls started
+    // from /collaborate/video (202). One person for one minute is one minute.
+    id: 'livekit_minutes',
+    plan: 'LiveKit Cloud Build',
+    label: msg`Call time this month`,
+    note: msg`The Build plan includes 5,000 participant minutes a month. Ten people on a call for an hour use 600.`,
+    limit: 5_000 * 60,
+    unit: 'seconds',
+    period: 'month',
+    envKey: 'VITE_FREE_TIER_LIVEKIT_SECONDS',
   },
   {
     id: 'translator_chars',
@@ -160,6 +173,8 @@ export function usageForTier(id: FreeTierId, meters: UsageMeters): number {
   switch (id) {
     case 'livekit_concurrent':
       return Number(meters.calls_now) || 0
+    case 'livekit_minutes':
+      return kindTotal(meters, 'call_seconds')
     case 'translator_chars': {
       const venue = kindTotal(meters, 'translate_chars') + kindTotal(meters, 'caption_chars')
       const site = Number(meters.site_translate_chars)
