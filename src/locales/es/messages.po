@@ -333,6 +333,10 @@ msgstr "Advertencia: esto eliminará de forma permanente:"
 msgid "Codes"
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "End this call for everyone? Nobody will be able to rejoin it."
+msgstr "¿Terminar esta llamada para todos? Nadie podrá volver a unirse."
+
 #: src/i18n/harvested.ts
 msgid "Reads an uploaded document and proposes values for form fields"
 msgstr ""
@@ -1763,6 +1767,10 @@ msgstr ""
 msgid "Stops the same walkthrough appearing every visit."
 msgstr ""
 
+#: src/components/collaboration/MeetingCall.tsx
+msgid "Microphone"
+msgstr "Micrófono"
+
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "Team formed. Your Homebase is the next free team room."
 msgstr "Equipo formado. Su Homebase es la siguiente sala de equipo libre."
@@ -1929,10 +1937,6 @@ msgstr "Un plano en formato SVG es opcional: sin uno, las salas se muestran como
 #: src/i18n/harvested.ts
 msgid "If a funder is awarded the right to use your work, that comes from the funding agreement you sign with them afterwards — a separate document, negotiated separately, that you are free not to sign. It never comes from the act of applying."
 msgstr ""
-
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "KTIP Video"
-msgstr "Video KTIP"
 
 #: src/i18n/harvested.ts
 msgid "Pin a post to hold it at the top of its board regardless of age — announcements, rules, a call for participants. Lock to keep it readable but closed to replies.\n"
@@ -2351,6 +2355,10 @@ msgstr "Eliminar contenido lo oculta de todos y notifica a su autor. Descartar m
 msgid "What the numbers count"
 msgstr "Qué cuentan los números"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "The video service has not been connected to this site. Calls will appear here once it is."
+msgstr "El servicio de video aún no está conectado a este sitio. Las llamadas aparecerán aquí cuando lo esté."
+
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Toggle theme"
 msgstr "Cambiar tema"
@@ -2582,10 +2590,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Create a KTIP account"
 msgstr "Crear una cuenta de KTIP"
-
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "No active call"
-msgstr "No hay ninguna llamada activa"
 
 #: src/i18n/harvested.ts
 msgid "You may use the AI features to draft, improve and translate your own work. You may not use them to generate content that breaks any rule above, and you must not present AI output as verified fact where its accuracy matters to someone else — a grant application, a funding claim, a safety instruction."
@@ -2859,6 +2863,10 @@ msgstr ""
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "AI tools materially helped us build this"
 msgstr "Las herramientas de IA nos ayudaron de forma sustancial a construir esto"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Invitations sent. Each person gets a message with the call link."
+msgstr "Invitaciones enviadas. Cada persona recibe un mensaje con el enlace de la llamada."
 
 #: src/components/legal/ConsentDocument.tsx
 msgid "Jump to the end"
@@ -3371,6 +3379,10 @@ msgstr "(usted)"
 msgid "Recent searches"
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Rejoin"
+msgstr "Volver a unirse"
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "Personalization reset to defaults"
 msgstr "Personalización restablecida a los valores predeterminados"
@@ -3681,10 +3693,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Account & Verification"
 msgstr "Cuenta y verificación"
-
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "Join Video Call"
-msgstr "Unirse a la videollamada"
 
 #: src/i18n/harvested.ts
 msgid "Verification Policy"
@@ -4151,6 +4159,10 @@ msgstr "Desconectado"
 msgid "Remove \"{title}\" from this application?"
 msgstr "¿Quitar «{title}» de esta solicitud?"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Video call invitation"
+msgstr "Invitación a una videollamada"
+
 #. placeholder {0}: params.days
 #: src/lib/personalization.ts
 msgid "Happening in {0} days"
@@ -4466,6 +4478,10 @@ msgstr ""
 msgid "Several subjects have their own documents. Where one applies, it governs that subject and this document does not repeat it. The full set is listed under See also at the foot of this page."
 msgstr ""
 
+#: src/lib/free-tiers.ts
+msgid "The Build plan includes 5,000 participant minutes a month. Ten people on a call for an hour use 600."
+msgstr "El plan Build incluye 5.000 minutos de participante al mes. Diez personas en una llamada durante una hora usan 600."
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "Answer the challenge and attach your supporting files"
 msgstr "Responda al desafío y adjunte sus archivos de respaldo"
@@ -4492,8 +4508,9 @@ msgstr "Resuma el propósito de la solicitud, el problema abordado, su enfoque y
 
 #: src/components/security/BackupCodesSheet.tsx
 #: src/components/verification/OrgCodesPanel.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Copied"
-msgstr ""
+msgstr "Copiado"
 
 #: src/components/legal/MyTakedownNotices.tsx
 msgid "Why they say it infringes:"
@@ -5001,6 +5018,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Analytics session identifier"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "There is no call at this link. Check the link, or start a new call."
+msgstr "No hay ninguna llamada en este enlace. Revise el enlace o inicie una llamada nueva."
 
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
@@ -6531,6 +6552,10 @@ msgstr "Siga las quejas que ha presentado"
 msgid "Read it again"
 msgstr "Volver a leerlo"
 
+#: src/lib/free-tiers.ts
+msgid "Call time this month"
+msgstr "Tiempo de llamadas este mes"
+
 #: src/i18n/harvested.ts
 #: src/pages/auth/SignupPage.tsx
 #: src/pages/dashboard/dashboard-tabs.ts
@@ -6553,10 +6578,6 @@ msgstr ""
 msgid "Your Microsoft account did not share an email address with KTIP. Ask whoever administers it to add one, or sign in with Google or an email address instead."
 msgstr "Su cuenta de Microsoft no compartió una dirección de correo electrónico con KTIP. Pida a quien la administre que agregue una, o inicie sesión con Google o con una dirección de correo electrónico."
 
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "Video call: {roomName}"
-msgstr "Videollamada: {roomName}"
-
 #: src/hooks/useMyKtipEnrollments.ts
 msgid "Could not load enrollments"
 msgstr "No se pudieron cargar las inscripciones"
@@ -6569,10 +6590,6 @@ msgstr "Por <0>{0}</0>"
 #: src/i18n/harvested.ts
 msgid "Click \"Share\" in the toolbar."
 msgstr "Haga clic en «Compartir» en la barra de herramientas."
-
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "Enter a room name or create one, then click Join"
-msgstr "Escriba el nombre de una sala o cree una, luego haga clic en Unirse"
 
 #: src/i18n/harvested.ts
 msgid "How do I manage my project team?"
@@ -6686,6 +6703,10 @@ msgstr "Reconectando — los recuentos pueden estar desactualizados"
 msgid "Reported and flagged content"
 msgstr "Contenido denunciado y marcado"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "{inviterName} invited you to {callName}"
+msgstr "{inviterName} le invitó a {callName}"
+
 #: src/i18n/harvested.ts
 msgid "Your analytics choice"
 msgstr ""
@@ -6772,9 +6793,9 @@ msgstr "Instituciones"
 msgid "Calendar view"
 msgstr "Vista de calendario"
 
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "Open in new tab"
-msgstr "Abrir en una pestaña nueva"
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Start call"
+msgstr "Iniciar llamada"
 
 #: src/lib/authenticator-apps.ts
 msgid "Download Ente Auth for your computer from ente.io/auth, or from the app store on a phone, and open it."
@@ -7409,6 +7430,10 @@ msgstr "Solo puede editar sus propios eventos."
 msgid "What happened"
 msgstr "Qué sucedió"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "This call has ended."
+msgstr "Esta llamada ha terminado."
+
 #: src/i18n/harvested.ts
 msgid "Telemetry, user ID, route, browser context"
 msgstr ""
@@ -7653,16 +7678,6 @@ msgstr "Gestionar los elementos de moderación"
 msgid "Choosing your showcase."
 msgstr "Eligiendo su vitrina."
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "📹 You've been invited to a video conference!\n"
-"\n"
-"Room: {room}\n"
-"Join here: {roomLink}\n"
-"\n"
-"Click the link above to join the call."
-msgstr "📹 ¡Ha sido invitado a una videoconferencia!\n"
-""
-
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/hooks/useCollabInvites.ts
 msgid "Untitled document"
@@ -7680,6 +7695,10 @@ msgstr "Cerrar sesión"
 #: src/i18n/harvested.ts
 msgid "What we receive from other services"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "You get a link to share. Anyone signed in who has it can join until you end the call, or for seven days."
+msgstr "Recibirá un enlace para compartir. Cualquier persona con sesión iniciada que lo tenga puede unirse hasta que usted termine la llamada, o durante siete días."
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "A backup address that signs in to this account with the same password"
@@ -8001,6 +8020,10 @@ msgstr "Elija el icono de sol o luna que se despliega encima."
 #: src/components/ui/Stepper.tsx
 msgid "Step {stepNumber} not started"
 msgstr "Paso {stepNumber} sin empezar"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "The host has stopped new people joining. Ask them to open it again, then reload this page."
+msgstr "El anfitrión ha impedido que se una gente nueva. Pídale que la vuelva a abrir y luego recargue esta página."
 
 #: src/i18n/harvested.ts
 msgid "Licence"
@@ -8524,8 +8547,9 @@ msgid "Recent"
 msgstr "Recientes"
 
 #: src/components/verification/OrgCodesPanel.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "a member"
-msgstr ""
+msgstr "un miembro"
 
 #: src/i18n/harvested.ts
 msgid "Rate-limit records"
@@ -8665,6 +8689,10 @@ msgstr "No se pudo restablecer la contraseña. Vuelva a intentarlo."
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Two-step verification is on."
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Video calls are not switched on yet"
+msgstr "Las videollamadas aún no están activadas"
 
 #: src/components/courses/CourseCard.tsx
 msgid "View course"
@@ -8839,6 +8867,10 @@ msgstr ""
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Progress"
 msgstr "Progreso"
+
+#: src/lib/free-tiers.ts
+msgid "The Build plan allows 100 people in calls at the same time, across every room. It also caps video sent out at 50 GB a month, which only the LiveKit dashboard can show."
+msgstr "El plan Build permite 100 personas en llamadas a la vez, sumando todas las salas. También limita el video enviado a 50 GB al mes, algo que solo el panel de LiveKit puede mostrar."
 
 #: src/i18n/harvested.ts
 msgid "Declaring a false date of birth — in particular one that presents a minor as an adult — is grounds for immediate suspension. It is also the single thing most likely to put a young member in a situation the safeguards were built to prevent."
@@ -9118,6 +9150,10 @@ msgstr "Redirigiéndolo a <0>Mis reportes</0>. Haga clic en el enlace si no es r
 msgid "A reviewer removed the badge from this account, so an email address cannot bring it back."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "This link is for the old video tool"
+msgstr "Este enlace es de la antigua herramienta de video"
+
 #: src/components/resume/sheets/LedgerSheet.tsx
 msgid "End of résumé"
 msgstr ""
@@ -9186,6 +9222,10 @@ msgstr ""
 #: src/lib/venue-room-presets.ts
 msgid "A team's own room. The team that claims it picks its colour, what goes in it and its logo."
 msgstr "La sala propia de un equipo. El equipo que la ocupa elige su color, lo que contiene y su logotipo."
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "You started this call"
+msgstr "Usted inició esta llamada"
 
 #: src/components/projects/CommentSection.tsx
 msgid "Write a comment..."
@@ -9274,6 +9314,10 @@ msgstr "Otras respuestas"
 #: src/i18n/harvested.ts
 msgid "The full picture — what supervised mode restricts, and how guardian requests are handled — is in the Minor Safeguarding Statement."
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Something went wrong. Try again."
+msgstr "Algo salió mal. Inténtelo de nuevo."
 
 #: src/components/venue/map/VenueMapEditor.tsx
 #: src/i18n/harvested.ts
@@ -9523,6 +9567,10 @@ msgstr ""
 #: src/pages/events/EventDetailPage.tsx
 msgid "Cancel RSVP"
 msgstr "Cancelar la confirmación de asistencia"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Locked: nobody new can join"
+msgstr "Bloqueada: nadie nuevo puede unirse"
 
 #: src/i18n/harvested.ts
 msgid "An entry found to infringe someone else’s rights may be disqualified, and a prize already awarded may be withdrawn."
@@ -10005,10 +10053,6 @@ msgstr ""
 msgid "My profile information is not showing"
 msgstr "La información de mi perfil no se muestra"
 
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "KTIP User"
-msgstr "Usuario de KTIP"
-
 #: src/lib/venue-room-sections.ts
 msgid "Everyone at the event who ticked it, with their skills. Not just this room."
 msgstr "Todas las personas del evento que lo marcaron, con sus habilidades. No solo esta sala."
@@ -10105,6 +10149,10 @@ msgstr ""
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Could not remove that person"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Calls are not open to student accounts"
+msgstr "Las llamadas no están disponibles para cuentas de estudiante"
 
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Whole buildings"
@@ -10544,10 +10592,6 @@ msgstr ""
 msgid "Download as Markdown"
 msgstr "Descargar como Markdown"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Enter a room name or generate one. Anyone with the same room name joins the same call. Use the Share button to copy a direct link for your team."
-msgstr "Introduzca un nombre de sala o genere uno. Cualquier persona con el mismo nombre de sala se une a la misma llamada. Use el botón Compartir para copiar un enlace directo para su equipo."
-
 #: src/i18n/harvested.ts
 msgid "Featuring is the main lever"
 msgstr "La función de destacar es la principal palanca"
@@ -10828,10 +10872,6 @@ msgstr ""
 #: src/components/settings/PreferencesTab.tsx
 msgid "Forum Replies"
 msgstr "Respuestas del foro"
-
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Generate a random room name"
-msgstr "Generar un nombre de sala aleatorio"
 
 #: src/components/venue/room/TeamFinderPanel.tsx
 #: src/lib/venue-room-sections.ts
@@ -11526,10 +11566,6 @@ msgstr ""
 msgid "Field extraction failed ({status})"
 msgstr "Error al extraer el campo ({status})"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Room Name"
-msgstr "Nombre de la sala"
-
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/components/venue/map/VenueRoomList.tsx
 msgid "Rooms"
@@ -11744,10 +11780,6 @@ msgstr ""
 msgid "Failed to load whiteboard"
 msgstr "Error al cargar la pizarra"
 
-#: src/lib/free-tiers.ts
-msgid "The Build plan allows 100 people in calls at the same time, across every room."
-msgstr "El plan Build permite 100 personas en llamadas al mismo tiempo, en todas las salas."
-
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "The code could not be issued."
 msgstr ""
@@ -11924,6 +11956,10 @@ msgstr "Nada se guarda hasta que usted lo confirme. La nota junto al botón indi
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "What you have agreed to"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Cannot join this call"
+msgstr "No puede unirse a esta llamada"
 
 #: src/i18n/harvested.ts
 msgid "Click \"Apply\" — you must be logged in."
@@ -12190,6 +12226,10 @@ msgstr "Pídale al administrador de KTIP de su escuela o universidad que añada 
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Full"
 msgstr "Completo"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Cannot open this call"
+msgstr "No se puede abrir esta llamada"
 
 #: src/hooks/useEmailVerification.ts
 msgid "That is not a domain KTIP can trust. Free-mail providers are refused."
@@ -13245,6 +13285,10 @@ msgstr "Utilice el botón Conectar en su página de miembro o en el panel del di
 msgid "Sofas and beanbags"
 msgstr "Sofás y pufs"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Lock"
+msgstr "Bloquear"
+
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "The brief has no objectives or deliverables to answer. Move on to the review."
 msgstr "El resumen no tiene objetivos ni entregables que responder. Pase a la revisión."
@@ -13377,6 +13421,10 @@ msgstr "Las ventanas fijadas se vuelven transparentes y dejan pasar los clics"
 #: src/pages/grants/GrantsPage.tsx
 msgid "Education Grants"
 msgstr "Subvenciones educativas"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Call name (optional)"
+msgstr "Nombre de la llamada (opcional)"
 
 #: src/pages/resources/ResourcesPage.tsx
 msgid "Resources could not be loaded"
@@ -15015,6 +15063,10 @@ msgstr "Buscar miembros..."
 msgid "You posted this funding call."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Untitled call"
+msgstr "Llamada sin título"
+
 #: src/i18n/harvested.ts
 msgid "Your profile, security, notifications and personalization — all on the dashboard."
 msgstr ""
@@ -15178,6 +15230,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Security and operational logs"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "That tool has been retired. Start a new call below and share its link instead."
+msgstr "Esa herramienta ya no está disponible. Inicie una llamada nueva abajo y comparta su enlace."
 
 #: src/i18n/harvested.ts
 msgid "Send controlled test failures through the live monitoring pipeline"
@@ -15742,6 +15798,7 @@ msgstr ""
 #: src/components/venue/room/AvStage.tsx
 #: src/components/venue/room/homebase/TeamDocs.tsx
 #: src/components/venue/room/homebase/TeamWhiteboard.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Connecting…"
 msgstr "Conectando…"
 
@@ -16007,6 +16064,10 @@ msgstr "Acciones de fila, y qué significan para el miembro"
 #: src/components/security/EmailCodeCard.tsx
 msgid "Verify and turn on"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Calls started here can end up as one-to-one, so they are for other members only. You can still use video in an event venue, where every room has a host."
+msgstr "Las llamadas iniciadas aquí pueden quedar entre dos personas, así que son solo para otros miembros. Puede seguir usando video en la sede de un evento, donde cada sala tiene un anfitrión."
 
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/profile/PortraitStudio.tsx
@@ -16745,6 +16806,10 @@ msgstr "{0} es obligatorio para {1}"
 msgid "The line that matters most: describing what you did is fine, implying who backs you is not. \"Winner, KTIP Climate Challenge 2026\" is fine. \"An OECS-accredited programme\" is not, unless you actually are one."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Started by {hostName}"
+msgstr "Iniciada por {hostName}"
+
 #: src/components/legal/SectionNotice.tsx
 msgid "The rules you agreed to at sign-up apply to every post and reply here."
 msgstr ""
@@ -16926,6 +16991,10 @@ msgstr "Inicie sesión para ver este miembro"
 msgid "LiveKit"
 msgstr ""
 
+#: src/components/collaboration/MeetingCall.tsx
+msgid "Join call"
+msgstr "Unirse a la llamada"
+
 #: src/i18n/harvested.ts
 msgid "Help article — Projects"
 msgstr "Artículo de ayuda — Proyectos"
@@ -17060,6 +17129,10 @@ msgstr "Credencial"
 #: src/i18n/harvested.ts
 msgid "How do I change my password?"
 msgstr "¿Cómo cambio mi contraseña?"
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Calls are not open to student accounts."
+msgstr "Las llamadas no están disponibles para cuentas de estudiante."
 
 #: src/i18n/harvested.ts
 msgid "Your side of it"
@@ -17554,6 +17627,10 @@ msgstr ""
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "This grant doesn't exist or has been removed."
 msgstr "Esta subvención no existe o ha sido eliminada."
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "You have started 30 calls today. You can start more tomorrow."
+msgstr "Hoy ha iniciado 30 llamadas. Podrá iniciar más mañana."
 
 #: src/pages/InvitationsPage.tsx
 msgid "Your Network"
@@ -18148,6 +18225,10 @@ msgstr ""
 msgid "(sample HTML)"
 msgstr "(HTML de ejemplo)"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Reopen"
+msgstr "Volver a abrir"
+
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "While entries are open you only see your own. Everyone's solutions become visible once submissions close"
 msgstr "Mientras las inscripciones estén abiertas, solo verá las suyas. Las soluciones de todos se vuelven visibles al cerrarse el plazo de envío"
@@ -18637,10 +18718,6 @@ msgstr "Cada sección"
 #: src/components/venue/room/homebase/TeamCalendar.tsx
 msgid "Add to my calendar"
 msgstr "Añadir a mi calendario"
-
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Copy shareable link"
-msgstr "Copiar enlace para compartir"
 
 #: src/i18n/harvested.ts
 msgid "We may amend these Terms. Material changes are announced in the application and by email at least %noticePeriod% before they take effect, and you will be asked to accept the new version. The version number and effective date at the top of this page always reflect what is currently in force."
@@ -19601,6 +19678,10 @@ msgstr ""
 msgid "Say any of these, in the language the site is showing."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Start a new call"
+msgstr "Iniciar una llamada nueva"
+
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "You administer this funding call."
 msgstr ""
@@ -19655,10 +19736,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Business Verification"
 msgstr "Verificación de empresa"
-
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "e.g. ktip-team-standup"
-msgstr "p. ej. ktip-team-standup"
 
 #: src/lib/venue-furniture.ts
 msgid "Sponsor banner and counter"
@@ -20377,6 +20454,10 @@ msgstr ""
 msgid "Thinking about where to send you…"
 msgstr "Buscando la página adecuada…"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "a video call"
+msgstr "una videollamada"
+
 #: src/components/association/AssociationReviewQueue.tsx
 msgid "Note to the business (optional)"
 msgstr ""
@@ -20530,6 +20611,10 @@ msgstr "El enlace de Zoom debe ser un enlace https de zoom.us."
 msgid "When I press the microphone"
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "You left the call."
+msgstr "Ha salido de la llamada."
+
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Undo last mark"
 msgstr "Deshacer la última marca"
@@ -20564,10 +20649,6 @@ msgstr "Su organización"
 #: src/i18n/harvested.ts
 msgid "How do group chats work?"
 msgstr "¿Cómo funcionan los chats grupales?"
-
-#: src/components/collaboration/JitsiVideoCall.tsx
-msgid "Leave Call"
-msgstr "Salir de la llamada"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Link to your deck"
@@ -20811,7 +20892,9 @@ msgid "Unpin panel"
 msgstr "Anclar panel"
 
 #. placeholder {0}: selected.length
+#. placeholder {0}: selectedUsers.length
 #: src/components/collaboration/ShareEntityModal.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "{0, plural, one {Invite # person} other {Invite # people}}"
 msgstr "{0, plural, one {Invitar a # persona} other {Invitar a # personas}}"
 
@@ -21325,10 +21408,6 @@ msgstr ""
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "The Submission Desk is not open for this event yet."
 msgstr "La Mesa de envíos aún no está abierta para este evento."
-
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Copied!"
-msgstr "¡Copiado!"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Entries are closed. Nothing was submitted."
@@ -22735,6 +22814,14 @@ msgstr ""
 msgid "Say what happened and why the suspension should be lifted."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "📹 {inviterName} invited you to {callName}.\n"
+"\n"
+"Join here: {link}"
+msgstr "📹 {inviterName} le invitó a {callName}.\n"
+"\n"
+"Únase aquí: {link}"
+
 #: src/lib/venue-templates.ts
 msgid "Hackathon HQ"
 msgstr "Cuartel general del hackathon"
@@ -23298,6 +23385,10 @@ msgstr "Búsqueda, recorridos guiados, notificaciones y opciones de visualizaci�
 msgid "Produce aggregate statistics from them."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Only the person who started this call can change it."
+msgstr "Solo la persona que inició esta llamada puede cambiarla."
+
 #: src/pages/auth/SignupPage.tsx
 msgid "We sent a link to {backup}. Open it to confirm your backup email."
 msgstr ""
@@ -23611,6 +23702,10 @@ msgstr "Su navegador le preguntará qué ventana compartir: elija esta pestaña.
 #: src/pages/collaborate/WhiteboardsListPage.tsx
 msgid "Shared with me"
 msgstr "Compartido conmigo"
+
+#: src/components/collaboration/MeetingCall.tsx
+msgid "Camera"
+msgstr "Cámara"
 
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "Build something in a weekend"
@@ -24057,6 +24152,10 @@ msgstr "Cambios sin guardar"
 msgid "Back to funding"
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "End for everyone"
+msgstr "Terminar para todos"
+
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Granted by verification. These can only be changed by your institution, your business association, or an OECS administrator."
 msgstr ""
@@ -24181,10 +24280,6 @@ msgstr "Los informes falsos o malintencionados pueden dar lugar a medidas contra
 msgid "Direct and group messaging with other members"
 msgstr "Mensajería individual y grupal con otros miembros"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Invitations sent! Users will receive a message with the room link."
-msgstr "¡Invitaciones enviadas! Los usuarios recibirán un mensaje con el enlace de la sala."
-
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Failed to save this funding call"
 msgstr ""
@@ -24251,6 +24346,10 @@ msgstr ""
 #: src/components/verification/OrgCodesPanel.tsx
 msgid "This member's badge no longer rests on your code."
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Your account is suspended, so you cannot use calls."
+msgstr "Su cuenta está suspendida, así que no puede usar las llamadas."
 
 #: src/i18n/harvested.ts
 msgid "Reserve your place at an upcoming event"
@@ -24631,6 +24730,7 @@ msgstr ""
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/components/verification/InstitutionalEmailCard.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 #: src/pages/cv/CvEditPage.tsx
 msgid "Remove"
 msgstr "Eliminar"
@@ -25056,6 +25156,10 @@ msgstr ""
 #: src/pages/grants/GrantApplicationPage.tsx
 msgid "Review your application before submitting. You can go back to edit any section."
 msgstr "Revise su solicitud antes de enviarla. Puede volver atrás para editar cualquier sección."
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "The host has locked this call. Ask them to open it again."
+msgstr "El anfitrión ha bloqueado esta llamada. Pídale que la vuelva a abrir."
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Topics applicants filter and search by — also what the personalized ranking matches on."
@@ -25559,6 +25663,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "What happens to the information in a notice"
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Start a call"
+msgstr "Iniciar una llamada"
 
 #: src/components/legal/Disclaimer.tsx
 msgid "Stop showing this note"
@@ -26630,10 +26738,6 @@ msgstr ""
 msgid "Clear search"
 msgstr "Borrar búsqueda"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "{inviterName} invited you to join room \"{room}\""
-msgstr "{inviterName} le invitó a unirse a la sala «{room}»"
-
 #: src/components/documents/RequestAccessModal.tsx
 msgid "Request sent to the document owner"
 msgstr "Solicitud enviada al propietario del documento"
@@ -27593,6 +27697,10 @@ msgstr "Usted es el primero en llegar."
 msgid "A short demo or pitch video, if you have one. Paste a Loom, Google Drive, YouTube or Vimeo link, with sharing set to \"Anyone with the link can view\"."
 msgstr ""
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "This call is locked"
+msgstr "Esta llamada está bloqueada"
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Approve application"
 msgstr ""
@@ -27990,6 +28098,10 @@ msgstr "Pregúntele a {ASSISTANT_NAME}"
 msgid "Unknown User"
 msgstr "Usuario desconocido"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "Sign in to join this call."
+msgstr "Inicie sesión para unirse a esta llamada."
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Pin panel open"
 msgstr "Fijar panel abierto"
@@ -28070,6 +28182,10 @@ msgstr "Empezar desde una plantilla"
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "{0} will be told their application was approved."
 msgstr ""
+
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "This call has ended"
+msgstr "Esta llamada ha terminado"
 
 #: src/components/messages/NewConversationModal.tsx
 msgid "New Conversation"
@@ -28564,10 +28680,6 @@ msgstr ""
 msgid "Everyone on the platform"
 msgstr "Todos en la plataforma"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Video Conference Invitation"
-msgstr "Invitación a videoconferencia"
-
 #: src/a11y/messages.ts
 msgid "Device follows the high-contrast setting on your computer or phone."
 msgstr ""
@@ -28675,11 +28787,6 @@ msgstr "Patrocinador eliminado"
 #: src/components/profile/ProfileCanvas.tsx
 msgid "No upcoming events."
 msgstr ""
-
-#. placeholder {0}: selectedUsers.length
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "{0, plural, one {Invite # user & Start Call} other {Invite # users & Start Call}}"
-msgstr "{0, plural, one {Invitar a # usuario e iniciar llamada} other {Invitar a # usuarios e iniciar llamada}}"
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Browse the member directory and connect with innovators across the Caribbean."
@@ -29398,8 +29505,9 @@ msgid "KTIP is a collaboration platform, so some data is deliberately public."
 msgstr ""
 
 #: src/components/help/HelpArticleCard.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Copy link"
-msgstr ""
+msgstr "Copiar enlace"
 
 #: src/i18n/harvested.ts
 msgid "Drawing, exporting and sharing a board."
@@ -30486,7 +30594,6 @@ msgstr ""
 msgid "Approve"
 msgstr "Aprobar"
 
-#: src/pages/collaborate/VideoConferencePage.tsx
 #: src/pages/events/EventDetailPage.tsx
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Share"
@@ -30733,10 +30840,6 @@ msgstr "Algunos eventos se celebran en un lugar virtual: salas entre las que pue
 #: src/components/messages/ChatSidebar.tsx
 msgid "Groups"
 msgstr "Grupos"
-
-#: src/pages/collaborate/VideoConferencePage.tsx
-msgid "Generate"
-msgstr "Generar"
 
 #: src/i18n/harvested.ts
 msgid "How points and ranks work."
@@ -31191,6 +31294,10 @@ msgstr "Comentarios, me gusta, seguimientos e historial de visualización"
 msgid "Sent — awaiting a response"
 msgstr "Enviado — a la espera de una respuesta"
 
+#: src/pages/collaborate/VideoConferencePage.tsx
+msgid "e.g. Weekly team check-in"
+msgstr "p. ej., Reunión semanal del equipo"
+
 #: src/components/directory/ConnectButton.tsx
 #: src/hooks/useConnections.ts
 msgid "Connection accepted"
@@ -31242,6 +31349,7 @@ msgstr ""
 #: src/components/documents/DocumentCard.tsx
 #: src/components/documents/RequestAccessModal.tsx
 #: src/components/projects/TeamWidget.tsx
+#: src/pages/collaborate/VideoConferencePage.tsx
 msgid "A member"
 msgstr "Un miembro"
 
