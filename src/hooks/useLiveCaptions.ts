@@ -8,6 +8,7 @@ import { useSpeechUsage } from './useSpeechUsage'
 import { shouldTranslate } from '../lib/i18n/should-translate'
 import { UI_LANGS, isUiLang, type UiLang } from '../lib/i18n/protocol'
 import {
+  canCaptionWithWhisper,
   captionEngine,
   createSpeechRecognizer,
   type CaptionEngine,
@@ -79,7 +80,7 @@ export interface LiveCaptions {
   captioning: boolean
   toggleCaptioning: () => void
   supported: boolean
-  /** browser: instant, free and unlimited. whisper: Firefox, a phrase late, a shared daily allowance (203). */
+  /** browser: instant, free and unlimited. whisper: Firefox, or a browser whose own service is out of reach; a phrase late, a shared daily allowance (203). */
   engine: CaptionEngine | null
   error: string | null
 }
@@ -99,8 +100,10 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const [captioning, setCaptioning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fixed for the life of the page: what the browser can do does not change.
-  const engine: CaptionEngine | null = useMemo(() => captionEngine(), [])
+  // What the browser can do, decided once. The only change is one way: a
+  // browser whose own speech service is out of reach moves to Whisper for the
+  // rest of the visit.
+  const [engine, setEngine] = useState<CaptionEngine | null>(() => captionEngine())
   const supported = engine !== null
 
   const merge = useCallback((incoming: CaptionWire) => {
@@ -252,7 +255,23 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
         : createSpeechRecognizer({
             lang: langRef.current,
             onSegment,
-            onError: (reason) => setError(reason),
+            onError: (_reason, failure) => {
+              if (failure === 'unreachable' && canCaptionWithWhisper()) {
+                // The browser's own speech service cannot be reached (Brave,
+                // Opera, a blocked network). Whisper works from any browser
+                // that can record, so captioning carries on there, a phrase
+                // late. Changing the engine restarts this effect.
+                setInterim('')
+                setEngine('whisper')
+                return
+              }
+              if (failure === 'transient') {
+                setError('speech-error')
+                return
+              }
+              setError(failure === 'no-mic' ? 'speech-no-mic' : 'speech-browser-unreachable')
+              setCaptioning(false)
+            },
           })
     setError(null)
 

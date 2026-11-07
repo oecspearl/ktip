@@ -30021,6 +30021,10 @@ msgstr "{0} has turned this off for its team. Ask an owner or admin of your orga
 msgid "All Discussions"
 msgstr "All Discussions"
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN."
+msgstr "This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN."
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Mark under review"
 msgstr "Mark under review"

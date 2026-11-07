@@ -29175,6 +29175,10 @@ msgstr ""
 msgid "All Discussions"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN."
+msgstr "Este navegador no puede conectarse a su servicio de reconocimiento de voz. Pruebe con Chrome o Edge, o desactive su VPN."
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Mark under review"
 msgstr ""

@@ -28999,6 +28999,10 @@ msgstr ""
 msgid "All Discussions"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN."
+msgstr ""
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Mark under review"
 msgstr ""

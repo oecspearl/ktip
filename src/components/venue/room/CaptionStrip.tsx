@@ -86,8 +86,8 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
     readLang
   )
 
-  // Whisper's stops have reasons a member can act on. Browser errors keep
-  // showing their own short code, as before.
+  // Every stop has a reason a member can act on. The hook turns the browser
+  // recogniser's own codes into these too, and an unknown code shows as is.
   const errorText = (code: string): string => {
     switch (code) {
       case 'speech-day-cap':
@@ -104,6 +104,8 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
         return t`Captions need your microphone. Allow it in the browser and try again.`
       case 'speech-error':
         return t`A phrase could not be captioned. Captions carry on.`
+      case 'speech-browser-unreachable':
+        return t`This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN.`
       default:
         return code
     }
