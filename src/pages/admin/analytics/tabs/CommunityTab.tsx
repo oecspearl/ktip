@@ -1,11 +1,16 @@
 import { useMemo } from 'react'
 import { useLingui } from '@lingui/react/macro'
 import { ChartFrame, HBar, type BarItem, type ChartColumn } from '../../../../components/charts'
-import { useAdminAnalytics, type DistributionItem } from '../../../../hooks/useAdminAnalytics'
+import {
+  useAdminAnalytics,
+  useEntrepreneurStages,
+  type DistributionItem,
+} from '../../../../hooks/useAdminAnalytics'
 import { useCountries } from '../../../../hooks/useEmployers'
 import { useKpiTargets, usePlatformPulse } from '../../../../hooks/usePlatformPulse'
 import { useKpiHistory } from '../../../../hooks/useKpiSnapshots'
 import { ROLE_LABELS } from '../../../../lib/constants'
+import { entrepreneurStageLabel } from '../../../../lib/entrepreneur-stage'
 import { resolveCopy } from '../../../../i18n/copy'
 import { scopeNote, type HubProps } from '../hub-context'
 import { KpiTiles, PulseError, SectionHeading, SeriesCard } from './shared'
@@ -28,6 +33,14 @@ const DIST_COLUMNS: ReadonlyArray<ChartColumn<DistributionItem>> = [
   { key: 'count', label: 'Members', align: 'right' },
 ]
 
+const STAGE_COLUMNS: ReadonlyArray<ChartColumn<DistributionItem>> = [
+  { key: 'label', label: 'Stage' },
+  { key: 'count', label: 'Entrepreneurs', align: 'right' },
+]
+
+/** Entrepreneurs who have not picked a stage yet (everyone who joined before 201). */
+const STAGE_NOT_SET = 'Not set'
+
 /** Who is here, where they are, and whether the partnerships are delivering. */
 export default function CommunityTab({ filters, period, trend, country }: HubProps) {
   const { i18n } = useLingui()
@@ -36,6 +49,7 @@ export default function CommunityTab({ filters, period, trend, country }: HubPro
   const history = useKpiHistory(filters.period === 'custom' ? 'month' : filters.period, 13)
   const { analytics, refetch } = useAdminAnalytics()
   const { countries } = useCountries()
+  const { stages, refetch: refetchStages } = useEntrepreneurStages(country)
 
   // Every OECS member state is a row, at zero if need be. "12 states, 9
   // represented" is the reading; a chart that only lists the nine hides the
@@ -63,8 +77,25 @@ export default function CommunityTab({ filters, period, trend, country }: HubPro
     }
   }, [analytics, i18n])
 
+  // Journey order, as the RPC returns it, not sorted by count: "how many have
+  // reached export" reads down the bars. Not set stays last, in the muted colour.
+  const byStage = useMemo(() => {
+    if (!stages || stages.state !== 'ok') return stages
+    return {
+      state: 'ok' as const,
+      items: stages.items.map((i) => ({
+        label: entrepreneurStageLabel(i18n, i.label) ?? STAGE_NOT_SET,
+        count: i.count,
+      })),
+    }
+  }, [stages, i18n])
+
   const toBars = (items: DistributionItem[]): BarItem[] =>
-    items.map((i) => ({ label: i.label, value: i.count, color: i.label === 'Outside the OECS' ? 'var(--color-chart-other)' : undefined }))
+    items.map((i) => ({
+      label: i.label,
+      value: i.count,
+      color: i.label === 'Outside the OECS' || i.label === STAGE_NOT_SET ? 'var(--color-chart-other)' : undefined,
+    }))
 
   return (
     <div className="space-y-6">
@@ -114,6 +145,18 @@ export default function CommunityTab({ filters, period, trend, country }: HubPro
           country={null}
           stacked
         />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartFrame<DistributionItem>
+          title="Entrepreneurs by stage"
+          subtitle={country ? `entrepreneurs in ${country}` : 'all entrepreneurs, from idea to exporting'}
+          input={byStage ?? { state: 'ok', items: [] }}
+          columns={STAGE_COLUMNS}
+          onRetry={() => refetchStages()}
+        >
+          {(items) => <HBar items={toBars(items)} labelTop={5} labelWidth={156} />}
+        </ChartFrame>
       </div>
     </div>
   )

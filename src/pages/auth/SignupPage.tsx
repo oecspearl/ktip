@@ -22,14 +22,15 @@ import {
   SKILL_SUGGESTIONS,
   interestSuggestionsFor,
   LIMITS,
-  ROLE_LABELS,
+  USER_ROLES,
 } from '../../lib/constants'
 import { seedPersonalizationTopics } from '../../hooks/usePersonalization'
 import { analytics } from '../../hooks/useAnalytics'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
+import { EntrepreneurStageSelect } from '../../components/auth/EntrepreneurStageSelect'
+import { roleLabelWithStage } from '../../lib/entrepreneur-stage'
 import { FormSection } from '../../components/ui/FormSection'
-import { resolveCopy } from '../../i18n/copy'
 import { OAuthButtons } from '../../components/auth/OAuthButtons'
 import { ConsentDocument } from '../../components/legal/ConsentDocument'
 import { CONSENT_BUNDLES } from '../../lib/legal'
@@ -126,6 +127,7 @@ const ALL_STEP1_TOUCHED: Record<string, boolean> = {
   confirm_password: true,
   date_of_birth: true,
   role: true,
+  entrepreneur_stage: true,
 }
 
 export default function SignupPage() {
@@ -160,6 +162,9 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+  // Asked only of entrepreneurs (201); cleared when the role changes away.
+  const [entrepreneurStage, setEntrepreneurStage] = useState('')
+  const isEntrepreneur = selectedRole === USER_ROLES.ENTREPRENEUR
 
   // Which of step 1's two folds is open. The account comes first and the role
   // grid waits folded underneath it, so a new visitor sees five fields rather
@@ -238,6 +243,7 @@ export default function SignupPage() {
     password,
     confirm_password: confirmPassword,
     role: selectedRole,
+    entrepreneur_stage: isEntrepreneur && entrepreneurStage ? entrepreneurStage : undefined,
     date_of_birth: dateOfBirth,
   }
 
@@ -336,7 +342,7 @@ export default function SignupPage() {
         setTouched(ALL_STEP1_TOUCHED)
         // An error inside a folded section is an error nobody can see.
         if (!accountValid(fieldErrors)) setAccountOpen(true)
-        if (fieldErrors.role) setRoleOpen(true)
+        if (fieldErrors.role || fieldErrors.entrepreneur_stage) setRoleOpen(true)
         return
       }
       analytics.funnel('signup', 'step_1_complete', { role: selectedRole })
@@ -391,6 +397,8 @@ export default function SignupPage() {
         // Derived, not asked for — see nameFromEmail.
         display_name: nameFromEmail(email),
         role: selectedRole,
+        // Seeds profiles.entrepreneur_stage via handle_new_user (201).
+        ...(input.entrepreneur_stage && { entrepreneur_stage: input.entrepreneur_stage }),
         // Seeds account_age via handle_new_user (091). Never lands on `profiles`.
         date_of_birth: dateOfBirth,
         // Seeds user_consents via handle_new_user (115), exactly as the date of
@@ -672,26 +680,44 @@ export default function SignupPage() {
                   title={t`Your role`}
                   summary={
                     selectedRole
-                      ? resolveCopy(i18n, ROLE_LABELS[selectedRole] ?? selectedRole)
+                      ? roleLabelWithStage(i18n, selectedRole, isEntrepreneur ? entrepreneurStage : null)
                       : t`Not chosen yet`
                   }
                   open={roleOpen}
                   onToggle={() => setRoleOpen((o) => !o)}
-                  complete={!!selectedRole}
+                  complete={!!selectedRole && (!isEntrepreneur || !!entrepreneurStage)}
                 >
                   <RolePicker
                     value={selectedRole}
                     onChange={(value) => {
                       setSelectedRole(value)
+                      if (value !== USER_ROLES.ENTREPRENEUR) setEntrepreneurStage('')
                       markTouched('role')
                       setErrors((prev) => {
                         const next = { ...prev }
                         delete next.role
+                        delete next.entrepreneur_stage
                         return next
                       })
                     }}
                     error={visibleError('role')}
                   />
+                  {isEntrepreneur && (
+                    <EntrepreneurStageSelect
+                      className="mt-4"
+                      value={entrepreneurStage}
+                      onChange={(value) => {
+                        setEntrepreneurStage(value)
+                        markTouched('entrepreneur_stage')
+                        setErrors((prev) => {
+                          const next = { ...prev }
+                          delete next.entrepreneur_stage
+                          return next
+                        })
+                      }}
+                      error={visibleError('entrepreneur_stage')}
+                    />
+                  )}
                 </FormSection>
 
                 <Button type="button" fullWidth onClick={goNext} icon={<ArrowRight size={20} />}>

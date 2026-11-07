@@ -1,7 +1,13 @@
 import { z } from 'zod'
 import { i18n, type MessageDescriptor } from '@lingui/core'
 import { msg, t } from '@lingui/core/macro'
-import { COLLABORATION_LEGACY_LABELS, COLLABORATION_OPTIONS, SELECTABLE_ROLES } from './constants'
+import {
+  COLLABORATION_LEGACY_LABELS,
+  COLLABORATION_OPTIONS,
+  ENTREPRENEUR_STAGE_VALUES,
+  SELECTABLE_ROLES,
+  USER_ROLES,
+} from './constants'
 import { isSupportedVideoLink, VIDEO_LINK_ERROR } from './video-embed'
 import { SOCIAL_KEYS } from './social-links'
 
@@ -202,6 +208,8 @@ const signupFields = z.object({
   // Onboarding and Settings still send one, and it is still length-checked.
   display_name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   role: z.enum(SIGNUP_ROLES, { error: 'Please select a role' }),
+  // Required for entrepreneurs only; see stageForEntrepreneurs below.
+  entrepreneur_stage: z.enum(ENTREPRENEUR_STAGE_VALUES).optional(),
   date_of_birth: dateOfBirthSchema,
   organization: z.string().max(200, 'Organisation name too long').optional(),
   industry: z.string().max(100, 'Industry too long').optional(),
@@ -230,7 +238,28 @@ const passwordsMatch = (
   }
 }
 
-export const signupSchema = signupFields.superRefine(passwordsMatch)
+/**
+ * An entrepreneur says where they are on the business journey (201). The issue
+ * sits on entrepreneur_stage so it renders under the stage picker, not the role
+ * grid. Every other role leaves the field out.
+ */
+export const stageForEntrepreneurs = (
+  value: { role: string; entrepreneur_stage?: string },
+  ctx: z.RefinementCtx,
+) => {
+  if (value.role === USER_ROLES.ENTREPRENEUR && !value.entrepreneur_stage) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['entrepreneur_stage'],
+      message: t`Choose the stage that fits you best`,
+    })
+  }
+}
+
+export const signupSchema = signupFields.superRefine((value, ctx) => {
+  passwordsMatch(value, ctx)
+  stageForEntrepreneurs(value, ctx)
+})
 
 // Step 1 of the signup wizard (required account fields)
 export const signupStep1Schema = signupFields
@@ -239,9 +268,13 @@ export const signupStep1Schema = signupFields
     password: true,
     confirm_password: true,
     role: true,
+    entrepreneur_stage: true,
     date_of_birth: true,
   })
-  .superRefine(passwordsMatch)
+  .superRefine((value, ctx) => {
+    passwordsMatch(value, ctx)
+    stageForEntrepreneurs(value, ctx)
+  })
 
 // Project Schemas
 export const projectSchema = z.object({
@@ -345,6 +378,9 @@ export const profileUpdateSchema = z.object({
   // profile_social_links_valid); these say which field is wrong before a save
   // is refused whole.
   tagline: z.string().max(120, 'Keep the tagline to 120 characters').optional(),
+  // 201. Required for entrepreneurs by the identity editor, not here: this
+  // schema validates whichever keys a block commits.
+  entrepreneur_stage: z.enum(ENTREPRENEUR_STAGE_VALUES).optional(),
   social_links: z
     .partialRecord(
       z.enum(SOCIAL_KEYS),

@@ -17,6 +17,7 @@ import {
   SKILL_SUGGESTIONS,
   interestSuggestionsFor,
   LIMITS,
+  USER_ROLES,
   VERIFICATION_GATED_ROLES,
 } from '../../lib/constants'
 import { seedPersonalizationTopics } from '../../hooks/usePersonalization'
@@ -24,6 +25,8 @@ import { analytics } from '../../hooks/useAnalytics'
 import { ROLE_BY_SLUG, isAdminReviewedRole, roleRequiresMfa } from '../../lib/permissions'
 import { AuthSplitShell } from '../../components/auth/AuthSplitShell'
 import { RolePicker } from '../../components/auth/RolePicker'
+import { EntrepreneurStageSelect } from '../../components/auth/EntrepreneurStageSelect'
+import { isEntrepreneurStage } from '../../lib/entrepreneur-stage'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useRequestStudentVerification } from '../../hooks/useInstitutions'
 import { useMyVerificationRequest, useRequestOrgRole } from '../../hooks/useVerification'
@@ -63,6 +66,9 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+  // Asked only of entrepreneurs (201).
+  const [entrepreneurStage, setEntrepreneurStage] = useState('')
+  const isEntrepreneur = selectedRole === USER_ROLES.ENTREPRENEUR
   const [organization, setOrganization] = useState('')
   const [industry, setIndustry] = useState('')
   const [country, setCountry] = useState('')
@@ -112,6 +118,9 @@ export default function OnboardingPage() {
     // asking a student to pick twice.
     const intended = auth.user?.user_metadata?.role
     if (typeof intended === 'string' && intended) setSelectedRole(intended)
+    // The stage the signup form sent, or one already on the profile.
+    const stage = auth.profile.entrepreneur_stage ?? auth.user?.user_metadata?.entrepreneur_stage
+    if (isEntrepreneurStage(stage)) setEntrepreneurStage(stage)
   }, [auth.profile, auth.user])
 
   if (!auth.loading && !auth.user) {
@@ -166,6 +175,9 @@ export default function OnboardingPage() {
       if (!dob.success) fieldErrors.date_of_birth = dob.error.issues[0]?.message ?? t`Enter a valid date of birth`
     }
     if (!selectedRole) fieldErrors.role = t`Please select a role`
+    if (isEntrepreneur && !entrepreneurStage) {
+      fieldErrors.entrepreneur_stage = t`Choose the stage that fits you best`
+    }
     setErrors(fieldErrors)
     return Object.keys(fieldErrors).length === 0
   }
@@ -243,6 +255,8 @@ export default function OnboardingPage() {
       await auth.updateProfile({
         display_name: displayName.trim(),
         ...(needsSchool ? {} : { roles: [selectedRole as UserRole] }),
+        // NULL for every other role; the 201 trigger would clear it anyway.
+        entrepreneur_stage: isEntrepreneur && entrepreneurStage ? entrepreneurStage : null,
         organization: organization.trim() || null,
         industry: industry.trim() || null,
         country: country || null,
@@ -547,14 +561,31 @@ export default function OnboardingPage() {
               value={selectedRole}
               onChange={(value) => {
                 setSelectedRole(value)
+                if (value !== USER_ROLES.ENTREPRENEUR) setEntrepreneurStage('')
                 setErrors((prev) => {
                   const next = { ...prev }
                   delete next.role
+                  delete next.entrepreneur_stage
                   return next
                 })
               }}
               error={errors.role}
             />
+
+            {isEntrepreneur && (
+              <EntrepreneurStageSelect
+                value={entrepreneurStage}
+                onChange={(value) => {
+                  setEntrepreneurStage(value)
+                  setErrors((prev) => {
+                    const next = { ...prev }
+                    delete next.entrepreneur_stage
+                    return next
+                  })
+                }}
+                error={errors.entrepreneur_stage}
+              />
+            )}
 
             <Input
               type="text"

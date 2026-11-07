@@ -33,6 +33,8 @@ import type {
 export interface SignupMetadata {
   display_name?: string
   role?: string
+  /** Entrepreneurs only: aspiring, startup, export_ready or exporter (201). */
+  entrepreneur_stage?: string
   /**
    * `YYYY-MM-DD`. handle_new_user() (091) moves it into `account_age` and
    * derives `is_minor` from it; it is never written to `profiles`, so it stays

@@ -1655,6 +1655,10 @@ msgstr "design the rooms"
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr "Accepted the first time you enter a hackathon or submit a solution to an event."
 
+#: src/i18n/harvested.ts
+msgid "An established business that has the products, services, operational capacity, market knowledge and basic regulatory and quality requirements necessary to enter regional or international markets, but may not yet have commenced exporting."
+msgstr "An established business that has the products, services, operational capacity, market knowledge and basic regulatory and quality requirements necessary to enter regional or international markets, but may not yet have commenced exporting."
+
 #. placeholder {0}: params.country
 #: src/lib/personalization.ts
 msgid "In {0}"
@@ -3174,6 +3178,10 @@ msgstr "{0} belongs to {1}, which verifies your KTIP account. Your profile now s
 #: src/components/settings/PreferencesTab.tsx
 msgid "Save Preferences"
 msgstr "Save Preferences"
+
+#: src/i18n/harvested.ts
+msgid "Start-up"
+msgstr "Start-up"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Draft. Not submitted yet."
@@ -7645,6 +7653,10 @@ msgid "Audio & video"
 msgstr "Audio & video"
 
 #: src/i18n/harvested.ts
+msgid "Aspiring Entrepreneur"
+msgstr "Aspiring Entrepreneur"
+
+#: src/i18n/harvested.ts
 msgid "Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier."
 msgstr "Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier."
 
@@ -8071,6 +8083,10 @@ msgstr "Use a recovery code"
 #: src/components/venue/room/homebase/TeamIntegrations.tsx
 msgid "That is not a GitHub repository. Use owner/name or the repo's URL."
 msgstr "That is not a GitHub repository. Use owner/name or the repo's URL."
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Your stage as an entrepreneur"
+msgstr "Your stage as an entrepreneur"
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Take the screenshot again"
@@ -10651,6 +10667,10 @@ msgid "You can start the first project."
 msgstr "You can start the first project."
 
 #: src/i18n/harvested.ts
+msgid "Exporter"
+msgstr "Exporter"
+
+#: src/i18n/harvested.ts
 msgid "Drafts save automatically, so you can leave and resume from My Applications."
 msgstr "Drafts save automatically, so you can leave and resume from My Applications."
 
@@ -10956,6 +10976,12 @@ msgstr "These are the businesses that asked your association to verify them. You
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
 msgstr "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
+
+#: src/lib/validation.ts
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Choose the stage that fits you best"
+msgstr "Choose the stage that fits you best"
 
 #: src/components/venue/room/homebase/TeamCalendar.tsx
 msgid "Nothing scheduled yet."
@@ -12198,6 +12224,10 @@ msgstr "Back to the map"
 #: src/i18n/harvested.ts
 msgid "Correcting your date of birth requires contacting support, by design."
 msgstr "Correcting your date of birth requires contacting support, by design."
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Choose a stage"
+msgstr "Choose a stage"
 
 #: src/components/verification/BusinessVerificationCard.tsx
 msgid "We send your details to the business association for the member state you pick. They check them against the national company registry."
@@ -13667,6 +13697,10 @@ msgstr "Close this folder?"
 msgid "Copy"
 msgstr "Copy"
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Filter by stage"
+msgstr "Filter by stage"
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Unpin — the panel stops fading and closes on an outside click"
 msgstr "Unpin — the panel stops fading and closes on an outside click"
@@ -13737,6 +13771,10 @@ msgstr "The most powerful way to grow your Caribbean innovation network."
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Image"
 msgstr "Image"
+
+#: src/i18n/harvested.ts
+msgid "Export-Ready"
+msgstr "Export-Ready"
 
 #: src/components/ui/GhostOpacityControl.tsx
 msgid "Pinned windows go see-through and let clicks pass through"
@@ -16346,6 +16384,10 @@ msgstr "Save Funding"
 #: src/i18n/harvested.ts
 msgid "A badge earned through a work or school address, an institution or a code depends on you still being there, so it lasts 12 months. We remind you 30 days and 7 days before it ends."
 msgstr "A badge earned through a work or school address, an institution or a code depends on you still being there, so it lasts 12 months. We remind you 30 days and 7 days before it ends."
+
+#: src/i18n/harvested.ts
+msgid "An individual developing a business idea or exploring an entrepreneurial opportunity but who has not yet formally established a business."
+msgstr "An individual developing a business idea or exploring an entrepreneurial opportunity but who has not yet formally established a business."
 
 #: src/pages/association/AssociationReviewPage.tsx
 msgid "Your account is not linked to an association yet"
@@ -19547,6 +19589,10 @@ msgstr "Explore projects, join events, and find funding for your ideas."
 msgid "That code was not accepted."
 msgstr "That code was not accepted."
 
+#: src/i18n/harvested.ts
+msgid "A new or emerging business developing its products, services, and business operations."
+msgstr "A new or emerging business developing its products, services, and business operations."
+
 #: src/components/venue/room/CaptionStrip.tsx
 msgid "Hear translations"
 msgstr "Hear translations"
@@ -21812,6 +21858,10 @@ msgid "Copy setup key"
 msgstr "Copy setup key"
 
 #: src/i18n/harvested.ts
+msgid "An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally."
+msgstr "An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally."
+
+#: src/i18n/harvested.ts
 msgid "Use the infringement report form, which is open to people without an account."
 msgstr "Use the infringement report form, which is open to people without an account."
 
@@ -21830,6 +21880,10 @@ msgstr "The event page’s FAQ, repeated here. Hidden if there is none."
 #: src/i18n/harvested.ts
 msgid "Switching which role you are acting as"
 msgstr "Switching which role you are acting as"
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "All stages"
+msgstr "All stages"
 
 #: src/i18n/harvested.ts
 msgid "Keys for external platforms"

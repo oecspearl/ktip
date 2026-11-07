@@ -42,6 +42,7 @@ import {
 import { ROLE_BY_SLUG, ROLE_DEFINITIONS } from '../../../../lib/permissions'
 import { resolveCopy } from '../../../../i18n/copy'
 import type { UserRole } from '../../../../types'
+import { EntrepreneurStageSelect } from '../../../../components/auth/EntrepreneurStageSelect'
 
 /** Roles a member may grant themselves; everything else needs a reviewer. */
 const SELF_ASSIGNABLE_SLUGS = new Set<string>(
@@ -50,7 +51,7 @@ const SELF_ASSIGNABLE_SLUGS = new Set<string>(
 
 /** What each block writes. Nothing else is sent, so nothing else can fail. */
 const KEYS: Record<Exclude<ProfileBlock, 'banner' | 'photo'>, readonly (keyof ProfileDraft)[]> = {
-  identity: ['display_name', 'roles'],
+  identity: ['display_name', 'roles', 'entrepreneur_stage'],
   about: ['bio', 'tagline'],
   details: ['organization', 'industry', 'country', 'phone', 'website', 'social_links'],
   skills: ['skills'],
@@ -406,6 +407,7 @@ function FieldModal({
   }
 
   const links = parseSocialLinksDraft(draft.draft.social_links)
+  const isEntrepreneur = draft.draft.roles.includes('entrepreneur' as UserRole)
 
   /** Store what was typed; tidy it (https://, trailing slash) when the field is left. */
   const setLink = (key: SocialKey, value: string, tidy = false) => {
@@ -424,6 +426,10 @@ function FieldModal({
         setErrors({ social_links: t`That ${SOCIAL_LABELS[bad]} link is not a web address.` })
         return
       }
+    }
+    if (block === 'identity' && isEntrepreneur && !draft.draft.entrepreneur_stage) {
+      setErrors({ entrepreneur_stage: t`Choose the stage that fits you best` })
+      return
     }
     const result = await draft.commit(keys)
     if (result.ok) onClose()
@@ -493,6 +499,21 @@ function FieldModal({
                 }
               )}
             </div>
+            {isEntrepreneur && (
+              <EntrepreneurStageSelect
+                className="mt-4"
+                value={draft.draft.entrepreneur_stage || ''}
+                onChange={(value) => {
+                  draft.set('entrepreneur_stage', value || null)
+                  setErrors((prev) => {
+                    const next = { ...prev }
+                    delete next.entrepreneur_stage
+                    return next
+                  })
+                }}
+                error={errors.entrepreneur_stage}
+              />
+            )}
             {verifiedRoles.length > 0 && (
               <div className="mt-3 border-t border-ktip-sand-100 pt-3">
                 <p className="mb-2 text-xs leading-relaxed text-ktip-sand-600">

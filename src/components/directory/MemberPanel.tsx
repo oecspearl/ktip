@@ -28,7 +28,6 @@ import {
   COLLABORATION_LABELS,
   COLLAB_EXCLUSIVE_VALUE,
   PHASE_LABELS,
-  ROLE_LABELS,
 } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { entityPath, memberPath } from '../../lib/slug'
@@ -40,6 +39,7 @@ import { ledeFrom } from '../profile/ProfileCanvas'
 import '../profile/editorial/editorial.css'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { roleLabelWithStage } from '../../lib/entrepreneur-stage'
 
 /** Trophies shown before the row collapses into a "+N" tile. */
 const SHELF_MAX = 5
@@ -372,7 +372,7 @@ export function MemberPanel() {
                   <ProfileHero
                     name={displayName}
                     verified={profile.is_verified}
-                    roleLabels={(profile.roles ?? []).map((role) => resolveCopy(i18n, ROLE_LABELS[role] || role))}
+                    roleLabels={(profile.roles ?? []).map((role) => roleLabelWithStage(i18n, role, profile.entrepreneur_stage))}
                     tagline={profile.tagline?.trim() || [profile.organization, profile.industry].filter(Boolean).join(' · ') || null}
                     bio={ledeFrom(profile.bio)}
                     country={profile.country}

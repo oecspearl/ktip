@@ -54,6 +54,7 @@ export type ProfileDraft = Pick<
   | 'tagline'
   | 'social_links'
   | 'profile_look'
+  | 'entrepreneur_stage'
 >
 
 /** Every key of a draft, for the callers that need to commit or snapshot all of it. */
@@ -73,6 +74,7 @@ export const DRAFT_KEYS = [
   'tagline',
   'social_links',
   'profile_look',
+  'entrepreneur_stage',
 ] as const satisfies readonly (keyof ProfileDraft)[]
 
 /**
@@ -207,6 +209,7 @@ export function draftFrom(profile: Profile | null | undefined): ProfileDraft {
     tagline: profile?.tagline || '',
     social_links: profile?.social_links || {},
     profile_look: profile?.profile_look ?? null,
+    entrepreneur_stage: profile?.entrepreneur_stage ?? null,
   }
 }
 
@@ -248,6 +251,7 @@ export function draftToView(profile: Profile, draft: ProfileDraft): ProfileView 
     tagline: draft.tagline || null,
     social_links: draft.social_links ?? null,
     profile_look: draft.profile_look ?? null,
+    entrepreneur_stage: draft.entrepreneur_stage || null,
   }
 }
 

@@ -328,6 +328,8 @@ export function useAdminUsers(filters?: {
   search?: string
   role?: string
   verified?: string
+  /** An ENTREPRENEUR_STAGES value, or 'not_set' for entrepreneurs who have not said (201). */
+  stage?: string
 }) {
   // admin_member_rows() (167): the list shows suspension details, which the
   // profiles table no longer hands to any client (168). Same filters and
@@ -339,6 +341,7 @@ export function useAdminUsers(filters?: {
       p_role: filters?.role || null,
       p_verified:
         filters?.verified === 'true' ? true : filters?.verified === 'false' ? false : null,
+      p_stage: filters?.stage || null,
     })
 
     if (error) throw error

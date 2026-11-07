@@ -37,6 +37,8 @@ export const PROFILE_PUBLIC_COLUMNS = [
   'account_status',
   // 169 — presentation only, a teaser like avatar_style and banner.
   'profile_look',
+  // 201 — public like roles; shown beside the Entrepreneur role.
+  'entrepreneur_stage',
 ] as const
 
 /**

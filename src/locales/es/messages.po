@@ -1602,6 +1602,10 @@ msgstr "diseñar las salas"
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "An established business that has the products, services, operational capacity, market knowledge and basic regulatory and quality requirements necessary to enter regional or international markets, but may not yet have commenced exporting."
+msgstr "Empresa consolidada que cuenta con los productos, servicios, capacidad operativa, conocimiento del mercado y requisitos regulatorios y de calidad básicos necesarios para entrar en mercados regionales o internacionales, pero que quizá aún no ha empezado a exportar."
+
 #. placeholder {0}: params.country
 #: src/lib/personalization.ts
 msgid "In {0}"
@@ -3093,6 +3097,10 @@ msgstr ""
 #: src/components/settings/PreferencesTab.tsx
 msgid "Save Preferences"
 msgstr "Guardar preferencias"
+
+#: src/i18n/harvested.ts
+msgid "Start-up"
+msgstr "Startup"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Draft. Not submitted yet."
@@ -7410,6 +7418,10 @@ msgid "Audio & video"
 msgstr "Audio y video"
 
 #: src/i18n/harvested.ts
+msgid "Aspiring Entrepreneur"
+msgstr "Emprendedor en ciernes"
+
+#: src/i18n/harvested.ts
 msgid "Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier."
 msgstr ""
 
@@ -7831,6 +7843,10 @@ msgstr ""
 #: src/components/venue/room/homebase/TeamIntegrations.tsx
 msgid "That is not a GitHub repository. Use owner/name or the repo's URL."
 msgstr "Eso no es un repositorio de GitHub. Use propietario/nombre o la URL del repositorio."
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Your stage as an entrepreneur"
+msgstr "Tu etapa como emprendedor"
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Take the screenshot again"
@@ -10320,6 +10336,10 @@ msgid "You can start the first project."
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Exporter"
+msgstr "Exportadora"
+
+#: src/i18n/harvested.ts
 msgid "Drafts save automatically, so you can leave and resume from My Applications."
 msgstr "Los borradores se guardan automáticamente, así que puede salir y retomar desde Mis solicitudes."
 
@@ -10623,6 +10643,12 @@ msgstr ""
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
 msgstr ""
+
+#: src/lib/validation.ts
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Choose the stage that fits you best"
+msgstr "Elige la etapa que mejor te describa"
 
 #: src/components/venue/room/homebase/TeamCalendar.tsx
 msgid "Nothing scheduled yet."
@@ -11838,6 +11864,10 @@ msgstr "Volver al mapa"
 #: src/i18n/harvested.ts
 msgid "Correcting your date of birth requires contacting support, by design."
 msgstr ""
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Choose a stage"
+msgstr "Elige una etapa"
 
 #: src/components/verification/BusinessVerificationCard.tsx
 msgid "We send your details to the business association for the member state you pick. They check them against the national company registry."
@@ -13261,6 +13291,10 @@ msgstr "¿Cerrar esta carpeta?"
 msgid "Copy"
 msgstr "Copiar"
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Filter by stage"
+msgstr "Filtrar por etapa"
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Unpin — the panel stops fading and closes on an outside click"
 msgstr "Desanclar — el panel deja de desvanecerse y se cierra al hacer clic fuera"
@@ -13331,6 +13365,10 @@ msgstr ""
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Image"
 msgstr "Imagen"
+
+#: src/i18n/harvested.ts
+msgid "Export-Ready"
+msgstr "Lista para exportar"
 
 #: src/components/ui/GhostOpacityControl.tsx
 msgid "Pinned windows go see-through and let clicks pass through"
@@ -15844,6 +15882,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "A badge earned through a work or school address, an institution or a code depends on you still being there, so it lasts 12 months. We remind you 30 days and 7 days before it ends."
 msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "An individual developing a business idea or exploring an entrepreneurial opportunity but who has not yet formally established a business."
+msgstr "Persona que desarrolla una idea de negocio o explora una oportunidad emprendedora, pero que aún no ha constituido formalmente una empresa."
 
 #: src/pages/association/AssociationReviewPage.tsx
 msgid "Your account is not linked to an association yet"
@@ -18957,6 +18999,10 @@ msgstr "Explore proyectos, únase a eventos y encuentre financiamiento para sus 
 msgid "That code was not accepted."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "A new or emerging business developing its products, services, and business operations."
+msgstr "Empresa nueva o emergente que desarrolla sus productos, servicios y operaciones comerciales."
+
 #: src/components/venue/room/CaptionStrip.tsx
 msgid "Hear translations"
 msgstr "Escuchar traducciones"
@@ -21182,6 +21228,10 @@ msgid "Copy setup key"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally."
+msgstr "Empresa consolidada que vende y entrega activamente productos o servicios a clientes en mercados fuera de su país de origen, ya sea a nivel regional o internacional."
+
+#: src/i18n/harvested.ts
 msgid "Use the infringement report form, which is open to people without an account."
 msgstr ""
 
@@ -21200,6 +21250,10 @@ msgstr "Las preguntas frecuentes de la página del evento, repetidas aquí. Se o
 #: src/i18n/harvested.ts
 msgid "Switching which role you are acting as"
 msgstr "Cambiar el rol con el que actúa"
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "All stages"
+msgstr "Todas las etapas"
 
 #: src/i18n/harvested.ts
 msgid "Keys for external platforms"

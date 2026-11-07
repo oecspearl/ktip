@@ -9,10 +9,10 @@ import {
   COLLAB_EXCLUSIVE_VALUE,
   EVENT_TYPE_LABELS,
   PHASE_LABELS,
-  ROLE_LABELS,
 } from '../../lib/constants'
 import { TIER_LABEL } from '../../lib/achievement-style'
 import { resolveCopy } from '../../i18n/copy'
+import { roleLabelWithStage } from '../../lib/entrepreneur-stage'
 import { cn, formatDate } from '../../lib/utils'
 import { entityPath } from '../../lib/slug'
 import { parseBanner } from '../../lib/banner'
@@ -244,7 +244,9 @@ export function ProfileCanvas({
    * is the one the platform can vouch for.
    */
   const orgName = employer?.trading_name || employer?.legal_name || profile.organization
-  const roleLabels = (profile.roles ?? []).map((role) => resolveCopy(i18n, ROLE_LABELS[role] || role))
+  const roleLabels = (profile.roles ?? []).map((role) =>
+    roleLabelWithStage(i18n, role, profile.entrepreneur_stage)
+  )
   const openTo = (profile.open_to ?? []).filter((v) => v !== COLLAB_EXCLUSIVE_VALUE)
   const notSeeking = (profile.open_to ?? []).includes(COLLAB_EXCLUSIVE_VALUE)
   const tagline =

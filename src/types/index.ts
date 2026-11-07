@@ -212,6 +212,12 @@ export interface Profile {
    */
   avatar_style?: AvatarStyle | null
   /**
+   * Entrepreneurs only (201): aspiring, startup, export_ready or exporter. A
+   * trigger clears it when the member drops the entrepreneur role. Optional
+   * for the deploy-ahead-of-migration reason banner is.
+   */
+  entrepreneur_stage?: string | null
+  /**
    * Migration 155 — theme, readable font, text size, photo brightness and
    * reduced motion, so they follow the member across devices. Every key is
    * optional; NULL means the device's own storage stands. Optional on the type
@@ -360,6 +366,11 @@ export interface Profile {
 export interface ProfileView {
   id: string
   display_name: string | null
+  /**
+   * Teaser field like roles (201): shown beside the Entrepreneur role. Optional
+   * for a deploy that runs ahead of the migration.
+   */
+  entrepreneur_stage?: string | null
   avatar_url: string | null
   /** Teaser field like the avatar (104): a private member's cover still shows. */
   banner?: BannerSpec | null

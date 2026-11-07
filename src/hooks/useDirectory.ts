@@ -18,11 +18,13 @@ const BADGE_COLUMNS =
 // not. Since 168 the table itself answers none of these columns.
 // Apply 167 before shipping this.
 const MEMBER_COLUMNS =
-  'id, username, display_name, avatar_url, banner, country, organization, roles, skills, is_verified, created_at, profile_visibility, section_visibility'
+  'id, username, display_name, avatar_url, banner, country, organization, roles, entrepreneur_stage, skills, is_verified, created_at, profile_visibility, section_visibility'
 
 export function useDirectoryMembers(filters?: {
   search?: string
   role?: string
+  /** An ENTREPRENEUR_STAGES value; only meaningful with role 'entrepreneur'. */
+  stage?: string
   country?: string
   skill?: string
   badge?: string
@@ -52,6 +54,11 @@ export function useDirectoryMembers(filters?: {
 
     if (filters?.role) {
       query = query.contains('roles', [filters.role])
+    }
+
+    // 201. Public like roles, so the view returns it to every viewer.
+    if (filters?.stage) {
+      query = query.eq('entrepreneur_stage', filters.stage)
     }
 
     if (filters?.country) {

@@ -127,6 +127,8 @@ describe('signupSchema', () => {
         confirm_password: 'Password123!',
         display_name: 'John Doe',
         role: role.value,
+        // 201: entrepreneurs also say their stage.
+        ...(role.value === 'entrepreneur' && { entrepreneur_stage: 'startup' }),
         date_of_birth: '1995-06-15',
       })
       expect(result.success, `role '${role.value}' must pass signup`).toBe(true)
@@ -143,6 +145,7 @@ describe('signupSchema', () => {
         confirm_password: 'Password123!',
         display_name: 'John Doe',
         role: 'entrepreneur',
+        entrepreneur_stage: 'startup',
         date_of_birth: '1995-06-15',
         open_to: openTo,
       })

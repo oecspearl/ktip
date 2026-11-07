@@ -123,6 +123,48 @@ export const VERIFICATION_GATED_ROLES = new Set<string>(
   SELECTABLE_ROLES.filter((r) => r.requiresVerification).map((r) => r.value)
 )
 
+/**
+ * Where an entrepreneur is on the business journey (profiles.entrepreneur_stage,
+ * migration 201). Asked whenever the Entrepreneur role is picked.
+ *
+ * The definitions are OECS's own wording and stay verbatim. Order is the
+ * journey, not the alphabet: the picker, the directory filter and the analytics
+ * chart all read it top to bottom. The values are the database's CHECK list.
+ */
+export const ENTREPRENEUR_STAGES = [
+  {
+    value: 'aspiring',
+    label: 'Aspiring Entrepreneur',
+    description:
+      'An individual developing a business idea or exploring an entrepreneurial opportunity but who has not yet formally established a business.',
+  },
+  {
+    value: 'startup',
+    label: 'Start-up',
+    description:
+      'A new or emerging business developing its products, services, and business operations.',
+  },
+  {
+    value: 'export_ready',
+    label: 'Export-Ready',
+    description:
+      'An established business that has the products, services, operational capacity, market knowledge and basic regulatory and quality requirements necessary to enter regional or international markets, but may not yet have commenced exporting.',
+  },
+  {
+    value: 'exporter',
+    label: 'Exporter',
+    description:
+      'An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally.',
+  },
+] as const
+
+export type EntrepreneurStage = (typeof ENTREPRENEUR_STAGES)[number]['value']
+
+export const ENTREPRENEUR_STAGE_VALUES = ENTREPRENEUR_STAGES.map((s) => s.value) as unknown as [
+  EntrepreneurStage,
+  ...EntrepreneurStage[],
+]
+
 // Project Phases
 export const PROJECT_PHASES = {
   CONCEPT: 'concept',

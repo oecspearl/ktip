@@ -1584,6 +1584,10 @@ msgstr ""
 msgid "Accepted the first time you enter a hackathon or submit a solution to an event."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "An established business that has the products, services, operational capacity, market knowledge and basic regulatory and quality requirements necessary to enter regional or international markets, but may not yet have commenced exporting."
+msgstr ""
+
 #. placeholder {0}: params.country
 #: src/lib/personalization.ts
 msgid "In {0}"
@@ -3066,6 +3070,10 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Save Preferences"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Start-up"
 msgstr ""
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
@@ -7350,6 +7358,10 @@ msgid "Audio & video"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Aspiring Entrepreneur"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Your analytics choice can be changed at any time in Settings, and it takes effect immediately — turning it off stops events being sent and drops the session identifier."
 msgstr ""
 
@@ -7768,6 +7780,10 @@ msgstr ""
 
 #: src/components/venue/room/homebase/TeamIntegrations.tsx
 msgid "That is not a GitHub repository. Use owner/name or the repo's URL."
+msgstr ""
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Your stage as an entrepreneur"
 msgstr ""
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
@@ -10241,6 +10257,10 @@ msgid "You can start the first project."
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "Exporter"
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Drafts save automatically, so you can leave and resume from My Applications."
 msgstr ""
 
@@ -10543,6 +10563,12 @@ msgstr ""
 #. placeholder {0}: confirmed.domain ?? ''
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "@{0} is not a trusted organisation or partner institution yet. Upload an identity document from Settings instead."
+msgstr ""
+
+#: src/lib/validation.ts
+#: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
+#: src/pages/onboarding/OnboardingPage.tsx
+msgid "Choose the stage that fits you best"
 msgstr ""
 
 #: src/components/venue/room/homebase/TeamCalendar.tsx
@@ -11751,6 +11777,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Correcting your date of birth requires contacting support, by design."
+msgstr ""
+
+#: src/components/auth/EntrepreneurStageSelect.tsx
+msgid "Choose a stage"
 msgstr ""
 
 #: src/components/verification/BusinessVerificationCard.tsx
@@ -13167,6 +13197,10 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
+#: src/pages/directory/DirectoryPage.tsx
+msgid "Filter by stage"
+msgstr ""
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Unpin — the panel stops fading and closes on an outside click"
 msgstr ""
@@ -13236,6 +13270,10 @@ msgstr ""
 
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Image"
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "Export-Ready"
 msgstr ""
 
 #: src/components/ui/GhostOpacityControl.tsx
@@ -15735,6 +15773,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "A badge earned through a work or school address, an institution or a code depends on you still being there, so it lasts 12 months. We remind you 30 days and 7 days before it ends."
+msgstr ""
+
+#: src/i18n/harvested.ts
+msgid "An individual developing a business idea or exploring an entrepreneurial opportunity but who has not yet formally established a business."
 msgstr ""
 
 #: src/pages/association/AssociationReviewPage.tsx
@@ -18834,6 +18876,10 @@ msgstr ""
 msgid "That code was not accepted."
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "A new or emerging business developing its products, services, and business operations."
+msgstr ""
+
 #: src/components/venue/room/CaptionStrip.tsx
 msgid "Hear translations"
 msgstr ""
@@ -21051,6 +21097,10 @@ msgid "Copy setup key"
 msgstr ""
 
 #: src/i18n/harvested.ts
+msgid "An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally."
+msgstr ""
+
+#: src/i18n/harvested.ts
 msgid "Use the infringement report form, which is open to people without an account."
 msgstr ""
 
@@ -21068,6 +21118,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Switching which role you are acting as"
+msgstr ""
+
+#: src/pages/directory/DirectoryPage.tsx
+msgid "All stages"
 msgstr ""
 
 #: src/i18n/harvested.ts

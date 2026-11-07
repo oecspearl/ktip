@@ -129,6 +129,12 @@ export function useProfileDraft(paused: boolean): ProfileDraftApi {
           ] as UserRole[]
         } else if (LIST_KEYS.has(key)) {
           Object.assign(patch, { [key]: draft[key] })
+        } else if (key === 'entrepreneur_stage') {
+          // The 201 trigger clears a stage without the role; saying so here
+          // keeps the refetched profile and the draft in agreement.
+          patch.entrepreneur_stage = draft.roles.includes('entrepreneur' as UserRole)
+            ? draft.entrepreneur_stage || null
+            : null
         } else if (key === 'social_links') {
           patch.social_links = draft.social_links ?? {}
         } else if (OBJECT_KEYS.has(key)) {

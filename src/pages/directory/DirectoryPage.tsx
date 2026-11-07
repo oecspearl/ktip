@@ -20,7 +20,8 @@ import {
   COLLAB_EXCLUSIVE_VALUE,
   COLLABORATION_OPTIONS,
   DIRECTORY_ROLE_LABELS,
-  ROLE_LABELS,
+  ENTREPRENEUR_STAGES,
+  USER_ROLES,
   SKILL_SUGGESTIONS,
 } from '../../lib/constants'
 import { usePageTitle } from '../../hooks/usePageTitle'
@@ -32,6 +33,7 @@ import type { ProfileSectionKey } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
+import { roleLabelWithStage } from '../../lib/entrepreneur-stage'
 import { BANNER_WASH, bannerImage, bannerPosition, isGradientBanner, parseBanner } from '../../lib/banner'
 import { COVER_VARIANT_WIDTH } from '../../lib/upload-variants'
 import { BannerAurora } from '../../components/profile/BannerAurora'
@@ -81,6 +83,8 @@ export default function DirectoryPage() {
   }, [requestedMember, memberId, openMember, closeMember, setSearchParams])
 
   const [selectedRole, setSelectedRole] = useState<string>('')
+  // Entrepreneur stage (201). Offered only while the role filter is Entrepreneur.
+  const [selectedStage, setSelectedStage] = useState<string>('')
   const [selectedCountry, setSelectedCountry] = useState<string>('')
   const [selectedSkill, setSelectedSkill] = useState<string>('')
   const [selectedBadge, setSelectedBadge] = useState<string>('')
@@ -95,11 +99,12 @@ export default function DirectoryPage() {
   const [pageLimit, setPageLimit] = useState(PAGE_SIZE)
   useEffect(() => {
     setPageLimit(PAGE_SIZE)
-  }, [debouncedSearch, selectedRole, selectedCountry, selectedSkill, selectedBadge, selectedOpenTo])
+  }, [debouncedSearch, selectedRole, selectedStage, selectedCountry, selectedSkill, selectedBadge, selectedOpenTo])
 
   const { members, loading } = useDirectoryMembers({
     search: debouncedSearch,
     role: selectedRole,
+    stage: selectedRole === USER_ROLES.ENTREPRENEUR ? selectedStage : undefined,
     country: selectedCountry,
     skill: selectedSkill,
     badge: selectedBadge,
@@ -141,6 +146,7 @@ export default function DirectoryPage() {
 
   const clearFilters = () => {
     setSelectedRole('')
+    setSelectedStage('')
     setSelectedCountry('')
     setSelectedSkill('')
     setSelectedBadge('')
@@ -235,7 +241,10 @@ export default function DirectoryPage() {
             {/* Role Filter */}
             <select
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.currentTarget.value)}
+              onChange={(e) => {
+                setSelectedRole(e.currentTarget.value)
+                setSelectedStage('')
+              }}
               className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
             >
               <option value=""><Trans>All Roles</Trans></option>
@@ -244,6 +253,21 @@ export default function DirectoryPage() {
                 <option key={value} value={value}>{resolveCopy(i18n, label)}</option>
               ))}
             </select>
+
+            {/* Entrepreneur stage, only once the role filter says Entrepreneur. */}
+            {selectedRole === USER_ROLES.ENTREPRENEUR && (
+              <select
+                value={selectedStage}
+                onChange={(e) => setSelectedStage(e.currentTarget.value)}
+                aria-label={t`Filter by stage`}
+                className="px-4 py-2.5 border border-ktip-sand-300 bg-ktip-cream rounded-lg focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-none transition-colors text-sm pointer-coarse:text-body"
+              >
+                <option value=""><Trans>All stages</Trans></option>
+                {ENTREPRENEUR_STAGES.map((stage) => (
+                  <option key={stage.value} value={stage.value}>{resolveCopy(i18n, stage.label)}</option>
+                ))}
+              </select>
+            )}
 
             {/* Country Filter */}
             <CountrySelect variant="filter" value={selectedCountry} onChange={setSelectedCountry} />
@@ -412,7 +436,7 @@ export default function DirectoryPage() {
                     }
                     eyebrow={
                       member.roles?.length > 0
-                        ? member.roles.slice(0, 2).map((r: string) => resolveCopy(i18n, ROLE_LABELS[r] || r)).join(', ')
+                        ? member.roles.slice(0, 2).map((r: string) => roleLabelWithStage(i18n, r, member.entrepreneur_stage)).join(', ')
                         : t`Member`
                     }
                     title={

@@ -148,3 +148,29 @@ export function useAdminAnalytics() {
 
   return { analytics: query.data, loading: query.isPending, error: query.error, refetch: query.refetch }
 }
+
+/**
+ * Entrepreneurs by stage (201): every stage plus not_set, in journey order,
+ * at zero where empty. Follows the hub's country filter; null is every country.
+ */
+export function useEntrepreneurStages(country: string | null) {
+  const fetchStages = async (): Promise<MeasuredList<DistributionItem>> => {
+    const name = 'get_entrepreneurs_by_stage'
+    try {
+      const { data, error } = await (supabase.rpc as any)(name, { p_country: country })
+      if (error || !Array.isArray(data)) return unavailableList(reasonFor(name, error))
+      return okList(
+        data.map((item: any) => ({ label: String(item.stage), count: Number(item.count) || 0 }))
+      )
+    } catch (err) {
+      return unavailableList(reasonFor(name, err ?? true))
+    }
+  }
+
+  const query = useQuery({
+    queryKey: keys.list('admin-entrepreneur-stages', { country }),
+    queryFn: fetchStages,
+  })
+
+  return { stages: query.data, refetch: query.refetch }
+}

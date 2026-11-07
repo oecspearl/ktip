@@ -8,7 +8,8 @@ import { RevokeVerificationModal } from '../../../components/admin/RevokeVerific
 import { useAdminUsers, useAdminUserActions } from '../../../hooks/useAdminDashboard'
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuth } from '../../../contexts/AuthContext'
-import { ROLE_LABELS, ROLE_COLORS } from '../../../lib/constants'
+import { ENTREPRENEUR_STAGES, ROLE_LABELS, ROLE_COLORS, USER_ROLES } from '../../../lib/constants'
+import { roleLabelWithStage } from '../../../lib/entrepreneur-stage'
 import { ROLE_DEFINITIONS, assignableRolesFor, canAdministerAccount } from '../../../lib/permissions'
 import { debounce } from '../../../lib/utils'
 import { PageHero } from '../../../components/layout/PageHero'
@@ -63,6 +64,8 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
+  // Entrepreneur stage (201), offered once the role filter is Entrepreneur.
+  const [stageFilter, setStageFilter] = useState('')
   const [verifiedFilter, setVerifiedFilter] = useState('')
 
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -72,6 +75,7 @@ export default function AdminUsersPage() {
     search: debouncedSearch || undefined,
     role: roleFilter || undefined,
     verified: verifiedFilter || undefined,
+    stage: (roleFilter === USER_ROLES.ENTREPRENEUR && stageFilter) || undefined,
   })
 
   const { updateRoles, toggleVerified, createUser, resetPassword, resetMfa, setSuspension, deleteUser, loading: actionLoading } = useAdminUserActions()
@@ -339,7 +343,10 @@ export default function AdminUsersPage() {
           </div>
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.currentTarget.value)}
+            onChange={(e) => {
+              setRoleFilter(e.currentTarget.value)
+              setStageFilter('')
+            }}
             className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
           >
             <option value="">All Roles</option>
@@ -347,6 +354,20 @@ export default function AdminUsersPage() {
               <option value={role} key={role}>{resolveCopy(i18n, ROLE_LABELS[role])}</option>
             ))}
           </select>
+          {roleFilter === USER_ROLES.ENTREPRENEUR && (
+            <select
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.currentTarget.value)}
+              aria-label="Filter by entrepreneur stage"
+              className="px-3 py-2 bg-ktip-cream border border-ktip-sand-200 rounded-lg text-sm text-gray-700 focus:border-ktip-ocean-500 focus:outline-hidden"
+            >
+              <option value="">All Stages</option>
+              {ENTREPRENEUR_STAGES.map((stage) => (
+                <option value={stage.value} key={stage.value}>{resolveCopy(i18n, stage.label)}</option>
+              ))}
+              <option value="not_set">Stage not set</option>
+            </select>
+          )}
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.currentTarget.value)}
@@ -361,6 +382,7 @@ export default function AdminUsersPage() {
               type="button"
               onClick={() => {
                 setRoleFilter('')
+                setStageFilter('')
                 setVerifiedFilter('')
                 setSearchQuery('')
                 setDebouncedSearch('')
@@ -487,7 +509,7 @@ export default function AdminUsersPage() {
                         {user.roles.length > 0 ? (
                           user.roles.map((role) => (
                             <Badge size="sm" className={ROLE_COLORS[role]} key={role}>
-                              {resolveCopy(i18n, ROLE_LABELS[role])}
+                              {roleLabelWithStage(i18n, role, user.entrepreneur_stage)}
                             </Badge>
                           ))
                         ) : (
