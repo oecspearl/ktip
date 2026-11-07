@@ -559,7 +559,7 @@ export const SITE_MAP: SiteEntry[] = [
     title: 'Video Conference',
     category: 'Collaborate',
     description: 'Start or join a video call',
-    keywords: ['video', 'call', 'meeting', 'jitsi', 'zoom', 'huddle', 'webcam'],
+    keywords: ['video', 'call', 'meeting', 'zoom', 'huddle', 'webcam'],
     href: '/collaborate/video',
     access: 'auth',
     icon: 'Video',

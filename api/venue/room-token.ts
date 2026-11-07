@@ -57,6 +57,19 @@ interface RoomGrant {
   max_publishers: number
 }
 
+type GrantTarget = { rpc: string; args: Record<string, string> }
+
+const nonEmpty = (value: unknown): value is string => typeof value === 'string' && value.length > 0
+
+/** The grant function for the one id the body names, or null for none or several. */
+export function pickTarget(body: { roomId?: unknown; coffeeTableId?: unknown; callId?: unknown }): GrantTarget | null {
+  const targets: GrantTarget[] = []
+  if (nonEmpty(body.roomId)) targets.push({ rpc: 'venue_room_grant', args: { p_room_id: body.roomId } })
+  if (nonEmpty(body.coffeeTableId)) targets.push({ rpc: 'coffee_table_grant', args: { p_table_id: body.coffeeTableId } })
+  if (nonEmpty(body.callId)) targets.push({ rpc: 'video_call_grant', args: { p_call_id: body.callId } })
+  return targets.length === 1 ? targets[0] : null
+}
+
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
@@ -76,20 +89,19 @@ export default async function handler(request: Request): Promise<Response> {
   const authHeader = request.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401)
 
-  let body: { roomId?: unknown; coffeeTableId?: unknown }
+  let body: { roomId?: unknown; coffeeTableId?: unknown; callId?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'Invalid JSON body' }, 400)
   }
 
-  // A coffee table (migration 200) is its own LiveKit room, granted by its
-  // own function. Exactly one of the two ids.
-  const roomId = body.roomId
-  const tableId = body.coffeeTableId
-  const isTable = typeof tableId === 'string' && tableId.length > 0
-  if (!isTable && (typeof roomId !== 'string' || !roomId)) {
-    return json({ error: 'roomId is required' }, 400)
+  // Three kinds of LiveKit room, each granted by its own function: a venue
+  // room (101), a coffee table (200) and a call from /collaborate/video (202).
+  // Exactly one id per request.
+  const target = pickTarget(body)
+  if (!target) {
+    return json({ error: 'Exactly one of roomId, coffeeTableId or callId is required' }, 400)
   }
 
   // The caller's own JWT, so auth.uid() inside the function is them and not a
@@ -103,9 +115,7 @@ export default async function handler(request: Request): Promise<Response> {
   } = await caller.auth.getUser()
   if (!user) return json({ error: 'Unauthorized' }, 401)
 
-  const { data, error } = isTable
-    ? await caller.rpc('coffee_table_grant', { p_table_id: tableId })
-    : await caller.rpc('venue_room_grant', { p_room_id: roomId })
+  const { data, error } = await caller.rpc(target.rpc, target.args)
 
   if (error) {
     // Every message the RPC raises is one of the room's real rules — "this room

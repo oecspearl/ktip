@@ -50,7 +50,9 @@ export function isVenueVideoConfigured(): boolean {
 }
 
 /** The one request both hooks make. The route asks Postgres; this only carries the answer. */
-async function fetchVenueToken(target: { roomId: string } | { coffeeTableId: string }): Promise<VenueRoomToken> {
+async function fetchVenueToken(
+  target: { roomId: string } | { coffeeTableId: string } | { callId: string }
+): Promise<VenueRoomToken> {
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -117,6 +119,28 @@ export function useCoffeeTableToken(tableId: string | undefined, enabled: boolea
   return {
     token: query.data?.token,
     grant: query.data?.grant,
+    error: query.error as Error | null,
+  }
+}
+
+/**
+ * A token for a call started from /collaborate/video (migration 202). Same
+ * route and refresh as a venue room, granted by video_call_grant(): any
+ * signed-in member holding the link, unless the call is locked or over.
+ */
+export function useCallToken(callId: string | undefined, enabled: boolean) {
+  const query = useQuery({
+    queryKey: keys.sub('video-call', 'livekit-token', callId),
+    queryFn: () => fetchVenueToken({ callId: callId as string }),
+    enabled: Boolean(callId) && enabled && isVenueVideoConfigured(),
+    staleTime: 25 * 60 * 1000,
+    refetchInterval: 25 * 60 * 1000,
+    retry: false,
+  })
+  return {
+    token: query.data?.token,
+    grant: query.data?.grant,
+    loading: query.isFetching && !query.data,
     error: query.error as Error | null,
   }
 }
