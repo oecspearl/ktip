@@ -467,8 +467,6 @@ function FreeTierMeters({
         return mine('translate_chars') + mine('caption_chars')
       case 'speech_translation_seconds':
         return mine('speech_seconds')
-      case 'tts_chars':
-        return mine('tts_chars')
       default:
         return null
     }

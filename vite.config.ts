@@ -499,6 +499,16 @@ export default defineConfig(({ mode }) => {
     'RECORDING_S3_SECRET',
     'RECORDING_S3_REGION',
     'RECORDING_S3_ENDPOINT',
+    // Groq (203): translation through the OpenAI-compatible adapter, and
+    // Whisper for Firefox captions at /api/speech/transcribe. Without the key
+    // translation answers degraded and only browsers with built-in speech
+    // recognition can caption.
+    'GROQ_API_KEY',
+    'GROQ_TRANSLATE_MODEL',
+    'GROQ_TRANSLATE_FALLBACK_MODEL',
+    'GROQ_WHISPER_MODEL',
+    'WHISPER_DAILY_SECONDS',
+    'WHISPER_DAILY_REQUESTS',
   ]) {
     if (!process.env[key] && env[key]) process.env[key] = env[key]
   }

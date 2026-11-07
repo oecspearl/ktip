@@ -232,3 +232,79 @@ describe('openrouter translate', () => {
     ).rejects.toThrow(/not JSON/)
   })
 })
+
+describe('groq translate', () => {
+  const rateLimited = () =>
+    ({
+      ok: false,
+      status: 429,
+      headers: new Headers({ 'retry-after': '30' }),
+      json: async () => ({}),
+      text: async () => '',
+    }) as unknown as Response
+
+  beforeEach(() => {
+    process.env.TRANSLATION_PROVIDER = 'groq'
+    process.env.GROQ_API_KEY = 'gsk-test'
+    delete process.env.GROQ_TRANSLATE_MODEL
+    delete process.env.GROQ_TRANSLATE_FALLBACK_MODEL
+  })
+
+  it('selects Groq with gpt-oss-20b by default, and is null without a key', () => {
+    expect(provider().id).toBe('groq:openai/gpt-oss-20b')
+    delete process.env.GROQ_API_KEY
+    expect(getProvider()).toBeNull()
+  })
+
+  it('asks gpt-oss for a strict schema with low reasoning effort, on Groq', async () => {
+    const fetchMock = mockFetch(completion({ t: ['Bonjour'], f: ['en'] }))
+    const out = await provider().translate(['Hello'], 'fr', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Bonjour', detected: 'en' }])
+
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toBe('https://api.groq.com/openai/v1/chat/completions')
+    const body = JSON.parse(String(init.body))
+    expect(body.model).toBe('openai/gpt-oss-20b')
+    expect(body.response_format.type).toBe('json_schema')
+    expect(body.response_format.json_schema.strict).toBe(true)
+    expect(body.reasoning_effort).toBe('low')
+    expect((init.headers as Record<string, string>)['HTTP-Referer']).toBeUndefined()
+  })
+
+  it('falls back to llama in JSON-object mode when the primary is rate limited', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(rateLimited())
+      .mockResolvedValueOnce(completion({ t: ['Hola'], f: ['en'] }))
+    vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const out = await provider().translate(['Hello'], 'es', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Hola', detected: 'en' }])
+
+    const second = JSON.parse(String((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body))
+    expect(second.model).toBe('llama-3.1-8b-instant')
+    expect(second.response_format).toEqual({ type: 'json_object' })
+    expect(second.reasoning_effort).toBeUndefined()
+    expect(second.messages[0].content).toMatch(/JSON object \{"t"/)
+  })
+
+  it('surfaces the rate limit when the fallback is switched off', async () => {
+    process.env.GROQ_TRANSLATE_FALLBACK_MODEL = 'none'
+    mockFetch(rateLimited())
+    await expect(
+      provider().translate(['Hello'], 'fr', 'text', new AbortController().signal)
+    ).rejects.toBeInstanceOf(ProviderRateLimited)
+  })
+
+  it('still refuses a ragged answer from the fallback', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn()
+        .mockResolvedValueOnce(rateLimited())
+        .mockResolvedValueOnce(completion({ t: ['Hola'], f: [] }))
+    )
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const out = await provider().translate(['Hello', 'Bye'], 'es', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Hello' }, { text: 'Bye' }])
+  })
+})

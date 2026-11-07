@@ -58,7 +58,9 @@ function voiceFor(lang: UiLang): SpeechSynthesisVoice | undefined {
  *
  * Two halves:
  *   - speaking: "Caption my speech" turns on the browser's recogniser for the
- *     local mic (Chrome, Edge, Safari), and everyone reads it in their language
+ *     local mic (Chrome, Edge, Safari), or sends each phrase to Groq's free
+ *     Whisper in a browser without one (Firefox, 203), and everyone reads it
+ *     in their language
  *   - listening: pick the language to read in, show the original under each
  *     translation, or have translations read aloud
  *
@@ -79,10 +81,33 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
       return next
     })
 
-  const { captions, interim, captioning, toggleCaptioning, supported, error } = useLiveCaptions(
+  const { captions, interim, captioning, toggleCaptioning, supported, engine, error } = useLiveCaptions(
     enabled,
     readLang
   )
+
+  // Whisper's stops have reasons a member can act on. Browser errors keep
+  // showing their own short code, as before.
+  const errorText = (code: string): string => {
+    switch (code) {
+      case 'speech-day-cap':
+        return t`Captions in this browser have used today's free allowance. Chrome, Edge or Safari can still caption you.`
+      case 'speech-user-day-cap':
+        return t`You have used today's hour of captions in this browser. Chrome, Edge or Safari can still caption you.`
+      case 'speech-busy':
+        return t`The caption service is busy, so a phrase was skipped. Captions carry on.`
+      case 'speech-not-allowed':
+        return t`Captions are not open to you in this room.`
+      case 'speech-unavailable':
+        return t`Captions are not available in this browser yet. Try Chrome, Edge or Safari.`
+      case 'speech-no-mic':
+        return t`Captions need your microphone. Allow it in the browser and try again.`
+      case 'speech-error':
+        return t`A phrase could not be captioned. Captions carry on.`
+      default:
+        return code
+    }
+  }
 
   // ---- read translations aloud, with the room turned down ----
   const room = useRoomContext()
@@ -241,12 +266,17 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
             <Trans>Everyone reads you in their own language</Trans>
           </span>
         )}
+        {captioning && engine === 'whisper' && (
+          <span className="text-micro text-white/40">
+            <Trans>In this browser your captions appear a few seconds after each phrase.</Trans>
+          </span>
+        )}
         {prefs.voice && (
           <span className="text-micro text-white/40">
             <Trans>Read aloud a few seconds behind. The room is turned down while it plays.</Trans>
           </span>
         )}
-        {error && <span className="text-micro text-amber-300/70">{error}</span>}
+        {error && <span className="text-micro text-amber-300/70">{errorText(error)}</span>}
       </div>
     </div>
   )

@@ -8,10 +8,13 @@ import { useSpeechUsage } from './useSpeechUsage'
 import { shouldTranslate } from '../lib/i18n/should-translate'
 import { UI_LANGS, isUiLang, type UiLang } from '../lib/i18n/protocol'
 import {
+  captionEngine,
   createSpeechRecognizer,
-  isSpeechRecognitionSupported,
+  type CaptionEngine,
   type SpeechRecognizer,
+  type SpeechSegment,
 } from '../lib/captions/speech'
+import { createWhisperRecognizer } from '../lib/captions/whisper-speech'
 
 /**
  * Live translated captions for a venue room.
@@ -76,6 +79,8 @@ export interface LiveCaptions {
   captioning: boolean
   toggleCaptioning: () => void
   supported: boolean
+  /** browser: instant, free and unlimited. whisper: Firefox, a phrase late, a shared daily allowance (203). */
+  engine: CaptionEngine | null
   error: string | null
 }
 
@@ -94,7 +99,9 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const [captioning, setCaptioning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supported = isSpeechRecognitionSupported()
+  // Fixed for the life of the page: what the browser can do does not change.
+  const engine: CaptionEngine | null = useMemo(() => captionEngine(), [])
+  const supported = engine !== null
 
   const merge = useCallback((incoming: CaptionWire) => {
     setCaptions((current) => {
@@ -162,7 +169,12 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const roomIdRef = useRef('')
   roomIdRef.current = room?.name || ''
   // Seconds of speech captioned, for the organiser's usage panel (199).
-  const meterSpeech = useSpeechUsage(room?.name || undefined, 'caption_speech_seconds')
+  // Whisper captions are metered by the server instead (203), from the
+  // duration Groq reports, so they are left out here.
+  const meterSpeech = useSpeechUsage(
+    engine === 'browser' ? room?.name || undefined : undefined,
+    'caption_speech_seconds'
+  )
   const segmentStart = useRef<number | null>(null)
 
   const onFinal = useCallback((text: string) => {
@@ -208,23 +220,41 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const recognizerRef = useRef<SpeechRecognizer | null>(null)
 
   useEffect(() => {
-    if (!captioning || !enabled) return
+    if (!captioning || !enabled || !engine) return
 
-    const recognizer = createSpeechRecognizer({
-      lang: langRef.current,
-      onSegment: ({ text, final }) => {
-        if (!final) {
-          if (segmentStart.current === null) segmentStart.current = Date.now()
-          setInterim(text)
-          return
-        }
-        meterSpeech(segmentSeconds(segmentStart.current, Date.now()))
-        segmentStart.current = null
-        setInterim('')
-        if (text.length >= MIN_CAPTION_CHARS) onFinal(text)
-      },
-      onError: (reason) => setError(reason),
-    })
+    const onSegment = ({ text, final }: SpeechSegment) => {
+      if (!final) {
+        if (segmentStart.current === null) segmentStart.current = Date.now()
+        setInterim(text)
+        return
+      }
+      // Browser captions meter speech time here; Whisper's server meters its own.
+      if (engine === 'browser') meterSpeech(segmentSeconds(segmentStart.current, Date.now()))
+      segmentStart.current = null
+      setInterim('')
+      if (text.length >= MIN_CAPTION_CHARS) onFinal(text)
+    }
+
+    const roomName = roomIdRef.current
+    const recognizer =
+      engine === 'whisper'
+        ? createWhisperRecognizer({
+            lang: langRef.current,
+            roomId: roomName,
+            onSegment,
+            // A fatal stop (allowance used up, not allowed here, no microphone)
+            // turns the button off, so it says so. "Busy" only shows.
+            onError: (reason, fatal) => {
+              setError(reason)
+              if (fatal) setCaptioning(false)
+            },
+          })
+        : createSpeechRecognizer({
+            lang: langRef.current,
+            onSegment,
+            onError: (reason) => setError(reason),
+          })
+    setError(null)
 
     recognizerRef.current = recognizer
     // Captions outrank voice commands for the microphone: Chrome allows one
@@ -242,7 +272,7 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     // `contentLang` is a dependency on purpose: switching your own language
     // mid-call has to restart the recogniser, or you carry on being transcribed
     // as the language you are no longer speaking.
-  }, [captioning, enabled, onFinal, contentLang, meterSpeech])
+  }, [captioning, enabled, engine, onFinal, contentLang, meterSpeech])
 
   // Sweep expired lines even when nobody is talking, so the strip empties
   // instead of freezing on the last thing anyone said.
@@ -271,6 +301,7 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     captioning,
     toggleCaptioning: useCallback(() => setCaptioning((value) => !value), []),
     supported,
+    engine,
     error,
   }
 }

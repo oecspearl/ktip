@@ -15,9 +15,8 @@ describe('free tier limits', () => {
   it('carries the published free allowances', () => {
     expect(tier('livekit_concurrent').limit).toBe(100)
     expect(tier('livekit_minutes').limit).toBe(5_000 * 60)
-    expect(tier('translator_chars').limit).toBe(2_000_000)
-    expect(tier('speech_translation_seconds').limit).toBe(5 * 3600)
-    expect(tier('tts_chars').limit).toBe(500_000)
+    expect(tier('translator_chars').limit).toBe(1_800_000)
+    expect(tier('speech_translation_seconds').limit).toBe(7 * 3600 * 30)
   })
 
   it('gives every tier its own env override key', () => {
@@ -30,17 +29,17 @@ describe('free tier limits', () => {
     const tiers = resolveFreeTiers({
       VITE_FREE_TIER_TRANSLATOR_CHARS: '5000000',
       VITE_FREE_TIER_LIVEKIT_CONCURRENT: '0',
-      VITE_FREE_TIER_TTS_CHARS: 'lots',
+      VITE_FREE_TIER_SPEECH_SECONDS: 'lots',
     })
     const byId = Object.fromEntries(tiers.map((t) => [t.id, t.limit]))
     expect(byId.translator_chars).toBe(5_000_000)
     expect(byId.livekit_concurrent).toBe(100)
-    expect(byId.tts_chars).toBe(500_000)
+    expect(byId.speech_translation_seconds).toBe(7 * 3600 * 30)
   })
 
   it('does not mutate the shared defaults when overriding', () => {
     resolveFreeTiers({ VITE_FREE_TIER_TRANSLATOR_CHARS: '9' })
-    expect(tier('translator_chars').limit).toBe(2_000_000)
+    expect(tier('translator_chars').limit).toBe(1_800_000)
   })
 })
 
@@ -77,8 +76,8 @@ describe('meterStatus', () => {
 
 describe('readMeter', () => {
   it('treats null and negative usage as zero', () => {
-    expect(readMeter(tier('tts_chars'), null).used).toBe(0)
-    expect(readMeter(tier('tts_chars'), -3).status).toBe('ok')
+    expect(readMeter(tier('speech_translation_seconds'), null).used).toBe(0)
+    expect(readMeter(tier('speech_translation_seconds'), -3).status).toBe('ok')
   })
 
   it('reports the status at the tier limit', () => {
@@ -127,7 +126,7 @@ describe('usageForTier', () => {
   })
 
   it('is zero for a kind nothing has written yet', () => {
-    expect(usageForTier('tts_chars', meters())).toBe(0)
+    expect(usageForTier('livekit_minutes', meters())).toBe(0)
     expect(usageForTier('speech_translation_seconds', meters())).toBe(90)
   })
 })

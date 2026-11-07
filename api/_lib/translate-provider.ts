@@ -155,8 +155,92 @@ function openrouterProvider(
   siteUrl: string,
   appName: string
 ): TranslateProvider {
-  return {
+  return chatCompletionsProvider({
     id: `openrouter:${model}`,
+    label: 'OpenRouter',
+    endpoint: OPENROUTER_ENDPOINT,
+    key,
+    model,
+    // OpenRouter's attribution headers. Optional to the API, but they are
+    // what makes spend legible per-app on the dashboard.
+    headers: { 'HTTP-Referer': siteUrl, 'X-Title': appName },
+    jsonMode: 'schema',
+  })
+}
+
+/**
+ * Groq's free tier (November 2026): the same OpenAI-compatible shape on a
+ * different host, no card required. Chosen where Azure will not sign up an
+ * account from the Eastern Caribbean.
+ *
+ * The free tier is limited per day, per model. The primary model answers in
+ * strict JSON; when its day runs out (429), the fallback model takes over in
+ * JSON-object mode, which is looser, so the same length and type checks
+ * decide what is usable. Both are env vars, so a model Groq retires is a
+ * dashboard change.
+ */
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
+
+/** Groq models that accept a strict JSON schema. Everything else gets JSON-object mode. */
+export function groqSupportsStrictSchema(model: string): boolean {
+  return /^openai\/gpt-oss-/.test(model)
+}
+
+function groqModel(key: string, model: string): TranslateProvider {
+  return chatCompletionsProvider({
+    id: `groq:${model}`,
+    label: 'Groq',
+    endpoint: GROQ_ENDPOINT,
+    key,
+    model,
+    jsonMode: groqSupportsStrictSchema(model) ? 'schema' : 'object',
+    // gpt-oss reasons before it answers. Translation needs almost none, and
+    // reasoning tokens count against the free tier's daily token budget.
+    body: /^openai\/gpt-oss-/.test(model) ? { reasoning_effort: 'low' } : undefined,
+  })
+}
+
+function groqProvider(key: string, model: string, fallbackModel: string | null): TranslateProvider {
+  const primary = groqModel(key, model)
+  const fallback = fallbackModel && fallbackModel !== model ? groqModel(key, fallbackModel) : null
+  return {
+    id: primary.id,
+    maxItemsPerCall: primary.maxItemsPerCall,
+    maxCharsPerCall: primary.maxCharsPerCall,
+    async translate(texts, to, format, signal) {
+      try {
+        return await primary.translate(texts, to, format, signal)
+      } catch (err) {
+        if (!fallback || signal?.aborted) throw err
+        console.warn(`[translate] ${primary.id} failed, trying ${fallback.id}:`, String(err).slice(0, 200))
+        return fallback.translate(texts, to, format, signal)
+      }
+    },
+  }
+}
+
+interface ChatCompletionsOptions {
+  id: string
+  /** Used in error messages, which end up in logs and Sentry. */
+  label: string
+  endpoint: string
+  key: string
+  model: string
+  headers?: Record<string, string>
+  /**
+   * schema: a strict JSON schema, enforced by the host.
+   * object: any JSON object; the shape is asked for in the prompt and checked
+   * here, element by element, like everything else.
+   */
+  jsonMode: 'schema' | 'object'
+  /** Extra request fields a host understands, e.g. Groq's reasoning_effort. */
+  body?: Record<string, unknown>
+}
+
+function chatCompletionsProvider(options: ChatCompletionsOptions): TranslateProvider {
+  const { label, endpoint, key, model, jsonMode } = options
+  return {
+    id: options.id,
     // Deliberately below Azure's 100/50,000. Positional fidelity is the failure
     // mode here, and it degrades with batch length long before the context window
     // does — a dropped element costs the whole chunk, since the length check then
@@ -179,18 +263,21 @@ function openrouterProvider(
           ? 'The input is HTML. Preserve every tag and attribute exactly; translate only the text between tags.'
           : 'The input is plain text. Do not add markup.',
         'Also return the BCP-47 base code of the language each element was written in.',
-      ].join(' ')
+        // JSON-object mode only promises valid JSON, so the shape is spelled out.
+        jsonMode === 'object'
+          ? 'Respond with only a JSON object {"t": [...], "f": [...]}, where "t" holds the translations and "f" the source language codes, one per input element.'
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
 
-      const res = await fetch(OPENROUTER_ENDPOINT, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         signal,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${key}`,
-          // OpenRouter's attribution headers. Optional to the API, but they are
-          // what makes spend legible per-app on the dashboard.
-          'HTTP-Referer': siteUrl,
-          'X-Title': appName,
+          ...options.headers,
         },
         body: JSON.stringify({
           model,
@@ -201,22 +288,26 @@ function openrouterProvider(
           // Translation is not a creative task, and a re-run of the same string
           // should not produce different French on a cache miss.
           temperature: 0,
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'translations',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  t: { type: 'array', items: { type: 'string' } },
-                  f: { type: 'array', items: { type: 'string' } },
+          response_format:
+            jsonMode === 'object'
+              ? { type: 'json_object' }
+              : {
+                  type: 'json_schema',
+                  json_schema: {
+                    name: 'translations',
+                    strict: true,
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        t: { type: 'array', items: { type: 'string' } },
+                        f: { type: 'array', items: { type: 'string' } },
+                      },
+                      required: ['t', 'f'],
+                      additionalProperties: false,
+                    },
+                  },
                 },
-                required: ['t', 'f'],
-                additionalProperties: false,
-              },
-            },
-          },
+          ...options.body,
         }),
       })
 
@@ -230,7 +321,7 @@ function openrouterProvider(
         // OpenRouter's body is the difference between "no credit", "bad model
         // slug" and "this model does not do structured outputs".
         const detail = await res.text().catch(() => '')
-        throw new Error(`OpenRouter ${res.status}: ${detail.slice(0, 300)}`)
+        throw new Error(`${label} ${res.status}: ${detail.slice(0, 300)}`)
       }
 
       const body = (await res.json()) as {
@@ -243,17 +334,17 @@ function openrouterProvider(
       // silently echoes English at the reader.
       if (body.error) {
         if (body.error.code === 429) throw new ProviderRateLimited(60)
-        throw new Error(`OpenRouter: ${String(body.error.message).slice(0, 300)}`)
+        throw new Error(`${label}: ${String(body.error.message).slice(0, 300)}`)
       }
 
       const content = body.choices?.[0]?.message?.content
-      if (typeof content !== 'string') throw new Error('OpenRouter returned no message content')
+      if (typeof content !== 'string') throw new Error(`${label} returned no message content`)
 
       let parsed: { t?: unknown; f?: unknown }
       try {
         parsed = JSON.parse(content) as { t?: unknown; f?: unknown }
       } catch {
-        throw new Error('OpenRouter returned content that is not JSON')
+        throw new Error(`${label} returned content that is not JSON`)
       }
 
       const out = parsed.t
@@ -292,6 +383,19 @@ function openrouterProvider(
  */
 export function getProvider(): TranslateProvider | null {
   const which = (process.env.TRANSLATION_PROVIDER || 'azure').toLowerCase()
+
+  if (which === 'groq') {
+    const key = process.env.GROQ_API_KEY
+    if (!key) return null
+    return groqProvider(
+      key,
+      process.env.GROQ_TRANSLATE_MODEL || 'openai/gpt-oss-20b',
+      // "none" switches the fallback off.
+      process.env.GROQ_TRANSLATE_FALLBACK_MODEL === 'none'
+        ? null
+        : process.env.GROQ_TRANSLATE_FALLBACK_MODEL || 'llama-3.1-8b-instant'
+    )
+  }
 
   if (which === 'openrouter') {
     const key = process.env.OPENROUTER_API_KEY

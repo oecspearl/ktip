@@ -13,9 +13,9 @@
  * that instead, with no code change. Anything else (unset, zero, text) keeps
  * the default.
  *
- * OpenRouter has no meter: it is billed per use with no free cap. When
- * TRANSLATION_PROVIDER is openrouter, the translator meter shows characters
- * that are being paid for rather than spent from Azure's allowance.
+ * Translation runs on Groq's free tier (203), whose limits are per day and per
+ * model rather than a monthly character count, so the translator meter shows
+ * the app's own monthly budget (claim_translation_budget, 097) instead.
  */
 
 import { msg } from '@lingui/core/macro'
@@ -26,7 +26,6 @@ export type FreeTierId =
   | 'livekit_minutes'
   | 'translator_chars'
   | 'speech_translation_seconds'
-  | 'tts_chars'
 
 export type FreeTierUnit = 'people' | 'chars' | 'seconds'
 
@@ -68,33 +67,24 @@ export const FREE_TIERS: readonly FreeTier[] = [
   },
   {
     id: 'translator_chars',
-    plan: 'Azure Translator F0',
+    plan: 'KTIP translation budget',
     label: msg`Translated characters this month`,
-    note: msg`Counts every translation on the site. Only cache misses use the allowance.`,
-    limit: 2_000_000,
+    note: msg`The app stops sending new text to Groq at this ceiling each month. Cached text never counts.`,
+    limit: 1_800_000,
     unit: 'chars',
     period: 'month',
     envKey: 'VITE_FREE_TIER_TRANSLATOR_CHARS',
   },
   {
     id: 'speech_translation_seconds',
-    plan: 'Azure Speech F0',
-    label: msg`Speech translation this month`,
-    note: msg`Five audio hours a month. Captions use the browser's own speech service for now, so this stays at zero.`,
-    limit: 5 * 60 * 60,
+    plan: 'Groq Whisper (free)',
+    label: msg`Firefox speech captions this month`,
+    note: msg`Only browsers with no speech recognition of their own use it. Groq allows about eight audio hours a day, and the app stops at seven.`,
+    // Seven hours a day for thirty days: the most the daily cap lets through.
+    limit: 7 * 60 * 60 * 30,
     unit: 'seconds',
     period: 'month',
     envKey: 'VITE_FREE_TIER_SPEECH_SECONDS',
-  },
-  {
-    id: 'tts_chars',
-    plan: 'Azure Speech F0',
-    label: msg`Neural voice characters this month`,
-    note: msg`Half a million characters a month. Nothing reads aloud through Azure yet.`,
-    limit: 500_000,
-    unit: 'chars',
-    period: 'month',
-    envKey: 'VITE_FREE_TIER_TTS_CHARS',
   },
 ]
 
@@ -182,7 +172,5 @@ export function usageForTier(id: FreeTierId, meters: UsageMeters): number {
     }
     case 'speech_translation_seconds':
       return kindTotal(meters, 'speech_seconds')
-    case 'tts_chars':
-      return kindTotal(meters, 'tts_chars')
   }
 }

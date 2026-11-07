@@ -16,7 +16,10 @@
  * captioning is offered rather than assumed — see `isSpeechRecognitionSupported`.
  * If that becomes a problem the shape below is a seam: a Soniox or Deepgram
  * WebSocket source implements the same three methods and nothing above changes.
+ * Groq's free Whisper is that second source, for Firefox (whisper-speech.ts, 203).
  */
+
+import { isWhisperCaptureSupported } from './whisper-speech-core'
 
 /**
  * Minimal declarations for the Web Speech API.
@@ -70,6 +73,34 @@ function getConstructor(): SpeechRecognitionConstructor | null {
 
 export function isSpeechRecognitionSupported(): boolean {
   return getConstructor() !== null
+}
+
+/**
+ * Set on deployments with a Groq key for Firefox captions (203). Public on
+ * purpose: it only tells the page that /api/speech/transcribe is worth trying.
+ */
+export function isWhisperCaptionsEnabled(): boolean {
+  const flag = import.meta.env.VITE_WHISPER_CAPTIONS as string | undefined
+  return flag === 'on' || flag === 'true' || flag === '1'
+}
+
+export type CaptionEngine = 'browser' | 'whisper'
+
+/**
+ * Which recogniser captions this member's speech.
+ *
+ * The browser's own whenever it has one: instant, free and unlimited. Whisper
+ * only where it does not (Firefox), because its free tier is one daily
+ * allowance for the whole organisation and its captions arrive a phrase late.
+ * Null when neither is available.
+ */
+export function captionEngine(
+  browser: boolean = isSpeechRecognitionSupported(),
+  whisper: boolean = isWhisperCaptionsEnabled() && isWhisperCaptureSupported()
+): CaptionEngine | null {
+  if (browser) return 'browser'
+  if (whisper) return 'whisper'
+  return null
 }
 
 export interface SpeechSegment {
