@@ -271,7 +271,7 @@ describe('groq translate', () => {
     expect((init.headers as Record<string, string>)['HTTP-Referer']).toBeUndefined()
   })
 
-  it('falls back to llama in JSON-object mode when the primary is rate limited', async () => {
+  it('falls back to gpt-oss-120b, still strict, when the primary is rate limited', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(rateLimited())
       .mockResolvedValueOnce(completion({ t: ['Hola'], f: ['en'] }))
@@ -282,10 +282,25 @@ describe('groq translate', () => {
     expect(out).toEqual([{ text: 'Hola', detected: 'en' }])
 
     const second = JSON.parse(String((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body))
-    expect(second.model).toBe('llama-3.1-8b-instant')
+    expect(second.model).toBe('openai/gpt-oss-120b')
+    expect(second.response_format.type).toBe('json_schema')
+    expect(second.reasoning_effort).toBe('low')
+  })
+
+  it('asks a model without strict schemas for a JSON object, spelled out in the prompt', async () => {
+    process.env.GROQ_TRANSLATE_FALLBACK_MODEL = 'some/plain-model'
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(rateLimited())
+      .mockResolvedValueOnce(completion({ t: ['Hola'], f: ['en'] }))
+    vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    await provider().translate(['Hello'], 'es', 'text', new AbortController().signal)
+    const second = JSON.parse(String((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body))
+    expect(second.model).toBe('some/plain-model')
     expect(second.response_format).toEqual({ type: 'json_object' })
     expect(second.reasoning_effort).toBeUndefined()
-    expect(second.messages[0].content).toMatch(/JSON object \{"t"/)
+    expect(second.messages[0].content).toMatch(/JSON object \{"translations"/)
   })
 
   it('surfaces the rate limit when the fallback is switched off', async () => {
@@ -306,5 +321,26 @@ describe('groq translate', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     const out = await provider().translate(['Hello', 'Bye'], 'es', 'text', new AbortController().signal)
     expect(out).toEqual([{ text: 'Hello' }, { text: 'Bye' }])
+  })
+})
+
+describe('answers a model can garble', () => {
+  it('reads the named fields the prompt now asks for', async () => {
+    mockFetch(completion({ translations: ['Bonjour'], source_languages: ['en'] }))
+    const out = await provider().translate(['Hello'], 'fr', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Bonjour', detected: 'en' }])
+  })
+
+  it('refuses a swapped answer: a language code is not a translation', async () => {
+    // What gpt-oss-20b on Groq returned once with the old one-letter fields.
+    mockFetch(completion({ t: ['en', 'en'], f: ['Bonjour,', 'Quoi de '] }))
+    const out = await provider().translate(['Good morning', 'What is up'], 'fr', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Good morning' }, { text: 'What is up' }])
+  })
+
+  it('keeps only real language codes as the detected language', async () => {
+    mockFetch(completion({ translations: ['Hola', 'Adiós'], source_languages: ['Good mor', 'EN'] }))
+    const out = await provider().translate(['Hello', 'Bye'], 'es', 'text', new AbortController().signal)
+    expect(out).toEqual([{ text: 'Hola' }, { text: 'Adiós', detected: 'en' }])
   })
 })

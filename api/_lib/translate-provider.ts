@@ -179,11 +179,17 @@ function openrouterProvider(
  * decide what is usable. Both are env vars, so a model Groq retires is a
  * dashboard change.
  */
+/** "en", "fr", "es-419": what a source-language answer must look like. */
+export function isLanguageCode(value: string): boolean {
+  return /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i.test(value.trim())
+}
+
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 
 /** Groq models that accept a strict JSON schema. Everything else gets JSON-object mode. */
 export function groqSupportsStrictSchema(model: string): boolean {
-  return /^openai\/gpt-oss-/.test(model)
+  // Groq's structured-outputs page, November 2026.
+  return /^openai\/gpt-oss-|^qwen\/qwen3/.test(model)
 }
 
 function groqModel(key: string, model: string): TranslateProvider {
@@ -262,10 +268,10 @@ function chatCompletionsProvider(options: ChatCompletionsOptions): TranslateProv
         format === 'html'
           ? 'The input is HTML. Preserve every tag and attribute exactly; translate only the text between tags.'
           : 'The input is plain text. Do not add markup.',
-        'Also return the BCP-47 base code of the language each element was written in.',
+        'Put the translations in "translations", and the two-letter code of the language each input element was written in (for example "en") in "source_languages", one per element and in the same order.',
         // JSON-object mode only promises valid JSON, so the shape is spelled out.
         jsonMode === 'object'
-          ? 'Respond with only a JSON object {"t": [...], "f": [...]}, where "t" holds the translations and "f" the source language codes, one per input element.'
+          ? 'Respond with only a JSON object {"translations": [...], "source_languages": [...]}.'
           : '',
       ]
         .filter(Boolean)
@@ -299,10 +305,10 @@ function chatCompletionsProvider(options: ChatCompletionsOptions): TranslateProv
                     schema: {
                       type: 'object',
                       properties: {
-                        t: { type: 'array', items: { type: 'string' } },
-                        f: { type: 'array', items: { type: 'string' } },
+                        translations: { type: 'array', items: { type: 'string' } },
+                        source_languages: { type: 'array', items: { type: 'string' } },
                       },
-                      required: ['t', 'f'],
+                      required: ['translations', 'source_languages'],
                       additionalProperties: false,
                     },
                   },
@@ -340,15 +346,19 @@ function chatCompletionsProvider(options: ChatCompletionsOptions): TranslateProv
       const content = body.choices?.[0]?.message?.content
       if (typeof content !== 'string') throw new Error(`${label} returned no message content`)
 
-      let parsed: { t?: unknown; f?: unknown }
+      let parsed: { t?: unknown; f?: unknown; translations?: unknown; source_languages?: unknown }
       try {
-        parsed = JSON.parse(content) as { t?: unknown; f?: unknown }
+        parsed = JSON.parse(content) as typeof parsed
       } catch {
         throw new Error(`${label} returned content that is not JSON`)
       }
 
-      const out = parsed.t
-      const from = Array.isArray(parsed.f) ? parsed.f : []
+      // Named fields since November 2026: gpt-oss swapped the old one-letter
+      // "t" and "f". The short names are still read, for older prompts
+      // answered from a cache or a proxy.
+      const out = parsed.translations ?? parsed.t
+      const fromRaw = parsed.source_languages ?? parsed.f
+      const from = Array.isArray(fromRaw) ? fromRaw : []
 
       // The whole-chunk guard. A model that returned the wrong number of items
       // has told us nothing about which ones shifted, so pairing ANY of them by
@@ -362,10 +372,13 @@ function chatCompletionsProvider(options: ChatCompletionsOptions): TranslateProv
       return texts.map((text, i) => {
         const translated = out[i]
         if (typeof translated !== 'string' || translated.length === 0) return { text }
+        // A bare language code where a sentence should be is a swapped answer,
+        // not a translation. The source is better than "en" under a name.
+        if (isLanguageCode(translated) && !isLanguageCode(text)) return { text }
         const detected = from[i]
         return {
           text: translated,
-          ...(typeof detected === 'string' && detected ? { detected: detected.slice(0, 8) } : {}),
+          ...(typeof detected === 'string' && isLanguageCode(detected) ? { detected: detected.toLowerCase() } : {}),
         }
       })
     },
@@ -393,7 +406,9 @@ export function getProvider(): TranslateProvider | null {
       // "none" switches the fallback off.
       process.env.GROQ_TRANSLATE_FALLBACK_MODEL === 'none'
         ? null
-        : process.env.GROQ_TRANSLATE_FALLBACK_MODEL || 'llama-3.1-8b-instant'
+        : // Its own daily allowance, separate from the primary's. llama-3.1-8b
+          // was the plan until Groq retired it from free keys (November 2026).
+          process.env.GROQ_TRANSLATE_FALLBACK_MODEL || 'openai/gpt-oss-120b'
     )
   }
 
