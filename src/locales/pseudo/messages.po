@@ -16223,6 +16223,7 @@ msgid "The filters stack, so combine as many as you need.\n"
 "The count tells you how many are open versus closed, and Clear all filters resets everything."
 msgstr ""
 
+#: src/components/CallErrorBoundary.tsx
 #: src/components/venue/room/QuestBoardPanel.tsx
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Try again"
@@ -21978,6 +21979,10 @@ msgid "• Download B&W or Color — opens the print dialog; choose “Save as P
 "• Sync from Virtual Campus — pulls in your OECS course history and leaves any section you have edited alone\n"
 "• Edit — opens the editor\n"
 "• Public / Private — a public CV gets a shareable link that opens for anyone, even signed out. Private is the default."
+msgstr ""
+
+#: src/components/CallErrorBoundary.tsx
+msgid "The call ran into a problem and stopped."
 msgstr ""
 
 #: src/components/projects/ProjectCard.tsx

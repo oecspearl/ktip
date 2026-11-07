@@ -16334,6 +16334,7 @@ msgid "The filters stack, so combine as many as you need.\n"
 msgstr "Les filtres se cumulent, combinez-en donc autant que nécessaire.\n"
 ""
 
+#: src/components/CallErrorBoundary.tsx
 #: src/components/venue/room/QuestBoardPanel.tsx
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Try again"
@@ -22113,6 +22114,10 @@ msgid "• Download B&W or Color — opens the print dialog; choose “Save as P
 "• Public / Private — a public CV gets a shareable link that opens for anyone, even signed out. Private is the default."
 msgstr "• Télécharger en N&B ou en couleur — ouvre la boîte de dialogue d'impression ; choisissez « Enregistrer au format PDF »\n"
 ""
+
+#: src/components/CallErrorBoundary.tsx
+msgid "The call ran into a problem and stopped."
+msgstr "L'appel a rencontré un problème et s'est arrêté."
 
 #: src/components/projects/ProjectCard.tsx
 #: src/i18n/harvested.ts

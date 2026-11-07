@@ -95,7 +95,11 @@ export function VenueCall({
             // the venue map. Two of each would be two sources of truth.
             chat: false,
             leave: false,
-            settings: true,
+            // Off: LiveKit's settings button reads a LayoutContextProvider
+            // that only its VideoConference prefab sets up, and without one
+            // it throws during render and takes the room page down. Device
+            // choice is still here, in the menus beside the mic and camera.
+            settings: false,
           }}
         />
       )}

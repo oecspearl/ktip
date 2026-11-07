@@ -8,6 +8,7 @@ import { useCoffeeTables } from '../../../hooks/useCoffeeTables'
 import { isVenueVideoConfigured, useCoffeeTableToken } from '../../../hooks/useVenueRoomToken'
 import { minutesLeft, type CoffeeTable } from '../../../lib/coffee-tables'
 import { useNow } from './judging/judging-time'
+import { CallErrorBoundary } from '../../CallErrorBoundary'
 import type { VenueRoom } from '../../../types'
 
 // Lazy for the same reason as in AvStage: the LiveKit SDK loads only once
@@ -191,9 +192,11 @@ function TableCall({
         <p className="text-sm text-amber-700">{error.message}</p>
       ) : token && grant ? (
         <div className="overflow-hidden rounded-xl bg-ktip-ink p-2 text-white">
-          <Suspense fallback={<div className="h-48 animate-pulse-soft rounded-lg bg-white/10" />}>
-            <VenueCall mode="grid" token={token} grant={grant} />
-          </Suspense>
+          <CallErrorBoundary area="coffee-table-call">
+            <Suspense fallback={<div className="h-48 animate-pulse-soft rounded-lg bg-white/10" />}>
+              <VenueCall mode="grid" token={token} grant={grant} />
+            </Suspense>
+          </CallErrorBoundary>
         </div>
       ) : isVenueVideoConfigured() ? (
         <div className="h-48 animate-pulse-soft rounded-xl bg-ktip-sand-100" />

@@ -34,6 +34,7 @@ import {
   PhoneOff,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
+import { CallErrorBoundary } from '../../components/CallErrorBoundary'
 import { Button } from '../../components/ui/Button'
 import type { Profile } from '../../types'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
@@ -332,7 +333,9 @@ function CallView({ callId, onStartNew }: { callId: string; onStartNew: () => vo
   return (
     <div className="flex flex-col gap-4">
       <CallHeader call={call} onError={(err) => toast.error(refusalText(callRefusal(err)))} />
-      <Suspense fallback={callSkeleton}>{stage}</Suspense>
+      <CallErrorBoundary area="collaborate-call">
+        <Suspense fallback={callSkeleton}>{stage}</Suspense>
+      </CallErrorBoundary>
       <InvitePanel call={call} />
     </div>
   )

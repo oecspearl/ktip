@@ -5,6 +5,7 @@ import { VENUE_AUDIO_MODE_LABELS } from '../../../lib/constants'
 import { ROOM_CAMERA_LABELS, type RoomCameraMode } from '../../../lib/venue-room-layout'
 import { isVenueVideoConfigured, useVenueRoomToken } from '../../../hooks/useVenueRoomToken'
 import { useRoomRecording } from '../../../hooks/useRoomRecording'
+import { CallErrorBoundary } from '../../CallErrorBoundary'
 import { RecordingConsent, useRecordingConsent } from './RecordingConsent'
 
 // Lazy on purpose, and it matters more than it looks: VenueCall is the only
@@ -67,7 +68,10 @@ export function AvStage({
   const { acknowledged, acknowledge } = useRecordingConsent(room.id, Boolean(room.recording_enabled))
 
   const { token, grant, error } = useVenueRoomToken(room.id, live && acknowledged)
-  const recording = useRoomRecording(room.id, Boolean(grant?.is_host))
+  // Only rooms marked for recording: anywhere else the route answers 403
+  // "not enabled", which a status poll would hit every few seconds.
+  const canRecord = Boolean(grant?.is_host && grant?.recording)
+  const recording = useRoomRecording(room.id, canRecord)
 
   if (mode === 'off') return null
 
@@ -141,6 +145,7 @@ export function AvStage({
         {needsConsent ? (
           <RecordingConsent onAccept={acknowledge} />
         ) : connected && token && grant ? (
+          <CallErrorBoundary area="venue-call">
           <Suspense fallback={placeholders}>
             <VenueCall
               mode={mode}
@@ -148,7 +153,7 @@ export function AvStage({
               grant={grant}
               fill={fill}
               onRecordingControl={
-                grant.is_host ? (
+                canRecord ? (
                   <RecordButton
                     recording={recording.recording}
                     busy={recording.busy}
@@ -165,6 +170,7 @@ export function AvStage({
               <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />
             )}
           </Suspense>
+          </CallErrorBoundary>
         ) : (
           placeholders
         )}
