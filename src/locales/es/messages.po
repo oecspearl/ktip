@@ -2111,6 +2111,10 @@ msgid "The row at the top picks the month, quarter, year or a custom range, and 
 "Tiles report the selected period; the trend charts look back further, so the shape is visible around the number."
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "You have used today's hour of captions in this browser. Chrome, Edge or Safari can still caption you."
+msgstr "Ya usó la hora de subtítulos de hoy en este navegador. Chrome, Edge o Safari todavía pueden subtitularle."
+
 #: src/components/venue/map/VenueTemplatePicker.tsx
 msgid "Single floor layouts"
 msgstr "Distribuciones de una planta"
@@ -2263,10 +2267,6 @@ msgstr ""
 #: src/pages/events/EventDetailPage.tsx
 msgid "Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in."
 msgstr "Salas, audio abierto y todas las personas conectadas en este momento. Los asistentes registrados pueden entrar directamente."
-
-#: src/lib/free-tiers.ts
-msgid "Speech translation this month"
-msgstr "Traducción de voz este mes"
 
 #: src/i18n/harvested.ts
 msgid "After a Google or Microsoft signup you land on the onboarding wizard instead of going straight to the site.\n"
@@ -2578,6 +2578,10 @@ msgstr "PDF, Word, Excel, CSV, Markdown, texto o imagen — hasta 25 MB"
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Browse Grants"
 msgstr "Explorar subvenciones"
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captions need your microphone. Allow it in the browser and try again."
+msgstr "Los subtítulos necesitan su micrófono. Permítalo en el navegador e inténtelo de nuevo."
 
 #: src/i18n/harvested.ts
 msgid "What is the invitations inbox?"
@@ -8091,6 +8095,10 @@ msgstr "Reclamada. Un organizador la revisará."
 msgid "Not permitted"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captions are not open to you in this room."
+msgstr "Los subtítulos no están disponibles para usted en esta sala."
+
 #: src/a11y/messages.ts
 msgid "Previous paragraph"
 msgstr ""
@@ -13237,6 +13245,10 @@ msgstr "{0} de {1} plazas ocupadas"
 msgid "Host and store"
 msgstr ""
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "A phrase could not be captioned. Captions carry on."
+msgstr "No se pudo subtitular una frase. Los subtítulos continúan."
+
 #: src/i18n/harvested.ts
 msgid "The licence you grant %entityShort%"
 msgstr ""
@@ -15790,6 +15802,10 @@ msgstr "Archivos de apoyo (opcional)"
 msgid "Switch from the list view to the calendar view using the toggle at the top."
 msgstr "Cambie de la vista de lista a la vista de calendario mediante el interruptor situado en la parte superior."
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captions in this browser have used today's free allowance. Chrome, Edge or Safari can still caption you."
+msgstr "Los subtítulos de este navegador agotaron la cuota gratuita de hoy. Chrome, Edge o Safari todavía pueden subtitularle."
+
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Post-Secondary Institution"
@@ -16180,6 +16196,10 @@ msgstr "Buscar empresas"
 msgid "Feature on the homepage"
 msgstr "Destacar en la página de inicio"
 
+#: src/lib/free-tiers.ts
+msgid "Firefox speech captions this month"
+msgstr "Subtítulos de voz en Firefox este mes"
+
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Last Updated"
 msgstr "Última actualización"
@@ -16317,10 +16337,6 @@ msgstr "Los proyectos de su propiedad, incluidos los privados."
 #: src/pages/events/CreateEventPage.tsx
 msgid "After you create it, the next screen is where you {0}."
 msgstr "Después de crearlo, la siguiente pantalla es donde usted {0}."
-
-#: src/lib/free-tiers.ts
-msgid "Half a million characters a month. Nothing reads aloud through Azure yet."
-msgstr "Medio millón de caracteres al mes. Aún no se lee nada en voz alta mediante Azure."
 
 #: src/i18n/harvested.ts
 msgid "The filters stack, so combine as many as you need.\n"
@@ -19068,6 +19084,10 @@ msgstr ""
 msgid "{0, plural, one {# note on screen} other {# notes on screen}}"
 msgstr "{0, plural, one {# nota en pantalla} other {# notas en pantalla}}"
 
+#: src/lib/free-tiers.ts
+msgid "Only browsers with no speech recognition of their own use it. Groq allows about eight audio hours a day, and the app stops at seven."
+msgstr "Solo lo usan los navegadores sin reconocimiento de voz propio. Groq permite unas ocho horas de audio al día y la aplicación se detiene a las siete."
+
 #: src/i18n/harvested.ts
 msgid "Explore projects, join events, and find funding for your ideas."
 msgstr "Explore proyectos, únase a eventos y encuentre financiamiento para sus ideas."
@@ -19344,6 +19364,10 @@ msgid "A title and a body, added to the board you came from — the board is fix
 "\n"
 "Once published you can edit or delete your own discussion, and replies notify you as they arrive."
 msgstr ""
+
+#: src/lib/free-tiers.ts
+msgid "The app stops sending new text to Groq at this ceiling each month. Cached text never counts."
+msgstr "La aplicación deja de enviar texto nuevo a Groq al llegar a este límite cada mes. El texto en caché nunca cuenta."
 
 #: src/lib/venue-room-sections.ts
 msgid "Team leaderboard and the side quests organisers set. Judging scores never count here."
@@ -20284,10 +20308,6 @@ msgid "Search what you already have, or start something new with the button on t
 msgstr "Busque lo que ya tiene, o empiece algo nuevo con el botón de la derecha.\n"
 ""
 
-#: src/lib/free-tiers.ts
-msgid "Five audio hours a month. Captions use the browser's own speech service for now, so this stays at zero."
-msgstr "Cinco horas de audio al mes. Por ahora, los subtítulos usan el servicio de voz del propio navegador, así que esto se queda en cero."
-
 #: src/lib/funding-types.ts
 msgid "Blended finance"
 msgstr ""
@@ -20747,10 +20767,6 @@ msgstr "Introduzca una dirección de correo electrónico válida"
 #: src/a11y/messages.ts
 msgid "Close the reading bar"
 msgstr ""
-
-#: src/lib/free-tiers.ts
-msgid "Neural voice characters this month"
-msgstr "Caracteres de voz neuronal este mes"
 
 #: src/components/profile/PortraitTile.tsx
 msgid "Profile Photo"
@@ -23180,6 +23196,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "This is the opposite of the default for projects and events. Publishing a project is a deliberate act with its own agreement; submitting an application is not publishing."
 msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "In this browser your captions appear a few seconds after each phrase."
+msgstr "En este navegador, sus subtítulos aparecen unos segundos después de cada frase."
 
 #: src/i18n/harvested.ts
 msgid "Help article — Getting Around"
@@ -25933,6 +25953,10 @@ msgstr "Imprímalo, o consulte la fuente"
 msgid "Thanks for your feedback!"
 msgstr "¡Gracias por sus comentarios!"
 
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "The caption service is busy, so a phrase was skipped. Captions carry on."
+msgstr "El servicio de subtítulos está ocupado y se omitió una frase. Los subtítulos continúan."
+
 #: src/components/association/AssociationReviewQueue.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Status"
@@ -27006,6 +27030,10 @@ msgstr "Descargar a color (A4)"
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Hidden notes"
 msgstr ""
+
+#: src/components/venue/room/CaptionStrip.tsx
+msgid "Captions are not available in this browser yet. Try Chrome, Edge or Safari."
+msgstr "Los subtítulos aún no están disponibles en este navegador. Pruebe con Chrome, Edge o Safari."
 
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Desks and monitors"
@@ -30822,10 +30850,6 @@ msgid "Scroll to the Comments section on any project to leave a comment or ask a
 "All three need you to be signed in."
 msgstr "Desplácese hasta la sección Comentarios de cualquier proyecto para dejar un comentario o hacer una pregunta.\n"
 ""
-
-#: src/lib/free-tiers.ts
-msgid "Counts every translation on the site. Only cache misses use the allowance."
-msgstr "Cuenta todas las traducciones del sitio. Solo las que no están en caché consumen la cuota."
 
 #: src/components/notes/StickyNote.tsx
 msgid "Quote"
