@@ -10,23 +10,40 @@ export interface DetectorOptions {
   silenceMs: number
   /** Shorter than this is a cough or a click, not a phrase. */
   minMs: number
-  /** Longer than this is cut, so a monologue still captions every few seconds. */
+  /**
+   * After this long, a phrase is cut at the next short gap between words
+   * instead of waiting for a full pause, so captions keep pace with someone
+   * who talks without stopping.
+   */
+  softMs: number
+  /** How much quiet counts as a gap between words, once softMs has passed. */
+  gapMs: number
+  /** Longer than this is cut wherever it is, the last resort for a monologue. */
   maxMs: number
 }
 
 /**
- * Tuned for a laptop microphone in a meeting. Each phrase is one request, and
- * Groq bills every request as at least ten seconds, so phrases are allowed to
- * run long rather than being chopped at every breath.
+ * Tuned for a laptop microphone in a meeting, and for latency within the free
+ * tier. Each phrase is one request: Groq allows 20 a minute for the whole
+ * organisation and bills each as at least ten seconds. Phrases of about five
+ * seconds keep one non-stop speaker near 12 a minute, and captions trail the
+ * speaker by a few seconds rather than by a whole sentence.
  */
 export const DEFAULT_DETECTOR: DetectorOptions = {
   threshold: 0.015,
-  silenceMs: 900,
+  silenceMs: 700,
   minMs: 600,
-  maxMs: 12_000,
+  softMs: 4_500,
+  gapMs: 250,
+  maxMs: 9_000,
 }
 
-export type DetectorEvent = 'start' | 'end' | 'cancel' | null
+/**
+ * split: the phrase so far is done and the speaker is still going, so the
+ * next one starts at once. Recording from the gap means the first word after
+ * it is never clipped.
+ */
+export type DetectorEvent = 'start' | 'end' | 'split' | 'cancel' | null
 
 /**
  * Finds phrases in a stream of microphone levels. Voice is anything well
@@ -55,9 +72,15 @@ export function createUtteranceDetector(options: DetectorOptions = DEFAULT_DETEC
       }
 
       if (voiced) lastVoice = now
-      if (now - startedAt >= options.maxMs) {
-        speaking = false
-        return 'end'
+      const long = now - startedAt >= options.maxMs
+      const atGap = now - startedAt >= options.softMs && now - lastVoice >= options.gapMs
+      if (long || atGap) {
+        // The next phrase starts here, counted as voiced so its own silence
+        // timer runs from the cut. If the speaker had in fact stopped, it
+        // ends as a cancel and nothing is sent.
+        startedAt = now
+        lastVoice = now
+        return 'split'
       }
       if (now - lastVoice >= options.silenceMs) {
         speaking = false

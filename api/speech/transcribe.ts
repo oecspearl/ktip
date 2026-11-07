@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { serviceClient } from '../_lib/venue-usage'
-import { billedSeconds, speechAllowanceVerdict, whisperText } from '../_lib/speech-allowance'
+import { afterResponse, serviceClient, type EdgeContext } from '../_lib/venue-usage'
+import { billedSeconds, speechAllowanceVerdict, tokenSubject, whisperText } from '../_lib/speech-allowance'
 
 export const config = { runtime: 'edge' }
 
@@ -36,7 +36,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const MAX_AUDIO_BYTES = 2 * 1024 * 1024
 const LANGS = new Set(['en', 'fr', 'es'])
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(request: Request, context?: EdgeContext): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
@@ -68,15 +68,26 @@ export default async function handler(request: Request): Promise<Response> {
   const caller = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   })
-  const {
-    data: { user },
-  } = await caller.auth.getUser()
+  // Verifying the token and reading the allowance are two round trips, and a
+  // caption waits on both. The allowance is looked up for the id the token
+  // claims while the token is verified, and counts only when the verified id
+  // is the same.
+  const claimed = tokenSubject(authHeader)
+  const [
+    {
+      data: { user },
+    },
+    lookup,
+  ] = await Promise.all([
+    caller.auth.getUser(),
+    claimed
+      ? db.rpc('speech_allowance', { p_user: claimed, p_room_id: roomId })
+      : Promise.resolve({ data: null, error: null }),
+  ])
   if (!user) return json({ error: 'Unauthorized' }, 401)
 
-  const { data: allowance, error } = await db.rpc('speech_allowance', {
-    p_user: user.id,
-    p_room_id: roomId,
-  })
+  const { data: allowance, error } =
+    user.id === claimed ? lookup : await db.rpc('speech_allowance', { p_user: user.id, p_room_id: roomId })
   if (error) {
     console.error('[speech/transcribe] allowance check failed', error)
     return json({ error: 'Could not check the speech allowance' }, 503)
@@ -115,15 +126,21 @@ export default async function handler(request: Request): Promise<Response> {
   const body = (await res.json().catch(() => ({}))) as { text?: unknown; segments?: unknown; duration?: unknown }
 
   // Recorded whether or not any words came back: Groq counted the audio either
-  // way. A failed write is logged, not returned, so the member still gets text.
-  const { error: usageError } = await db.rpc('record_venue_usage', {
-    p_room_id: roomId,
-    p_user_id: user.id,
-    p_kind: 'speech_seconds',
-    p_amount: billedSeconds(body.duration),
-    p_meta: { engine: 'whisper' },
-  })
-  if (usageError) console.error('[speech/transcribe] usage write failed', usageError)
+  // way. Written after the answer has gone, so the caption does not wait on
+  // it; a failed write is logged.
+  afterResponse(
+    context,
+    (async () => {
+      const { error: usageError } = await db.rpc('record_venue_usage', {
+        p_room_id: roomId,
+        p_user_id: user.id,
+        p_kind: 'speech_seconds',
+        p_amount: billedSeconds(body.duration),
+        p_meta: { engine: 'whisper' },
+      })
+      if (usageError) console.error('[speech/transcribe] usage write failed', usageError)
+    })()
+  )
 
   return json({ text: whisperText(body) })
 }

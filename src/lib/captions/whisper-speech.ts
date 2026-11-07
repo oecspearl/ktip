@@ -141,6 +141,10 @@ export function createWhisperRecognizer(options: WhisperRecognizerOptions): Spee
       const event = detector.feed(rms(frame), performance.now())
       if (event === 'start') startPhrase()
       else if (event === 'end') endPhrase(true)
+      else if (event === 'split') {
+        endPhrase(true)
+        startPhrase()
+      }
       else if (event === 'cancel') endPhrase(false)
     }, LEVEL_POLL_MS)
 

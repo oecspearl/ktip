@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ProviderRateLimited, getProvider } from '../../../api/_lib/translate-provider'
+import { ProviderRateLimited, getProvider, usableCaption } from '../../../api/_lib/translate-provider'
 
 /**
  * The OpenRouter adapter, and specifically the ways a model can answer badly.
@@ -342,5 +342,100 @@ describe('answers a model can garble', () => {
     mockFetch(completion({ translations: ['Hola', 'Adiós'], source_languages: ['Good mor', 'EN'] }))
     const out = await provider().translate(['Hello', 'Bye'], 'es', 'text', new AbortController().signal)
     expect(out).toEqual([{ text: 'Hola' }, { text: 'Adiós', detected: 'en' }])
+  })
+})
+
+describe('caption translation, every language in one call', () => {
+  const signal = () => new AbortController().signal
+  const rateLimited = () =>
+    ({
+      ok: false,
+      status: 429,
+      headers: new Headers({ 'retry-after': '30' }),
+      json: async () => ({}),
+      text: async () => '',
+    }) as unknown as Response
+
+  beforeEach(() => {
+    process.env.TRANSLATION_PROVIDER = 'groq'
+    process.env.GROQ_API_KEY = 'gsk-test'
+    delete process.env.GROQ_TRANSLATE_MODEL
+    delete process.env.GROQ_TRANSLATE_FALLBACK_MODEL
+  })
+
+  it('asks once for both languages, keyed by code, with the previous piece as context', async () => {
+    const fetchMock = mockFetch(completion({ fr: 'tester le prototype', es: 'probar el prototipo' }))
+    const out = await provider().translateCaption!(
+      { text: 'test the prototype', from: 'en', to: ['fr', 'es'], context: 'next week we want to' },
+      signal()
+    )
+    expect(out).toEqual({ fr: 'tester le prototype', es: 'probar el prototipo' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    const body = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body))
+    expect(body.response_format.json_schema.schema.required).toEqual(['fr', 'es'])
+    expect(JSON.parse(body.messages[1].content)).toEqual({
+      previous: 'next week we want to',
+      fragment: 'test the prototype',
+    })
+    expect(body.messages[0].content).toContain('never finish the sentence')
+  })
+
+  it('sends no "previous" when there is no context', async () => {
+    const fetchMock = mockFetch(completion({ fr: 'bonjour', es: 'hola' }))
+    await provider().translateCaption!({ text: 'hello', from: 'en', to: ['fr', 'es'] }, signal())
+    const body = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body))
+    expect(JSON.parse(body.messages[1].content)).toEqual({ fragment: 'hello' })
+  })
+
+  it('leaves out a language whose answer is unusable', async () => {
+    mockFetch(completion({ fr: 'en', es: '' }))
+    const out = await provider().translateCaption!({ text: 'hello there', from: 'en', to: ['fr', 'es'] }, signal())
+    expect(out).toEqual({})
+  })
+
+  it('falls back to the second model when the first is rate limited', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(rateLimited())
+      .mockResolvedValueOnce(completion({ en: 'good morning', es: 'buenos días' }))
+    vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const out = await provider().translateCaption!({ text: 'bonjour', from: 'fr', to: ['en', 'es'] }, signal())
+    expect(out).toEqual({ en: 'good morning', es: 'buenos días' })
+    const second = JSON.parse(String((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body))
+    expect(second.model).toBe('openai/gpt-oss-120b')
+  })
+
+  it('asks Azure for both languages in one call, ignoring the context', async () => {
+    process.env.TRANSLATION_PROVIDER = 'azure'
+    process.env.AZURE_TRANSLATOR_KEY = 'azure-test'
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      json: async () => [{ translations: [{ text: 'bonjour', to: 'fr' }, { text: 'hola', to: 'es' }] }],
+      text: async () => '',
+    } as unknown as Response)
+    const out = await provider().translateCaption!(
+      { text: 'hello', from: 'en', to: ['fr', 'es'], context: 'ignored' },
+      signal()
+    )
+    expect(out).toEqual({ fr: 'bonjour', es: 'hola' })
+    const [url] = fetchMock.mock.calls[0] as unknown as [string]
+    expect(url).toContain('&from=en&to=fr&to=es')
+  })
+})
+
+describe('usableCaption', () => {
+  it('takes a real translation, trimmed', () => {
+    expect(usableCaption('hello', ' bonjour ')).toBe('bonjour')
+  })
+
+  it('refuses empty, non-string, a bare language code, and a runaway answer', () => {
+    expect(usableCaption('hello', '')).toBeNull()
+    expect(usableCaption('hello', 42)).toBeNull()
+    expect(usableCaption('hello there', 'fr')).toBeNull()
+    expect(usableCaption('yes', 'x'.repeat(100))).toBeNull()
   })
 })

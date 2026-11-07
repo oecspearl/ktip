@@ -197,13 +197,19 @@ export function createSpeechRecognizer(options: SpeechRecognizerOptions): Speech
       heardAnything = true
       networkStrikes = 0
       // Only the results added since the last event — re-reading from zero
-      // re-emits the whole session on every syllable.
+      // re-emits the whole session on every syllable. Finals go out one by
+      // one. Chrome often splits its running guess into a settled part and a
+      // changing part, so the interim results are joined into the one text
+      // they are.
+      const interim: string[] = []
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
         const text = result[0]?.transcript?.trim()
         if (!text) continue
-        options.onSegment({ text, final: result.isFinal })
+        if (result.isFinal) options.onSegment({ text, final: true })
+        else interim.push(text)
       }
+      if (interim.length > 0) options.onSegment({ text: interim.join(' '), final: false })
     }
 
     instance.onerror = (event) => {

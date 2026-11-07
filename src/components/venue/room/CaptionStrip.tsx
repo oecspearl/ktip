@@ -8,6 +8,7 @@ import { cn } from '../../../lib/utils'
 import { useLiveCaptions } from '../../../hooks/useLiveCaptions'
 import { useContentLanguage } from '../../../i18n/useContentLanguage'
 import { UI_LANGS, isUiLang, type UiLang } from '../../../lib/i18n/protocol'
+import { captionRuns } from '../../../lib/captions/runs'
 
 const LANG_NAME: Record<UiLang, string> = { en: 'English', fr: 'Français', es: 'Español' }
 const PREF_KEY = 'ktip.captions.prefs'
@@ -148,11 +149,26 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
   }, [captions, voiceOn, readLang, meterRead])
 
   const hasLines = captions.length > 0 || interim.length > 0
+  const runs = captionRuns(captions)
+
+  // Keep the newest words in view, unless the reader has scrolled up to
+  // re-read something.
+  const scroller = useRef<HTMLDivElement>(null)
+  const pinned = useRef(true)
+  useEffect(() => {
+    const el = scroller.current
+    if (el && pinned.current) el.scrollTop = el.scrollHeight
+  }, [captions, interim])
 
   return (
     <div className="flex flex-col gap-1.5">
       {hasLines && (
         <div
+          ref={scroller}
+          onScroll={(e) => {
+            const el = e.currentTarget
+            pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24
+          }}
           className="max-h-32 overflow-y-auto rounded-xl bg-black/40 px-3 py-2"
           // Captions arrive continuously; a screen reader announcing every line
           // over the top of the speaker would be worse than silence. `polite`
@@ -160,27 +176,33 @@ export function CaptionStrip({ enabled }: { enabled: boolean }) {
           aria-live="polite"
           aria-atomic="false"
         >
-          {captions.map((caption) => (
-            <div key={caption.id} className="py-0.5">
-              <p className="text-sm leading-snug text-white/90">
-                {caption.name && (
-                  <span className="mr-1.5 font-semibold text-white/60">{caption.name}</span>
-                )}
-                {/* lang= on the text itself, so a screen reader pronounces a
-                    French caption with a French voice rather than reading it as
-                    mangled English. */}
-                <span lang={caption.translated ? readLang : caption.lang}>{caption.display}</span>
-                {caption.translated && (
-                  <Languages size={11} className="ml-1 inline-block text-white/30" aria-label={t`Translated`} />
-                )}
-              </p>
-              {prefs.original && caption.translated && (
-                <p lang={caption.lang} className="text-xs italic leading-snug text-white/45">
-                  {caption.text}
+          {runs.map((run) => {
+            const translated = run.pieces.some((piece) => piece.translated)
+            return (
+              <div key={run.key} className="py-0.5">
+                <p className="text-sm leading-snug text-white/90">
+                  {run.name && <span className="mr-1.5 font-semibold text-white/60">{run.name}</span>}
+                  {/* lang= on the text itself, so a screen reader pronounces a
+                      French caption with a French voice rather than reading it
+                      as mangled English. */}
+                  {run.pieces.map((piece, i) => (
+                    <span key={piece.id} lang={piece.translated ? readLang : piece.lang}>
+                      {i > 0 ? ' ' : ''}
+                      {piece.display}
+                    </span>
+                  ))}
+                  {translated && (
+                    <Languages size={11} className="ml-1 inline-block text-white/30" aria-label={t`Translated`} />
+                  )}
                 </p>
-              )}
-            </div>
-          ))}
+                {prefs.original && translated && (
+                  <p lang={run.pieces[0].lang} className="text-xs italic leading-snug text-white/45">
+                    {run.pieces.map((piece) => piece.text).join(' ')}
+                  </p>
+                )}
+              </div>
+            )
+          })}
           {interim && (
             // The speaker's own in-progress words, on their screen only. Dimmed
             // because it is not final and will be rewritten as they keep talking.

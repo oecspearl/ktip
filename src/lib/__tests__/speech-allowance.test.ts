@@ -6,6 +6,7 @@ import {
   billedSeconds,
   limitFromEnv,
   speechAllowanceVerdict,
+  tokenSubject,
   whisperText,
 } from '../../../api/_lib/speech-allowance'
 
@@ -91,5 +92,22 @@ describe('whisperText', () => {
   it('falls back to the plain text without segments', () => {
     expect(whisperText({ text: ' Bonjour ' })).toBe('Bonjour')
     expect(whisperText({})).toBe('')
+  })
+})
+
+describe('tokenSubject', () => {
+  const token = (claims: unknown) =>
+    `Bearer x.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.sig`
+  const id = '0b7a6f2e-1c3d-4e5f-8a9b-0c1d2e3f4a5b'
+
+  it('reads the sub claim without verifying it', () => {
+    expect(tokenSubject(token({ sub: id }))).toBe(id)
+  })
+
+  it('is null for anything that is not a token with a UUID subject', () => {
+    expect(tokenSubject(null)).toBeNull()
+    expect(tokenSubject('Bearer nonsense')).toBeNull()
+    expect(tokenSubject(token({ sub: 'not-a-uuid' }))).toBeNull()
+    expect(tokenSubject('Bearer x.%%%.sig')).toBeNull()
   })
 })

@@ -68,3 +68,24 @@ export function whisperText(body: { text?: unknown; segments?: unknown }): strin
     .join(' ')
     .trim()
 }
+
+/**
+ * The `sub` claim of a bearer token, unverified, or null.
+ *
+ * Only for starting the allowance lookup while the token is being verified
+ * in parallel. The answer is used only once verification returns the same id,
+ * so a forged token reads nothing it can use.
+ */
+export function tokenSubject(authHeader: string | null): string | null {
+  const token = authHeader?.replace(/^Bearer\s+/i, '').trim()
+  const payload = token?.split('.')[1]
+  if (!payload) return null
+  try {
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4)
+    const claims = JSON.parse(atob(padded)) as { sub?: unknown }
+    return typeof claims.sub === 'string' && /^[0-9a-f-]{36}$/i.test(claims.sub) ? claims.sub : null
+  } catch {
+    return null
+  }
+}

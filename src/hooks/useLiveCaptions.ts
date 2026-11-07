@@ -2,11 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { acquireMic } from '@a11y-kit'
 import { useDataChannel, useLocalParticipant, useRoomContext } from '@livekit/components-react'
 import { useContentLanguage } from '../i18n/useContentLanguage'
-import { request } from '../lib/i18n/batcher'
 import { segmentSeconds } from '../lib/speech-usage'
 import { useSpeechUsage } from './useSpeechUsage'
 import { shouldTranslate } from '../lib/i18n/should-translate'
-import { UI_LANGS, isUiLang, type UiLang } from '../lib/i18n/protocol'
+import { isUiLang, type UiLang } from '../lib/i18n/protocol'
 import {
   canCaptionWithWhisper,
   captionEngine,
@@ -16,6 +15,8 @@ import {
   type SpeechSegment,
 } from '../lib/captions/speech'
 import { createWhisperRecognizer } from '../lib/captions/whisper-speech'
+import { createCaptionChunker } from '../lib/captions/chunker'
+import { translateCaption } from '../lib/captions/caption-translate'
 
 /**
  * Live translated captions for a venue room.
@@ -34,23 +35,31 @@ import { createWhisperRecognizer } from '../lib/captions/whisper-speech'
  *     authorised by the same signed token. One fewer moving part, and captions
  *     cannot outlive the call they belong to.
  *
- * Two messages per utterance, not one. The original goes out the instant it is
- * final, so everyone sees *something* in about a second; the translations follow
- * when they land and swap in place. Waiting to send until the translation
- * returned would make every caption arrive late for everyone, including the
- * people who did not need it translated at all.
+ * Two messages per piece, not one. The original goes out the instant it is
+ * settled, so everyone sees *something* in about a second; the translations
+ * follow when they land and swap in place. Waiting to send until the
+ * translation returned would make every caption arrive late for everyone,
+ * including the people who did not need it translated at all.
  *
- * Nothing here is stored. Captions are `store: false` through the translation
- * pipeline — spoken words in a room are exactly the kind of text migration 097's
- * comment says must not outlive the request — and the buffer below is a ring
- * that forgets.
+ * A piece is a few words, not a sentence: the browser engine sends words once
+ * they stop changing (captions/chunker.ts), and Whisper cuts a phrase every
+ * few seconds (whisper-speech-core.ts). Each piece is translated with the one
+ * before it as context, in one request for every language
+ * (api/captions/translate.ts).
+ *
+ * Nothing here is stored. Spoken words in a room are exactly the kind of text
+ * migration 097's comment says must not outlive the request: the caption route
+ * never touches the shared cache, and the buffer below is a ring that forgets.
  */
 
 const TOPIC = 'ktip-captions'
-const MAX_CAPTIONS = 8
+// Pieces of a few words now, not whole sentences, so more of them are kept.
+const MAX_CAPTIONS = 14
 const CAPTION_TTL_MS = 45_000
 /** Long enough to be a sentence worth translating, short enough to still be live. */
 const MIN_CAPTION_CHARS = 2
+/** A piece this recent is the same train of thought, and goes along as context. */
+const CONTEXT_MS = 10_000
 
 interface CaptionWire {
   v: 1
@@ -179,13 +188,20 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     'caption_speech_seconds'
   )
   const segmentStart = useRef<number | null>(null)
+  // The speaker's last piece, sent along with the next one so a sentence cut
+  // in two still translates as one.
+  const lastPiece = useRef<{ text: string; at: number } | null>(null)
 
   const onFinal = useCallback((text: string) => {
     const spoken = langRef.current
     const id = `${Math.trunc(performance.now())}-${Math.trunc(Math.random() * 1e6)}`
+    const now = Date.now()
+    const previous = lastPiece.current
+    const context = previous && now - previous.at < CONTEXT_MS ? previous.text : undefined
+    lastPiece.current = { text, at: now }
 
-    // Out immediately, untranslated. Everyone sees the sentence about a second
-    // after it was said; the people who share the speaker's language are done.
+    // Out immediately, untranslated. Everyone sees the words about a second
+    // after they were said; the people who share the speaker's language are done.
     publishRef.current({ v: 1, id, text, lang: spoken, name: nameRef.current })
     // The speaker also sees their own line, because a data message does not
     // echo back to its sender.
@@ -193,31 +209,17 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
 
     if (!shouldTranslate(text)) return
 
-    const targets = UI_LANGS.filter((target) => target !== spoken)
-    const roomId = roomIdRef.current
-    const meter = roomId ? { surface: 'captions' as const, roomId } : undefined
-    void Promise.all(
-      targets.map(async (target) => {
-        const translated = await request(text, 'text', target, {
-          from: spoken,
-          // Spoken words leave no trace in the shared cache. See migration 097.
-          store: false,
-          meter,
-        })
-        return [target, translated] as const
-      })
-    ).then((pairs) => {
-      const variants: Partial<Record<UiLang, string>> = {}
-      for (const [target, translated] of pairs) {
-        // An unchanged string means the translation failed or was declined.
-        // Sending it would tell every reader "this IS the French", which is a
-        // lie; leaving it out lets them fall back to the original.
-        if (translated && translated !== text) variants[target] = translated
+    // One request for every other language, and nothing is stored: spoken
+    // words leave no trace in the shared cache (migration 097).
+    void translateCaption({ text, from: spoken, context, roomId: roomIdRef.current || undefined }).then(
+      (variants) => {
+        // A language that did not come back is left out, so its readers keep
+        // the original rather than being told it is the translation.
+        if (Object.keys(variants).length === 0) return
+        publishRef.current({ v: 1, id, variants })
+        merge({ v: 1, id, variants })
       }
-      if (Object.keys(variants).length === 0) return
-      publishRef.current({ v: 1, id, variants })
-      merge({ v: 1, id, variants })
-    })
+    )
   }, [merge])
 
   const recognizerRef = useRef<SpeechRecognizer | null>(null)
@@ -225,17 +227,29 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   useEffect(() => {
     if (!captioning || !enabled || !engine) return
 
+    // Browser recognisers wait for a pause to call anything final, so settled
+    // words go out in pieces while the speaker is still talking. Whisper
+    // already sends a phrase every few seconds (whisper-speech-core.ts).
+    const chunker = engine === 'browser' ? createCaptionChunker() : null
+
     const onSegment = ({ text, final }: SpeechSegment) => {
       if (!final) {
         if (segmentStart.current === null) segmentStart.current = Date.now()
-        setInterim(text)
+        if (chunker) {
+          const piece = chunker.interim(text, Date.now())
+          if (piece && piece.length >= MIN_CAPTION_CHARS) onFinal(piece)
+          setInterim(chunker.unsent(text))
+        } else {
+          setInterim(text)
+        }
         return
       }
       // Browser captions meter speech time here; Whisper's server meters its own.
       if (engine === 'browser') meterSpeech(segmentSeconds(segmentStart.current, Date.now()))
       segmentStart.current = null
       setInterim('')
-      if (text.length >= MIN_CAPTION_CHARS) onFinal(text)
+      const rest = chunker ? chunker.final(text) : text
+      if (rest.length >= MIN_CAPTION_CHARS) onFinal(rest)
     }
 
     const roomName = roomIdRef.current

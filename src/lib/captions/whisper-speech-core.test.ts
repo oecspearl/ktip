@@ -17,7 +17,7 @@ describe('captionEngine', () => {
 })
 
 describe('createUtteranceDetector', () => {
-  const options = { threshold: 0.02, silenceMs: 900, minMs: 600, maxMs: 12_000 }
+  const options = { threshold: 0.02, silenceMs: 900, minMs: 600, softMs: 4_500, gapMs: 250, maxMs: 12_000 }
   const run = (frames: Array<[number, number]>) => {
     const detector = createUtteranceDetector(options)
     return frames.map(([level, at]) => detector.feed(level, at)).filter(Boolean)
@@ -34,10 +34,34 @@ describe('createUtteranceDetector', () => {
     expect(run([[0.1, 0], [0.001, 100], [0.001, 1_100]])).toEqual(['start', 'cancel'])
   })
 
-  it('cuts a monologue so captions keep coming', () => {
+  it('cuts a monologue with no gaps at the hard limit, and keeps recording', () => {
     const frames: Array<[number, number]> = []
     for (let t = 0; t <= 13_000; t += 500) frames.push([0.1, t])
-    expect(run(frames).slice(0, 2)).toEqual(['start', 'end'])
+    expect(run(frames).slice(0, 2)).toEqual(['start', 'split'])
+  })
+
+  it('after a few seconds, cuts at the next short gap between words', () => {
+    const frames: Array<[number, number]> = []
+    // Voice for 5 s, then a 300 ms gap between words, then more voice.
+    for (let t = 0; t <= 5_000; t += 50) frames.push([0.1, t])
+    for (let t = 5_050; t <= 5_350; t += 50) frames.push([0.001, t])
+    for (let t = 5_400; t <= 6_000; t += 50) frames.push([0.1, t])
+    expect(run(frames)).toEqual(['start', 'split'])
+  })
+
+  it('does not cut at a short gap early in a phrase', () => {
+    const frames: Array<[number, number]> = []
+    for (let t = 0; t <= 2_000; t += 50) frames.push([0.1, t])
+    for (let t = 2_050; t <= 2_350; t += 50) frames.push([0.001, t])
+    for (let t = 2_400; t <= 3_000; t += 50) frames.push([0.1, t])
+    expect(run(frames)).toEqual(['start'])
+  })
+
+  it('a cut right before the speaker stops sends nothing more', () => {
+    const frames: Array<[number, number]> = []
+    for (let t = 0; t <= 5_000; t += 50) frames.push([0.1, t])
+    for (let t = 5_050; t <= 7_000; t += 50) frames.push([0.001, t])
+    expect(run(frames)).toEqual(['start', 'split', 'cancel'])
   })
 
   it('learns the room noise, so a steady hum is not a phrase', () => {
