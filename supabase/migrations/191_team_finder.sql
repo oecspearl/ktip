@@ -2,7 +2,7 @@
 --
 -- 188 made teams and said "applications, invites and openings are a later
 -- migration". This is that migration. Two tables, and the functions that are
-the only way to write them:
+-- the only way to write them:
 --
 --   1. event_team_openings  a gap a team wants filled ("UI designer"), with
 --                           optional skills. Captains post and close them.
