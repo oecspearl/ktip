@@ -29,10 +29,20 @@ export interface CallLangState {
   speaks: UiLang
   /** The language they read and hear everyone else in. */
   reads: UiLang
-  /** True while they want subtitles, translated or not. */
+  /**
+   * True while they want any subtitles at all. Kept for tabs opened before
+   * `foreign` existed: they only read this flag.
+   */
   subs: boolean
   /** They have paused their own captions for everyone else. */
   paused: boolean
+  /**
+   * What they want from a speaker in another language. Absent from older
+   * clients, which are then followed on `subs` alone.
+   */
+  foreign?: ForeignMode
+  /** They want subtitles for speakers of their own language too (read-along). */
+  along?: boolean
   /**
    * What their recogniser is doing for the people following them. Absent from
    * older clients and from anyone nobody follows. It lets a listener's empty
@@ -116,14 +126,30 @@ export function subtitleNotice(people: readonly NoticePerson[], band: boolean): 
   return null
 }
 
-/** A listener's answer to "follow along in your language?". */
-export type FollowChoice = 'ask' | 'captions' | 'voice' | 'off'
+/**
+ * What a listener gets from someone speaking another language.
+ *
+ *   voice      their words translated, as subtitles AND read aloud, with their
+ *              own voice muted. The default (2026-11-10): Delon's rule is that
+ *              a listener in another language never hears the original unless
+ *              they ask for it.
+ *   subtitles  translated subtitles over their own voice, like a film.
+ *   original   nothing: their own voice, no subtitles.
+ */
+export type ForeignMode = 'voice' | 'subtitles' | 'original'
 
-export const isFollowChoice = (value: unknown): value is FollowChoice =>
-  value === 'ask' || value === 'captions' || value === 'voice' || value === 'off'
+export const DEFAULT_FOREIGN: ForeignMode = 'voice'
 
-/** Subtitles are on for either "yes" answer. */
-export const wantsSubtitles = (choice: FollowChoice): boolean => choice === 'captions' || choice === 'voice'
+export const isForeignMode = (value: unknown): value is ForeignMode =>
+  value === 'voice' || value === 'subtitles' || value === 'original'
+
+/** Whether a listener wants any subtitles at all: the legacy `subs` flag. */
+export const wantsAnySubtitles = (foreign: ForeignMode, along: boolean): boolean => along || foreign !== 'original'
+
+/** Whether a subtitle line in `lang` is shown to a listener who reads `reads`. */
+export function showsLine(lang: UiLang, reads: UiLang, foreign: ForeignMode, along: boolean): boolean {
+  return lang === reads ? along : foreign !== 'original'
+}
 
 interface LangWire extends CallLangState {
   v: 1
@@ -143,6 +169,11 @@ export function decodeLangState(payload: Uint8Array): CallLangState | null {
     // Still v1: an older client ignores the field, and a status it does not
     // know is dropped here rather than failing the whole message.
     if (isCaptionStatus(raw.cap)) state.cap = raw.cap
+    // Both or neither: `along` means nothing without the mode it sits beside.
+    if (isForeignMode(raw.foreign)) {
+      state.foreign = raw.foreign
+      state.along = raw.along === true
+    }
     return state
   } catch {
     return null
@@ -158,13 +189,29 @@ export interface Audience {
   targets: UiLang[]
 }
 
+/** Whether this listener wants my words translated into their language. */
+function wantsTranslation(person: CallLangState, speaks: UiLang): boolean {
+  if (person.reads === speaks) return false
+  return person.foreign ? person.foreign !== 'original' : person.subs
+}
+
+/**
+ * Whether this listener needs my recogniser running. Someone in another
+ * language follows me by default; someone in mine only when they asked to read
+ * along. An older client is followed on its one flag.
+ */
+export function followsSpeaker(person: CallLangState, speaks: UiLang): boolean {
+  if (!person.foreign) return person.subs
+  return person.along === true || wantsTranslation(person, speaks)
+}
+
 /**
  * Who is following me.
  *
- * Anyone with subtitles on counts, including people who read my own language:
- * they want to read along, so my recogniser has to run for them too. Only the
- * ones who read another language add a translation target, and none do when
- * the room's organiser has switched live translation off.
+ * Everyone who needs my words counts, translated or not. Only those who read
+ * another language and want it translated add a translation target, and none
+ * do when the room's organiser has switched live translation off: they still
+ * get my words as spoken.
  */
 export function audienceFor(
   others: Iterable<CallLangState>,
@@ -172,35 +219,123 @@ export function audienceFor(
   translationAllowed: boolean
 ): Audience {
   const byLang: Partial<Record<UiLang, number>> = {}
+  const targets = new Set<UiLang>()
   let total = 0
   for (const person of others) {
-    if (!person.subs) continue
+    if (!followsSpeaker(person, speaks)) continue
     total += 1
     byLang[person.reads] = (byLang[person.reads] ?? 0) + 1
+    if (translationAllowed && wantsTranslation(person, speaks)) targets.add(person.reads)
   }
-  const targets = translationAllowed
-    ? (Object.keys(byLang) as UiLang[]).filter((lang) => lang !== speaks).sort()
-    : []
-  return { total, byLang, targets }
+  return { total, byLang, targets: [...targets].sort() }
 }
 
 /**
- * Whether to offer a listener translation for someone who is talking.
- *
- * Only when that person speaks another language, the listener has not answered
- * yet, and the room allows translation. Someone who speaks the listener's own
- * language is never a reason to interrupt them.
+ * Whether to tell a listener, once, that someone talking is being translated
+ * for them: only when that person speaks another language and translation is
+ * actually happening. Nothing to say about my own language.
  */
-export function shouldOffer({
-  choice,
+export function shouldNotice({
+  foreign,
   myLang,
   speakerLang,
   translationAllowed,
 }: {
-  choice: FollowChoice
+  foreign: ForeignMode
   myLang: UiLang
   speakerLang: UiLang | null | undefined
   translationAllowed: boolean
 }): boolean {
-  return translationAllowed && choice === 'ask' && !!speakerLang && speakerLang !== myLang
+  return translationAllowed && foreign !== 'original' && !!speakerLang && speakerLang !== myLang
+}
+
+/** Why a speaker's own voice is at the volume it is, for ?calldebug. */
+export type MixReason =
+  | 'translated'
+  | 'same-language'
+  | 'unknown-language'
+  | 'wants-original'
+  | 'subtitles-only'
+  | 'room-off'
+  | 'not-transcribed'
+  | 'no-captions'
+  | 'untranslated'
+
+/**
+ * How loud a speaker's own voice plays for me: 0 when only their translation
+ * should reach me, 1 otherwise.
+ *
+ * Muted only when every link of the chain is working: they speak another
+ * language, I chose the translated voice, the room allows it, their browser
+ * says it is transcribing them (`cap: 'live'`), and their lines are arriving
+ * translated. Any broken link gives their own voice back, so a listener is
+ * never left in silence because translation failed somewhere they cannot see.
+ */
+export function originalVolume({
+  foreign,
+  translationAllowed,
+  reads,
+  theirSpeaks,
+  theirCap,
+  untranslated,
+  noCaptions = false,
+}: {
+  foreign: ForeignMode
+  translationAllowed: boolean
+  reads: UiLang
+  theirSpeaks: UiLang | undefined
+  theirCap: CaptionStatus | undefined
+  /** Their newest line has waited too long for a translation (`awaitsTranslation`). */
+  untranslated: boolean
+  /** They have been talking a while and no line has come from them (`talkingWithoutCaptions`). */
+  noCaptions?: boolean
+}): { volume: 0 | 1; reason: MixReason } {
+  if (!theirSpeaks) return { volume: 1, reason: 'unknown-language' }
+  if (theirSpeaks === reads) return { volume: 1, reason: 'same-language' }
+  if (foreign === 'original') return { volume: 1, reason: 'wants-original' }
+  if (foreign === 'subtitles') return { volume: 1, reason: 'subtitles-only' }
+  if (!translationAllowed) return { volume: 1, reason: 'room-off' }
+  if (theirCap !== 'live') return { volume: 1, reason: 'not-transcribed' }
+  if (noCaptions) return { volume: 1, reason: 'no-captions' }
+  if (untranslated) return { volume: 1, reason: 'untranslated' }
+  return { volume: 0, reason: 'translated' }
+}
+
+/** How long a line may wait for its translation before the speaker's own voice comes back. */
+export const UNTRANSLATED_GRACE_MS = 5_000
+
+/**
+ * Whether a speaker's newest line has gone unanswered by the translator for
+ * longer than the grace period: the translate route is failing, or the speaker
+ * does not know I want their words in my language. A line the speaker chose
+ * not to translate (a number, a name) does not count.
+ */
+export function awaitsTranslation(
+  newest: { lang: UiLang; at: number; translated: boolean; plain: boolean } | undefined,
+  reads: UiLang,
+  now: number
+): boolean {
+  if (!newest || newest.lang === reads || newest.translated || newest.plain) return false
+  return now - newest.at > UNTRANSLATED_GRACE_MS
+}
+
+/**
+ * How long someone may talk with no line arriving from them before their own
+ * voice comes back. Longer than a translation's grace: Whisper sends a phrase
+ * only every few seconds.
+ */
+export const NO_CAPTION_GRACE_MS = 8_000
+
+/**
+ * Whether a speaker whose browser says it is transcribing (`cap: 'live'`) has
+ * been talking for longer than the grace period with nothing to show for it.
+ * A recogniser can report running and hear nothing (Edge, 2026-11-10); without
+ * this the listener would sit in silence with the original muted.
+ *
+ * `waitingSince` is when they started talking after their last line arrived.
+ */
+export function talkingWithoutCaptions(waitingSince: number | undefined, newestAt: number | undefined, now: number): boolean {
+  if (waitingSince === undefined) return false
+  if (newestAt !== undefined && newestAt >= waitingSince) return false
+  return now - waitingSince > NO_CAPTION_GRACE_MS
 }

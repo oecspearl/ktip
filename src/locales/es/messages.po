@@ -801,6 +801,10 @@ msgstr "Seguimiento de sus solicitudes de financiamiento"
 msgid "What you give us directly"
 msgstr "Lo que usted nos brinda directamente"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "No translation."
+msgstr "Sin traducción."
+
 #: src/lib/member-kpis.ts
 msgid "Forum posts"
 msgstr "Publicaciones en foros"
@@ -845,10 +849,6 @@ msgstr "La consola de administración"
 #: src/components/settings/VerificationTab.tsx
 msgid "Drop files to add"
 msgstr "Suelte archivos para añadirlos"
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Keep the original"
-msgstr "Mantener el original"
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Skills"
@@ -4566,6 +4566,7 @@ msgstr "El suyo"
 msgid "New Event"
 msgstr "Nuevo evento"
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Turn translation off"
 msgstr "Desactivar la traducción"
@@ -6587,6 +6588,10 @@ msgstr "Seguridad"
 msgid "Frequently asked questions"
 msgstr "Preguntas frecuentes"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Hear the original"
+msgstr "Oír el original"
+
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "What you're building, in a line"
 msgstr "Qué está construyendo, en una línea"
@@ -8239,6 +8244,10 @@ msgstr "Página no encontrada"
 msgid "Demo Day"
 msgstr "Día de demostración"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "With subtitles. Their own voice is muted for you."
+msgstr "Con subtítulos. Su propia voz queda silenciada para ti."
+
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Upload the call for proposals, annexes or budget templates."
 msgstr "Suba la convocatoria de propuestas, los anexos o las plantillas de presupuesto."
@@ -8861,6 +8870,10 @@ msgstr "Mis antiguos borradores de código no aparecen en mis fragmentos"
 msgid "Close this room"
 msgstr "Cerrar esta sala"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your browser is blocking the microphone. Allow it from the icon at the left of the address bar, then press the microphone button again."
+msgstr "Tu navegador está bloqueando el micrófono. Permítelo desde el icono a la izquierda de la barra de direcciones y vuelve a pulsar el botón del micrófono."
+
 #: src/components/profile/PortraitStudio.tsx
 msgid "Upload a photo to cut out first."
 msgstr ""
@@ -9405,10 +9418,6 @@ msgid "Search by name, then stack any of the filters beside it:\n"
 msgstr "Busque por nombre y luego combine cualquiera de los filtros junto a él:\n"
 ""
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Follow along in {mine}? Read what they say as subtitles, and hear it read aloud if you like."
-msgstr "¿Seguir en {mine}? Lee lo que dice en subtítulos y, si quieres, escúchalo en voz alta."
-
 #: src/lib/permissions.ts
 msgid "Civil-society organisation delivering programmes. Runs projects and events, applies for funding, contributes knowledge."
 msgstr ""
@@ -9891,6 +9900,10 @@ msgstr "Modificar los puntos o los criterios afecta a las futuras concesiones, n
 #: src/i18n/harvested.ts
 msgid "Session token"
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Another app is using your microphone. Close it, then press the microphone button again."
+msgstr "Otra aplicación está usando tu micrófono. Ciérrala y vuelve a pulsar el botón del micrófono."
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Replace file"
@@ -13136,6 +13149,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Apply for a grant"
 msgstr "Solicitar una subvención"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "When someone speaks another language"
+msgstr "Cuando alguien habla otro idioma"
 
 #: src/i18n/harvested.ts
 msgid "Notice privacy"
@@ -17320,6 +17337,10 @@ msgstr ""
 msgid "You have not submitted anything yet"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Their own voice"
+msgstr "Su propia voz"
+
 #: src/components/association/AssociationReviewQueue.tsx
 msgid "Registry number confirmed"
 msgstr ""
@@ -17382,6 +17403,10 @@ msgstr ""
 #: src/components/layout/Navbar.tsx
 msgid "Events you organise or registered for"
 msgstr "Eventos que organizas o en los que te has inscrito"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "When someone speaks your language"
+msgstr "Cuando alguien habla tu idioma"
 
 #: src/i18n/harvested.ts
 msgid "Guides, articles and partner tools"
@@ -18344,6 +18369,10 @@ msgstr "Su mensaje está copiado. En {name}, haga clic en el cuadro de publicaci
 msgid "Two-step verification is on, using your authenticator app."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "In {mine}, over their own voice."
+msgstr "En {mine}, sobre su propia voz."
+
 #: src/i18n/harvested.ts
 msgid "The text of the document you uploaded"
 msgstr ""
@@ -18760,6 +18789,10 @@ msgstr ""
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Loading project..."
 msgstr "Cargando proyecto..."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "You hear them in {mine}, with subtitles. Their own voice is muted for you."
+msgstr "Oyes lo que dice en {mine}, con subtítulos. Su propia voz queda silenciada para ti."
 
 #: src/components/notes/StickyNote.tsx
 msgid "Move note"
@@ -19287,6 +19320,10 @@ msgstr "Sala vacía"
 msgid "Team logo"
 msgstr "Logotipo del equipo"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles for {mine} too"
+msgstr "Subtítulos en {mine} también"
+
 #: src/i18n/harvested.ts
 msgid "What reviewers are bound by"
 msgstr ""
@@ -19788,10 +19825,6 @@ msgstr ""
 msgid "A new or emerging business developing its products, services, and business operations."
 msgstr "Empresa nueva o emergente que desarrolla sus productos, servicios y operaciones comerciales."
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Hear translations"
-msgstr "Escuchar traducciones"
-
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "People you mentor"
 msgstr "Personas a las que asesora"
@@ -19828,10 +19861,6 @@ msgstr "Columna principal"
 #: src/i18n/harvested.ts
 msgid "Optional, first-party, and nothing is written unless you allow it."
 msgstr ""
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "The speaker’s own voice drops while it plays"
-msgstr "La voz de quien habla baja mientras suena"
 
 #: src/hooks/useVenueRoomToken.ts
 msgid "Your sign-in has ended. Sign out and back in to join the call."
@@ -20201,14 +20230,6 @@ msgstr "conexiones"
 msgid "Click Save. You keep earning points and can still see your own rank — nobody else can."
 msgstr "Haga clic en Guardar. Usted sigue obteniendo puntos y puede seguir viendo su propia posición — nadie más puede verla."
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Subtitles and voice"
-msgstr "Subtítulos y voz"
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "On the video, in {mine}"
-msgstr "En el video, en {mine}"
-
 #: src/lib/delete-guard.ts
 msgid "The project page and everything on it"
 msgstr "La página del proyecto y todo su contenido"
@@ -20358,10 +20379,6 @@ msgstr "Francés"
 #: src/i18n/harvested.ts
 msgid "Name the board for the subject, not for a single question — threads go inside it."
 msgstr ""
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "This covers everyone who speaks another language. Change it with the language button under the call."
-msgstr "Se aplica a todas las personas que hablan otro idioma. Cámbialo con el botón de idioma debajo de la llamada."
 
 #: src/components/legal/AgreementGate.tsx
 msgid "Two documents cover everything you publish on KTIP. They open each time you start or edit something here."
@@ -22104,6 +22121,10 @@ msgstr ""
 msgid "That code can no longer be cancelled."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your microphone didn't start. Press the microphone button to try again."
+msgstr "Tu micrófono no se inició. Pulsa el botón del micrófono para intentarlo de nuevo."
+
 #: src/lib/venue-room-sections.ts
 msgid "The event page’s FAQ, repeated here. Hidden if there is none."
 msgstr "Las preguntas frecuentes de la página del evento, repetidas aquí. Se ocultan si no hay ninguna."
@@ -23121,6 +23142,7 @@ msgstr "Preparando el edificio…"
 msgid "Required?"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Turn translation on"
 msgstr "Activar la traducción"
@@ -26648,6 +26670,10 @@ msgstr "Archivo añadido"
 msgid "Your declared date of birth is treated as restricted data: it is stored in its own table behind its own access rules, it is never copied onto your public profile, and ordinary application queries cannot read it back. Everything downstream consumes a derived yes-or-no answer to \"is this account a minor?\" rather than the date itself."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "No microphone found. Plug one in, then press the microphone button again."
+msgstr "No se encontró ningún micrófono. Conecta uno y vuelve a pulsar el botón del micrófono."
+
 #: src/i18n/harvested.ts
 msgid "Promote the platform"
 msgstr ""
@@ -28585,6 +28611,10 @@ msgstr "Eliminar mensaje"
 #: src/i18n/harvested.ts
 msgid "Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count."
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles in {mine} show what they say."
+msgstr "Los subtítulos en {mine} muestran lo que dice."
 
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Why you think they would fit"
@@ -31808,6 +31838,10 @@ msgstr ""
 #: src/lib/share/targets.ts
 msgid "Online and in {place}."
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "OK"
+msgstr "OK"
 
 #: src/i18n/harvested.ts
 msgid "How do I control what I get notified about?"

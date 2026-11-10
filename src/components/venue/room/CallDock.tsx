@@ -139,6 +139,8 @@ export function CallDock({
   )
 }
 
+const ignoreDeviceError = () => {}
+
 /** A microphone or camera button, with its device menu beside it. */
 function DeviceToggle({
   source,
@@ -156,7 +158,10 @@ function DeviceToggle({
   labelOff: string
 }) {
   const { t } = useLingui()
-  const { toggle, enabled, pending } = useTrackToggle({ source })
+  // The failure itself reaches the call as RoomEvent.MediaDevicesError, which
+  // CallCaptionsProvider turns into a reason under the dock. Handling it here
+  // too keeps a refused microphone from becoming an unhandled rejection.
+  const { toggle, enabled, pending } = useTrackToggle({ source, onDeviceError: ignoreDeviceError })
   const label = enabled ? labelOn : labelOff
   const menuLabel = kind === 'audioinput' ? t`Choose a microphone` : t`Choose a camera`
   return (

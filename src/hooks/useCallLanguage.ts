@@ -9,27 +9,34 @@ import { ConnectionState, RoomEvent, type RemoteParticipant } from 'livekit-clie
 import { useLanguage } from '../i18n/LanguageContext'
 import { type UiLang } from '../lib/i18n/protocol'
 import {
+  DEFAULT_FOREIGN,
   LANG_TOPIC,
   decodeLangState,
   encodeLangState,
-  isFollowChoice,
-  shouldOffer,
-  wantsSubtitles,
+  isForeignMode,
+  shouldNotice,
+  wantsAnySubtitles,
   type CallLangState,
   type CaptionStatus,
-  type FollowChoice,
+  type ForeignMode,
 } from '../lib/captions/followers'
 
 /**
- * What I speak and read in a call, what everyone else does, and whether to ask
- * me to follow someone in my own language.
+ * What I speak and read in a call, what everyone else does, and whether to
+ * tell me someone is being translated for me.
  *
  * Both come from the site's language (the switch in the top bar), 2026-11-10.
  * A speaker sets nothing: they are subtitled in the language the site is in,
  * and can only pause it or, rarely, say they are speaking another one for
- * this call. A listener reads in the site's language, and when someone speaks
- * another one they choose: keep the original, or subtitles (and a voice) in
- * theirs. Changing the site's language changes the call's at once.
+ * this call. A listener reads in the site's language, and someone speaking
+ * another one reaches them translated, as subtitles and a voice, unless they
+ * chose otherwise (`foreign`). Changing the site's language changes the
+ * call's at once.
+ *
+ * Translation used to wait for the listener to answer "Follow along in
+ * French?". Until they did, nothing was translated and they heard the
+ * original, which in a two-device test looked like translation not working at
+ * all. Now it is on from the start, and the listener is told once.
  *
  * Each member tells the call their language state over a reliable data
  * message (captions/followers.ts says why not participant attributes). A
@@ -40,16 +47,20 @@ import {
  * Must be rendered inside <LiveKitRoom>.
  */
 
-// v2 when the language moved to the site's own (2026-11-10): choices made
-// under the old picker are dropped, so everyone is offered the choice afresh.
-const PREF_KEY = 'ktip.call.language.v2'
+// v3 when translation became the default (2026-11-10). A v2 "keep the
+// original", often tapped before anyone knew what it did, is not carried over:
+// everyone starts from the new default.
+const PREF_KEY = 'ktip.call.language.v3'
+const V2_KEY = 'ktip.call.language.v2'
 /** How often my language state is re-sent to the call. */
 const REANNOUNCE_MS = 10_000
-/** The caption strip's old preferences, read once so nobody loses a choice they made. */
-const LEGACY_KEY = 'ktip.captions.prefs'
+/** How long the "is being translated for you" notice stays up. */
+const NOTICE_MS = 9_000
 
 interface Prefs {
-  choice?: FollowChoice
+  foreign?: ForeignMode
+  /** Subtitles for speakers of my own language too. */
+  along?: boolean
   /** Show the original under each translated line. */
   original?: boolean
 }
@@ -58,17 +69,21 @@ function readPrefs(): Prefs {
   try {
     const raw = JSON.parse(localStorage.getItem(PREF_KEY) || 'null')
     if (raw && typeof raw === 'object') {
-      // A stored `lang` from before the site's language took over is ignored.
       return {
-        choice: isFollowChoice(raw.choice) ? raw.choice : undefined,
+        foreign: isForeignMode(raw.foreign) ? raw.foreign : undefined,
+        along: raw.along === true,
         original: raw.original === true,
       }
     }
-    const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '{}')
-    return {
-      choice: legacy.voice === true ? 'voice' : undefined,
-      original: legacy.original === true,
+    // v2 answers that still mean something: subtitles-only keeps reading
+    // along, as "Subtitles" did then. "Keep the original" and unanswered start
+    // from the default.
+    const v2 = JSON.parse(localStorage.getItem(V2_KEY) || 'null')
+    if (v2 && typeof v2 === 'object') {
+      if (v2.choice === 'captions') return { foreign: 'subtitles', along: true, original: v2.original === true }
+      return { original: v2.original === true }
     }
+    return {}
   } catch {
     return {}
   }
@@ -82,8 +97,8 @@ function writePrefs(prefs: Prefs) {
   }
 }
 
-/** Someone talking in another language, whom I have not yet been asked about. */
-export interface OfferTarget {
+/** Someone talking in another language, being translated for me. */
+export interface NoticeTarget {
   identity: string
   name: string
   speaks: UiLang
@@ -96,8 +111,12 @@ export interface CallLanguage {
   speaks: UiLang
   /** Say I am speaking another language in this call. Null goes back to the site's. */
   setSpeaks: (lang: UiLang | null) => void
-  choice: FollowChoice
-  setChoice: (choice: FollowChoice) => void
+  /** What I get from someone speaking another language. */
+  foreign: ForeignMode
+  setForeign: (mode: ForeignMode) => void
+  /** Subtitles for speakers of my own language too. */
+  along: boolean
+  setAlong: (on: boolean) => void
   showOriginal: boolean
   setShowOriginal: (on: boolean) => void
   /** My own captions, paused for everyone. Per call: a pause should not outlive it. */
@@ -105,7 +124,9 @@ export interface CallLanguage {
   setPaused: (on: boolean) => void
   /** Everyone else's language state, by participant identity. */
   roster: ReadonlyMap<string, CallLangState>
-  offer: OfferTarget | null
+  /** Shown once per call, the first time someone in another language talks. */
+  notice: NoticeTarget | null
+  dismissNotice: () => void
 }
 
 export function useCallLanguage(
@@ -121,7 +142,8 @@ export function useCallLanguage(
   const [speakOverride, setSpeakOverride] = useState<UiLang | null>(null)
   const reads = uiLang
   const speaks = speakOverride ?? uiLang
-  const choice = prefs.choice ?? 'ask'
+  const foreign = prefs.foreign ?? DEFAULT_FOREIGN
+  const along = prefs.along === true
 
   const update = useCallback((patch: Prefs) => {
     setPrefs((current) => {
@@ -135,11 +157,20 @@ export function useCallLanguage(
   const room = useRoomContext()
   const connection = useConnectionState()
   const [roster, setRoster] = useState<ReadonlyMap<string, CallLangState>>(() => new Map())
+  // Who has told me their state. The first message from anyone gets my state
+  // straight back: if they never heard my hello, they would otherwise wait up
+  // to REANNOUNCE_MS to learn I want their words translated.
+  const heardFrom = useRef(new Set<string>())
+  const answerRef = useRef<(identity: string) => void>(() => {})
 
   const { send } = useDataChannel(LANG_TOPIC, (message) => {
     const identity = message.from?.identity
     const state = decodeLangState(message.payload)
     if (!identity || !state) return
+    if (!heardFrom.current.has(identity)) {
+      heardFrom.current.add(identity)
+      answerRef.current(identity)
+    }
     setRoster((current) => {
       const next = new Map(current)
       next.set(identity, state)
@@ -148,8 +179,16 @@ export function useCallLanguage(
   })
 
   const mine = useMemo<CallLangState>(
-    () => ({ speaks, reads, subs: wantsSubtitles(choice), paused, ...(cap ? { cap } : {}) }),
-    [speaks, reads, choice, paused, cap]
+    () => ({
+      speaks,
+      reads,
+      subs: wantsAnySubtitles(foreign, along),
+      paused,
+      foreign,
+      along,
+      ...(cap ? { cap } : {}),
+    }),
+    [speaks, reads, foreign, along, paused, cap]
   )
   const mineRef = useRef(mine)
   mineRef.current = mine
@@ -169,6 +208,7 @@ export function useCallLanguage(
       // Not connected yet. The Connected effect below sends it again.
     }
   }, [])
+  answerRef.current = (identity) => announce([identity])
 
   useEffect(() => {
     if (connection === ConnectionState.Connected) announce()
@@ -187,13 +227,15 @@ export function useCallLanguage(
   useEffect(() => {
     if (!room) return
     const joined = (participant: RemoteParticipant) => announce([participant.identity])
-    const left = (participant: RemoteParticipant) =>
+    const left = (participant: RemoteParticipant) => {
+      heardFrom.current.delete(participant.identity)
       setRoster((current) => {
         if (!current.has(participant.identity)) return current
         const next = new Map(current)
         next.delete(participant.identity)
         return next
       })
+    }
     room.on(RoomEvent.ParticipantConnected, joined)
     room.on(RoomEvent.ParticipantDisconnected, left)
     return () => {
@@ -202,39 +244,49 @@ export function useCallLanguage(
     }
   }, [room, announce])
 
-  // ---- the offer: only once someone in another language actually talks ----
+  // ---- the notice: once per call, when someone in another language first talks ----
   const speaking = useSpeakingParticipants()
-  const [offer, setOffer] = useState<OfferTarget | null>(null)
+  const [notice, setNotice] = useState<NoticeTarget | null>(null)
+  const noticed = useRef(false)
 
   useEffect(() => {
-    if (choice !== 'ask' || !translationAllowed) {
-      if (offer) setOffer(null)
-      return
-    }
-    if (offer && offer.speaks !== reads) return
+    if (noticed.current) return
     for (const participant of speaking) {
       if (participant.isLocal) continue
       const theirs = roster.get(participant.identity)?.speaks
-      if (shouldOffer({ choice, myLang: reads, speakerLang: theirs, translationAllowed }) && theirs) {
-        setOffer({ identity: participant.identity, name: participant.name || participant.identity, speaks: theirs })
+      if (theirs && shouldNotice({ foreign, myLang: reads, speakerLang: theirs, translationAllowed })) {
+        noticed.current = true
+        setNotice({ identity: participant.identity, name: participant.name || participant.identity, speaks: theirs })
         return
       }
     }
-    // Switching the site to their language answers the question for me.
-    if (offer) setOffer(null)
-  }, [speaking, roster, choice, reads, translationAllowed, offer])
+  }, [speaking, roster, foreign, reads, translationAllowed])
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = window.setTimeout(() => setNotice(null), NOTICE_MS)
+    return () => window.clearTimeout(timer)
+  }, [notice])
+
+  // Answering it, or switching the site to their language, closes it.
+  useEffect(() => {
+    if (notice && (foreign === 'original' || notice.speaks === reads)) setNotice(null)
+  }, [notice, foreign, reads])
 
   return {
     reads,
     speaks,
     setSpeaks: setSpeakOverride,
-    choice,
-    setChoice: useCallback((next: FollowChoice) => update({ choice: next }), [update]),
+    foreign,
+    setForeign: useCallback((next: ForeignMode) => update({ foreign: next }), [update]),
+    along,
+    setAlong: useCallback((on: boolean) => update({ along: on }), [update]),
     showOriginal: prefs.original === true,
     setShowOriginal: useCallback((on: boolean) => update({ original: on }), [update]),
     paused,
     setPaused,
     roster,
-    offer,
+    notice,
+    dismissNotice: useCallback(() => setNotice(null), []),
   }
 }

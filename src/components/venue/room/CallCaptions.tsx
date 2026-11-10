@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Captions, CaptionsOff, Languages, Pause, Play, Volume2 } from 'lucide-react'
-import { useLocalParticipant, useRemoteParticipants, useSpeakingParticipants } from '@livekit/components-react'
+import { useLocalParticipant, useRemoteParticipants, useRoomContext, useSpeakingParticipants } from '@livekit/components-react'
+import { MediaDeviceFailure, RoomEvent } from 'livekit-client'
 import { useLanguage } from '../../../i18n/LanguageContext'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
@@ -10,14 +11,17 @@ import { UI_LANGS, type UiLang } from '../../../lib/i18n/protocol'
 import {
   audienceFor,
   captionStatus,
+  showsLine,
   subtitleNotice,
-  wantsSubtitles,
+  wantsAnySubtitles,
   type Audience,
   type CaptionStatus,
+  type ForeignMode,
   type SubtitleNotice,
 } from '../../../lib/captions/followers'
 import { captionRuns, type CaptionRun } from '../../../lib/captions/runs'
 import { useCallLanguage, type CallLanguage } from '../../../hooks/useCallLanguage'
+import { useCallMixer, type MixEntry } from '../../../hooks/useCallMixer'
 import { useLiveCaptions, type LiveCaptions, type ResolvedCaption } from '../../../hooks/useLiveCaptions'
 import { primeSpeechVoice, useTranslationVoice } from '../../../hooks/useTranslationVoice'
 import { Button } from '../../ui/Button'
@@ -29,16 +33,19 @@ import { Segmented } from '../../ui/Segmented'
  *
  *   <CallCaptionsProvider>  inside <LiveKitRoom>, wrapping the call
  *     <CaptionOverlay />    on the video itself, centred at the bottom
- *     <TranslationOffer />  "Kemar is speaking English. Follow along in French?"
+ *     <TranslationNotice /> "Kemar is speaking English. You hear him in French."
  *     <CallTranslateBar />  under the video: Subtitles, language, my own status
  *
  * Split this way so a call with LiveKit's own layout (MeetingCall) and a call
  * with ours (VenueCall) both put the subtitles where subtitles go, on the
  * picture, instead of in a strip underneath it.
  *
- * Nobody presses a button to be captioned. A listener turns subtitles on, or
- * answers the offer; that tells the call (captions/followers.ts), and the
- * speaker's browser starts transcribing for as long as anyone is following.
+ * Nobody presses a button to be captioned or translated. Someone who speaks
+ * another language is translated for me from the start, as subtitles and a
+ * voice, with their own voice muted (useCallMixer); I can choose subtitles
+ * only, or the original. My language state tells the call
+ * (captions/followers.ts), and each speaker's browser transcribes for as long
+ * as anyone is following.
  */
 
 /** Each language in its own name, for pickers. */
@@ -63,8 +70,10 @@ interface CallCaptionsValue {
   language: CallLanguage
   live: LiveCaptions
   audience: Audience
-  /** Subtitles are on for me. */
+  /** Subtitles are on for me, for some speaker. */
   subs: boolean
+  /** Someone in the call speaks a language other than the one I read. */
+  someoneForeign: boolean
   /** Translations are read aloud to me. */
   voiceOn: boolean
   translationAllowed: boolean
@@ -72,8 +81,12 @@ interface CallCaptionsValue {
   /** My recogniser should be running right now. */
   transcribe: boolean
   micOn: boolean
+  /** Why my microphone would not turn on, until it does. */
+  micProblem: MediaDeviceFailure | null
   /** What the call is told about my recogniser (followers.ts). */
   cap: CaptionStatus | undefined
+  /** How loud each speaker plays for me, and why. */
+  mix: ReadonlyMap<string, MixEntry>
 }
 
 const CallCaptionsContext = createContext<CallCaptionsValue | null>(null)
@@ -130,9 +143,55 @@ export function CallCaptionsProvider({
   })
   useEffect(() => setCap(nextCap), [nextCap])
 
-  const subs = wantsSubtitles(language.choice)
-  const voiceOn = language.choice === 'voice' && translationAllowed
-  useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
+  // Subtitles are on by default, but there is nothing to show in a call where
+  // everyone speaks my language and I have not asked to read along: no band,
+  // no chip, rather than an empty strip that looks broken.
+  const someoneForeign = useMemo(
+    () => [...language.roster.values()].some((state) => state.speaks !== language.reads),
+    [language.roster, language.reads]
+  )
+  const subs = language.along || (wantsAnySubtitles(language.foreign, false) && someoneForeign)
+  const voiceOn = language.foreign === 'voice' && translationAllowed
+  const { reading } = useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
+
+  // Phones keep speechSynthesis silent until a tap has spoken once, and the
+  // translated voice is now on before anyone taps anything about it. The first
+  // tap anywhere on the page unlocks it.
+  useEffect(() => {
+    if (!voiceOn) return
+    const unlock = () => primeSpeechVoice()
+    document.addEventListener('pointerdown', unlock, { once: true, capture: true })
+    return () => document.removeEventListener('pointerdown', unlock, { capture: true })
+  }, [voiceOn])
+
+  const mix = useCallMixer({
+    foreign: language.foreign,
+    translationAllowed,
+    reads: language.reads,
+    roster: language.roster,
+    captions: live.captions,
+    reading,
+  })
+
+  // A microphone that would not turn on, on joining or on pressing the
+  // button. LiveKit emits it for both; without this the button just stayed
+  // red and nobody could tell why.
+  const room = useRoomContext()
+  const [micProblem, setMicProblem] = useState<MediaDeviceFailure | null>(null)
+  useEffect(() => {
+    if (!room) return
+    const onError = (error: Error, kind?: MediaDeviceKind) => {
+      if (kind && kind !== 'audioinput') return
+      setMicProblem(MediaDeviceFailure.getFailure(error) ?? MediaDeviceFailure.Other)
+    }
+    room.on(RoomEvent.MediaDevicesError, onError)
+    return () => {
+      room.off(RoomEvent.MediaDevicesError, onError)
+    }
+  }, [room])
+  useEffect(() => {
+    if (isMicrophoneEnabled) setMicProblem(null)
+  }, [isMicrophoneEnabled])
 
   const value = useMemo<CallCaptionsValue>(
     () => ({
@@ -140,14 +199,31 @@ export function CallCaptionsProvider({
       live,
       audience,
       subs,
+      someoneForeign,
       voiceOn,
       translationAllowed,
       canPublish,
       transcribe,
       micOn: isMicrophoneEnabled,
+      micProblem,
       cap,
+      mix,
     }),
-    [language, live, audience, subs, voiceOn, translationAllowed, canPublish, transcribe, isMicrophoneEnabled, cap]
+    [
+      language,
+      live,
+      audience,
+      subs,
+      someoneForeign,
+      voiceOn,
+      translationAllowed,
+      canPublish,
+      transcribe,
+      isMicrophoneEnabled,
+      micProblem,
+      cap,
+      mix,
+    ]
   )
 
   return <CallCaptionsContext.Provider value={value}>{children}</CallCaptionsContext.Provider>
@@ -167,11 +243,12 @@ export function useSpeakerLang(identity: string, isLocal: boolean): UiLang | nul
 /**
  * The chip in the call's header: what my subtitles are doing. "Subtitles · FR",
  * with "· voice" when translations are read aloud, or "Translation off" with a
- * way back on after I chose to keep the original.
+ * way back on after I chose the original.
  */
 export function TranslationChip() {
   const { t } = useLingui()
-  const { language, subs, voiceOn, translationAllowed } = useCallCaptions()
+  const { language, subs, voiceOn: voiceSetting, translationAllowed, someoneForeign } = useCallCaptions()
+  const voiceOn = voiceSetting && someoneForeign
   const chip =
     'inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-micro font-bold'
   const code = language.reads.toUpperCase()
@@ -183,14 +260,17 @@ export function TranslationChip() {
       </span>
     )
   }
-  if (language.choice === 'off' && translationAllowed) {
+  if (language.foreign === 'original' && translationAllowed && someoneForeign) {
     return (
       <span className={cn(chip, 'border-white/12 bg-white/9 text-white/74')}>
         <Languages size={12} aria-hidden="true" />
         <Trans>Translation off</Trans>
         <button
           type="button"
-          onClick={() => language.setChoice('captions')}
+          onClick={() => {
+            primeSpeechVoice()
+            language.setForeign('voice')
+          }}
           className="font-extrabold text-white underline underline-offset-2"
         >
           <Trans>Turn on</Trans>
@@ -235,7 +315,13 @@ export function CaptionOverlay({
 }) {
   const { t } = useLingui()
   const { live, subs, voiceOn, language } = useCallCaptions()
-  const lines = useMemo(() => live.captions.filter((caption) => !caption.own), [live.captions])
+  const { reads, foreign, along } = language
+  // Someone in my language only when I asked to read along; someone in
+  // another one unless I chose their original.
+  const lines = useMemo(
+    () => live.captions.filter((caption) => !caption.own && showsLine(caption.lang, reads, foreign, along)),
+    [live.captions, reads, foreign, along]
+  )
   const now = useNow(subs && lines.length > 0)
   const notice = useSubtitleNotice(subs, band)
 
@@ -355,24 +441,23 @@ function useSubtitleNotice(active: boolean, band: boolean): SubtitleNotice | nul
 }
 
 /**
- * The offer, shown once someone who speaks another language starts talking.
- * Asked once per browser: the answer covers every speaker, and lives in the
- * language button afterwards.
+ * Said once per call, the first time someone in another language talks: they
+ * are being translated for me, and how to hear them as they are. Not a
+ * question: translation is already on, and the card leaves by itself.
  */
-export function TranslationOffer({ className }: { className?: string }) {
+export function TranslationNotice({ className }: { className?: string }) {
   const { t, i18n } = useLingui()
-  const { language } = useCallCaptions()
-  const offer = language.offer
-  if (!offer) return null
+  const { language, voiceOn } = useCallCaptions()
+  const notice = language.notice
+  if (!notice) return null
 
-  const name = offer.name.split(' ')[0]
-  const theirs = i18n._(LANG_NAME[offer.speaks])
+  const name = notice.name.split(' ')[0]
+  const theirs = i18n._(LANG_NAME[notice.speaks])
   const mine = i18n._(LANG_NAME[language.reads])
 
   return (
     <div
-      role="dialog"
-      aria-labelledby="call-offer-title"
+      role="status"
       className={cn(
         'absolute right-3 top-3 z-raised flex w-[min(21rem,calc(100%-1.5rem))] flex-col gap-3 rounded-surface border border-ktip-sand-200 bg-ktip-cream p-4 text-ktip-sand-900 shadow-card',
         className
@@ -380,56 +465,45 @@ export function TranslationOffer({ className }: { className?: string }) {
     >
       <div className="flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-ktip-ocean-50 text-ktip-ocean-700">
-          <Languages size={18} aria-hidden="true" />
+          {voiceOn ? <Volume2 size={18} aria-hidden="true" /> : <Languages size={18} aria-hidden="true" />}
         </span>
         <div className="min-w-0">
-          <p id="call-offer-title" className="text-label font-bold">
-            {t`${name} is speaking ${theirs}`}
-          </p>
+          <p className="text-label font-bold">{t`${name} is speaking ${theirs}`}</p>
           <p className="mt-0.5 text-caption text-ktip-sand-600">
-            {t`Follow along in ${mine}? Read what they say as subtitles, and hear it read aloud if you like.`}
+            {voiceOn
+              ? t`You hear them in ${mine}, with subtitles. Their own voice is muted for you.`
+              : t`Subtitles in ${mine} show what they say.`}
           </p>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <Button
-          size="sm"
-          onClick={() => {
-            // Inside the tap: phones keep speech silent until a gesture has spoken once.
-            primeSpeechVoice()
-            language.setChoice('voice')
-          }}
-        >
-          <Volume2 size={14} aria-hidden="true" />
-          <Trans>Subtitles and voice</Trans>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="secondary" onClick={() => language.setForeign('original')}>
+          <Trans>Hear the original</Trans>
         </Button>
-        <div className="flex gap-2">
-          <Button size="sm" variant="secondary" className="flex-1" onClick={() => language.setChoice('captions')}>
+        {voiceOn && (
+          <Button size="sm" variant="ghost" onClick={() => language.setForeign('subtitles')}>
             <Trans>Subtitles only</Trans>
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => language.setChoice('off')}>
-            <Trans>Keep the original</Trans>
-          </Button>
-        </div>
+        )}
+        <Button size="sm" variant="ghost" className="ml-auto" onClick={language.dismissNotice}>
+          <Trans>OK</Trans>
+        </Button>
       </div>
-      <p className="text-micro text-ktip-sand-500">
-        <Trans>This covers everyone who speaks another language. Change it with the language button under the call.</Trans>
-      </p>
     </div>
   )
 }
 
 /**
  * For a call with no video (a huddle): a dark band that appears only while
- * there is something to read. The offer sits in it rather than over it, so the
- * band grows to fit instead of the card spilling out.
+ * there is something to read. The notice sits in it rather than over it, so
+ * the band grows to fit instead of the card spilling out.
  */
 export function SubtitleBand() {
   const { subs, language } = useCallCaptions()
-  if (!subs && !language.offer) return null
+  if (!subs && !language.notice) return null
   return (
     <div className="relative flex min-h-28 flex-col gap-2 rounded-surface bg-black/30 p-3 @container">
-      <TranslationOffer className="static w-full" />
+      <TranslationNotice className="static w-full" />
       <CaptionOverlay band />
     </div>
   )
@@ -445,23 +519,39 @@ const pill = (on: boolean) =>
     on ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
   )
 
-/** Subtitles on or off. `dock` is the square icon button; `pill` the labelled one. */
+/**
+ * The quick switch. With someone in another language in the call it turns
+ * their translation on or off (off is their original voice); with everyone in
+ * my language it turns read-along subtitles on or off. The menu has the rest.
+ * `dock` is the square icon button; `pill` the labelled one.
+ */
 export function SubtitlesToggle({ variant = 'pill' }: { variant?: 'pill' | 'dock' }) {
   const { t } = useLingui()
-  const { language, subs } = useCallCaptions()
-  const toggle = () => language.setChoice(subs ? 'off' : 'captions')
+  const { language, someoneForeign } = useCallCaptions()
+  const on = someoneForeign ? language.foreign !== 'original' : language.along
+  const toggle = () => {
+    if (!someoneForeign) return language.setAlong(!on)
+    if (!on) primeSpeechVoice()
+    language.setForeign(on ? 'original' : 'voice')
+  }
 
   if (variant === 'dock') {
-    const label = subs ? t`Turn subtitles off` : t`Turn subtitles on`
+    const label = someoneForeign
+      ? on
+        ? t`Turn translation off`
+        : t`Turn translation on`
+      : on
+        ? t`Turn subtitles off`
+        : t`Turn subtitles on`
     return (
-      <button type="button" aria-pressed={subs} aria-label={label} title={label} onClick={toggle} className={DOCK_BUTTON}>
-        {subs ? <Captions size={18} aria-hidden="true" /> : <CaptionsOff size={18} aria-hidden="true" />}
+      <button type="button" aria-pressed={on} aria-label={label} title={label} onClick={toggle} className={DOCK_BUTTON}>
+        {on ? <Captions size={18} aria-hidden="true" /> : <CaptionsOff size={18} aria-hidden="true" />}
       </button>
     )
   }
   return (
-    <button type="button" aria-pressed={subs} onClick={toggle} className={pill(subs)}>
-      {subs ? <Captions size={13} aria-hidden="true" /> : <CaptionsOff size={13} aria-hidden="true" />}
+    <button type="button" aria-pressed={on} onClick={toggle} className={pill(on)}>
+      {on ? <Captions size={13} aria-hidden="true" /> : <CaptionsOff size={13} aria-hidden="true" />}
       <Trans>Subtitles</Trans>
     </button>
   )
@@ -511,7 +601,7 @@ export function LanguageButton({ variant = 'pill' }: { variant?: 'pill' | 'dock'
 /** What is happening to my own words, and anything that went wrong. */
 export function SpeakerStatus() {
   const { t, i18n } = useLingui()
-  const { language, live, audience, translationAllowed, canPublish, micOn } = useCallCaptions()
+  const { language, live, audience, translationAllowed, canPublish, micOn, micProblem } = useCallCaptions()
 
   const audienceText = (Object.entries(audience.byLang) as [UiLang, number][])
     .map(([lang, count]) => `${ENDONYM[lang]} (${count})`)
@@ -561,11 +651,13 @@ export function SpeakerStatus() {
 
       {/* Followed, but muted: the recogniser stays off, so say so here instead
           of leaving the listener's band empty with no reason on this side. */}
-      {canPublish && !language.paused && audience.total > 0 && !micOn && (
+      {canPublish && !language.paused && audience.total > 0 && !micOn && !micProblem && (
         <span className="text-micro text-white/70">
           <Trans>Someone wants to read what you say. Unmute so they can.</Trans>
         </span>
       )}
+
+      {canPublish && micProblem && <span className="text-micro text-ktip-sun-300">{micText(micProblem)}</span>}
 
       {heard && (
         <span lang={language.speaks} className="w-full min-w-0 truncate text-micro text-white/55 @max-3xl:text-center">
@@ -599,6 +691,20 @@ export function SpeakerStatus() {
       {live.error && <span className="text-micro text-ktip-sun-300">{errorText(live.error)}</span>}
     </>
   )
+
+  /** Why the microphone would not turn on, and what to do about it. */
+  function micText(failure: MediaDeviceFailure): string {
+    switch (failure) {
+      case MediaDeviceFailure.PermissionDenied:
+        return t`Your browser is blocking the microphone. Allow it from the icon at the left of the address bar, then press the microphone button again.`
+      case MediaDeviceFailure.NotFound:
+        return t`No microphone found. Plug one in, then press the microphone button again.`
+      case MediaDeviceFailure.DeviceInUse:
+        return t`Another app is using your microphone. Close it, then press the microphone button again.`
+      default:
+        return t`Your microphone didn't start. Press the microphone button to try again.`
+    }
+  }
 
   /** Every stop has a reason a member can act on. An unknown code shows as is. */
   function errorText(code: string): string {
@@ -639,16 +745,18 @@ export function CallDebug() {
     }
   })
   if (!on || !value) return null
-  const { language, live, audience, subs, transcribe, micOn, translationAllowed, cap } = value
+  const { language, live, audience, subs, transcribe, micOn, micProblem, translationAllowed, cap, mix } = value
   const last = live.captions[live.captions.length - 1]
   const roster = [...language.roster.entries()]
+  const volumes = [...mix.entries()]
   return (
     <pre className="col-span-full max-h-48 overflow-auto whitespace-pre-wrap rounded-control bg-black/60 p-2 font-mono text-micro leading-snug text-white/80">
       {[
-        `me: speaks ${language.speaks}, reads ${language.reads}, choice ${language.choice}, subs ${subs}, paused ${language.paused}, mic ${micOn}`,
-        `room translation ${translationAllowed ? 'on' : 'off'}; offer ${language.offer ? `${language.offer.name} (${language.offer.speaks})` : 'none'}`,
+        `me: speaks ${language.speaks}, reads ${language.reads}, foreign ${language.foreign}, along ${language.along}, subs ${subs}, paused ${language.paused}, mic ${micOn}${micProblem ? ` (${micProblem})` : ''}`,
+        `room translation ${translationAllowed ? 'on' : 'off'}; notice ${language.notice ? `${language.notice.name} (${language.notice.speaks})` : 'none'}`,
+        `their voices: ${volumes.map(([id, entry]) => `${id.slice(0, 8)} vol ${entry.volume} ${entry.reason}`).join(' | ') || 'nobody'}`,
         `following me: ${audience.total}, translate into [${audience.targets.join(', ')}]; transcribe ${transcribe}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, cap ${cap ?? 'none'}, error ${live.error ?? 'none'}${live.failed ? ' (stopped)' : ''}, translation ${live.translationIssue ?? 'ok'}`,
-        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} subs ${s.subs}${s.paused ? ' paused' : ''} cap ${s.cap ?? '-'}`).join(' | ') || 'empty'}`,
+        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} ${s.foreign ?? `subs ${s.subs}`}${s.along ? ' along' : ''}${s.paused ? ' paused' : ''} cap ${s.cap ?? '-'}`).join(' | ') || 'empty'}`,
         `captions: ${live.captions.length}${last ? `, last ${last.own ? 'mine' : 'theirs'} ${last.lang}${last.translated ? ` → ${language.reads}` : ''}: "${last.display.slice(0, 60)}"` : ''}`,
       ].join('\n')}
     </pre>
@@ -677,11 +785,16 @@ function LanguageMenu({
   onClose: () => void
 }) {
   const { t, i18n } = useLingui()
-  const { language, subs, voiceOn, translationAllowed, canPublish } = useCallCaptions()
+  const { language, translationAllowed, canPublish } = useCallCaptions()
   const site = useLanguage()
   const [pickSpeaks, setPickSpeaks] = useState(false)
   const mine = i18n._(LANG_NAME[language.reads])
   const spoken = i18n._(LANG_NAME[language.speaks])
+  const foreignModes: { value: ForeignMode; label: string; hint: string }[] = [
+    { value: 'voice', label: t`Hear it in ${mine}`, hint: t`With subtitles. Their own voice is muted for you.` },
+    { value: 'subtitles', label: t`Subtitles only`, hint: t`In ${mine}, over their own voice.` },
+    { value: 'original', label: t`Their own voice`, hint: t`No translation.` },
+  ]
 
   useEffect(() => {
     const onDown = (event: PointerEvent) => {
@@ -711,7 +824,7 @@ function LanguageMenu({
       role="dialog"
       aria-label={t`Language and subtitles`}
       className={cn(
-        'absolute bottom-full z-dropdown mb-2 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-4 rounded-surface border border-ktip-sand-200 bg-ktip-cream p-4 text-ktip-sand-900 shadow-card max-sm:fixed max-sm:inset-x-4 max-sm:bottom-24 max-sm:w-auto max-sm:translate-x-0',
+        'absolute bottom-full z-dropdown mb-2 flex max-h-[calc(100dvh-8rem)] w-[min(20rem,calc(100vw-2rem))] flex-col gap-4 overflow-y-auto overscroll-contain rounded-surface border border-ktip-sand-200 bg-ktip-cream p-4 text-ktip-sand-900 shadow-card max-sm:fixed max-sm:inset-x-4 max-sm:bottom-24 max-sm:w-auto max-sm:translate-x-0',
         align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0'
       )}
     >
@@ -731,33 +844,58 @@ function LanguageMenu({
           <Trans>The site's language. Changing it here changes the whole site.</Trans>
         </span>
       </div>
+      <fieldset className="flex flex-col gap-1">
+        <legend className="mb-1 text-micro font-semibold uppercase tracking-wider text-ktip-sand-500">
+          <Trans>When someone speaks another language</Trans>
+        </legend>
+        {foreignModes.map((mode) => {
+          const disabled = mode.value === 'voice' && !translationAllowed
+          const checked = language.foreign === mode.value
+          return (
+            <label
+              key={mode.value}
+              className={cn(
+                'flex cursor-pointer items-start gap-2.5 rounded-control px-2 py-1.5 transition-colors',
+                checked ? 'bg-ktip-ocean-50' : 'hover:bg-ktip-sand-100',
+                disabled && 'cursor-not-allowed opacity-50'
+              )}
+            >
+              <input
+                type="radio"
+                name="call-foreign-mode"
+                value={mode.value}
+                checked={checked}
+                disabled={disabled}
+                onChange={() => {
+                  // Inside the tap: phones keep speech silent until a gesture has spoken once.
+                  if (mode.value === 'voice') primeSpeechVoice()
+                  language.setForeign(mode.value)
+                }}
+                className="mt-1 shrink-0 accent-ktip-ocean-700"
+              />
+              <span className="min-w-0">
+                <span className="block text-caption font-semibold text-ktip-sand-900">{mode.label}</span>
+                <span className="block text-micro text-ktip-sand-500">{mode.hint}</span>
+              </span>
+            </label>
+          )
+        })}
+      </fieldset>
       <div className="flex flex-col gap-3">
         {row(
-          <Trans>Subtitles</Trans>,
-          t`On the video, in ${mine}`,
-          <Switch
-            checked={subs}
-            onChange={(on) => language.setChoice(on ? 'captions' : 'off')}
-            label={t`Subtitles`}
-          />
-        )}
-        {row(
-          t`Hear it in ${mine}`,
-          <Trans>The speaker’s own voice drops while it plays</Trans>,
-          <Switch
-            checked={voiceOn}
-            disabled={!translationAllowed}
-            onChange={(on) => {
-              if (on) primeSpeechVoice()
-              language.setChoice(on ? 'voice' : 'captions')
-            }}
-            label={t`Hear translations`}
-          />
+          t`Subtitles for ${mine} too`,
+          <Trans>When someone speaks your language</Trans>,
+          <Switch checked={language.along} onChange={language.setAlong} label={t`Subtitles for ${mine} too`} />
         )}
         {row(
           <Trans>Show the original</Trans>,
           <Trans>Under each translated line</Trans>,
-          <Switch checked={language.showOriginal} onChange={language.setShowOriginal} label={t`Show the original`} />
+          <Switch
+            checked={language.showOriginal}
+            disabled={language.foreign === 'original'}
+            onChange={language.setShowOriginal}
+            label={t`Show the original`}
+          />
         )}
       </div>
       {canPublish && (

@@ -1,29 +1,32 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRoomContext } from '@livekit/components-react'
 import type { UiLang } from '../lib/i18n/protocol'
-import { DUCKED_VOLUME, isSlowStart, isStale, pickVoice } from '../lib/captions/voice'
+import { isSlowStart, isStale, pickVoice } from '../lib/captions/voice'
 import { useSpeechUsage } from './useSpeechUsage'
 import type { ResolvedCaption } from './useLiveCaptions'
 
 /**
  * Translations read aloud in the listener's language, one line at a time.
  *
- * Three rules the old read-aloud broke:
+ * Rules the old read-aloud broke:
  *
  *   - Never my own words. The old one read every translated line, and my own
  *     lines were in that list, so anyone whose reading language differed from
  *     their speaking language heard themselves translated back.
- *   - Only the person being translated is turned down, and only while their
- *     line plays. The old one turned the whole room down for as long as the
- *     setting was on.
  *   - A line that has fallen more than a few seconds behind the speaker is
  *     skipped instead of read, so the voice catches up rather than drifting.
+ *
+ * It does not touch anyone's volume. It says whose line it is reading
+ * (`reading`), and useCallMixer, the one owner of every speaker's volume,
+ * decides what that means. Two owners used to fight: this hook set a speaker
+ * back to full volume after each line, undoing the mute that keeps their
+ * original voice from a listener in another language.
  *
  * Voices come from speechSynthesis (captions/voice.ts picks one): free, no key.
  */
 
 const SLOW_KEY = 'ktip.call.slowVoices'
-/** Keep the room turned down briefly after a line, so back-to-back lines do not pump the volume. */
+/** Keep saying "reading" briefly after a line, so back-to-back lines do not pump the volume. */
 const RESTORE_AFTER_MS = 1_200
 const SEEN_LIMIT = 200
 
@@ -78,7 +81,7 @@ export function useTranslationVoice({
   captions: ResolvedCaption[]
   enabled: boolean
   lang: UiLang
-}) {
+}): { reading: string | null } {
   const room = useRoomContext()
   // Characters read aloud, for the organiser's usage panel (199).
   const meterRead = useSpeechUsage(room?.name || undefined, 'read_aloud_chars')
@@ -87,7 +90,8 @@ export function useTranslationVoice({
   const queue = useRef<QueuedLine[]>([])
   const busy = useRef(false)
   const slow = useRef<Set<string>>(loadSlow())
-  const ducked = useRef<string | null>(null)
+  // Whose translated line is playing, for the mixer. Null once the voice is quiet.
+  const [reading, setReading] = useState<string | null>(null)
   const restoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const langRef = useRef(lang)
   langRef.current = lang
@@ -95,21 +99,14 @@ export function useTranslationVoice({
   const restore = useCallback(() => {
     if (restoreTimer.current) clearTimeout(restoreTimer.current)
     restoreTimer.current = null
-    if (!ducked.current) return
-    room?.remoteParticipants.get(ducked.current)?.setVolume(1)
-    ducked.current = null
-  }, [room])
+    setReading(null)
+  }, [])
 
-  const duck = useCallback(
-    (identity: string) => {
-      if (restoreTimer.current) clearTimeout(restoreTimer.current)
-      restoreTimer.current = null
-      if (ducked.current && ducked.current !== identity) restore()
-      room?.remoteParticipants.get(identity)?.setVolume(DUCKED_VOLUME)
-      ducked.current = identity
-    },
-    [room, restore]
-  )
+  const duck = useCallback((identity: string) => {
+    if (restoreTimer.current) clearTimeout(restoreTimer.current)
+    restoreTimer.current = null
+    setReading(identity)
+  }, [])
 
   const next = useCallback(() => {
     if (!supported()) return
@@ -183,8 +180,10 @@ export function useTranslationVoice({
     () => () => {
       queue.current = []
       if (supported()) window.speechSynthesis.cancel()
-      restore()
+      if (restoreTimer.current) clearTimeout(restoreTimer.current)
     },
-    [restore]
+    []
   )
+
+  return { reading }
 }

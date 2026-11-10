@@ -14,7 +14,7 @@ import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 import { PhoneCall, Presentation, ScreenShare } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
-import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationChip, TranslationOffer } from './CallCaptions'
+import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationChip, TranslationNotice } from './CallCaptions'
 import { CallDock, type CallSignals } from './CallDock'
 import { BoardCanvas, useBoardShare } from './CallBoard'
 import { CallPeopleProvider, CallTile, type CallPerson } from './CallTile'
@@ -353,7 +353,7 @@ function PresentLayout({
             </div>
           )}
           <CaptionOverlay className="@2xl:left-3 @2xl:right-[calc(min(24%,14rem)+1.5rem)]" />
-          <TranslationOffer className="left-3 right-auto top-12" />
+          <TranslationNotice className="left-3 right-auto top-12" />
         </div>
         {showColumn && <SideColumn tracks={others} />}
       </div>
@@ -405,7 +405,7 @@ function SpotlightLayout({ cameras, fill }: { cameras: TrackReferenceOrPlacehold
         >
           <CallTile trackRef={lead} avatarSize={96} className="h-full w-full" />
           <CaptionOverlay />
-          <TranslationOffer />
+          <TranslationNotice />
         </div>
         {others.length > 0 && <SideColumn tracks={others} />}
       </div>
@@ -445,7 +445,7 @@ function GridStage({ cameras, fill }: { cameras: TrackReferenceOrPlaceholder[]; 
         ))}
       </div>
       <CaptionOverlay />
-      <TranslationOffer />
+      <TranslationNotice />
     </div>
   )
 }

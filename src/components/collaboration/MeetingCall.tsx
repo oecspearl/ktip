@@ -11,7 +11,7 @@ import {
   CallCaptionsProvider,
   CallTranslateBar,
   CaptionOverlay,
-  TranslationOffer,
+  TranslationNotice,
 } from '../venue/room/CallCaptions'
 import { LIVEKIT_ROOM_OPTIONS } from '../../lib/livekit-options'
 import { LIVEKIT_URL } from '../../hooks/useVenueRoomToken'
@@ -96,7 +96,7 @@ export function MeetingCall({
           <VideoConference />
           {/* Lifted clear of VideoConference's own control bar along the bottom. */}
           <CaptionOverlay className="bottom-20" />
-          <TranslationOffer />
+          <TranslationNotice />
         </div>
         <CallTranslateBar />
       </CallCaptionsProvider>

@@ -814,6 +814,10 @@ msgstr "Track your funding applications"
 msgid "What you give us directly"
 msgstr "What you give us directly"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "No translation."
+msgstr "No translation."
+
 #: src/lib/member-kpis.ts
 msgid "Forum posts"
 msgstr "Forum posts"
@@ -858,10 +862,6 @@ msgstr "The admin console"
 #: src/components/settings/VerificationTab.tsx
 msgid "Drop files to add"
 msgstr "Drop files to add"
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Keep the original"
-msgstr "Keep the original"
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Skills"
@@ -4639,6 +4639,7 @@ msgstr "Your own"
 msgid "New Event"
 msgstr "New Event"
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Turn translation off"
 msgstr "Turn translation off"
@@ -6714,6 +6715,10 @@ msgstr "Security"
 msgid "Frequently asked questions"
 msgstr "Frequently asked questions"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Hear the original"
+msgstr "Hear the original"
+
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "What you're building, in a line"
 msgstr "What you're building, in a line"
@@ -8427,6 +8432,10 @@ msgstr "Page Not Found"
 msgid "Demo Day"
 msgstr "Demo Day"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "With subtitles. Their own voice is muted for you."
+msgstr "With subtitles. Their own voice is muted for you."
+
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Upload the call for proposals, annexes or budget templates."
 msgstr "Upload the call for proposals, annexes or budget templates."
@@ -9071,6 +9080,10 @@ msgstr "My old code drafts are missing from my snippets"
 msgid "Close this room"
 msgstr "Close this room"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your browser is blocking the microphone. Allow it from the icon at the left of the address bar, then press the microphone button again."
+msgstr "Your browser is blocking the microphone. Allow it from the icon at the left of the address bar, then press the microphone button again."
+
 #: src/components/profile/PortraitStudio.tsx
 msgid "Upload a photo to cut out first."
 msgstr "Upload a photo to cut out first."
@@ -9636,10 +9649,6 @@ msgstr "Search by name, then stack any of the filters beside it:\n"
 "\n"
 "Clear all filters appears underneath once anything is set."
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Follow along in {mine}? Read what they say as subtitles, and hear it read aloud if you like."
-msgstr "Follow along in {mine}? Read what they say as subtitles, and hear it read aloud if you like."
-
 #: src/lib/permissions.ts
 msgid "Civil-society organisation delivering programmes. Runs projects and events, applies for funding, contributes knowledge."
 msgstr "Civil-society organisation delivering programmes. Runs projects and events, applies for funding, contributes knowledge."
@@ -10129,6 +10138,10 @@ msgstr "Editing points or criteria affects future awards, not the ones already g
 #: src/i18n/harvested.ts
 msgid "Session token"
 msgstr "Session token"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Another app is using your microphone. Close it, then press the microphone button again."
+msgstr "Another app is using your microphone. Close it, then press the microphone button again."
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Replace file"
@@ -13467,6 +13480,10 @@ msgstr "How KTIP works for people with disabilities, what you can change, and wh
 #: src/i18n/harvested.ts
 msgid "Apply for a grant"
 msgstr "Apply for a grant"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "When someone speaks another language"
+msgstr "When someone speaks another language"
 
 #: src/i18n/harvested.ts
 msgid "Notice privacy"
@@ -17791,6 +17808,10 @@ msgstr "Too long for X by {over} characters. Shorten the message first."
 msgid "You have not submitted anything yet"
 msgstr "You have not submitted anything yet"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Their own voice"
+msgstr "Their own voice"
+
 #: src/components/association/AssociationReviewQueue.tsx
 msgid "Registry number confirmed"
 msgstr "Registry number confirmed"
@@ -17859,6 +17880,10 @@ msgstr "Our people cannot take part — for when they would be judging it."
 #: src/components/layout/Navbar.tsx
 msgid "Events you organise or registered for"
 msgstr "Events you organise or registered for"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "When someone speaks your language"
+msgstr "When someone speaks your language"
 
 #: src/i18n/harvested.ts
 msgid "Guides, articles and partner tools"
@@ -18857,6 +18882,10 @@ msgstr "Your message is copied. In {name}, click the post box and press {pasteKe
 msgid "Two-step verification is on, using your authenticator app."
 msgstr "Two-step verification is on, using your authenticator app."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "In {mine}, over their own voice."
+msgstr "In {mine}, over their own voice."
+
 #: src/i18n/harvested.ts
 msgid "The text of the document you uploaded"
 msgstr "The text of the document you uploaded"
@@ -19281,6 +19310,10 @@ msgstr "Honesty"
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Loading project..."
 msgstr "Loading project..."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "You hear them in {mine}, with subtitles. Their own voice is muted for you."
+msgstr "You hear them in {mine}, with subtitles. Their own voice is muted for you."
 
 #: src/components/notes/StickyNote.tsx
 msgid "Move note"
@@ -19815,6 +19848,10 @@ msgstr "Empty room"
 msgid "Team logo"
 msgstr "Team logo"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles for {mine} too"
+msgstr "Subtitles for {mine} too"
+
 #: src/i18n/harvested.ts
 msgid "What reviewers are bound by"
 msgstr "What reviewers are bound by"
@@ -20326,10 +20363,6 @@ msgstr "That code was not accepted."
 msgid "A new or emerging business developing its products, services, and business operations."
 msgstr "A new or emerging business developing its products, services, and business operations."
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Hear translations"
-msgstr "Hear translations"
-
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "People you mentor"
 msgstr "People you mentor"
@@ -20366,10 +20399,6 @@ msgstr "Main column"
 #: src/i18n/harvested.ts
 msgid "Optional, first-party, and nothing is written unless you allow it."
 msgstr "Optional, first-party, and nothing is written unless you allow it."
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "The speaker’s own voice drops while it plays"
-msgstr "The speaker’s own voice drops while it plays"
 
 #: src/hooks/useVenueRoomToken.ts
 msgid "Your sign-in has ended. Sign out and back in to join the call."
@@ -20752,14 +20781,6 @@ msgstr "connections"
 msgid "Click Save. You keep earning points and can still see your own rank — nobody else can."
 msgstr "Click Save. You keep earning points and can still see your own rank — nobody else can."
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "Subtitles and voice"
-msgstr "Subtitles and voice"
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "On the video, in {mine}"
-msgstr "On the video, in {mine}"
-
 #: src/lib/delete-guard.ts
 msgid "The project page and everything on it"
 msgstr "The project page and everything on it"
@@ -20917,10 +20938,6 @@ msgstr "French"
 #: src/i18n/harvested.ts
 msgid "Name the board for the subject, not for a single question — threads go inside it."
 msgstr "Name the board for the subject, not for a single question — threads go inside it."
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "This covers everyone who speaks another language. Change it with the language button under the call."
-msgstr "This covers everyone who speaks another language. Change it with the language button under the call."
 
 #: src/components/legal/AgreementGate.tsx
 msgid "Two documents cover everything you publish on KTIP. They open each time you start or edit something here."
@@ -22682,6 +22699,10 @@ msgstr "Share this project"
 msgid "That code can no longer be cancelled."
 msgstr "That code can no longer be cancelled."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your microphone didn't start. Press the microphone button to try again."
+msgstr "Your microphone didn't start. Press the microphone button to try again."
+
 #: src/lib/venue-room-sections.ts
 msgid "The event page’s FAQ, repeated here. Hidden if there is none."
 msgstr "The event page’s FAQ, repeated here. Hidden if there is none."
@@ -23729,6 +23750,7 @@ msgstr "Setting up the building…"
 msgid "Required?"
 msgstr "Required?"
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomOpsPanels.tsx
 msgid "Turn translation on"
 msgstr "Turn translation on"
@@ -27394,6 +27416,10 @@ msgstr "File added"
 msgid "Your declared date of birth is treated as restricted data: it is stored in its own table behind its own access rules, it is never copied onto your public profile, and ordinary application queries cannot read it back. Everything downstream consumes a derived yes-or-no answer to \"is this account a minor?\" rather than the date itself."
 msgstr "Your declared date of birth is treated as restricted data: it is stored in its own table behind its own access rules, it is never copied onto your public profile, and ordinary application queries cannot read it back. Everything downstream consumes a derived yes-or-no answer to \"is this account a minor?\" rather than the date itself."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "No microphone found. Plug one in, then press the microphone button again."
+msgstr "No microphone found. Plug one in, then press the microphone button again."
+
 #: src/i18n/harvested.ts
 msgid "Promote the platform"
 msgstr "Promote the platform"
@@ -29369,6 +29395,10 @@ msgstr "Remove message"
 #: src/i18n/harvested.ts
 msgid "Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count."
 msgstr "Serious cases — commercial-scale infringement, or repeat infringement after a warning — may be terminated without waiting for the count."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles in {mine} show what they say."
+msgstr "Subtitles in {mine} show what they say."
 
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Why you think they would fit"
@@ -32692,6 +32722,10 @@ msgstr "Development link:"
 #: src/lib/share/targets.ts
 msgid "Online and in {place}."
 msgstr "Online and in {place}."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "OK"
+msgstr "OK"
 
 #: src/i18n/harvested.ts
 msgid "How do I control what I get notified about?"

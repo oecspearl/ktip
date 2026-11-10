@@ -64,6 +64,11 @@ interface CaptionWire {
   name?: string
   /** Present on the follow-up: the same piece in the languages its listeners read. */
   variants?: Partial<Record<UiLang, string>>
+  /**
+   * On the first message: the speaker will not translate this piece (a number,
+   * a name, one letter). A listener stops waiting for a translation of it.
+   */
+  plain?: boolean
 }
 
 export interface Caption {
@@ -77,6 +82,8 @@ export interface Caption {
   at: number
   /** Mine. Never shown to me as a subtitle, never read aloud to me. */
   own: boolean
+  /** Not translated on purpose (CaptionWire.plain). */
+  plain: boolean
 }
 
 export interface ResolvedCaption extends Caption {
@@ -138,6 +145,11 @@ export function useLiveCaptions({
             // that is already on screen.
             text: incoming.text ?? existing.text,
             variants: { ...existing.variants, ...(incoming.variants ?? {}) },
+            // The original can land after its translation: the original rides
+            // the lossy channel, the translation the reliable one.
+            name: existing.name || incoming.name || '',
+            lang: isUiLang(incoming.lang) ? incoming.lang : existing.lang,
+            plain: existing.plain || incoming.plain === true,
           }
         : {
             id: incoming.id,
@@ -148,6 +160,7 @@ export function useLiveCaptions({
             variants: incoming.variants ?? {},
             at,
             own,
+            plain: incoming.plain === true,
           }
       const others = current.filter((caption) => caption.id !== incoming.id)
       return [...others, next].filter((caption) => at - caption.at < CAPTION_TTL_MS).slice(-MAX_CAPTIONS)
@@ -209,12 +222,20 @@ export function useLiveCaptions({
       const context = previous && now - previous.at < CONTEXT_MS ? previous.text : undefined
       lastPiece.current = { text, at: now }
 
-      const original: CaptionWire = { v: 1, id, text, lang: spoken, name: nameRef.current }
+      const translatable = shouldTranslate(text)
+      const original: CaptionWire = {
+        v: 1,
+        id,
+        text,
+        lang: spoken,
+        name: nameRef.current,
+        ...(translatable ? {} : { plain: true }),
+      }
       publishRef.current(original, false)
       merge(original, identityRef.current, true)
 
       const to = targetsRef.current.filter((lang) => lang !== spoken)
-      if (to.length === 0 || !shouldTranslate(text)) return
+      if (to.length === 0 || !translatable) return
 
       void translateCaption({ text, from: spoken, targets: to, context, roomId: roomIdRef.current || undefined }).then(
         ({ variants, degraded }) => {
@@ -228,7 +249,9 @@ export function useLiveCaptions({
             return
           }
           setTranslationIssue(null)
-          const follow: CaptionWire = { v: 1, id, variants }
+          // Language and name ride along: if the lossy original never
+          // arrived, a listener still knows what it is reading and whose it is.
+          const follow: CaptionWire = { v: 1, id, variants, lang: spoken, name: nameRef.current }
           publishRef.current(follow, true)
           merge(follow, identityRef.current, true)
         }
