@@ -25,7 +25,7 @@ export function RoomPanel({ title, meta, children, className }: RoomPanelProps) 
         className
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-ktip-sand-100 px-4 py-3">
+      <div data-panel-head className="flex items-center justify-between gap-2 border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           {title}
         </h2>

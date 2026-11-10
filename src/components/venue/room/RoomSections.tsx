@@ -1,23 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { flushSync } from 'react-dom'
-import { Maximize2, Minimize2 } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 import { cn } from '../../../lib/utils'
 import { useEventCriteria } from '../../../hooks/useEventCriteria'
+import { isVenueVideoConfigured } from '../../../hooks/useVenueRoomToken'
 import { sectionsForRoom } from '../../../lib/venue-room-sections'
 import type { ResolvedRoomSection, RoomSectionId } from '../../../lib/venue-room-sections'
-import {
-  canBeHero,
-  cameraModeFor,
-  hostHeroOf,
-  orderSectionIds,
-  readHeroPin,
-  resolveHero,
-  spanClass,
-  spanFills,
-  spanKeyFor,
-  writeHeroPin,
-} from '../../../lib/venue-room-layout'
-import type { HeroPin } from '../../../lib/venue-room-layout'
+import { cameraModeFor, orderSectionIds } from '../../../lib/venue-room-layout'
+import { planRoomShell } from '../../../lib/venue-room-shell'
+import { RoomDock, type DockTab } from './RoomDock'
 import { EventChallengeBrief } from '../../events/EventChallengeBrief'
 import { EventSolutionsPanel } from '../../events/EventSolutionsPanel'
 import { RoomChatPanel } from '../RoomChatPanel'
@@ -50,7 +39,6 @@ import type {
   VenueRoom,
 } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
-import { prefersReducedMotionNow } from '../../../a11y/store'
 import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
@@ -101,17 +89,15 @@ export interface RoomSectionContext {
  * The room, assembled.
  *
  * Which panels appear is data (venue_rooms.sections, or the kind's defaults) —
- * see src/lib/venue-room-sections.ts. *Where they sit* is also data, per kind —
- * see src/lib/venue-room-layout.ts. This file is only the map from an id to a
- * component, and it is the one place that has to change when a section is added.
- *
- * One grid, not a main column and an aside: an eight-and-four split of video and
- * chat cannot be expressed as "a column and a 20rem rail", and every kind wants
- * a different one of those splits.
+ * see src/lib/venue-room-sections.ts. Where they sit is one shape for every
+ * room — see src/lib/venue-room-shell.ts: a band across the top, the call, the
+ * room's own tool, a shelf of everything else, and a dock on the right with
+ * Chat, People and one tab for this kind of room. This file is the map from an
+ * id to a component, and the one place that changes when a section is added.
  *
  * Sections that have nothing to show render null and their cell removes itself
- * — the `:has(> div:empty)` rule below plus `grid-flow-dense`, so a sponsor
- * banner on a room with no sponsor leaves no hole where a card should be.
+ * (the `:has(> div:empty)` rule), so a sponsor banner in a room with no sponsor
+ * leaves no gap.
  */
 export function RoomSections({
   context,
@@ -120,8 +106,9 @@ export function RoomSections({
   context: RoomSectionContext
   className?: string
 }) {
-  const { t } = useLingui()
-  const { event, room, viewerRole, signals } = context
+  const { t, i18n } = useLingui()
+  const { event, room, viewerRole } = context
+  const [dockCollapsed, setDockCollapsed] = useDockCollapsed()
 
   const resolved = useMemo(
     () => sectionsForRoom(room, viewerRole, event.event_type),
@@ -137,141 +124,114 @@ export function RoomSections({
       .filter((s): s is ResolvedRoomSection => !!s)
   }, [resolved, room.kind])
 
-  const visible = useMemo(() => ordered.map((s) => s.def.id as RoomSectionId), [ordered])
-  const hero = useRoomHero(room, visible, signals.presenter?.since ?? null)
+  const byId = useMemo(() => new Map(ordered.map((s) => [s.def.id as RoomSectionId, s])), [ordered])
+  const plan = useMemo(() => {
+    const ids = ordered.map((s) => s.def.id as RoomSectionId)
+    // The call has its own reaction button. The emoji row only earns its place
+    // where there is no live call to put it in.
+    const withCall = ids.includes('av_placeholder') && isVenueVideoConfigured()
+    return planRoomShell(room.kind, withCall ? ids.filter((id) => id !== 'reactions') : ids)
+  }, [ordered, room.kind])
 
   if (!ordered.length) return null
 
+  const render = (id: RoomSectionId, fill = false) => {
+    const section = byId.get(id)
+    return section ? <RoomSection section={section} context={context} fill={fill} /> : null
+  }
+  const cell = (id: RoomSectionId, extra?: string) => (
+    <div key={id} className={cn('min-w-0 [&:has(>div:empty)]:hidden', extra)}>
+      <div>{render(id)}</div>
+    </div>
+  )
+
+  const dockTabs: DockTab[] = plan.dock.map((id) => ({
+    id,
+    label:
+      id === 'chat'
+        ? t`Chat`
+        : id === 'occupants'
+          ? t`People`
+          : i18n._(byId.get(id)!.def.label),
+    node: render(id, true),
+  }))
+  const hasDock = dockTabs.length > 0
+
   return (
-    <div
-      className={cn(
-        'grid grid-cols-1 gap-4 lg:auto-rows-[minmax(11rem,auto)] lg:grid-flow-dense lg:grid-cols-12',
-        className
-      )}
-    >
-      {ordered.map((section) => {
-        const id = section.def.id as RoomSectionId
-        const span = spanKeyFor(room.kind, id, hero.active)
-        const isHero = id === hero.active
+    <div className={cn('flex flex-col gap-4', className)}>
+      {plan.band.map((id) => cell(id))}
 
-        return (
-          <div
-            key={id}
-            // Named so the browser can morph this exact cell from where it was
-            // to where it is going. Without a name per cell the whole grid
-            // cross-fades, which reads as a flicker rather than a movement.
-            style={{ viewTransitionName: `vt-room-${id.replace(/_/g, '-')}` }}
-            className={cn(
-              // The wrapper is what collapses when a section renders nothing,
-              // which is why the pin button below is a sibling of the content
-              // rather than inside it: an empty cell must stay empty.
-              'group/cell relative lg:min-h-0 [&:has(>div:empty)]:hidden',
-              spanClass(span)
-            )}
-          >
-            <div className="h-full">
-              <RoomSection section={section} context={context} fill={spanFills(span)} />
-            </div>
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-4',
+          hasDock && (dockCollapsed ? 'lg:grid-cols-[minmax(0,1fr)_3.25rem]' : 'lg:grid-cols-[minmax(0,1fr)_22rem]')
+        )}
+      >
+        <div className="flex min-w-0 flex-col gap-4">
+          {plan.call && cell(plan.call)}
+          {plan.tool && cell(plan.tool)}
+        </div>
 
-            {canBeHero(room.kind, id) && (
-              <button
-                type="button"
-                onClick={() => hero.promote(id)}
-                aria-label={isHero ? t`Stop keeping this panel large` : t`Make this the big panel`}
-                title={isHero ? t`Stop keeping this large` : t`Make this the big panel`}
-                className="absolute right-2 top-2 z-sticky hidden rounded-lg border border-ktip-sand-200 bg-ktip-cream/90 p-1.5 text-ktip-sand-500 opacity-0 shadow-card transition-opacity hover:text-ktip-ocean-700 focus-visible:opacity-100 group-focus-within/cell:opacity-100 group-hover/cell:opacity-100 lg:block"
-              >
-                {isHero ? (
-                  <Minimize2 size={13} aria-hidden="true" />
-                ) : (
-                  <Maximize2 size={13} aria-hidden="true" />
-                )}
-              </button>
-            )}
+        {/* After the call and tool in the page order, so on a phone chat sits
+            right under them; beside them, spanning both rows, on a desktop. */}
+        {hasDock && (
+          <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <RoomDock
+              roomId={room.id}
+              tabs={dockTabs}
+              collapsed={dockCollapsed}
+              onCollapsedChange={setDockCollapsed}
+            />
           </div>
-        )
-      })}
+        )}
+
+        {plan.shelf.length > 0 && (
+          <div className="grid min-w-0 grid-cols-1 content-start gap-4 md:grid-cols-2 lg:col-start-1">
+            {plan.shelf.map((id) => cell(id, WIDE_ON_SHELF.has(id) ? 'md:col-span-2' : undefined))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-/**
- * Which panel is the big one, and the click that changes it.
- *
- * The pin is this person's, on this device — see venue-room-layout.ts for why
- * it is not a column. Clicking the panel that is already large clears the pin
- * rather than re-setting it, so the same control hands the room back to the
- * automatic behaviour, which is the only way somebody who pinned chat during a
- * talk gets the presenter back without knowing they have to.
- *
- * The rendered hero is a *step behind* the resolved one on purpose. Swapping
- * col-span and row-span is a grid reflow, and no amount of `transition` will
- * tween a grid track — the cells simply appear somewhere else. So the change is
- * applied inside a view transition, which lets the browser morph every cell
- * from its old box to its new one. Routing it through state rather than through
- * the click handler means a hero taken over by whoever is presenting animates
- * the same way as one the reader promoted themselves.
- */
-function useRoomHero(room: VenueRoom, visible: RoomSectionId[], presentingSince: number | null) {
-  const [pin, setPin] = useState<HeroPin | null>(() => readHeroPin(room.id))
+/** Panels that need the shelf's full width: galleries, tables, boards. */
+const WIDE_ON_SHELF = new Set<RoomSectionId>([
+  'showcase_gallery',
+  'peoples_choice',
+  'results_board',
+  'organiser_ops',
+  'quest_board',
+  'team_finder',
+  'collab_commons',
+  'coffee_tables',
+  'judging_console',
+  'submission_desk',
+  'challenge_brief',
+  'team_workspace',
+  'reactions',
+])
 
-  useEffect(() => {
-    setPin(readHeroPin(room.id))
-  }, [room.id])
+const DOCK_COLLAPSED_KEY = 'ktip.room.dock.collapsed'
 
-  const hostHero = useMemo(() => hostHeroOf(room), [room])
-
-  const target = resolveHero({
-    visible,
-    kind: room.kind,
-    hostHero,
-    presentingSince,
-    pin,
+/** The dock folded to a rail, remembered on this device for every room. */
+function useDockCollapsed(): [boolean, (collapsed: boolean) => void] {
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(DOCK_COLLAPSED_KEY) === '1'
+    } catch {
+      return false
+    }
   })
-
-  const [active, setActive] = useState(target)
-
-  useEffect(() => {
-    if (target === active) return
-    startBentoTransition(() => flushSync(() => setActive(target)))
-  }, [target, active])
-
-  const promote = useCallback(
-    (id: RoomSectionId) => {
-      const next = pin?.id === id ? null : { id, at: Date.now() }
-      setPin(next)
-      writeHeroPin(room.id, next)
-    },
-    [pin, room.id]
-  )
-
-  return { active, pin, promote }
-}
-
-/**
- * Re-lay-out the bento with a morph rather than a jump.
- *
- * Falls straight through on a browser without view transitions and on anyone
- * who has asked for less motion — in both cases the layout still changes, it
- * just changes instantly, which is exactly what it did before this existed.
- *
- * flushSync is required, not defensive: startViewTransition captures the DOM
- * when its callback returns, and a React state update that has not been flushed
- * by then would be captured as "nothing changed".
- */
-function startBentoTransition(apply: () => void) {
-  const start = (document as Document & { startViewTransition?: (cb: () => void) => unknown })
-    .startViewTransition
-
-  if (
-    typeof start !== 'function' ||
-    prefersReducedMotionNow()
-  ) {
-    apply()
-    return
-  }
-
-  start.call(document, apply)
+  const update = useCallback((next: boolean) => {
+    setCollapsed(next)
+    try {
+      localStorage.setItem(DOCK_COLLAPSED_KEY, next ? '1' : '0')
+    } catch {
+      // Blocked storage: it lasts for this visit.
+    }
+  }, [])
+  return [collapsed, update]
 }
 
 function RoomSection({

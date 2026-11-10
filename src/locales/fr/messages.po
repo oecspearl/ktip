@@ -111,6 +111,10 @@ msgstr "Configurer une application d'authentification"
 msgid "Active Grants"
 msgstr "Subventions actives"
 
+#: src/components/venue/room/RoomDock.tsx
+msgid "Show the side panel"
+msgstr "Afficher le panneau latéral"
+
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Another team's Homebase"
 msgstr "La Homebase d'une autre équipe"
@@ -1742,6 +1746,10 @@ msgstr "Notes"
 msgid "Deadline: {0}"
 msgstr "Date limite : {0}"
 
+#: src/components/venue/room/RoomDock.tsx
+msgid "Room panel"
+msgstr "Panneau de la salle"
+
 #: src/lib/permissions.ts
 msgid "Publish an event, including hackathons and challenges, and open registrations."
 msgstr "Publiez un événement, y compris des hackathons et des défis, et ouvrez les inscriptions."
@@ -2060,6 +2068,7 @@ msgstr "Comment partager un tableau blanc, un document ou un extrait de code ?"
 msgid "Share your thoughts, questions, or ideas..."
 msgstr "Partagez vos réflexions, questions ou idées..."
 
+#: src/components/venue/room/RoomSections.tsx
 #: src/lib/forum-board-icons.ts
 msgid "People"
 msgstr "Personnes"
@@ -4121,10 +4130,6 @@ msgstr "Détails de l'erreur"
 msgid "Some could not be deleted"
 msgstr "Certains n'ont pas pu être supprimés"
 
-#: src/lib/venue-templates.ts
-msgid "Watch the demos and vote for a favourite."
-msgstr "Regardez les démos et votez pour votre préférée."
-
 #: src/a11y/messages.ts
 msgid "Your answers stay on this device. Only the settings themselves are saved to your account."
 msgstr "Vos réponses restent sur cet appareil. Seuls les paramètres eux-mêmes sont enregistrés dans votre compte."
@@ -4677,6 +4682,10 @@ msgstr "Répondez au défi et joignez vos pièces justificatives"
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Link to show it"
 msgstr "Lien pour le montrer"
+
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Talks and chat reach you in"
+msgstr "Vous recevez les interventions et le chat en"
 
 #: src/i18n/harvested.ts
 msgid "The Partner API Terms apply to any organisation reading platform data through our partner API."
@@ -6895,6 +6904,7 @@ msgstr "Supprimer définitivement"
 msgid "Integration"
 msgstr "Intégration"
 
+#: src/components/venue/room/RoomSections.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Chat"
 msgstr "Discussion"
@@ -9624,6 +9634,10 @@ msgstr "Accepté le {approvedDate}"
 #: src/components/venue/room/QuestBoardPanel.tsx
 msgid "New quest, e.g. Help another team"
 msgstr "Nouvelle quête, ex. Aider une autre équipe"
+
+#: src/components/venue/room/RoomDock.tsx
+msgid "Hide the side panel"
+msgstr "Masquer le panneau latéral"
 
 #: src/hooks/useProjects.ts
 msgid "Not changed. You may no longer own it."
@@ -13638,6 +13652,10 @@ msgstr "La suppression de ce {noun} est définitive. Tout ce qui y est attaché 
 msgid "Collapse"
 msgstr "Réduire"
 
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Could not save your language"
+msgstr "Impossible d’enregistrer votre langue"
+
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "Help requests"
 msgstr "Demandes d'aide"
@@ -15202,10 +15220,6 @@ msgstr "OECS · Plateforme de Connaissance, Technologie & Innovation"
 #: src/i18n/harvested.ts
 msgid "Moderate every project, public or private"
 msgstr "Modérez tous les projets, publics ou privés"
-
-#: src/components/venue/room/RoomSections.tsx
-msgid "Stop keeping this large"
-msgstr "Arrêter de garder ceci en grand"
 
 #. placeholder {0}: params.responderName
 #. placeholder {1}: params.invite.resource_title
@@ -19821,10 +19835,6 @@ msgstr "Membres ({0})"
 msgid "Sign In"
 msgstr "Connexion"
 
-#: src/components/venue/room/RoomSections.tsx
-msgid "Make this the big panel"
-msgstr "Faire de ceci le grand panneau"
-
 #: src/i18n/harvested.ts
 msgid "Help article — For Administrators"
 msgstr "Article d'aide — Pour les administrateurs"
@@ -22353,6 +22363,10 @@ msgstr "Impossible d'enregistrer vos notes."
 msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
 msgstr "Désactivez cette option et vos points restent privés — vous continuez d'en gagner et de voir votre propre classement, mais personne d'autre ne le peut. Rendre votre niveau et vos points privés sur votre profil vous retire aussi du classement pour tous, sauf vos relations."
 
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Your language"
+msgstr "Votre langue"
+
 #: src/i18n/harvested.ts
 msgid "It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents."
 msgstr "Cela ne garantit pas qu'une subvention répertoriée existe, que les fonds seront déboursés, ou que le bailleur se comportera bien. %entityShort% n'est pas partie à votre accord avec un bailleur sauf s'il est expressément le bailleur nommé. Lisez la clause de non-responsabilité sur les subventions et le financement avant d'envoyer de l'argent ou des documents à quiconque."
@@ -22388,10 +22402,6 @@ msgstr "Que puis-je faire sans compte ?"
 #: src/pages/JoinInvitePage.tsx
 msgid "Invitation accepted — taking you there…"
 msgstr "Invitation acceptée — direction en cours…"
-
-#: src/components/venue/room/RoomSections.tsx
-msgid "Stop keeping this panel large"
-msgstr "Ne plus garder ce panneau agrandi"
 
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Loading documents…"
@@ -31672,6 +31682,10 @@ msgstr ""
 #: src/pages/InvitationsPage.tsx
 msgid "Project team invitations"
 msgstr "Invitations de l'équipe du projet"
+
+#: src/pages/events/EventVenueRoomPage.tsx
+msgid "{hereCount} here"
+msgstr "{hereCount} présents"
 
 #: src/lib/reaction-emoji.ts
 msgid "Love it"

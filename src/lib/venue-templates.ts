@@ -160,15 +160,10 @@ const HACKATHON_TOWER: TemplateFloor[] = [
   {
     name: 'Level 3 · Demos',
     rooms: [
+      // The Spectator Gallery folded into this room (2026-11-10): People's
+      // Choice is already on the stage, and a second room showing the same
+      // demos only split the audience in two.
       { preset: 'showcase', w: 11, h: 7 },
-      {
-        preset: 'main-hall',
-        w: 10,
-        h: 6,
-        name: 'Spectator Gallery',
-        description: msg`Watch the demos and vote for a favourite.`,
-        addSections: ['peoples_choice'],
-      },
       SUBMISSION_DESK,
       QUEST_BOARD,
     ],

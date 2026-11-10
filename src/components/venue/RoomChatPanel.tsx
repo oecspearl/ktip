@@ -418,7 +418,7 @@ export function RoomChatPanel({
         className
       )}
     >
-      <div className="border-b border-ktip-sand-100 px-4 py-3">
+      <div data-panel-head className="border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           <Trans>{room.name} chat</Trans>
         </h2>

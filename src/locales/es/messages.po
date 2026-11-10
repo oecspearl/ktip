@@ -111,6 +111,10 @@ msgstr "Configurar una aplicación autenticadora"
 msgid "Active Grants"
 msgstr "Subvenciones activas"
 
+#: src/components/venue/room/RoomDock.tsx
+msgid "Show the side panel"
+msgstr "Mostrar el panel lateral"
+
 #: src/components/venue/map/VenueMapExplorer.tsx
 msgid "Another team's Homebase"
 msgstr "Homebase de otro equipo"
@@ -1742,6 +1746,10 @@ msgstr "Notas"
 msgid "Deadline: {0}"
 msgstr "Fecha límite: {0}"
 
+#: src/components/venue/room/RoomDock.tsx
+msgid "Room panel"
+msgstr "Panel de la sala"
+
 #: src/lib/permissions.ts
 msgid "Publish an event, including hackathons and challenges, and open registrations."
 msgstr "Publique un evento, incluidos hackatones y desafíos, y abra las inscripciones."
@@ -2060,6 +2068,7 @@ msgstr "¿Cómo comparto una pizarra, un documento o un fragmento de código?"
 msgid "Share your thoughts, questions, or ideas..."
 msgstr "Comparta sus reflexiones, preguntas o ideas..."
 
+#: src/components/venue/room/RoomSections.tsx
 #: src/lib/forum-board-icons.ts
 msgid "People"
 msgstr "Personas"
@@ -4121,10 +4130,6 @@ msgstr "Detalles del error"
 msgid "Some could not be deleted"
 msgstr "Algunos no pudieron ser eliminados"
 
-#: src/lib/venue-templates.ts
-msgid "Watch the demos and vote for a favourite."
-msgstr "Vea las demostraciones y vote por su favorita."
-
 #: src/a11y/messages.ts
 msgid "Your answers stay on this device. Only the settings themselves are saved to your account."
 msgstr "Sus respuestas permanecen en este dispositivo. Sólo la configuración se guarda en su cuenta."
@@ -4677,6 +4682,10 @@ msgstr "Responda al desafío y adjunte sus archivos de respaldo"
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Link to show it"
 msgstr "Enlace para mostrarlo"
+
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Talks and chat reach you in"
+msgstr "Recibes las charlas y el chat en"
 
 #: src/i18n/harvested.ts
 msgid "The Partner API Terms apply to any organisation reading platform data through our partner API."
@@ -6881,6 +6890,7 @@ msgstr "Eliminar permanentemente"
 msgid "Integration"
 msgstr ""
 
+#: src/components/venue/room/RoomSections.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Chat"
 msgstr "Chat"
@@ -9584,6 +9594,10 @@ msgstr "Aceptado el {approvedDate}"
 #: src/components/venue/room/QuestBoardPanel.tsx
 msgid "New quest, e.g. Help another team"
 msgstr "Nueva misión, p. ej. Ayudar a otro equipo"
+
+#: src/components/venue/room/RoomDock.tsx
+msgid "Hide the side panel"
+msgstr "Ocultar el panel lateral"
 
 #: src/hooks/useProjects.ts
 msgid "Not changed. You may no longer own it."
@@ -13544,6 +13558,10 @@ msgstr "Eliminar este {noun} es permanente. Todo lo adjunto a él se elimina tam
 msgid "Collapse"
 msgstr ""
 
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Could not save your language"
+msgstr "No se pudo guardar tu idioma"
+
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "Help requests"
 msgstr "Solicitudes de ayuda"
@@ -15066,10 +15084,6 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Moderate every project, public or private"
 msgstr "Modere todos los proyectos, públicos o privados"
-
-#: src/components/venue/room/RoomSections.tsx
-msgid "Stop keeping this large"
-msgstr "Dejar de mantener esto en grande"
 
 #. placeholder {0}: params.responderName
 #. placeholder {1}: params.invite.resource_title
@@ -19625,10 +19639,6 @@ msgstr "Miembros ({0})"
 msgid "Sign In"
 msgstr "Iniciar sesión"
 
-#: src/components/venue/room/RoomSections.tsx
-msgid "Make this the big panel"
-msgstr "Convertir en el panel grande"
-
 #: src/i18n/harvested.ts
 msgid "Help article — For Administrators"
 msgstr "Artículo de ayuda: Para administradores"
@@ -22137,6 +22147,10 @@ msgstr "No se pudieron guardar sus puntuaciones."
 msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
 msgstr "Desactive esto y sus puntos permanecen solo suyos: usted sigue ganándolos y puede ver su propia clasificación, pero nadie más puede hacerlo. Si hace privados su nivel y sus puntos en su perfil, tampoco aparece en la clasificación para nadie salvo sus conexiones."
 
+#: src/components/venue/room/RoomArrivalPanels.tsx
+msgid "Your language"
+msgstr "Tu idioma"
+
 #: src/i18n/harvested.ts
 msgid "It does not guarantee that a listed grant exists, that funds will be disbursed, or that the funder will behave well. %entityShort% is not a party to your agreement with a funder unless it is expressly the named funder. Read the Grant & Funding Disclaimer before you send anyone money or documents."
 msgstr ""
@@ -22172,10 +22186,6 @@ msgstr "¿Qué puedo hacer sin una cuenta?"
 #: src/pages/JoinInvitePage.tsx
 msgid "Invitation accepted — taking you there…"
 msgstr "Invitación aceptada — dirigiéndole allí…"
-
-#: src/components/venue/room/RoomSections.tsx
-msgid "Stop keeping this panel large"
-msgstr "Dejar de mantener este panel grande"
 
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Loading documents…"
@@ -31322,6 +31332,10 @@ msgstr ""
 #: src/pages/InvitationsPage.tsx
 msgid "Project team invitations"
 msgstr "Invitaciones del equipo del proyecto"
+
+#: src/pages/events/EventVenueRoomPage.tsx
+msgid "{hereCount} here"
+msgstr "{hereCount} aquí"
 
 #: src/lib/reaction-emoji.ts
 msgid "Love it"

@@ -11,6 +11,7 @@ import { useRoomSignals } from '../../hooks/useRoomSignals'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
+import { AvatarCluster } from '../../components/venue/AvatarCluster'
 import { RoomSections } from '../../components/venue/room/RoomSections'
 import { HomebaseLookPanel } from '../../components/venue/room/HomebaseLookPanel'
 import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
@@ -208,6 +209,8 @@ export default function EventVenueRoomPage() {
   const Icon = resolveIcon(VENUE_ROOM_KIND_ICONS[room.kind])
   const isHost = membership.role === 'organizer'
   const headcount = presence.occupants.filter((o) => o.availability !== 'offline').length
+  // Named for the catalog: "{hereCount} here", not "{0} here".
+  const hereCount = inRoom.length
 
   const sectionContext: RoomSectionContext = {
     event,
@@ -244,7 +247,7 @@ export default function EventVenueRoomPage() {
       />
 
       <div className="mx-auto max-w-[1640px] px-3 py-6 sm:px-4">
-        <div className="mb-6 flex items-start gap-3">
+        <div className="mb-6 flex flex-wrap items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ktip-ocean-50 text-ktip-ocean-700">
             <Icon size={20} aria-hidden="true" />
           </span>
@@ -259,11 +262,20 @@ export default function EventVenueRoomPage() {
               <p className="mt-1 text-sm text-ktip-sand-600">{room.description}</p>
             )}
           </div>
-          {!room.is_open && (
-            <span className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-3 py-1 text-xs font-medium text-ktip-sand-600">
-              <Lock size={12} aria-hidden="true" /> <Trans>Closed</Trans>
-            </span>
-          )}
+          {/* Who is here, at a glance: the same faces the People tab lists. */}
+          <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2 self-center">
+            {inRoom.length > 0 && (
+              <span className="flex items-center gap-2 text-xs font-semibold text-ktip-sand-600">
+                <AvatarCluster occupants={inRoom.slice(0, 4)} overflow={Math.max(0, inRoom.length - 4)} size="sm" />
+                <Trans>{hereCount} here</Trans>
+              </span>
+            )}
+            {!room.is_open && (
+              <span className="flex items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-3 py-1 text-xs font-medium text-ktip-sand-600">
+                <Lock size={12} aria-hidden="true" /> <Trans>Closed</Trans>
+              </span>
+            )}
+          </div>
         </div>
 
         {/*

@@ -4,6 +4,10 @@ import { useToast } from '../../../contexts/ToastContext'
 import { useMyEventRsvp, useVenueCheckIn } from '../../../hooks/useVenueCheckIn'
 import { entityPath } from '../../../lib/slug'
 import { Button } from '../../ui/Button'
+import { Segmented } from '../../ui/Segmented'
+import { useAuth } from '../../../contexts/AuthContext'
+import { useContentLanguage } from '../../../i18n/useContentLanguage'
+import { UI_LANGS, type UiLang } from '../../../lib/i18n/protocol'
 import { RoomPanel } from './RoomPanel'
 import type { Event, EventVenueMember } from '../../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -51,6 +55,7 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
           You are registered for <strong>{event.title}</strong> but not checked in yet.
         </Trans>
       </p>
+      <ArrivalLanguage />
       <Button
         size="sm"
         loading={saving}
@@ -65,6 +70,43 @@ export function CheckInCard({ event }: { event: Pick<Event, 'id' | 'title'> }) {
       >
         <Trans>Check in</Trans>
       </Button>
+    </div>
+  )
+}
+
+const ENDONYM: Record<UiLang, string> = { en: 'English', fr: 'Français', es: 'Español' }
+
+/**
+ * The language talks and chat reach this member in, asked on arrival.
+ *
+ * The same setting as Preferences (profiles.content_language). Calls use it by
+ * default, so answering here is what makes the "follow along in your language"
+ * offer appear for someone speaking another one.
+ */
+function ArrivalLanguage() {
+  const { t } = useLingui()
+  const auth = useAuth()
+  const toast = useToast()
+  const { lang } = useContentLanguage()
+
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2 text-sm text-ktip-sun-800">
+      <span>
+        <Trans>Talks and chat reach you in</Trans>
+      </span>
+      <Segmented
+        value={lang}
+        options={UI_LANGS.map((code) => ({ value: code, label: ENDONYM[code] }))}
+        onChange={async (next) => {
+          try {
+            await auth.updateProfile({ content_language: next })
+          } catch (err: any) {
+            toast.error(err?.message || t`Could not save your language`)
+          }
+        }}
+        label={t`Your language`}
+        radius="sm"
+      />
     </div>
   )
 }

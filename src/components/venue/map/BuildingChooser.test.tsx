@@ -27,7 +27,7 @@ describe('BuildingChooser', () => {
     const cards = screen.getAllByRole('button', { pressed: true })
     expect(cards).toHaveLength(1)
     expect(cards[0]).toHaveTextContent('Hackathon Tower')
-    expect(screen.getAllByText('5 floors, 29 rooms').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('5 floors, 28 rooms').length).toBeGreaterThan(0)
   })
 
   it('re-rolls a laid-out building', () => {
