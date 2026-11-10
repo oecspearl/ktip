@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { canCheckEmail, checkEmailAvailable } from './email-available'
+import { canCheckEmail, checkEmail, checkEmailAvailable } from './email-available'
 
 const respond = (status: number, body: unknown) =>
   vi.fn(async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch
@@ -40,5 +40,25 @@ describe('checkEmailAvailable', () => {
       throw new TypeError('Failed to fetch')
     }) as unknown as typeof fetch
     expect(await checkEmailAvailable('a@b.co', undefined, thrower)).toBe('unknown')
+  })
+})
+
+describe('checkEmail', () => {
+  it('carries the server’s school flag beside the answer', async () => {
+    expect(await checkEmail('a@b.edu', undefined, respond(200, { in_use: false, school: true }))).toEqual({
+      availability: 'free',
+      school: true,
+    })
+    expect(await checkEmail('a@b.co', undefined, respond(200, { in_use: true }))).toEqual({
+      availability: 'taken',
+      school: false,
+    })
+  })
+
+  it('is never school when the question went unanswered', async () => {
+    expect(await checkEmail('a@b.edu', undefined, respond(500, { school: true }))).toEqual({
+      availability: 'unknown',
+      school: false,
+    })
   })
 })

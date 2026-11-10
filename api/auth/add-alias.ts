@@ -26,6 +26,11 @@ const DAILY_SEND_LIMIT = 5
 // this string. Do not make them distinguishable — see the docblock.
 const IN_USE_MESSAGE = 'That email address is already in use.'
 
+// Server text is English-only; the forms show their own translated version
+// keyed off `reason`, and this is the fallback.
+const BOTH_SCHOOL_MESSAGE =
+  'Both of your addresses are school addresses. Use a personal one here, like Gmail or Outlook, so you keep access after you leave school.'
+
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), {
     status,
@@ -103,6 +108,18 @@ export default async function handler(request: Request) {
   }
 
   const admin = createClient(supabaseUrl, serviceKey)
+
+  // --- 204: at least one of the two addresses must outlive school ---
+  // Checked before the rate limit so a refused pair does not spend a send.
+  // If the check itself fails the pair is let through; ProtectedRoute reads
+  // my_secondary_email_status() and asks again on the next navigation.
+  const [aliasSchool, primarySchool] = await Promise.all([
+    admin.rpc('is_school_email', { p_email: email }),
+    admin.rpc('is_school_email', { p_email: caller.email ?? '' }),
+  ])
+  if (aliasSchool.data === true && primarySchool.data === true) {
+    return json({ error: BOTH_SCHOOL_MESSAGE, reason: 'both_school' }, 400)
+  }
 
   // --- Rate limit: cap verification mail per account per day ---
   const { data: limit } = await admin.rpc('consume_auth_rate_limit', {

@@ -70,8 +70,15 @@ export default async function handler(request: Request) {
     return json({ error: 'rate_limited', retry_after: (limit as any).retry_after }, 429)
   }
 
-  const { data, error } = await admin.rpc('email_in_use', { p_email: email })
+  const [{ data, error }, school] = await Promise.all([
+    admin.rpc('email_in_use', { p_email: email }),
+    // 204. Whether the domain counts as a school one, so the signup form can
+    // insist one of the two addresses is personal. An institution's domain
+    // list is public knowledge, so this leaks nothing the in_use answer does
+    // not. A failure is false: add-alias checks the pair again.
+    admin.rpc('is_school_email', { p_email: email }),
+  ])
   if (error) return json({ error: 'server_error' }, 500)
 
-  return json({ in_use: data === true }, 200)
+  return json({ in_use: data === true, school: school.data === true }, 200)
 }

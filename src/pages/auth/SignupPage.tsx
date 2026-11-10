@@ -13,7 +13,9 @@ import { PasswordChecklist } from '../../components/ui/PasswordChecklist'
 import { Mail, Lock, UserPlus, CheckCircle, ArrowLeft, ArrowRight, Building2, Cake } from 'lucide-react'
 import { OtpInput } from '../../components/ui/OtpInput'
 import { signupSchema, signupStep1Schema, todayIso } from '../../lib/validation'
-import { canCheckEmail, checkEmailAvailable } from '../../lib/email-available'
+import { canCheckEmail, checkEmail } from '../../lib/email-available'
+import { secondaryEmailProblem } from '../../lib/email-policy'
+import { useSecondaryEmailCopy } from '../../hooks/useSecondaryEmailCopy'
 import { supabase } from '../../lib/supabase'
 import { roleRequiresMfa } from '../../lib/permissions'
 import { rememberReturnTo, takeReturnTo } from '../../lib/return-to'
@@ -98,7 +100,7 @@ const nameFromEmail = (email: string) => {
 }
 
 /**
- * Registers the optional backup address through the route Settings → Security
+ * Registers the backup address through the route Settings → Security
  * already uses (api/auth/add-alias.ts), which stores it unverified and mails it
  * a confirmation link. True when the route accepted it; a refusal, a missing
  * session or a network failure is false, and the caller only reports it.
@@ -152,12 +154,20 @@ export default function SignupPage() {
 
   // Step 1 — required account fields
   const [email, setEmail] = useState('')
-  // Optional. Becomes a secondary address (user_email_aliases) once the account
-  // exists — see addBackupEmail. Nothing is sent before then: the alias route
-  // needs a session, and signUp() returns none.
+  // Required (204). Becomes a secondary address (user_email_aliases) once the
+  // account exists — see addBackupEmail. Nothing is sent before then: the alias
+  // route needs a session, and signUp() returns none.
   const [backupEmail, setBackupEmail] = useState('')
   const [takenBackup, setTakenBackup] = useState<string | null>(null)
   const backupCheck = useRef<AbortController | null>(null)
+  // Addresses the server called school ones (204), keyed by the address so a
+  // flag never outlives an edit. The shape test in email-policy covers the
+  // rest; this adds the domains only an institution's listing knows.
+  const [schoolAddresses, setSchoolAddresses] = useState<ReadonlySet<string>>(() => new Set())
+  const noteSchool = (address: string, school: boolean) => {
+    if (school) setSchoolAddresses((prev) => (prev.has(address) ? prev : new Set(prev).add(address)))
+  }
+  const secondaryCopy = useSecondaryEmailCopy()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
@@ -200,19 +210,20 @@ export default function SignupPage() {
   const normalisedEmail = email.trim().toLowerCase()
   const emailTaken = takenEmail !== null && takenEmail === normalisedEmail
 
-  // Live from the values, like accountComplete below. Empty is valid: the
-  // field is optional. A taken address is refused here because the alias route
-  // would refuse it after signup anyway, when it is too late to fix in place.
+  // Live from the values, like accountComplete below. Required, and at least
+  // one of the pair must not be a school address (204). A taken address is
+  // refused here because the alias route would refuse it after signup anyway,
+  // when it is too late to fix in place.
   const normalisedBackup = backupEmail.trim().toLowerCase()
-  const backupError: string | undefined = !normalisedBackup
-    ? undefined
-    : !canCheckEmail(normalisedBackup)
-      ? t`Enter a valid email address.`
-      : normalisedBackup === normalisedEmail
-        ? t`Use a different address from your main email.`
-        : takenBackup === normalisedBackup
-          ? t`That email address is already in use.`
-          : undefined
+  const backupError: string | undefined =
+    secondaryCopy.problem(
+      secondaryEmailProblem({
+        primary: normalisedEmail,
+        secondary: normalisedBackup,
+        primarySchool: schoolAddresses.has(normalisedEmail),
+        secondarySchool: schoolAddresses.has(normalisedBackup),
+      }),
+    ) ?? (takenBackup === normalisedBackup ? t`That email address is already in use.` : undefined)
   const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
 
@@ -290,9 +301,10 @@ export default function SignupPage() {
     if (!canCheckEmail(address) || address === takenEmail) return
     const controller = new AbortController()
     emailCheck.current = controller
-    void checkEmailAvailable(address, controller.signal).then((result) => {
+    void checkEmail(address, controller.signal).then((result) => {
       if (controller.signal.aborted) return
-      if (result === 'taken') setTakenEmail(address)
+      noteSchool(address, result.school)
+      if (result.availability === 'taken') setTakenEmail(address)
     })
   }
 
@@ -306,9 +318,10 @@ export default function SignupPage() {
     if (!canCheckEmail(address) || address === normalisedEmail || address === takenBackup) return
     const controller = new AbortController()
     backupCheck.current = controller
-    void checkEmailAvailable(address, controller.signal).then((result) => {
+    void checkEmail(address, controller.signal).then((result) => {
       if (controller.signal.aborted) return
-      if (result === 'taken') setTakenBackup(address)
+      noteSchool(address, result.school)
+      if (result.availability === 'taken') setTakenBackup(address)
     })
   }
 
@@ -454,16 +467,16 @@ export default function SignupPage() {
 
       // The backup address goes out now, not at signUp(): the alias route proves
       // account ownership with a session, and this is the first moment there
-      // is one. Not awaited, and a failure never blocks the account — it only
-      // says where to add the address by hand.
+      // is one. A failure never blocks the account: the secondary-email gate
+      // (204) asks for it again on the next page. Awaited for that same gate —
+      // a send still in flight would have it ask for this very address.
       const backup = backupEmail.trim().toLowerCase()
       // An address found to be taken after step 1 is not sent, only reported.
       const accessToken = backupError ? undefined : otpData?.session?.access_token
       if (backup) {
-        void addBackupEmail(accessToken, backup).then((sent) => {
-          if (sent) toast.success(t`We sent a link to ${backup}. Open it to confirm your backup email.`)
-          else toast.warning(t`Your backup email was not added. You can add it in Settings → Security.`)
-        })
+        const sent = await addBackupEmail(accessToken, backup)
+        if (sent) toast.success(t`We sent a link to ${backup}. Open it to confirm your backup email.`)
+        else toast.warning(t`Your backup email was not added. We will ask for it again in a moment.`)
       }
 
       // Navigate straight to enrolment rather than letting ProtectedRoute bounce
@@ -611,18 +624,19 @@ export default function SignupPage() {
 
                     <Input
                       type="email"
-                      label={t`Backup email (optional)`}
-                      placeholder={t`A second address you can use`}
+                      label={t`Backup email`}
+                      placeholder={t`A personal address, like Gmail or Outlook`}
                       value={backupEmail}
                       onChange={(e) => setBackupEmail(e.target.value)}
                       onBlur={handleBackupBlur}
                       error={touched.backup_email ? backupError : undefined}
-                      helperText={t`For signing in and account recovery. We email it a link to confirm.`}
+                      helperText={secondaryCopy.helper}
                       icon={<Mail size={20} />}
                       // Not "email": autofill would copy the main address in
                       // here and trip the "different address" check.
                       autoComplete="off"
                       fullWidth
+                      required
                     />
 
                     <div>

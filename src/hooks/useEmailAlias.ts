@@ -32,6 +32,41 @@ export function useMyEmailAlias(userId: string | undefined) {
   return { alias: query.data ?? null, loading: query.isPending, error: query.error }
 }
 
+/** my_secondary_email_status() (204). */
+export interface SecondaryEmailStatus {
+  has_secondary: boolean
+  secondary_email: string | null
+  verified: boolean
+  pending_live: boolean
+  primary_school: boolean
+  secondary_school: boolean
+  compliant: boolean
+}
+
+/**
+ * Where the signed-in account stands against the secondary-email rule (204).
+ * Read by ProtectedRoute, which only renders for signed-in sessions, so public
+ * pages never pay for it. Keyed under 'email-alias' so every alias mutation
+ * refreshes it with the same invalidation.
+ */
+export function useSecondaryEmailStatus(userId: string | undefined) {
+  const query = useQuery({
+    queryKey: keys.sub('email-alias', 'status', userId),
+    queryFn: async (): Promise<SecondaryEmailStatus> => {
+      const { data, error } = await (supabase.rpc as any)('my_secondary_email_status')
+      if (error) throw error
+      return data as SecondaryEmailStatus
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+    // A failed check lets the member through (see ProtectedRoute); retrying
+    // a missing function on every navigation would only add latency.
+    retry: 1,
+  })
+
+  return { status: query.data ?? null, loading: query.isPending && !!userId, error: query.error }
+}
+
 export function useEmailAliasMutations() {
   const { t } = useLingui()
   const queryClient = useQueryClient()
@@ -73,9 +108,32 @@ export function useEmailAliasMutations() {
     onSuccess: invalidate,
   })
 
+  /**
+   * Swaps a verified alias for a new address. add-alias refuses while a
+   * verified one is on file, so it is removed first. If the add then fails the
+   * account has no secondary, and ProtectedRoute asks for one: never stuck.
+   */
+  //
+  // The delete goes straight to the table rather than through removeMutation:
+  // that one invalidates on success, and the refreshed status would bounce a
+  // Settings visitor to the gate between the two halves of the swap.
+  const replaceAlias = async (userId: string, email: string) => {
+    const { error } = await (supabase.from('user_email_aliases') as any)
+      .delete()
+      .eq('user_id', userId)
+    if (error) throw error
+    try {
+      return await addMutation.mutateAsync(email)
+    } catch (err) {
+      invalidate()
+      throw err
+    }
+  }
+
   return {
     addAlias: addMutation.mutateAsync,
     removeAlias: removeMutation.mutateAsync,
+    replaceAlias,
     loading: addMutation.isPending || removeMutation.isPending,
     error: addMutation.error || removeMutation.error,
   }

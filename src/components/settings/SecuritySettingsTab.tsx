@@ -8,6 +8,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { changePasswordSchema, changeEmailSchema, secondaryEmailSchema } from '../../lib/validation'
 import { useMyEmailAlias, useEmailAliasMutations } from '../../hooks/useEmailAlias'
+import { useSecondaryEmailCopy } from '../../hooks/useSecondaryEmailCopy'
+import { looksLikeSchoolEmail, secondaryEmailProblem } from '../../lib/email-policy'
 import {
   useBackupCodeStatus,
   useMfaEmailMutations,
@@ -57,7 +59,8 @@ export function SecuritySettingsTab() {
 
   // Secondary email
   const { alias, loading: aliasLoading } = useMyEmailAlias(auth.user?.id)
-  const { addAlias, removeAlias, loading: aliasSaving } = useEmailAliasMutations()
+  const { addAlias, replaceAlias, loading: aliasSaving } = useEmailAliasMutations()
+  const secondaryCopy = useSecondaryEmailCopy()
   const [secondaryEmail, setSecondaryEmail] = useState('')
   const [aliasErrors, setAliasErrors] = useState<Record<string, string>>({})
   const [aliasSent, setAliasSent] = useState(false)
@@ -176,6 +179,13 @@ export function SecuritySettingsTab() {
       return
     }
 
+    // 204. GoTrue takes the change directly, so this is the only place to say
+    // no before it happens; the secondary-email gate catches anything missed.
+    if (alias && looksLikeSchoolEmail(newEmail) && looksLikeSchoolEmail(alias.email)) {
+      setEmailErrors({ email: secondaryCopy.problem('both_school')! })
+      return
+    }
+
     setEmailLoading(true)
     try {
       await auth.updateEmail(newEmail)
@@ -204,8 +214,21 @@ export function SecuritySettingsTab() {
       return
     }
 
+    const policyError = secondaryCopy.problem(
+      secondaryEmailProblem({ primary: auth.user?.email ?? '', secondary: value }),
+    )
+    if (policyError) {
+      setAliasErrors({ email: policyError })
+      return
+    }
+
     try {
-      const res = await addAlias(value.trim().toLowerCase())
+      // A secondary is required (204), so a verified one is swapped rather
+      // than removed first; a pending one is simply overwritten by add-alias.
+      const email = value.trim().toLowerCase()
+      const res = alias?.verified_at && alias.email !== email
+        ? await replaceAlias(auth.user!.id, email)
+        : await addAlias(email)
       if (res.already_verified) {
         toast.success(t`That address is already verified.`)
         return
@@ -221,17 +244,6 @@ export function SecuritySettingsTab() {
       }
     } catch (err: any) {
       setAliasErrors({ _form: err.message || t`Failed to save the address` })
-    }
-  }
-
-  const handleRemoveSecondaryEmail = async () => {
-    setAliasErrors({})
-    setAliasSent(false)
-    try {
-      await removeAlias(auth.user!.id)
-      toast.success(t`Secondary email removed`)
-    } catch (err: any) {
-      setAliasErrors({ _form: err.message || t`Failed to remove the address` })
     }
   }
 
@@ -575,6 +587,7 @@ export function SecuritySettingsTab() {
                 value={secondaryEmail}
                 onChange={(e) => setSecondaryEmail(e.target.value)}
                 error={aliasErrors.email}
+                helperText={secondaryCopy.helper}
                 icon={<Mail size={20} />}
                 fullWidth
               />
@@ -594,8 +607,7 @@ export function SecuritySettingsTab() {
                 <div className="bg-ktip-ocean-50 border border-ktip-ocean-200 text-ktip-ocean-700 px-4 py-3 rounded-xl text-sm">
                   <Trans>
                     <strong>{alias.email}</strong> is now your primary email address, so it no
-                    longer works as a secondary one. You can remove it and add a different
-                    backup address.
+                    longer works as a secondary one. Add a different backup address below.
                   </Trans>
                 </div>
               ) : (
@@ -606,8 +618,23 @@ export function SecuritySettingsTab() {
                   </span>
                 </div>
               )}
-              <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
-                <Trans>Remove</Trans>
+              <Input
+                type="email"
+                label={t`Use a different address`}
+                placeholder={t`Enter a backup email address`}
+                value={secondaryEmail}
+                onChange={(e) => setSecondaryEmail(e.target.value)}
+                error={aliasErrors.email}
+                helperText={secondaryCopy.helper}
+                icon={<Mail size={20} />}
+                fullWidth
+              />
+              <Button
+                variant="secondary"
+                onClick={() => submitSecondaryEmail(secondaryEmail)}
+                loading={aliasSaving}
+              >
+                <Trans>Replace</Trans>
               </Button>
             </>
           ) : (
@@ -621,7 +648,7 @@ export function SecuritySettingsTab() {
                 ) : (
                   <Trans>
                     The confirmation link for <strong>{alias.email}</strong> expired. Send a
-                    fresh one, or remove the address.
+                    new one, or use a different address.
                   </Trans>
                 )}
               </div>
@@ -629,10 +656,25 @@ export function SecuritySettingsTab() {
                 <Button onClick={() => submitSecondaryEmail(alias.email)} loading={aliasSaving}>
                   <Trans>Resend Link</Trans>
                 </Button>
-                <Button variant="secondary" onClick={handleRemoveSecondaryEmail} loading={aliasSaving}>
-                  <Trans>Remove</Trans>
-                </Button>
               </div>
+              <Input
+                type="email"
+                label={t`Use a different address`}
+                placeholder={t`Enter a backup email address`}
+                value={secondaryEmail}
+                onChange={(e) => setSecondaryEmail(e.target.value)}
+                error={aliasErrors.email}
+                helperText={secondaryCopy.helper}
+                icon={<Mail size={20} />}
+                fullWidth
+              />
+              <Button
+                variant="secondary"
+                onClick={() => submitSecondaryEmail(secondaryEmail)}
+                loading={aliasSaving}
+              >
+                <Trans>Send link to this address</Trans>
+              </Button>
             </>
           )}
 

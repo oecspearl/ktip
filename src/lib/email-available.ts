@@ -19,12 +19,24 @@ export const canCheckEmail = (email: string) => {
   return EMAIL_RE.test(trimmed) && trimmed.length <= 254
 }
 
-export async function checkEmailAvailable(
+export interface EmailCheck {
+  availability: EmailAvailability
+  /**
+   * Whether the server counts the domain as a school one (migration 204).
+   * False whenever the question went unanswered — the forms OR this with their
+   * own shape test, and add-alias checks again, so a miss is never final.
+   */
+  school: boolean
+}
+
+const UNKNOWN: EmailCheck = { availability: 'unknown', school: false }
+
+export async function checkEmail(
   email: string,
   signal?: AbortSignal,
   fetchImpl: typeof fetch = fetch,
-): Promise<EmailAvailability> {
-  if (!canCheckEmail(email)) return 'unknown'
+): Promise<EmailCheck> {
+  if (!canCheckEmail(email)) return UNKNOWN
   try {
     const res = await fetchImpl('/api/auth/email-available', {
       method: 'POST',
@@ -32,12 +44,21 @@ export async function checkEmailAvailable(
       body: JSON.stringify({ email: email.trim().toLowerCase() }),
       signal,
     })
-    if (!res.ok) return 'unknown'
-    const body = (await res.json()) as { in_use?: unknown }
-    if (body.in_use === true) return 'taken'
-    if (body.in_use === false) return 'free'
-    return 'unknown'
+    if (!res.ok) return UNKNOWN
+    const body = (await res.json()) as { in_use?: unknown; school?: unknown }
+    const school = body.school === true
+    if (body.in_use === true) return { availability: 'taken', school }
+    if (body.in_use === false) return { availability: 'free', school }
+    return { availability: 'unknown', school }
   } catch {
-    return 'unknown'
+    return UNKNOWN
   }
+}
+
+export async function checkEmailAvailable(
+  email: string,
+  signal?: AbortSignal,
+  fetchImpl: typeof fetch = fetch,
+): Promise<EmailAvailability> {
+  return (await checkEmail(email, signal, fetchImpl)).availability
 }

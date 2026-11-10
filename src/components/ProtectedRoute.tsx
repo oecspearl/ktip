@@ -2,10 +2,13 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { RouteSplash } from './RouteSplash'
 import { suspensionRedirect } from '../lib/suspension'
+import { useSecondaryEmailStatus } from '../hooks/useEmailAlias'
 
 export const ProtectedRoute = () => {
   const auth = useAuth()
   const location = useLocation()
+  // Called before any return, as hooks must be. Disabled until there is a user.
+  const secondary = useSecondaryEmailStatus(auth.user?.id)
 
   if (auth.loading) {
     return <RouteSplash />
@@ -82,6 +85,20 @@ export const ProtectedRoute = () => {
   // not hold yet.
   if (auth.profile?.requires_mfa_enrollment) {
     return <Navigate to="/security/set-up" replace />
+  }
+
+  // A secondary email, at least one of the pair not a school address (204).
+  // Last, because every gate above it is about who may act at all, and an OAuth
+  // signup owes onboarding (and maybe a second factor) before this makes sense.
+  //
+  // Only an ANSWER of non-compliant holds the session. An error — the function
+  // not deployed yet, a network blip — lets the member through, the same rule
+  // the signup email check follows: a broken check must never lock people out.
+  if (secondary.loading) {
+    return <RouteSplash />
+  }
+  if (secondary.status && secondary.status.compliant === false) {
+    return <Navigate to="/security/backup-email" replace state={{ from: location }} />
   }
 
   return <Outlet />

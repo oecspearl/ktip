@@ -434,6 +434,7 @@ msgid "A public showcase is public. If your entry contains something you intend 
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
+#: src/pages/security/BackupEmailGatePage.tsx
 msgid "Verification link logged to the console (dev mode)."
 msgstr "Lien de vérification enregistré dans la console (mode développeur)."
 
@@ -768,6 +769,10 @@ msgstr ""
 msgid "Nobody is in here yet."
 msgstr "Personne n'est encore ici."
 
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Not you?"
+msgstr ""
+
 #: src/hooks/useAdminContentStatus.ts
 msgid "Not deleted. It may already be gone, or you may not be allowed to delete it."
 msgstr ""
@@ -895,6 +900,10 @@ msgstr ""
 
 #: src/components/profile/BannerStudio.tsx
 msgid "Directory card"
+msgstr ""
+
+#: src/hooks/useSecondaryEmailCopy.ts
+msgid "Your main email is a school address, and so is this one. Use a personal address, like Gmail or Outlook, so you can still sign in after you leave school."
 msgstr ""
 
 #: src/components/admin/ModerationReasonModal.tsx
@@ -2490,6 +2499,10 @@ msgstr "Dessiner"
 msgid "Quarter"
 msgstr "Trimestre"
 
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Both of your addresses are school addresses. School accounts usually close when you leave, so replace <0>{current}</0> with a personal one."
+msgstr ""
+
 #: src/lib/grant-application-template.ts
 msgid "Expected Outcomes"
 msgstr "Résultats attendus"
@@ -2860,7 +2873,7 @@ msgstr "Définissez votre statut à partir de la pastille dans la barre supérie
 msgid "Board created"
 msgstr ""
 
-#: src/pages/auth/SignupPage.tsx
+#: src/hooks/useSecondaryEmailCopy.ts
 msgid "Use a different address from your main email."
 msgstr ""
 
@@ -3758,6 +3771,10 @@ msgstr ""
 msgid "{0}, Col {1}"
 msgstr "{0}, Col {1}"
 
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Check your inbox"
+msgstr ""
+
 #: src/pages/grants/GrantsPage.tsx
 msgid "All Focus Areas"
 msgstr ""
@@ -4135,6 +4152,7 @@ msgstr "Centres d'intérêt"
 
 #: src/components/settings/SecuritySettingsTab.tsx
 #: src/hooks/useEmailAlias.ts
+#: src/pages/security/BackupEmailGatePage.tsx
 msgid "Failed to save the address"
 msgstr "Échec de l'enregistrement de l'adresse"
 
@@ -4526,10 +4544,6 @@ msgstr ""
 
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Post one and it appears on the Grants page straight away."
-msgstr ""
-
-#: src/pages/auth/SignupPage.tsx
-msgid "Your backup email was not added. You can add it in Settings → Security."
 msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
@@ -5479,6 +5493,10 @@ msgstr "Aucun document pour l'instant. Commencez-en un pour le plan de votre pit
 msgid "Contact you outside the platform using details taken from your entry, other than about the competition."
 msgstr ""
 
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "We sent a link to <0>{sentTo}</0>. Open it within 24 hours to confirm the address. You can carry on in the meantime."
+msgstr ""
+
 #: src/a11y/messages.ts
 msgid "Hold Alt and Shift (Option and Shift on a Mac) and press a key."
 msgstr ""
@@ -5664,10 +5682,6 @@ msgstr "L'organisateur n'en a pas activé un. Toutes les informations sur l'év�
 
 #: src/components/profile/PortraitStudio.tsx
 msgid "Checking photo…"
-msgstr ""
-
-#: src/pages/auth/SignupPage.tsx
-msgid "Backup email (optional)"
 msgstr ""
 
 #: src/components/grants/application/AIFieldActions.tsx
@@ -6519,6 +6533,11 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Use the \"Report\" button on the user's profile. Your report goes to the OECS moderation team through the grievance system, and you can track it under \"My Reports\". For general platform feedback, use the Feedback button instead."
 msgstr "Utilisez le bouton « Signaler » sur le profil de l'utilisateur. Votre signalement est transmis à l'équipe de modération de l'OECS via le système de plaintes, et vous pouvez le suivre dans « Mes signalements ». Pour un retour général sur la plateforme, utilisez plutôt le bouton Commentaires."
+
+#: src/pages/auth/SignupPage.tsx
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "A personal address, like Gmail or Outlook"
+msgstr ""
 
 #: src/components/layout/Navbar.tsx
 #: src/pages/auth/LoginPage.tsx
@@ -8013,6 +8032,10 @@ msgstr "Pièces jointes ({0})"
 msgid "Anything else: %privacyEmail%. We respond within %rightsResponsePeriod%."
 msgstr ""
 
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Send confirmation link"
+msgstr ""
+
 #: src/lib/achievement-copy.ts
 msgid "{n, plural, one {# event checked in at} other {# events checked in at}}"
 msgstr ""
@@ -9077,6 +9100,10 @@ msgstr "Placez-le à côté du coin de l'entrée."
 msgid "Member since {joinedYear}"
 msgstr ""
 
+#: src/components/settings/SecuritySettingsTab.tsx
+msgid "Use a different address"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I create a new project?"
 msgstr "Comment créer un nouveau projet ?"
@@ -9319,6 +9346,10 @@ msgstr ""
 msgid "Other Responses"
 msgstr "Autres réponses"
 
+#: src/hooks/useSecondaryEmailCopy.ts
+msgid "Enter a backup email address."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "The full picture — what supervised mode restricts, and how guardian requests are handled — is in the Minor Safeguarding Statement."
 msgstr ""
@@ -9386,6 +9417,10 @@ msgstr ""
 
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Waiting for your agreement"
+msgstr ""
+
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Resend to {current}"
 msgstr ""
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
@@ -9986,6 +10021,11 @@ msgstr "Parcourir les projets"
 msgid "Could not unhide this right now"
 msgstr ""
 
+#: src/pages/auth/SignupPage.tsx
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Backup email"
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Switch to email codes?"
 msgstr ""
@@ -10080,6 +10120,10 @@ msgstr "Veuillez réessayer sous peu."
 
 #: src/i18n/harvested.ts
 msgid "OECS Virtual Campus and Commons"
+msgstr ""
+
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Add a backup email"
 msgstr ""
 
 #: src/pages/grievances/ReportUserPage.tsx
@@ -10651,6 +10695,10 @@ msgstr ""
 #: src/pages/forums/PostDetailPage.tsx
 msgid "Failed to post reply"
 msgstr "Échec de l'envoi de la réponse"
+
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "A second way into your account."
+msgstr ""
 
 #: src/components/venue/room/RoomWayfindingPanels.tsx
 #: src/lib/venue-room-sections.ts
@@ -11469,6 +11517,7 @@ msgstr "Choisissez les sujets, catégories et types de contenu à faire apparaî
 
 #: src/i18n/harvested.ts
 #: src/pages/account/AccountSuspendedPage.tsx
+#: src/pages/security/BackupEmailGatePage.tsx
 #: src/pages/security/MfaChallengePage.tsx
 #: src/pages/security/MfaRecoverPage.tsx
 msgid "Sign out"
@@ -11888,6 +11937,7 @@ msgid "Confirm Your Report"
 msgstr "Confirmer votre signalement"
 
 #: src/components/profile/PortraitStudio.tsx
+#: src/components/settings/SecuritySettingsTab.tsx
 #: src/components/venue/room/HomebaseLookPanel.tsx
 msgid "Replace"
 msgstr "Remplacer"
@@ -12367,11 +12417,6 @@ msgstr ""
 #: src/lib/venue-templates.ts
 msgid "Arrivals on the ground floor, two Homebase floors for up to nine teams, then demos, then judging and organiser HQ at the top."
 msgstr "L'accueil au rez-de-chaussée, deux étages de Homebases pour neuf équipes au plus, puis les démos, puis l'évaluation et le QG des organisateurs en haut."
-
-#. placeholder {0}: alias.email
-#: src/components/settings/SecuritySettingsTab.tsx
-msgid "<0>{0}</0> is now your primary email address, so it no longer works as a secondary one. You can remove it and add a different backup address."
-msgstr "<0>{0}</0> est désormais votre adresse e-mail principale ; elle ne fonctionne donc plus comme adresse secondaire. Vous pouvez la supprimer et ajouter une autre adresse de secours."
 
 #: src/components/venue/room/QuestBoardPanel.tsx
 msgid "Side quests"
@@ -13001,6 +13046,10 @@ msgstr ""
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Reporting user"
 msgstr "Signalement d'un utilisateur"
+
+#: src/pages/grants/GrantDetailPage.tsx
+msgid "Sign in to apply"
+msgstr "Connectez-vous pour postuler"
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/hooks/useCollabInvites.ts
@@ -13831,6 +13880,11 @@ msgstr "Fermer la passerelle"
 msgid "Gives moderators a second opinion on a queued report"
 msgstr ""
 
+#. placeholder {0}: alias.email
+#: src/components/settings/SecuritySettingsTab.tsx
+msgid "<0>{0}</0> is now your primary email address, so it no longer works as a secondary one. Add a different backup address below."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Never published, never listed, never shown to other applicants."
 msgstr ""
@@ -14581,6 +14635,10 @@ msgstr "Rechercher des intégrations..."
 #: src/i18n/harvested.ts
 msgid "Month-by-month view of everything scheduled"
 msgstr "Vue mois par mois de tout ce qui est programmé"
+
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "Every account needs a second email address, so you can still get in if you lose access to <0>{primary}</0>."
+msgstr ""
 
 #: src/components/collaboration/editor/EditorToolbarV2.tsx
 #: src/components/grants/application/RichTextField.tsx
@@ -16912,10 +16970,6 @@ msgstr "Vous pouvez soumettre une nouvelle demande ci-dessous."
 msgid "Solo entry"
 msgstr "Participation individuelle"
 
-#: src/pages/auth/SignupPage.tsx
-msgid "For signing in and account recovery. We email it a link to confirm."
-msgstr ""
-
 #: src/pages/sme/OrgProfileEditPage.tsx
 msgid "Upload your logo"
 msgstr "Téléversez votre logo"
@@ -17909,10 +17963,6 @@ msgstr ""
 msgid "Failed to copy link"
 msgstr "Échec de la copie du lien"
 
-#: src/pages/auth/SignupPage.tsx
-msgid "A second address you can use"
-msgstr ""
-
 #: src/hooks/useGrants.ts
 msgid "Application not found."
 msgstr "Candidature introuvable."
@@ -18249,6 +18299,10 @@ msgstr "Rouvrir"
 #: src/components/events/EventSolutionsPanel.tsx
 msgid "While entries are open you only see your own. Everyone's solutions become visible once submissions close"
 msgstr "Tant que les soumissions sont ouvertes, vous ne voyez que les vôtres. Les solutions de tous deviennent visibles une fois les soumissions closes"
+
+#: src/hooks/useSecondaryEmailCopy.ts
+msgid "If you lose access to one address, the other still signs you in. At least one must be personal, not a school address."
+msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "What participants must achieve"
@@ -21430,10 +21484,6 @@ msgstr "Le Bureau des dépôts n'est pas encore ouvert pour cet événement."
 msgid "Entries are closed. Nothing was submitted."
 msgstr "Les participations sont closes. Rien n'a été soumis."
 
-#: src/components/settings/SecuritySettingsTab.tsx
-msgid "Secondary email removed"
-msgstr "E-mail secondaire supprimé"
-
 #: src/lib/venue-room-sections.ts
 msgid "Your own text — conduct, ground rules, what this room is not for."
 msgstr "Votre propre texte — conduite, règles de base, ce à quoi cette salle n'est pas destinée."
@@ -21771,6 +21821,10 @@ msgstr "Créer un nouvel événement"
 #: src/components/venue/room/RoomArrivalPanels.tsx
 msgid "Read the event brief →"
 msgstr "Lire le brief de l'événement →"
+
+#: src/pages/security/BackupEmailGatePage.tsx
+msgid "The confirmation link for <0>{current}</0> expired. Send a new one, or use a different address."
+msgstr ""
 
 #: src/lib/permissions.ts
 msgid "View members"
@@ -22189,10 +22243,6 @@ msgstr "Puis-je prévisualiser ma candidature avant de la soumettre ?"
 #: src/i18n/harvested.ts
 msgid "Real-time workspace: whiteboards, documents, code and video"
 msgstr "Espace de travail en temps réel : tableaux blancs, documents, code et vidéo"
-
-#: src/components/settings/SecuritySettingsTab.tsx
-msgid "Failed to remove the address"
-msgstr "Échec de la suppression de l'adresse"
 
 #: src/components/layout/RoleSwitcher.tsx
 msgid "Now acting as {roleName}"
@@ -24751,7 +24801,6 @@ msgstr ""
 
 #: src/components/feedback/FeedbackModal.tsx
 #: src/components/moderation/ModeratedField.tsx
-#: src/components/settings/SecuritySettingsTab.tsx
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 #: src/components/venue/RoomChatPanel.tsx
 #: src/components/verification/InstitutionalEmailCard.tsx
@@ -25029,11 +25078,6 @@ msgstr "Capturer l'écran"
 #: src/components/messages/ChatWindow.tsx
 msgid "Attach a file"
 msgstr "Joindre un fichier"
-
-#. placeholder {0}: alias.email
-#: src/components/settings/SecuritySettingsTab.tsx
-msgid "The confirmation link for <0>{0}</0> expired. Send a fresh one, or remove the address."
-msgstr "Le lien de confirmation pour <0>{0}</0> a expiré. Envoyez-en un nouveau, ou supprimez l'adresse."
 
 #: src/lib/countries.ts
 msgid "Wider Caribbean"
@@ -27022,6 +27066,11 @@ msgstr ""
 msgid "Project Owner"
 msgstr "Propriétaire du projet"
 
+#. placeholder {0}: alias.email
+#: src/components/settings/SecuritySettingsTab.tsx
+msgid "The confirmation link for <0>{0}</0> expired. Send a new one, or use a different address."
+msgstr ""
+
 #: src/pages/cv/CvPage.tsx
 #: src/pages/cv/PublicCvPage.tsx
 msgid "Download Color (A4)"
@@ -28937,6 +28986,7 @@ msgid "Forum Board"
 msgstr "Forum"
 
 #: src/pages/grants/MyApplicationsPage.tsx
+#: src/pages/security/BackupEmailGatePage.tsx
 #: src/pages/security/MfaSetupPage.tsx
 msgid "Continue"
 msgstr "Continuer"
@@ -29158,7 +29208,7 @@ msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/verification/InstitutionalEmailCard.tsx
-#: src/pages/auth/SignupPage.tsx
+#: src/hooks/useSecondaryEmailCopy.ts
 msgid "Enter a valid email address."
 msgstr "Saisissez une adresse e-mail valide."
 
@@ -30301,10 +30351,6 @@ msgstr "Inscriptions non ouvertes"
 msgid "Explain why you believe the content was removed by mistake or misidentification."
 msgstr ""
 
-#: src/pages/grants/GrantDetailPage.tsx
-msgid "Sign in to apply"
-msgstr "Connectez-vous pour postuler"
-
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/i18n/harvested.ts
 msgid "Where"
@@ -30589,6 +30635,10 @@ msgstr ""
 #: src/pages/dashboard/dashboard-tabs.ts
 msgid "Connections"
 msgstr "Connexions"
+
+#: src/components/settings/SecuritySettingsTab.tsx
+msgid "Send link to this address"
+msgstr ""
 
 #: src/pages/InvitationsPage.tsx
 msgid "Project team invitations"
@@ -31452,4 +31502,8 @@ msgstr "Capture d'écran jointe"
 
 #: src/components/dashboard/stats/OverviewStats.tsx
 msgid "Likes"
+msgstr ""
+
+#: src/pages/auth/SignupPage.tsx
+msgid "Your backup email was not added. We will ask for it again in a moment."
 msgstr ""

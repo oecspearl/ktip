@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -7,6 +7,10 @@ const mockAuth = vi.fn()
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockAuth(),
 }))
+const mockSecondary = vi.fn()
+vi.mock('../hooks/useEmailAlias', () => ({
+  useSecondaryEmailStatus: () => mockSecondary(),
+}))
 vi.mock('./RouteSplash', () => ({
   RouteSplash: () => <div>SPLASH</div>,
 }))
@@ -14,6 +18,10 @@ vi.mock('./RouteSplash', () => ({
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+})
+
+beforeEach(() => {
+  mockSecondary.mockReturnValue({ status: { compliant: true }, loading: false, error: null })
 })
 
 type ProfileOverrides = Record<string, unknown>
@@ -49,6 +57,7 @@ function renderAt(path = '/dashboard') {
         <Route path="/security/set-up" element={<div>MFA_SETUP</div>} />
         <Route path="/security/verify" element={<div>MFA_CHALLENGE</div>} />
         <Route path="/account/suspended" element={<div>SUSPENDED</div>} />
+        <Route path="/security/backup-email" element={<div>BACKUP_EMAIL</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -165,5 +174,41 @@ describe('ProtectedRoute gate ordering', () => {
     mockAuth.mockReturnValue(auth({}, { requires_mfa_enrollment: undefined }))
     renderAt()
     expect(screen.getByText('DASHBOARD')).toBeTruthy()
+  })
+})
+
+// 204. A secondary email, at least one of the pair not a school address.
+describe('ProtectedRoute secondary email gate', () => {
+  it('holds an account with no compliant secondary on the backup email page', () => {
+    mockAuth.mockReturnValue(auth())
+    mockSecondary.mockReturnValue({ status: { compliant: false }, loading: false, error: null })
+    renderAt()
+    expect(screen.getByText('BACKUP_EMAIL')).toBeTruthy()
+    expect(screen.queryByText('DASHBOARD')).toBeNull()
+  })
+
+  it('waits for the answer rather than flashing the page', () => {
+    mockAuth.mockReturnValue(auth())
+    mockSecondary.mockReturnValue({ status: null, loading: true, error: null })
+    renderAt()
+    expect(screen.getByText('SPLASH')).toBeTruthy()
+  })
+
+  it('lets the member through when the check itself fails', () => {
+    mockAuth.mockReturnValue(auth())
+    mockSecondary.mockReturnValue({ status: null, loading: false, error: new Error('missing function') })
+    renderAt()
+    expect(screen.getByText('DASHBOARD')).toBeTruthy()
+  })
+
+  it('asks for onboarding and two-step set-up first', () => {
+    mockSecondary.mockReturnValue({ status: { compliant: false }, loading: false, error: null })
+    mockAuth.mockReturnValue(auth({}, { roles: [] }))
+    renderAt()
+    expect(screen.getByText('ONBOARDING')).toBeTruthy()
+    cleanup()
+    mockAuth.mockReturnValue(auth({}, { requires_mfa_enrollment: true }))
+    renderAt()
+    expect(screen.getByText('MFA_SETUP')).toBeTruthy()
   })
 })
