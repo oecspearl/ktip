@@ -20,7 +20,12 @@
 --   5. The unverified account can still update its own profile.
 --
 -- Requires 205 and everything before it. Needs a role that can write
--- auth.users (the SQL editor's default is fine).
+-- auth.users and auth.mfa_factors (the SQL editor's default is fine).
+--
+-- Since 206 an admin-tier account holds nothing for itself until this
+-- session has passed its second step, so `super` carries a verified TOTP
+-- factor and acts at aal2. `newbie` does too when it replies: since 118 a new
+-- entrepreneur sends no message until its second step is done.
 -- ============================================================
 
 BEGIN;
@@ -59,7 +64,15 @@ BEGIN
   ALTER TABLE profiles DISABLE TRIGGER USER;
   UPDATE profiles SET is_verified = FALSE WHERE id IN (v_newbie, v_super);
   UPDATE profiles SET is_verified = TRUE, verified_via = 'admin', verified_at = NOW() WHERE id = v_member;
+  UPDATE profiles SET mfa_method = 'totp' WHERE id = v_super;
   ALTER TABLE profiles ENABLE TRIGGER USER;
+
+  -- 206: the admin-tier fixture needs a second step to act for itself.
+  -- 118: so does a new entrepreneur before it can send a message (the
+  -- messages INSERT policy asks account_mfa_satisfied).
+  INSERT INTO auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at)
+  VALUES (gen_random_uuid(), v_super,  'test-205', 'totp', 'verified', NOW(), NOW()),
+         (gen_random_uuid(), v_newbie, 'test-205', 'totp', 'verified', NOW(), NOW());
 END $$;
 
 -- ------------------------------------------------------------
@@ -159,13 +172,15 @@ BEGIN
   ASSERT v_result->>'reason' = 'unverified',
     format('a member messaging an unverified account must get reason unverified, got %s', v_result);
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_super)::text, TRUE);
+  PERFORM set_config('request.jwt.claims',
+    json_build_object('sub', v_super, 'aal', 'aal2')::text, TRUE);
   v_result := start_direct_conversation(v_newbie);
   ASSERT (v_result->>'ok')::BOOLEAN,
     format('staff must be able to open a thread with an unverified account, got %s', v_result);
   v_conv := (v_result->>'conversation_id')::UUID;
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_newbie)::text, TRUE);
+  PERFORM set_config('request.jwt.claims',
+    json_build_object('sub', v_newbie, 'aal', 'aal2')::text, TRUE);
   INSERT INTO messages (conversation_id, sender_id, content) VALUES (v_conv, v_newbie, 'thanks');
   ASSERT FOUND, 'the unverified account replies in a staff thread';
 

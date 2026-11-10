@@ -242,11 +242,13 @@ BEGIN
 END $$;
 
 -- ------------------------------------------------------------
--- 7. An unverified account cannot start a video call
+-- 7. Unverified or closed accounts cannot start a video call
 -- ------------------------------------------------------------
 DO $$
 DECLARE
+  v_mentor  UUID := '00000000-0000-4000-8000-000000002063';
   v_refused BOOLEAN := FALSE;
+  v_status  TEXT;
 BEGIN
   BEGIN
     PERFORM video_call_check_caller('00000000-0000-4000-8000-000000002064');
@@ -255,7 +257,25 @@ BEGIN
   END;
   ASSERT v_refused, 'an unverified account must be refused a video call';
 
-  PERFORM video_call_check_caller('00000000-0000-4000-8000-000000002063');
+  -- Block 5 closed the mentor, so the closed-account gate answers first.
+  v_refused := FALSE;
+  BEGIN
+    PERFORM video_call_check_caller(v_mentor);
+  EXCEPTION WHEN raise_exception THEN
+    v_refused := TRUE;
+  END;
+  ASSERT v_refused, 'a closed account must be refused a video call';
+
+  -- Reopened through the member's own path (the lifecycle fence lets it by),
+  -- the verified, active mentor may call.
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claims',
+    json_build_object('sub', v_mentor, 'aal', 'aal1')::text, TRUE);
+  SELECT r.account_status INTO v_status FROM reopen_my_account() r;
+  ASSERT v_status = 'active', 'reopen_my_account() still reopens the account';
+  RESET ROLE;
+
+  PERFORM video_call_check_caller(v_mentor);
 END $$;
 
 ROLLBACK;
