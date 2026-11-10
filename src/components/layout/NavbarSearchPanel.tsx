@@ -1,6 +1,7 @@
 import {
   ArrowUpRight,
   Brain,
+  ChevronDown,
   ChevronRight,
   Clock,
   CornerDownLeft,
@@ -283,11 +284,19 @@ export function NavbarSearchPanel({
                         onClick={() => onToggleExpand(row.id)}
                         aria-label={isExpanded ? `Hide details for ${row.title}` : `Show details for ${row.title}`}
                         aria-expanded={isExpanded}
-                        className="px-3 text-ktip-sand-400 hover:text-ktip-ocean-600 hover:bg-ktip-sand-100/60 transition-colors"
+                        className={cn(
+                          'self-center mr-3 shrink-0 inline-flex items-center gap-1 h-7 px-1.5 sm:px-2 rounded-md border text-xs font-medium transition-colors',
+                          isExpanded
+                            ? 'border-ktip-ocean-300 bg-ktip-ocean-50 text-ktip-ocean-700'
+                            : 'border-ktip-sand-200 text-ktip-sand-600 hover:border-ktip-ocean-300 hover:bg-ktip-ocean-50 hover:text-ktip-ocean-700'
+                        )}
                       >
-                        <ChevronRight
-                          size={16}
-                          className={cn('transition-transform', isExpanded && 'rotate-90')}
+                        <span className="hidden sm:inline">
+                          <Trans>Details</Trans>
+                        </span>
+                        <ChevronDown
+                          size={14}
+                          className={cn('transition-transform', isExpanded && 'rotate-180')}
                         />
                       </button>
                     </div>
