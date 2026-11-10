@@ -89,12 +89,13 @@ export default async function handler(request: Request): Promise<Response> {
   if (!caller) return json({ error: 'Unauthorized' }, 401)
 
   const admin = createClient(supabaseUrl, serviceKey)
-  const { data: limit } = await admin.rpc('consume_auth_rate_limit', {
+  // Fail closed: an unreachable limiter refuses.
+  const { data: limit, error: limitError } = await admin.rpc('consume_auth_rate_limit', {
     p_bucket: `cv-generate:ip:${clientIp(request)}`,
     p_window_seconds: IP_WINDOW,
     p_limit: IP_LIMIT,
   })
-  if ((limit as { allowed?: boolean } | null)?.allowed === false) {
+  if (limitError || (limit as { allowed?: boolean } | null)?.allowed !== true) {
     return json({ error: 'Too many attempts. Please try again in a few minutes.' }, 429)
   }
 

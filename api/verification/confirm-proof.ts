@@ -54,13 +54,14 @@ export default async function handler(request: Request) {
 
   const admin = createClient(supabaseUrl, serviceKey)
 
-  const { data: limit } = await admin.rpc('consume_auth_rate_limit', {
+  // Fail closed: an unreachable limiter refuses rather than allowing guesses.
+  const { data: limit, error: limitError } = await admin.rpc('consume_auth_rate_limit', {
     p_bucket: `verify:ip:${clientIp(request)}`,
     p_window_seconds: 3600,
     p_limit: IP_HOURLY_LIMIT,
   })
-  if (limit && (limit as any).allowed === false) {
-    return json({ error: 'rate_limited', retry_after: (limit as any).retry_after }, 429)
+  if (limitError || (limit as any)?.allowed !== true) {
+    return json({ error: 'rate_limited', retry_after: (limit as any)?.retry_after ?? null }, 429)
   }
 
   const { data, error } = await admin.rpc('confirm_email_proof', { p_token: token })

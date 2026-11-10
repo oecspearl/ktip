@@ -1,3 +1,6 @@
+import { createClient } from '@supabase/supabase-js'
+import { clientIp } from './_lib/client-ip'
+
 export const config = { runtime: 'edge' }
 
 /**
@@ -11,9 +14,7 @@ export const config = { runtime: 'edge' }
  * them, and that password lives in TEST_ACCOUNTS_PASSWORD on Vercel.
  *
  *   TEST_CREDS_PASSCODE     what testers type. Min 12 characters, or the
- *                           endpoint refuses to serve at all: Edge has no
- *                           state to count attempts in, so the passcode's
- *                           length is the only brake on guessing.
+ *                           endpoint refuses to serve at all.
  *   TEST_ACCOUNTS_PASSWORD  the password the seed script set.
  *   TEST_ACCOUNTS_DOMAIN    optional, defaults to ktip.test. Must match the
  *                           --domain the seed script ran with.
@@ -21,14 +22,26 @@ export const config = { runtime: 'edge' }
  * Unset either required variable and the endpoint answers 404, so taking the
  * page down is one env var away and needs no deploy of code.
  *
+ * NO ADMIN-TIER LOGINS (2026-11-10). This page used to hand out Admin, both
+ * supervisors and Safety Admin: one shared password, exempt from the second
+ * step, on the live database. Anyone holding the passcode could suspend,
+ * delete or re-password real members. Those four are gone from the list, and
+ * the seed script skips them unless --with-admin-tier is passed (for a
+ * staging project). Removing them here does not change their password: the
+ * accounts on live must be deleted or demoted too (docs/SECURITY-AUDIT-2026-11-10.md).
+ *
+ * ATTEMPTS ARE COUNTED. The old comment said the passcode's length was "the
+ * only brake on guessing", because Edge keeps no state. The database does: a
+ * per-address bucket (056) is consumed before every comparison, and an
+ * unreachable limiter refuses.
+ *
  * Keep ACCOUNTS in step with the ACCOUNTS list in the seed script.
  */
 
-const ACCOUNTS: Array<{ tier: 'admin' | 'organisation' | 'individual'; slug: string; name: string; does: string }> = [
-  { tier: 'admin', slug: 'admin', name: 'Admin', does: 'Every console page. Cannot change another administrator.' },
-  { tier: 'admin', slug: 'people_supervisor', name: 'People & Trust Supervisor', does: 'Members (read-only), verification, institutions, moderation, grievances.' },
-  { tier: 'admin', slug: 'programme_supervisor', name: 'Programmes Supervisor', does: 'Projects, grants, forums, resources, achievements, employers.' },
-  { tier: 'admin', slug: 'safety_admin', name: 'Safety Admin', does: 'Flagged content and moderation logs.' },
+const ATTEMPT_LIMIT = 10
+const ATTEMPT_WINDOW = 3600
+
+const ACCOUNTS: Array<{ tier: 'organisation' | 'individual'; slug: string; name: string; does: string }> = [
   { tier: 'organisation', slug: 'chamber_admin', name: 'Business Association', does: 'Verifies local businesses in Saint Lucia.' },
   { tier: 'organisation', slug: 'diaspora', name: 'Diaspora Association / Network', does: 'Mentors, funds and judges challenges from abroad.' },
   { tier: 'organisation', slug: 'educational_partner', name: 'Post-Secondary Institution', does: 'Approves students and oversees their submissions.' },
@@ -77,6 +90,22 @@ export default async function handler(request: Request) {
   if (passcode.length < 12 || !password) return json({ error: 'not_found' }, 404)
 
   if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceKey) return json({ error: 'not_found' }, 404)
+
+  // Counted before the passcode is read, every time, so a guess costs an
+  // attempt whether it is right or wrong.
+  const admin = createClient(supabaseUrl, serviceKey)
+  const { data: limit, error: limitError } = await admin.rpc('consume_auth_rate_limit', {
+    p_bucket: `test-creds:ip:${clientIp(request)}`,
+    p_window_seconds: ATTEMPT_WINDOW,
+    p_limit: ATTEMPT_LIMIT,
+  })
+  if (limitError || (limit as { allowed?: boolean } | null)?.allowed !== true) {
+    return json({ error: 'rate_limited' }, 429)
+  }
 
   let attempt = ''
   try {

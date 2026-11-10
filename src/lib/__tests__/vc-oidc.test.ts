@@ -110,6 +110,28 @@ describe('verifyVcToken', () => {
     expect(payload.name).toBe('Ama')
   })
 
+  it('accepts a code-flow token that echoes the nonce start.ts sent', async () => {
+    serveJwks([publicJwk])
+    const payload = await verifyVcToken(await sign({ nonce: 'n-123' }), config(), 'n-123')
+    expect(payload.nonce).toBe('n-123')
+  })
+
+  it('rejects a code-flow token whose nonce does not match', async () => {
+    serveJwks([publicJwk])
+    const token = await sign({ nonce: 'someone-elses' })
+    await expect(verifyVcToken(token, config(), 'n-123')).rejects.toMatchObject({
+      code: 'nonce_mismatch',
+    })
+  })
+
+  it('rejects a code-flow token that carries no nonce at all', async () => {
+    serveJwks([publicJwk])
+    const token = await sign({})
+    await expect(verifyVcToken(token, config(), 'n-123')).rejects.toMatchObject({
+      code: 'nonce_mismatch',
+    })
+  })
+
   it('rejects a token signed by a different key', async () => {
     const other = await generateKeyPair('ES256', { extractable: true })
     serveJwks([publicJwk])

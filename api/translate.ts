@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { getProvider } from './_lib/translate-provider'
 import { clientIp } from './_lib/client-ip'
+import { authenticate } from './_lib/require-permission'
 import {
   afterResponse,
   parseTranslationContext,
@@ -157,10 +158,14 @@ export default async function handler(request: Request, context?: EdgeContext): 
   const ipHash = await contentHash(`${process.env.TRANSLATION_IP_SALT ?? ''}${ip}`, 'text')
 
   const cap = Number(process.env.TRANSLATION_MONTHLY_CHAR_CAP ?? 1_800_000)
-  // Presence of a bearer token, not its validity. This only picks which throttle
-  // ceiling applies; nothing here is gated on identity, and a forged header buys
-  // the caller a larger rate-limit bucket and nothing else.
-  const authenticated = Boolean(request.headers.get('authorization'))
+  // A VALID session, not merely a header. This only picks which throttle
+  // ceiling applies, but it used to read header presence, so any made-up
+  // "Authorization: x" bought five times the anonymous budget against the
+  // monthly cap every reader shares. One auth round-trip, only when a header
+  // is sent.
+  const authenticated = request.headers.get('authorization')
+    ? (await authenticate(request)).ok
+    : false
 
   const venue = parseTranslationContext(body.ctx)
   let providerChars = 0

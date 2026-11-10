@@ -92,8 +92,17 @@ export class VcTokenError extends Error {
  * `maxTokenAge` is separate from `exp` on purpose: a handoff token is meant to
  * be redeemed within seconds of the button press, and the issuer's own `exp`
  * may be far more generous than that. This caps the window regardless.
+ *
+ * `expectedNonce` is passed on the code flow, where api/auth/vc/start.ts sent a
+ * nonce and stored it beside the PKCE verifier. The id_token must echo it
+ * exactly, which binds the token to the sign-in this browser started. The
+ * IdP-initiated `vc_token` path has no stored nonce and passes none.
  */
-export async function verifyVcToken(token: string, cfg: VcConfig): Promise<JWTPayload> {
+export async function verifyVcToken(
+  token: string,
+  cfg: VcConfig,
+  expectedNonce?: string
+): Promise<JWTPayload> {
   if (!token || token.length > 8192) throw new VcTokenError('malformed')
 
   let payload: JWTPayload
@@ -110,6 +119,10 @@ export async function verifyVcToken(token: string, cfg: VcConfig): Promise<JWTPa
   }
 
   if (!payload.sub) throw new VcTokenError('no_subject')
+
+  if (expectedNonce !== undefined && payload.nonce !== expectedNonce) {
+    throw new VcTokenError('nonce_mismatch')
+  }
 
   // The single rule standing between "this email is asserted" and "this account
   // is yours". Without it, anyone who can register an address on the Virtual

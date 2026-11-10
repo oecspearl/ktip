@@ -113,10 +113,10 @@ const EMPTY_FIELD: FieldModeration = {
 /** Strip tags before scanning HTML. Positions from this are not editor positions. */
 function plainText(value: string, format: ModerationFieldSpec['format']): string {
   if (format !== 'html') return value
-  if (typeof document === 'undefined') return value.replace(/<[^>]*>/g, ' ')
-  const el = document.createElement('div')
-  el.innerHTML = value
-  return el.textContent ?? ''
+  if (typeof DOMParser === 'undefined') return value.replace(/<[^>]*>/g, ' ')
+  // Inert: unlike a detached div, a parsed document loads no images and runs
+  // no handlers, so scanning hostile HTML cannot execute it.
+  return new DOMParser().parseFromString(value, 'text/html').body.textContent ?? ''
 }
 
 /**

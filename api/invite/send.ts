@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
-import { requireVerified } from '../_lib/require-permission'
+import { consumeRateLimit, requireVerified } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -179,6 +179,18 @@ export default async function handler(request: Request) {
     title = (resource as any).title || resourceTitle
   }
 
+  // --- Every lookup counts, members included ---
+  // The email_invites count above only sees invitations that were emailed. An
+  // address that already has an account takes the branch below, writes no
+  // invite row, and answers existing_user: true, so without this bucket a
+  // resource owner could test any number of addresses for membership.
+  if (!(await consumeRateLimit(admin, `invite-lookup:user:${caller.id}`, 86_400, DAILY_INVITE_LIMIT * 2))) {
+    return json(
+      { error: `You can send up to ${DAILY_INVITE_LIMIT} email invitations per day.` },
+      429
+    )
+  }
+
   // --- Already a member? Share in-app rather than emailing a signup link ---
   const { data: existing } = await admin.rpc('get_user_id_by_email', { p_email: email })
   const existingUserId = typeof existing === 'string' ? existing : null
@@ -202,7 +214,10 @@ export default async function handler(request: Request) {
       },
       { onConflict: `${config.fkColumn},shared_with` }
     )
-    if (shareError) return json({ error: shareError.message }, 400)
+    if (shareError) {
+      console.error(`[invite/send] share upsert failed: ${shareError.message}`)
+      return json({ error: 'Could not share this with that member.' }, 400)
+    }
 
     await admin.from('notifications').insert({
       user_id: existingUserId,
@@ -282,7 +297,8 @@ export default async function handler(request: Request) {
     const detail = resendResponse ? await resendResponse.text().catch(() => '') : ''
     // Withdraw the invite rather than leaving a live token nobody received.
     await admin.from('email_invites').update({ status: 'revoked' }).eq('token', token)
-    return json({ error: `Failed to send the invitation email. ${detail}`.trim() }, 502)
+    console.error(`[invite/send] resend ${resendResponse?.status ?? 'no response'}: ${detail.slice(0, 300)}`)
+    return json({ error: 'Failed to send the invitation email.' }, 502)
   }
 
   return json({ success: true, existing_user: false }, 200)

@@ -1,5 +1,6 @@
 import { getProvider, ProviderRateLimited, type TranslateProvider } from '../_lib/translate-provider'
 import { clientIp } from '../_lib/client-ip'
+import { authenticate } from '../_lib/require-permission'
 import {
   afterResponse,
   recordTranslationUsage,
@@ -94,11 +95,15 @@ export default async function handler(request: Request, context?: EdgeContext): 
   const chars = text.length * to.length
   const ipHash = await contentHash(`${process.env.TRANSLATION_IP_SALT ?? ''}${clientIp(request)}`, 'text')
   const cap = Number(process.env.TRANSLATION_MONTHLY_CHAR_CAP ?? 1_800_000)
+  // A valid session buys the larger bucket, not a header anyone can write.
+  const authenticated = request.headers.get('authorization')
+    ? (await authenticate(request)).ok
+    : false
   const { data: claim, error: claimError } = await db.rpc('claim_translation_budget', {
     p_ip_hash: ipHash,
     p_chars: chars,
     p_cap: Number.isFinite(cap) ? cap : 1_800_000,
-    p_authenticated: Boolean(request.headers.get('authorization')),
+    p_authenticated: authenticated,
   })
   if (claimError) return json({ variants: {}, degraded: 'provider_error' })
   const verdict = (claim ?? { allowed: false, reason: 'over_budget' }) as {

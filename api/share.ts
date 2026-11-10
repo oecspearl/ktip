@@ -1,4 +1,9 @@
-import { authenticate, adminClientOrNull } from './_lib/require-permission'
+import {
+  authenticate,
+  adminClientOrNull,
+  consumeRateLimit,
+  requireVerified,
+} from './_lib/require-permission'
 import { clientIp } from './_lib/client-ip'
 import {
   DRAFT_ANGLES,
@@ -87,25 +92,26 @@ export default async function handler(request: Request) {
   if (!guard.ok) return guard.response
   const { callerId, callerClient } = guard
 
+  // 205: an unverified account browses; it does not spend the AI budget. The
+  // same gate ai-chat and extract-fields apply.
+  const unverified = await requireVerified(callerClient)
+  if (unverified) return unverified
+
   // Fail closed, as api/ai-chat.ts does: no service key means no throttle, and
   // an unthrottled route onto a paid key is not something to ship.
   const adminClient = adminClientOrNull()
   if (!adminClient) return json({ error: 'Server configuration error' }, 503)
 
   const [burst, daily] = await Promise.all([
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `share-draft:user:${callerId}`,
-      p_window_seconds: BURST_WINDOW,
-      p_limit: BURST_LIMIT,
-    }),
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `share-draft:user-daily:${callerId}:${clientIp(request)}`,
-      p_window_seconds: DAILY_WINDOW,
-      p_limit: DAILY_LIMIT,
-    }),
+    consumeRateLimit(adminClient, `share-draft:user:${callerId}`, BURST_WINDOW, BURST_LIMIT),
+    consumeRateLimit(
+      adminClient,
+      `share-draft:user-daily:${callerId}:${clientIp(request)}`,
+      DAILY_WINDOW,
+      DAILY_LIMIT
+    ),
   ])
-  const denied = (r: { data: unknown }) => (r.data as { allowed?: boolean } | null)?.allowed === false
-  if (denied(burst) || denied(daily)) {
+  if (!burst || !daily) {
     return json({ error: 'rate_limited' }, 429)
   }
 

@@ -862,6 +862,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const updatePassword = useCallback(async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) throw error
+    // A new password is usually a reaction to a leaked one, so every other
+    // signed-in device goes. This tab keeps its session. Not fatal: the
+    // password has already changed, and the member should not see an error.
+    const { error: othersError } = await supabase.auth.signOut({ scope: 'others' })
+    if (othersError) console.warn('[auth] could not sign out other sessions', othersError.message)
   }, [])
 
   // Update email

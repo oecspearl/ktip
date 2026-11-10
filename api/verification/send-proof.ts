@@ -83,12 +83,13 @@ export default async function handler(request: Request) {
   }
 
   // --- Rate limit: cap proof mail per account per day ---
-  const { data: limit } = await admin.rpc('consume_auth_rate_limit', {
+  // Fail closed: an unreachable limiter refuses the send.
+  const { data: limit, error: limitError } = await admin.rpc('consume_auth_rate_limit', {
     p_bucket: `proof-send:user:${caller.id}`,
     p_window_seconds: 86400,
     p_limit: PROOF_DAILY_SEND_LIMIT,
   })
-  if (limit && (limit as any).allowed === false) {
+  if (limitError || (limit as any)?.allowed !== true) {
     return json(
       { error: `You can request up to ${PROOF_DAILY_SEND_LIMIT} confirmation emails per day.` },
       429
@@ -138,7 +139,10 @@ export default async function handler(request: Request) {
     ? await admin.from('email_proofs').update(row).eq('id', mineRow.id)
     : await admin.from('email_proofs').insert(row)
 
-  if (writeError) return json({ error: writeError.message }, 400)
+  if (writeError) {
+    console.error(`[send-proof] write failed: ${writeError.message}`)
+    return json({ error: 'Could not save that address. Please try again.' }, 400)
+  }
 
   const verifyUrl = `${siteOrigin(request)}/verify-institution-email/${token}`
 
@@ -200,7 +204,8 @@ export default async function handler(request: Request) {
   if (!resendResponse?.ok) {
     const detail = resendResponse ? await resendResponse.text().catch(() => '') : ''
     await withdraw()
-    return json({ error: `Failed to send the confirmation email. ${detail}`.trim() }, 502)
+    console.error(`[send-proof] resend ${resendResponse?.status ?? 'no response'}: ${detail.slice(0, 300)}`)
+    return json({ error: 'Failed to send the confirmation email.' }, 502)
   }
 
   return json({ success: true, kind }, 200)

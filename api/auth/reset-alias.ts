@@ -138,15 +138,16 @@ export default async function handler(request: Request) {
     }),
   ])
 
+  // Fail closed: an errored or empty answer counts as blocked.
   const blocked = [ipLimit, emailLimit]
-    .map((r) => r.data as { allowed: boolean; retry_after: number } | null)
-    .filter((r) => r && r.allowed === false)
+    .filter((r) => r.error || (r.data as { allowed?: boolean } | null)?.allowed !== true)
+    .map((r) => r.data as { allowed?: boolean; retry_after?: number } | null)
 
   if (blocked.length > 0) {
     return settle(
       {
         error: 'Too many attempts. Please try again later.',
-        retry_after: Math.max(...blocked.map((r) => r!.retry_after || 0)),
+        retry_after: Math.max(...blocked.map((r) => r?.retry_after || 0)),
       },
       429
     )

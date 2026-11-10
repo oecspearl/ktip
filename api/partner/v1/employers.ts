@@ -43,6 +43,8 @@ const MAX_LIMIT = 200
 const KEY_RE = /^ktip_[a-z0-9]{12}_[A-Za-z0-9_-]{43}$/
 const RATE_WINDOW_SECONDS = 3600
 const RATE_LIMIT = 600
+/** Per network address, across every key presented from it: three keys' worth. */
+const RATE_IP_LIMIT = 1800
 
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), {
@@ -128,14 +130,31 @@ export default async function handler(request: Request) {
   // be able to tell a real key from a fake one by which attempts get counted.
   // Keyed on the digest so the plaintext key never lands in a table.
   const keyHash = await sha256Hex(key)
-  const { data: limit } = await admin.rpc('consume_auth_rate_limit', {
-    p_bucket: `partner:key:${keyHash.slice(0, 32)}`,
-    p_window_seconds: RATE_WINDOW_SECONDS,
-    p_limit: RATE_LIMIT,
-  })
-  if (limit && (limit as any).allowed === false) {
+  // Two buckets, both consumed every time. The key bucket alone meant a flood
+  // of made-up keys was never throttled, because each fake key got a fresh
+  // bucket; the address bucket caps that. Fail closed: an errored or empty
+  // answer counts as limited.
+  const [ipLimit, keyLimit] = await Promise.all([
+    admin.rpc('consume_auth_rate_limit', {
+      p_bucket: `partner:ip:${ip}`,
+      p_window_seconds: RATE_WINDOW_SECONDS,
+      p_limit: RATE_IP_LIMIT,
+    }),
+    admin.rpc('consume_auth_rate_limit', {
+      p_bucket: `partner:key:${keyHash.slice(0, 32)}`,
+      p_window_seconds: RATE_WINDOW_SECONDS,
+      p_limit: RATE_LIMIT,
+    }),
+  ])
+  const limited = [ipLimit, keyLimit].filter(
+    (r) => r.error || (r.data as { allowed?: boolean } | null)?.allowed !== true
+  )
+  if (limited.length > 0) {
     await log(429, null, 0)
-    return json({ error: 'rate_limited', retry_after: (limit as any).retry_after }, 429)
+    const retryAfter = Math.max(
+      ...limited.map((r) => (r.data as { retry_after?: number } | null)?.retry_after || 0)
+    )
+    return json({ error: 'rate_limited', retry_after: retryAfter }, 429)
   }
 
   if (!KEY_RE.test(key)) {

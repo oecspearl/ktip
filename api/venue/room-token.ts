@@ -115,6 +115,22 @@ export default async function handler(request: Request): Promise<Response> {
   } = await caller.auth.getUser()
   if (!user) return json({ error: 'Unauthorized' }, 401)
 
+  // A suspended or closed account holds a working session since 184 stopped
+  // banning the login, and the three grant functions check membership, not
+  // standing. Refuse here, once, for all three kinds of room (2026-11-10).
+  const [{ data: suspended, error: suspendedError }, { data: active, error: activeError }] =
+    await Promise.all([
+      caller.rpc('is_suspended', { p_user: user.id }),
+      caller.rpc('is_account_active', { p_user: user.id }),
+    ])
+  if (suspendedError || activeError) {
+    console.error(`[room-token] standing check failed: ${(suspendedError ?? activeError)?.message}`)
+    return json({ error: 'Could not check this account. Please try again.' }, 500)
+  }
+  if (suspended === true || active !== true) {
+    return json({ error: 'This account cannot join rooms right now.' }, 403)
+  }
+
   const { data, error } = await caller.rpc(target.rpc, target.args)
 
   if (error) {

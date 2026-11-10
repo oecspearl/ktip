@@ -126,13 +126,13 @@ export const SETTINGS_CATEGORY: HelpCategory = {
     {
       id: 'change-password',
       title: 'How do I change my password?',
-      content: `Open Security on your Dashboard, under Account.\n\nEnter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n\nThe change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.\n\nIf you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider.`,
+      content: `Open Security on your Dashboard, under Account.\n\nEnter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n\nThe new password follows the same rule as signup: at least 8 characters, with upper and lower case letters, a number and a symbol.\n\nSaving it signs you out on every other device. The one you are using stays signed in.\n\nIf you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider.`,
       tags: ['change', 'password', 'security', 'update', 'length'],
     },
     {
       id: 'two-step-overview',
       title: 'What is two-step verification?',
-      content: `A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n\nThere are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n\nSome roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.\n\nEither way you also get ten recovery codes. Keep them somewhere that is not the phone.\n`,
+      content: `A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n\nThere are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n\nSome roles must have it: Entrepreneur, and every administrator role. An account with one of them is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Entrepreneur accounts that existed before the requirement were left as they were. Administrator accounts were not.\n\nEither way you also get ten recovery codes. Keep them somewhere that is not the phone.\n`,
       tags: ['two-step', 'two-factor', '2fa', 'mfa', 'security', 'authenticator', 'email code', 'verification'],
     },
     {

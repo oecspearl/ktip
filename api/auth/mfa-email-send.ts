@@ -103,15 +103,16 @@ export default async function handler(request: Request) {
   // takeover attempt cycling through accounts still runs out of road. Sixty,
   // not twenty: a whole office signs in from one address, and twenty sends an
   // hour was a training session's worth of colleagues locking each other out.
-  const { data: ipLimit } = await admin.rpc('consume_auth_rate_limit', {
+  // Fail closed: an unreachable limiter refuses the send.
+  const { data: ipLimit, error: ipLimitError } = await admin.rpc('consume_auth_rate_limit', {
     p_bucket: `mfa-email-send:ip:${clientIp(request)}`,
     p_window_seconds: 3600,
     p_limit: 60,
   })
   const ip = ipLimit as { allowed?: boolean; retry_after?: number } | null
-  if (ip && ip.allowed === false) {
+  if (ipLimitError || ip?.allowed !== true) {
     return json(
-      { error: 'Too many codes requested.', reason: 'rate_limited', retry_after: ip.retry_after ?? null },
+      { error: 'Too many codes requested.', reason: 'rate_limited', retry_after: ip?.retry_after ?? null },
       429,
     )
   }

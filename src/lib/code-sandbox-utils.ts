@@ -84,6 +84,9 @@ export function executeJavaScript(code: string): Promise<ExecutionResult> {
     }
 
     const handler = (event: MessageEvent) => {
+      // Only this run's own frame. Any other window (another tab's runner, an
+      // embed, an opener) could otherwise post a forged result or error.
+      if (event.source !== iframe.contentWindow) return
       const data = event.data
       if (!data || typeof data !== 'object' || !data.type) return
       if (data.type === 'ready') {

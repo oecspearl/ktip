@@ -733,7 +733,14 @@ const router = createBrowserRouter([
           // gets pointed at signup, and the token is redeemed once they return.
           { path: '/join/:token', lazy: lazyPage(() => import('./pages/JoinInvitePage')) },
 
-          // Admin routes
+          // Admin routes. Inside ProtectedRoute since 206: every admin-tier role
+          // owes a second step, and AdminRoute alone never sent an administrator
+          // to /security/set-up or /security/verify. The database refuses an
+          // admin session that skipped the step either way; this is what
+          // routes them to the page that lets them take it.
+          {
+            Component: ProtectedRoute,
+            children: [
           {
             Component: AdminRoute,
             children: [
@@ -882,6 +889,8 @@ const router = createBrowserRouter([
                   },
                 ],
               },
+            ],
+          },
             ],
           },
 

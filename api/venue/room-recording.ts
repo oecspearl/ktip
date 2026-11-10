@@ -127,6 +127,13 @@ export async function POST(request: Request): Promise<Response> {
       if (typeof egressId !== 'string' || !egressId) {
         return json({ error: 'egressId is required to stop' }, 400)
       }
+      // The grant proves the caller hosts THIS room, not every room. Stop only
+      // a recording that belongs to it, or a host of one room could end the
+      // recording of any other by passing its id.
+      const ours = await egress.listEgress({ roomName: grant.room, active: true })
+      if (!ours.some((info) => info.egressId === egressId)) {
+        return json({ error: 'No such recording in this room' }, 404)
+      }
       const info = await egress.stopEgress(egressId)
       return json({ egressId: info.egressId, status: info.status })
     }

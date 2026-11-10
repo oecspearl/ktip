@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { SITE_MAP_COMPACT, SITE_ENTRY_IDS } from '../src/lib/site-map'
 import { ADMIN_CONSOLE_KEYS } from '../src/lib/admin-console-keys'
-import { adminClientOrNull } from './_lib/require-permission'
+import { adminClientOrNull, consumeRateLimit } from './_lib/require-permission'
 import { clientIp } from './_lib/client-ip'
 
 export const config = { runtime: 'edge' }
@@ -127,20 +127,10 @@ export default async function handler(request: Request) {
 
   const ip = clientIp(request)
   const [burst, daily] = await Promise.all([
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `ai-search:ip:${ip}`,
-      p_window_seconds: IP_WINDOW,
-      p_limit: IP_LIMIT,
-    }),
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `ai-search:ip-daily:${ip}`,
-      p_window_seconds: IP_DAILY_WINDOW,
-      p_limit: IP_DAILY_LIMIT,
-    }),
+    consumeRateLimit(adminClient, `ai-search:ip:${ip}`, IP_WINDOW, IP_LIMIT),
+    consumeRateLimit(adminClient, `ai-search:ip-daily:${ip}`, IP_DAILY_WINDOW, IP_DAILY_LIMIT),
   ])
-  const denied = (r: { data: unknown }) =>
-    (r.data as { allowed?: boolean } | null)?.allowed === false
-  if (denied(burst) || denied(daily)) {
+  if (!burst || !daily) {
     return json({ error: 'Too many requests. Please try again in a few minutes.' }, 429)
   }
 
@@ -190,8 +180,10 @@ export default async function handler(request: Request) {
     clearTimeout(timeout)
 
     if (!res.ok) {
+      // The provider's body stays in the server log, never in the reply.
       const detail = await res.text().catch(() => '')
-      return json({ error: `AI error: ${res.status}`, detail: detail.slice(0, 200) }, res.status)
+      console.error(`[ai-search] provider ${res.status}: ${detail.slice(0, 300)}`)
+      return json({ error: `AI error: ${res.status}` }, res.status === 429 ? 429 : 502)
     }
 
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }

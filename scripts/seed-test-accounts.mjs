@@ -4,7 +4,10 @@
  * and go straight to work without signing up, onboarding or waiting on review.
  *
  * Usage — run from the repo root:
- *   node --env-file=.env scripts/seed-test-accounts.mjs [--password 'Shared!Pass1'] [--domain ktip.test] [--only student,faculty]
+ *   node --env-file=.env scripts/seed-test-accounts.mjs [--password 'Shared!Pass1'] [--domain ktip.test] [--only student,faculty] [--with-admin-tier]
+ *
+ * --with-admin-tier also creates Admin, both supervisors and Safety Admin. Only
+ * for a staging project: on live they would be shared administrator logins.
  *
  * Requires VITE_SUPABASE_URL, SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)
  * and the publishable key (VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY).
@@ -57,7 +60,7 @@ const secret = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_R
 const publishable = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 
 const USAGE =
-  "Usage: node --env-file=.env scripts/seed-test-accounts.mjs [--password 'Shared!Pass1'] [--domain ktip.test] [--only slug,slug]"
+  "Usage: node --env-file=.env scripts/seed-test-accounts.mjs [--password 'Shared!Pass1'] [--domain ktip.test] [--only slug,slug] [--with-admin-tier]"
 
 if (!url || !secret || !publishable) {
   console.error('Missing VITE_SUPABASE_URL, SUPABASE_SECRET_KEY or the publishable key.')
@@ -75,6 +78,11 @@ const domain = (arg('domain') || 'ktip.test').toLowerCase()
 // when omitted so it is never a guessable default someone later reuses.
 const password = arg('password') || `Ktip!${crypto.randomUUID().slice(0, 12)}`
 const only = arg('only')?.split(',').map((s) => s.trim())
+// Admin-tier logins share one password and skip the second step, so on a
+// database holding real members they are a takeover waiting for a leaked
+// passcode. Off unless asked for, for a staging project (2026-11-10).
+const withAdminTier = process.argv.includes('--with-admin-tier')
+const ADMIN_TIER = new Set(['admin', 'people_supervisor', 'programme_supervisor', 'safety_admin'])
 
 const COUNTRY = 'Saint Lucia'
 const COUNTRY_CODE = 'LC'
@@ -105,7 +113,9 @@ const ACCOUNTS = [
   { slug: 'mentor', label: 'Mentor', name: 'Test Mentor', org: null },
   { slug: 'researcher', label: 'Researcher', name: 'Test Researcher', org: 'Test Research Institute' },
   { slug: 'student', label: 'Student', name: 'Test Student', org: 'Test Community College', institution: ['university', 'student'] },
-].filter((a) => !only || only.includes(a.slug))
+]
+  .filter((a) => withAdminTier || !ADMIN_TIER.has(a.slug))
+  .filter((a) => !only || only.includes(a.slug))
 
 const TEST_INSTITUTIONS = {
   university: { slug: 'ktip-test-college', name: 'Test Community College', kind: 'university' },

@@ -53,7 +53,7 @@ export default async function handler(request: Request): Promise<Response> {
           return json({ error: 'Enrollment service is not configured correctly. Contact support.' }, 503)
         }
         console.error(`[ktip-enrollments] upstream ${err.status}: ${err.message}`)
-        return json({ error: err.message }, 502)
+        return json({ error: 'Could not load your enrollments. Please try again later.' }, 502)
       }
       console.error('[ktip-enrollments] unexpected error:', err)
       return json({ error: 'Could not load enrollments' }, 502)

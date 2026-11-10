@@ -33,6 +33,7 @@ import { FactStrip } from '../../components/detail/FactStrip'
 import { DetailActionCard } from '../../components/detail/DetailActionCard'
 import { grantTarget } from '../../lib/share/targets'
 import { entityPath } from '../../lib/slug'
+import { isHttpUrl } from '../../lib/submission-checklist'
 
 export default function GrantDetailPage() {
     const { t } = useLingui()
@@ -380,11 +381,15 @@ export default function GrantDetailPage() {
                       {/* The switch reaches this button too, though only as far as
                           hiding it: the link leaves KTIP, so no policy can enforce
                           anything past this point. */}
-                      {grant.application_url && gate.allowed && !isExpired && grant.is_active && (
+                      {/* http(s) only, and the new tab gets no handle back on
+                          this one: the address is whatever the poster typed,
+                          and window.open() has none of React's guard against a
+                          javascript: link. */}
+                      {isHttpUrl(grant.application_url) && gate.allowed && !isExpired && grant.is_active && (
                         <Button
                           fullWidth
                           icon={<ExternalLink size={20} />}
-                          onClick={() => window.open(grant.application_url!, '_blank')}
+                          onClick={() => window.open(grant.application_url!.trim(), '_blank', 'noopener,noreferrer')}
                         >
                           <Trans>Apply on External Site</Trans>
                         </Button>

@@ -356,9 +356,10 @@ export default async function handler(request: Request): Promise<Response> {
     }),
   ])
 
-  const limited = [ipLimit, dailyLimit]
-    .map((r) => r.data as { allowed: boolean } | null)
-    .some((r) => r && r.allowed === false)
+  // Fail closed: an errored or empty answer counts as limited.
+  const limited = [ipLimit, dailyLimit].some(
+    (r) => r.error || (r.data as { allowed?: boolean } | null)?.allowed !== true
+  )
   if (limited) return fail(origin, 'rate_limited', `ip=${ip}`)
 
   // -- Obtain a verified token -------------------------------------------
@@ -384,14 +385,18 @@ export default async function handler(request: Request): Promise<Response> {
       const { data: stash } = await admin.rpc('vc_claim_handoff_ticket', {
         p_token_hash: await sha256Hex(`pkce:${state}`),
       })
-      const verifier = (stash as { code_verifier?: string } | null)?.code_verifier
+      const stashed = stash as { code_verifier?: string; nonce?: string } | null
+      const verifier = stashed?.code_verifier
       if (!verifier) return fail(origin, 'unknown_state')
+      // start.ts stores the nonce it sent beside the verifier; the id_token
+      // must carry it back. A stash without one predates the check.
+      if (!stashed?.nonce) return fail(origin, 'unknown_state')
 
       const tokens = await exchangeCode(cfg, code, `${origin}/auth/vc/callback`, verifier)
       if (!tokens.id_token) return fail(origin, 'no_id_token')
 
       rawToken = tokens.id_token
-      payload = await verifyVcToken(tokens.id_token, cfg)
+      payload = await verifyVcToken(tokens.id_token, cfg, stashed.nonce)
       if (tokens.access_token) userinfo = await fetchUserinfo(cfg, tokens.access_token)
     } else {
       return fail(origin, 'missing_token')
@@ -469,9 +474,20 @@ export default async function handler(request: Request): Promise<Response> {
 
   // -- Hand the session over ----------------------------------------------
 
+  // The session is minted for the account resolved and suspension-checked
+  // above, by ITS email. Minting for claims.email instead would sign the
+  // browser into whichever account owns that address, which is not the same
+  // account when the Virtual Campus identity was linked by vc_sub to a KTIP
+  // account with a different email.
+  const { data: account, error: accountError } = await admin.auth.admin.getUserById(userId)
+  const accountEmail = account?.user?.email
+  if (accountError || !accountEmail) {
+    return fail(origin, 'session_failed', accountError?.message ?? 'resolved account has no email')
+  }
+
   let session
   try {
-    session = await mintSession(admin, supabaseUrl, anonKey, claims.email)
+    session = await mintSession(admin, supabaseUrl, anonKey, accountEmail)
   } catch (err) {
     return fail(origin, 'session_failed', (err as Error).message)
   }

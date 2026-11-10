@@ -122,12 +122,13 @@ export default async function handler(request: Request) {
   }
 
   // --- Rate limit: cap verification mail per account per day ---
-  const { data: limit } = await admin.rpc('consume_auth_rate_limit', {
+  // Fail closed: an unreachable limiter refuses, it does not wave the send through.
+  const { data: limit, error: limitError } = await admin.rpc('consume_auth_rate_limit', {
     p_bucket: `alias-send:user:${caller.id}`,
     p_window_seconds: 86400,
     p_limit: DAILY_SEND_LIMIT,
   })
-  if (limit && (limit as any).allowed === false) {
+  if (limitError || (limit as any)?.allowed !== true) {
     return json(
       { error: `You can request up to ${DAILY_SEND_LIMIT} verification emails per day.` },
       429
@@ -195,7 +196,8 @@ export default async function handler(request: Request) {
     // 23505 = the lower(email) unique index. Somebody else holds this address
     // as a pending alias. Word it exactly like the account collision above.
     if ((writeError as any).code === '23505') return json({ error: IN_USE_MESSAGE }, 409)
-    return json({ error: writeError.message }, 400)
+    console.error(`[add-alias] write failed: ${writeError.message}`)
+    return json({ error: 'Could not save that address. Please try again.' }, 400)
   }
 
   const verifyUrl = `${siteOrigin(request)}/verify-email/${token}`
@@ -256,7 +258,8 @@ export default async function handler(request: Request) {
       .from('user_email_aliases')
       .update({ verification_token: null, token_expires_at: null })
       .eq('user_id', caller.id)
-    return json({ error: `Failed to send the verification email. ${detail}`.trim() }, 502)
+    console.error(`[add-alias] resend ${resendResponse.status}: ${detail.slice(0, 300)}`)
+    return json({ error: 'Failed to send the verification email.' }, 502)
   }
 
   return json({ success: true }, 200)

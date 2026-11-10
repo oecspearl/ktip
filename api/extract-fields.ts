@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { FIELD_SPECS, describeFields, sanitizeFields } from '../src/lib/extracted-fields'
-import { adminClientOrNull, requireVerified } from './_lib/require-permission'
+import { adminClientOrNull, consumeRateLimit, requireVerified } from './_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -103,12 +103,7 @@ export default async function handler(request: Request) {
   const adminClient = adminClientOrNull()
   if (!adminClient) return json({ error: 'Server configuration error' }, 503)
 
-  const { data: limit } = await adminClient.rpc('consume_auth_rate_limit', {
-    p_bucket: `extract-fields:user:${caller.id}`,
-    p_window_seconds: USER_WINDOW,
-    p_limit: USER_LIMIT,
-  })
-  if ((limit as { allowed?: boolean } | null)?.allowed === false) {
+  if (!(await consumeRateLimit(adminClient, `extract-fields:user:${caller.id}`, USER_WINDOW, USER_LIMIT))) {
     return json({ error: 'Too many requests. Please try again in a few minutes.' }, 429)
   }
 
@@ -158,8 +153,10 @@ export default async function handler(request: Request) {
     clearTimeout(timeout)
 
     if (!res.ok) {
+      // The provider's body stays in the server log, never in the reply.
       const detail = await res.text().catch(() => '')
-      return json({ error: `AI error: ${res.status}`, detail: detail.slice(0, 200) }, res.status)
+      console.error(`[extract-fields] provider ${res.status}: ${detail.slice(0, 300)}`)
+      return json({ error: `AI error: ${res.status}` }, res.status === 429 ? 429 : 502)
     }
 
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }

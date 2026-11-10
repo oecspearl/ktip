@@ -173,6 +173,33 @@ export async function requirePermission(
 }
 
 /**
+ * One database-backed rate-limit bucket (056), failing closed.
+ *
+ * Returns true when the call may go ahead. The routes used to test
+ * `data?.allowed === false`, which let every request through whenever the RPC
+ * errored or answered nothing — a limiter that switches itself off exactly when
+ * the database is struggling. An error or a missing answer is now a refusal.
+ * Only the bucket's prefix is logged: the rest can hold a user id or a hash.
+ */
+export async function consumeRateLimit(
+  admin: SupabaseClient,
+  bucket: string,
+  windowSeconds: number,
+  limit: number
+): Promise<boolean> {
+  const { data, error } = await admin.rpc('consume_auth_rate_limit', {
+    p_bucket: bucket,
+    p_window_seconds: windowSeconds,
+    p_limit: limit,
+  })
+  if (error) {
+    console.error(`[rate-limit] ${bucket.split(':')[0]} refused, limiter unavailable: ${error.message}`)
+    return false
+  }
+  return (data as { allowed?: boolean } | null)?.allowed === true
+}
+
+/**
  * The verification gate (139, widened in 205), asked after authenticate().
  *
  * For routes any signed-in member could call until 205: AI, invites, course

@@ -128,12 +128,14 @@ export default async function handler(request: Request) {
     }),
   ])
 
+  // Fail closed: an errored or empty answer counts as blocked. This route is a
+  // password oracle and its database counters are its only limiter.
   const blocked = [ipLimit, emailLimit, dailyLimit]
-    .map((r) => r.data as { allowed: boolean; retry_after: number } | null)
-    .filter((r) => r && r.allowed === false)
+    .filter((r) => r.error || (r.data as { allowed?: boolean } | null)?.allowed !== true)
+    .map((r) => r.data as { allowed?: boolean; retry_after?: number } | null)
 
   if (blocked.length > 0) {
-    const retryAfter = Math.max(...blocked.map((r) => r!.retry_after || 0))
+    const retryAfter = Math.max(...blocked.map((r) => r?.retry_after || 0))
     console.warn(`[login-alias] rate limited ip=${ip}`)
     return settle(
       { error: 'Too many attempts. Please try again later.', retry_after: retryAfter },

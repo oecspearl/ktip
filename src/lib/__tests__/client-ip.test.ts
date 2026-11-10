@@ -38,6 +38,18 @@ describe('clientIp', () => {
     )
   })
 
+  it('expands :: before cutting to the /64, so host bits never leak into the key', () => {
+    // Two hosts in the same /64, written with the zeros compressed.
+    expect(clientIp(req({ 'x-real-ip': '2001:db8::1:2:3' }))).toBe('2001:db8:0:0')
+    expect(clientIp(req({ 'x-real-ip': '2001:db8::9:9:9' }))).toBe('2001:db8:0:0')
+    expect(clientIp(req({ 'x-real-ip': '2001:db8:85a3::7348' }))).toBe('2001:db8:85a3:0')
+    expect(clientIp(req({ 'x-real-ip': '::1' }))).toBe('0:0:0:0')
+  })
+
+  it('buckets an IPv4-mapped address as the IPv4 it carries', () => {
+    expect(clientIp(req({ 'x-real-ip': '::ffff:203.0.113.9' }))).toBe('203.0.113.9')
+  })
+
   it('is "unknown" with no address at all', () => {
     expect(clientIp(req({}))).toBe('unknown')
   })

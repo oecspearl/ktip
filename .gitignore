@@ -31,6 +31,11 @@ dist-ssr
 # A real account's password: never commit, never log. The `.env` line above does
 # NOT cover this — gitignore matches that name exactly, not as a prefix.
 .env.perf
+# Every other variant too (.env.development, .env.preview, .env.staging.local…),
+# so a new environment file is ignored before anyone thinks to list it. The
+# template is the one env file that belongs in git.
+.env.*
+!.env.example
 
 # Build output
 build

@@ -58,9 +58,13 @@ export default async function handler(request: Request): Promise<Response> {
       p_window_seconds: IP_WINDOW,
       p_limit: IP_LIMIT,
     })
+    // Fail closed: an unreachable limiter refuses, it does not wave the call on
+    // to the Virtual Campus.
     if (rateError) {
       console.error(`[ktip-enroll] rate limit RPC failed: ${rateError.message}`)
-    } else if ((limit as { allowed?: boolean } | null)?.allowed === false) {
+      return json({ error: 'Too many enrollment attempts. Please try again later.' }, 429)
+    }
+    if ((limit as { allowed?: boolean } | null)?.allowed !== true) {
       return json({ error: 'Too many enrollment attempts. Please try again later.' }, 429)
     }
 
@@ -102,7 +106,7 @@ export default async function handler(request: Request): Promise<Response> {
           return json({ error: 'Enrollment service is not configured correctly. Contact support.' }, 503)
         }
         console.error(`[ktip-enroll] upstream ${err.status}: ${err.message}`)
-        return json({ error: err.message }, 502)
+        return json({ error: 'Enrollment failed. Please try again later.' }, 502)
       }
       console.error('[ktip-enroll] unexpected error:', err)
       return json({ error: 'Enrollment failed' }, 502)

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
 import { emailAllowed } from '../_lib/email-prefs'
-import { requireVerified } from '../_lib/require-permission'
+import { consumeRateLimit, requireVerified } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -108,6 +108,13 @@ export default async function handler(request: Request) {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
+  // The RSVP check below proves the caller registered; it does not stop them
+  // re-sending the organiser email in a loop. Three per event per day covers a
+  // change of attendance type and a retry (2026-11-10).
+  if (!(await consumeRateLimit(admin, `rsvp-notify:user:${caller.id}:${eventId}`, 86_400, 3))) {
+    return json({ sent: false, reason: 'rate_limited' }, 429)
+  }
+
   // The caller's own row, or nothing. This is what makes the endpoint safe to
   // expose: it can only ever announce a registration the caller just made.
   const { data: rsvp } = await admin
@@ -179,7 +186,8 @@ export default async function handler(request: Request) {
 
   if (!resendResponse.ok) {
     const detail = await resendResponse.text().catch(() => '')
-    return json({ sent: false, reason: `resend_failed ${detail}`.trim() }, 200)
+    console.error(`[registration-notify] resend ${resendResponse.status}: ${detail.slice(0, 300)}`)
+    return json({ sent: false, reason: 'resend_failed' }, 200)
   }
 
   return json({ sent: true }, 200)

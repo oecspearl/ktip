@@ -38,9 +38,25 @@ describe('roleRequiresMfa', () => {
     expect(roleRequiresMfa('entrepreneur')).toBe(true)
   })
 
-  it('is off for every other role at 118', () => {
+  it('is on for entrepreneur and, since 206, every admin-tier role, and off for the rest', () => {
     const required = ROLE_DEFINITIONS.filter((role) => role.requiresMfa).map((role) => role.slug)
-    expect(required).toEqual(['entrepreneur'])
+    expect([...required].sort()).toEqual(
+      [
+        'admin',
+        'entrepreneur',
+        'oecs',
+        'people_supervisor',
+        'programme_supervisor',
+        'safety_admin',
+        'super_admin',
+      ].sort()
+    )
+  })
+
+  it('covers every admin-tier role, so a new administrator role cannot skip it', () => {
+    const adminTier = ROLE_DEFINITIONS.filter((role) => role.tier === 'admin')
+    expect(adminTier.length).toBeGreaterThan(0)
+    expect(adminTier.every((role) => role.requiresMfa === true)).toBe(true)
   })
 
   it('is false for a slug nobody has heard of, rather than throwing', () => {

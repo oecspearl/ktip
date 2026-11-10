@@ -1,4 +1,9 @@
-import { authenticate, adminClientOrNull, requireVerified } from './_lib/require-permission'
+import {
+  authenticate,
+  adminClientOrNull,
+  consumeRateLimit,
+  requireVerified,
+} from './_lib/require-permission'
 import { clientIp } from './_lib/client-ip'
 
 export const config = { runtime: 'edge' }
@@ -102,20 +107,15 @@ export default async function handler(request: Request) {
   if (!adminClient) return json({ error: 'Server configuration error' }, 503)
 
   const [burst, daily] = await Promise.all([
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `ai-chat:user:${callerId}`,
-      p_window_seconds: USER_WINDOW,
-      p_limit: USER_LIMIT,
-    }),
-    adminClient.rpc('consume_auth_rate_limit', {
-      p_bucket: `ai-chat:user-daily:${callerId}:${clientIp(request)}`,
-      p_window_seconds: USER_DAILY_WINDOW,
-      p_limit: USER_DAILY_LIMIT,
-    }),
+    consumeRateLimit(adminClient, `ai-chat:user:${callerId}`, USER_WINDOW, USER_LIMIT),
+    consumeRateLimit(
+      adminClient,
+      `ai-chat:user-daily:${callerId}:${clientIp(request)}`,
+      USER_DAILY_WINDOW,
+      USER_DAILY_LIMIT
+    ),
   ])
-  const denied = (r: { data: unknown }) =>
-    (r.data as { allowed?: boolean } | null)?.allowed === false
-  if (denied(burst) || denied(daily)) {
+  if (!burst || !daily) {
     return json({ error: 'Too many requests. Please try again in a few minutes.' }, 429)
   }
 
@@ -156,11 +156,11 @@ export default async function handler(request: Request) {
     clearTimeout(timeout)
 
     if (!res.ok) {
+      // The provider's body can quote the request or a masked key; it stays in
+      // the server log.
       const errorText = await res.text().catch(() => '')
-      return json(
-        { error: `AI error: ${res.status}`, detail: errorText.slice(0, 200) },
-        res.status
-      )
+      console.error(`[ai-chat] provider ${res.status}: ${errorText.slice(0, 300)}`)
+      return json({ error: `AI error: ${res.status}` }, res.status === 429 ? 429 : 502)
     }
 
     const data = await res.json()

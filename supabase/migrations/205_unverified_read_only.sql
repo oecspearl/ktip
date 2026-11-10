@@ -218,10 +218,19 @@ CREATE POLICY "Verified members only: snippets"
   ON snippets AS RESTRICTIVE FOR INSERT
   WITH CHECK (is_verified_member(auth.uid()));
 
-DROP POLICY IF EXISTS "Verified members only: proposals" ON proposals;
-CREATE POLICY "Verified members only: proposals"
-  ON proposals AS RESTRICTIVE FOR INSERT
-  WITH CHECK (is_verified_member(auth.uid()));
+-- 045 dropped the proposals table and nothing recreated it, so a bare
+-- CREATE POLICY here fails with 42P01 and takes the whole migration with it.
+-- Guarded: a database that still carries the table gets the rule, and every
+-- other database skips it.
+DO $$
+BEGIN
+  IF to_regclass('public.proposals') IS NOT NULL THEN
+    EXECUTE 'DROP POLICY IF EXISTS "Verified members only: proposals" ON proposals';
+    EXECUTE 'CREATE POLICY "Verified members only: proposals"
+      ON proposals AS RESTRICTIVE FOR INSERT
+      WITH CHECK (is_verified_member(auth.uid()))';
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Verified members only: share documents" ON document_shares;
 CREATE POLICY "Verified members only: share documents"

@@ -6,9 +6,10 @@ import { cn } from '../../lib/utils'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
 
 function preview(html: string, max = 48): string {
-  const el = document.createElement('div')
-  el.innerHTML = html
-  const text = (el.textContent || '').replace(/\s+/g, ' ').trim()
+  // DOMParser, not a detached div: a div still fetches <img> sources, so an
+  // onerror handler in the note would run. A parsed document is inert.
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  const text = (doc.body.textContent || '').replace(/\s+/g, ' ').trim()
   return text.length > max ? `${text.slice(0, max)}…` : text
 }
 

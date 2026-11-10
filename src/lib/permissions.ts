@@ -59,6 +59,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`OECS Secretariat. System-wide management, global policy, audit logs, suspensions.`,
     selfAssignable: false,
     requiresVerification: true,
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 10,
   },
   // The Admin seat (124). Everything super_admin holds — every key, every
@@ -76,6 +78,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`Runs the platform day to day. Every permission, every console page, and full charge of supervisors and members. Cannot suspend, delete or re-role another Admin — that stays with the Super Admin.`,
     selfAssignable: false,
     requiresVerification: true,
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 11,
   },
   // The two supervisor seats. Same tier as each other, deliberately: neither
@@ -93,6 +97,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`Owns who people are and how they behave: member records (read-only), verification, institutions, association review, moderation and grievances.`,
     selfAssignable: false,
     requiresVerification: true,
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 12,
   },
   {
@@ -102,6 +108,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`Owns what the platform publishes: projects, grants, forums, resources, achievements and employers. Events and the venue stay with the Super Admin.`,
     selfAssignable: false,
     requiresVerification: true,
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 14,
   },
   {
@@ -111,6 +119,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     description: msg`Content moderator. Owns flagged-content queues, automated moderation logs and escalations.`,
     selfAssignable: false,
     requiresVerification: true,
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 20,
   },
   {
@@ -121,6 +131,8 @@ export const ROLE_DEFINITIONS: RoleDefinition[] = [
     selfAssignable: false,
     requiresVerification: true,
     aliasOf: 'super_admin',
+    // 206: every admin-tier role owes a second step.
+    requiresMfa: true,
     sortOrder: 25,
   },
 

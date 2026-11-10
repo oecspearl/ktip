@@ -117,6 +117,18 @@ export default async function handler(request: Request): Promise<Response> {
     ) {
       return json({ ok: false, error: 'All three affirmations are required' }, 400)
     }
+    // Public and unauthenticated, and it mails the claimant: bound every field so
+    // one request cannot store or send an arbitrarily large body (2026-11-10).
+    if (
+      claimantName.length > 200 ||
+      claimantEmail.length > 254 ||
+      (claimantOrg?.length ?? 0) > 200 ||
+      targetUrl.length > 2048 ||
+      workDescription.length > 5000 ||
+      infringementDetail.length > 10000
+    ) {
+      return json({ ok: false, error: 'One of the fields is too long' }, 413)
+    }
 
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } })
     const ipHash = await hashIp(clientIp(request))
