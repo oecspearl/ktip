@@ -6763,6 +6763,10 @@ msgstr "Iniciar sesión"
 msgid "Verification code"
 msgstr ""
 
+#: src/components/RouteLoadFailed.tsx
+msgid "This page didn't load"
+msgstr "Esta página no se cargó"
+
 #: src/components/calendar/CalendarFilterMenu.tsx
 msgid "Only my items"
 msgstr ""
@@ -11029,6 +11033,10 @@ msgstr "Aspectos básicos"
 msgid "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 msgstr "Todo lo que modifique aquí es suyo — la sincronización desde el Virtual Campus no lo tocará."
 
+#: src/components/RouteLoadFailed.tsx
+msgid "Go to Discover"
+msgstr "Ir a Descubrir"
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "e.g. Call for Proposals 2026"
 msgstr "p. ej., Convocatoria de propuestas 2026"
@@ -12006,6 +12014,10 @@ msgstr ""
 #: src/components/legal/ReconsentBanner.tsx
 msgid "Later"
 msgstr "Más tarde"
+
+#: src/components/RouteLoadFailed.tsx
+msgid "KTIP was probably updated since you opened it, or your connection dropped. Reloading gets you the latest version."
+msgstr "Es probable que KTIP se haya actualizado desde que lo abrió, o que se haya cortado su conexión. Recargue para obtener la versión más reciente."
 
 #: src/i18n/harvested.ts
 msgid "Browse funding opportunities across the OECS."
@@ -14156,6 +14168,10 @@ msgstr "¿Qué son las publicaciones fijadas?"
 #: src/components/settings/PreferencesTab.tsx
 msgid "Choose what you want to be notified about"
 msgstr "Elija sobre qué desea recibir notificaciones"
+
+#: src/components/RouteLoadFailed.tsx
+msgid "Reload"
+msgstr "Recargar"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Link to your deck, or upload a file below"

@@ -6891,6 +6891,10 @@ msgstr "Log In"
 msgid "Verification code"
 msgstr "Verification code"
 
+#: src/components/RouteLoadFailed.tsx
+msgid "This page didn't load"
+msgstr "This page didn't load"
+
 #: src/components/calendar/CalendarFilterMenu.tsx
 msgid "Only my items"
 msgstr "Only my items"
@@ -11306,6 +11310,10 @@ msgstr "Basics"
 msgid "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 msgstr "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 
+#: src/components/RouteLoadFailed.tsx
+msgid "Go to Discover"
+msgstr "Go to Discover"
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "e.g. Call for Proposals 2026"
 msgstr "e.g. Call for Proposals 2026"
@@ -12302,6 +12310,10 @@ msgstr "Menus, buttons and labels. Applies immediately and follows you to your o
 #: src/components/legal/ReconsentBanner.tsx
 msgid "Later"
 msgstr "Later"
+
+#: src/components/RouteLoadFailed.tsx
+msgid "KTIP was probably updated since you opened it, or your connection dropped. Reloading gets you the latest version."
+msgstr "KTIP was probably updated since you opened it, or your connection dropped. Reloading gets you the latest version."
 
 #: src/i18n/harvested.ts
 msgid "Browse funding opportunities across the OECS."
@@ -14523,6 +14535,10 @@ msgstr "What are pinned posts?"
 #: src/components/settings/PreferencesTab.tsx
 msgid "Choose what you want to be notified about"
 msgstr "Choose what you want to be notified about"
+
+#: src/components/RouteLoadFailed.tsx
+msgid "Reload"
+msgstr "Reload"
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Link to your deck, or upload a file below"

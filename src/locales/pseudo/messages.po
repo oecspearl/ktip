@@ -6668,6 +6668,10 @@ msgstr ""
 msgid "Verification code"
 msgstr ""
 
+#: src/components/RouteLoadFailed.tsx
+msgid "This page didn't load"
+msgstr ""
+
 #: src/components/calendar/CalendarFilterMenu.tsx
 msgid "Only my items"
 msgstr ""
@@ -10905,6 +10909,10 @@ msgstr ""
 msgid "Anything you change here is yours — syncing from the Virtual Campus will leave it alone."
 msgstr ""
 
+#: src/components/RouteLoadFailed.tsx
+msgid "Go to Discover"
+msgstr ""
+
 #: src/components/documents/DocumentUploadModal.tsx
 msgid "e.g. Call for Proposals 2026"
 msgstr ""
@@ -11878,6 +11886,10 @@ msgstr ""
 
 #: src/components/legal/ReconsentBanner.tsx
 msgid "Later"
+msgstr ""
+
+#: src/components/RouteLoadFailed.tsx
+msgid "KTIP was probably updated since you opened it, or your connection dropped. Reloading gets you the latest version."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14013,6 +14025,10 @@ msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Choose what you want to be notified about"
+msgstr ""
+
+#: src/components/RouteLoadFailed.tsx
+msgid "Reload"
 msgstr ""
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx

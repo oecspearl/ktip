@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/react'
 import {
   createBrowserRouter as createBrowserRouterBase,
   Outlet,
-  Link,
   Navigate,
   useParams,
   useSearchParams,
@@ -29,6 +28,8 @@ import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
 import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
+import { RouteLoadFailed, ReloadOnMount } from './components/RouteLoadFailed'
+import { claimAutoReload } from './lib/route-reload'
 import { AppError } from './lib/app-error'
 import { captureException } from './lib/monitoring'
 import { enableCardShuffle } from './lib/routeTransitions'
@@ -132,19 +133,6 @@ const queryClient = new QueryClient({
   },
 })
 
-// Shown while a page is not yet ported to React (its import fails to compile).
-// Once every page is ported this fallback never renders.
-function Placeholder() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <p className="text-gray-500">This page is being migrated.</p>
-      <Link to="/" className="text-ktip-tropical-700 hover:underline">
-        Back to Discover
-      </Link>
-    </div>
-  )
-}
-
 /** /events/:id/edit → /events/:id/manage — the edit page folded into the workspace. */
 function EventEditRedirect() {
   const { id } = useParams()
@@ -201,9 +189,11 @@ function AgreementRoute(props: ComponentProps<typeof AgreementRouteType>) {
 function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
   return async () => {
     const mod = await importer().catch((error: unknown) => {
-      // The Placeholder fallback is kept, but it is no longer silent: after a
-      // deploy this is how a stale chunk reference presents, and it looked
-      // identical to a page that was never ported.
+      // After a deploy this is how a stale chunk reference presents: the tab
+      // asks for a hashed file the new build no longer has. Only a full reload
+      // fixes it (React Router keeps this resolution for the life of the page),
+      // so the first failure reloads by itself and a repeat inside the guard
+      // window shows a screen that offers one. See src/lib/route-reload.ts.
       captureException(
         new AppError({
           code: 'ROUTE_IMPORT_FAILED',
@@ -212,7 +202,7 @@ function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
           cause: error,
         })
       )
-      return { default: Placeholder }
+      return { default: claimAutoReload() ? ReloadOnMount : RouteLoadFailed }
     })
     return { Component: mod.default }
   }

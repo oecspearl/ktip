@@ -83,7 +83,7 @@ Cancelling an event keeps its page up with a cancelled badge rather than deletin
 
 There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.
 
-Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.
+Some roles must have it: Entrepreneur, and every administrator role. An account with one of them is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Entrepreneur accounts that existed before the requirement were left as they were. Administrator accounts were not.
 
 Either way you also get ten recovery codes. Keep them somewhere that is not the phone.`,
   msg`A shared document`,
@@ -1706,7 +1706,9 @@ If you signed up with Google or Microsoft, your email belongs to that provider a
 
 Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.
 
-The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.
+The new password follows the same rule as signup: at least 8 characters, with upper and lower case letters, a number and a symbol.
+
+Saving it signs you out on every other device. The one you are using stays signed in.
 
 If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider.`,
   msg`Open Settings, then Verification. The page offers the routes that fit your account. They are listed here from the quickest to the slowest.`,

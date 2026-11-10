@@ -107,7 +107,7 @@
       "destination": "/api/auth/vc/start"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ],
