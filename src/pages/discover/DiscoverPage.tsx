@@ -1509,15 +1509,22 @@ export default function DiscoverPage() {
               column above — see the fit box. Pinned left and right rather than
               shrink-wrapped: the card strip's `max-w-full` resolves against
               this element, and a shrink-to-fit ancestor would let the strip
-              size itself. */}
-          <div className="absolute inset-x-[5%] bottom-[2.5em] flex items-end justify-between gap-[1.5em]">
+              size itself.
+
+              pointer-events-none because that stretch leaves the row's right
+              half an empty, transparent box that still hit-tests — and, being
+              positioned, it stacks over the text column. Wherever the column
+              is allowed down beside the strip (`strip.clear`), a slide with
+              long copy parks the CTA inside that box and swallows its clicks.
+              The strip block below turns events back on for itself. */}
+          <div className="absolute inset-x-[5%] bottom-[2.5em] flex items-end justify-between gap-[1.5em] pointer-events-none">
             {/* The ref is on THIS block, not the full-width row above it. The
                 row is stretched edge to edge so the card strip's `max-w-full`
                 has the column to resolve against; its right edge is therefore
                 the column's right edge, and measuring it would report the strip
                 as reaching under the text at every width. What actually takes
                 up space is the tabs and the five cards, which is this. */}
-            <div ref={stripRef} className="min-w-0">
+            <div ref={stripRef} className="min-w-0 pointer-events-auto">
               {/* Slide toggle */}
               {/* Soft-UI segmented control: the track is a well (inset pair,
                   on-dark materials over the photo) and the thumb is lifted out
