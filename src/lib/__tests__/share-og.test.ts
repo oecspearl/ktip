@@ -89,12 +89,21 @@ describe('itemCard', () => {
     const card = itemCard(ORIGIN, 'project', project)
     expect(card.title).toBe('EduCarib Platform')
     expect(card.url).toBe(`${ORIGIN}/projects/educarib-platform`)
-    expect(card.image).toMatch(/^https:\/\/ktip\.test\/api\/share-image\?kind=project&id=educarib-platform&v=\w+$/)
+    // Not under /api/: robots.txt closes it, and LinkedIn obeys that.
+    expect(card.image).toMatch(/^https:\/\/ktip\.test\/og\/project\/educarib-platform\.jpg\?v=\w+$/)
     expect(card.description).toContain('Lessons download overnight')
   })
 
+  it('keeps the share tags and stamp in og:url, and nothing else from the query', () => {
+    const shared = new URLSearchParams('og=project&id=educarib-platform&utm_source=linkedin&utm_medium=share&lang=fr&s=mh2k9x1&evil=<x>')
+    const card = itemCard(ORIGIN, 'project', project, shared)
+    expect(card.url).toBe(`${ORIGIN}/projects/educarib-platform?utm_source=linkedin&utm_medium=share&lang=fr&s=mh2k9x1`)
+    const odd = itemCard(ORIGIN, 'project', project, new URLSearchParams('s="><script>'))
+    expect(odd.url).toBe(`${ORIGIN}/projects/educarib-platform`)
+  })
+
   it('draws a card even when the item has no photo, since the facts go on it', () => {
-    expect(itemCard(ORIGIN, 'project', { ...project, image_url: null }).image).toContain('/api/share-image?')
+    expect(itemCard(ORIGIN, 'project', { ...project, image_url: null }).image).toContain('/og/project/')
   })
 
   it('changes the image address when anything drawn on it changes', () => {

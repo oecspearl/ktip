@@ -98,7 +98,7 @@ async function previewPage(request: Request): Promise<Response> {
     const admin = adminClientOrNull()
     if (id && admin) {
       const row = await loadShareable(admin, kind, id).catch(() => null)
-      if (row) card = itemCard(origin, kind, row)
+      if (row) card = itemCard(origin, kind, row, params)
     }
   }
   return new Response(request.method === 'HEAD' ? null : ogHtml(card), {

@@ -31,16 +31,26 @@ export const X_LINK_CHARS = 23
 export const X_LIMIT = 280
 
 /**
+ * Apps that keep the first preview they build for an address and reuse it for
+ * days. Their links get a share stamp (?s=), so each share is an address they
+ * haven't seen and they read the card fresh. None of them show the link in
+ * the post (a card for LinkedIn and Facebook, t.co on X), so the stamp stays
+ * out of sight. WhatsApp and email show the link, so theirs stays short.
+ */
+export const FRESH_LINK: ReadonlySet<SharePlatform> = new Set(['linkedin', 'facebook', 'x'])
+
+/**
  * The link as shared: tagged with the app it went out on, so visits can be
  * counted per app later, and with the sharer's language when it isn't English
  * (index.html honours ?lang= before first paint). Existing query and hash are
  * kept.
  */
-export function taggedUrl(url: string, source: SharePlatform, lang?: string): string {
+export function taggedUrl(url: string, source: SharePlatform, lang?: string, now = Date.now()): string {
   const u = new URL(url)
   u.searchParams.set('utm_source', source === 'native' ? 'share' : source)
   u.searchParams.set('utm_medium', 'share')
   if (lang && lang !== 'en') u.searchParams.set('lang', lang)
+  if (FRESH_LINK.has(source)) u.searchParams.set('s', now.toString(36))
   return u.toString()
 }
 

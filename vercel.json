@@ -107,6 +107,10 @@
       "destination": "/api/auth/vc/start"
     },
     {
+      "source": "/og/:kind(event|grant|project|org)/:id([a-z0-9-]+)\\.jpg",
+      "destination": "/api/share-image?kind=:kind&id=:id"
+    },
+    {
       "source": "/projects/:id",
       "has": [
         {

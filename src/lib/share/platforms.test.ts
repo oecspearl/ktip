@@ -13,6 +13,17 @@ describe('taggedUrl', () => {
     expect(taggedUrl(url, 'x', 'fr')).toContain('lang=fr')
   })
 
+  it('stamps LinkedIn, Facebook and X links so they read the card fresh, but not the ones people see', () => {
+    const now = 1_762_800_000_000
+    for (const app of ['linkedin', 'facebook', 'x'] as const) {
+      expect(new URL(taggedUrl(url, app, 'en', now)).searchParams.get('s')).toBe(now.toString(36))
+    }
+    expect(taggedUrl(url, 'linkedin', 'en', now)).not.toBe(taggedUrl(url, 'linkedin', 'en', now + 1))
+    for (const app of ['whatsapp', 'email', 'copy', 'native'] as const) {
+      expect(new URL(taggedUrl(url, app)).searchParams.has('s')).toBe(false)
+    }
+  })
+
   it('keeps an existing query and calls the phone share menu "share"', () => {
     expect(taggedUrl(`${url}?tab=faq`, 'native')).toBe(`${url}?tab=faq&utm_source=share&utm_medium=share`)
   })

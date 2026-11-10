@@ -42,4 +42,12 @@ describe('GET /api/share-image', () => {
       expect(res.headers.get('location')).toBe('/og-default.jpg')
     }
   })
+
+  it('reads kind and id from the /og/ path too, with the same checks', async () => {
+    for (const path of ['/og/nope/x.jpg', '/og/project/..%2F..%2Fetc.jpg', '/og/project/.jpg']) {
+      const res = await GET(new Request(`https://ktip.test${path}?v=1`))
+      expect(res.status).toBe(302)
+      expect(res.headers.get('location')).toBe('/og-default.jpg')
+    }
+  })
 })

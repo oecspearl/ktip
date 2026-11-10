@@ -19,7 +19,8 @@ import {
 } from './_lib/share-og.js'
 
 /**
- * GET /api/share-image?kind=<kind>&id=<id or slug>&v=<version>
+ * GET /og/<kind>/<id or slug>.jpg?v=<version>
+ * (vercel.json rewrites it to /api/share-image?kind=<kind>&id=<id>)
  *
  * The picture on a shared link's preview card: a 1200×630 JPEG of the item's
  * photo with a band along the bottom carrying the kind ("EVENT"), the title,
@@ -303,11 +304,19 @@ export async function renderCard(kind: OgKind, picture: Buffer | null, text: Car
     .toBuffer()
 }
 
+/**
+ * Crawlers ask for /og/<kind>/<id>.jpg (see cardImagePath); vercel.json
+ * rewrites that here with kind and id in the query. Reading the path as well
+ * keeps the route working if the query doesn't come through the rewrite.
+ */
+const CARD_PATH = /^\/og\/([a-z]+)\/([^/]+)\.jpg$/
+
 export async function GET(request: Request): Promise<Response> {
-  const params = new URL(request.url).searchParams
-  const kind = params.get('kind') as OgKind
+  const { pathname, searchParams: params } = new URL(request.url)
+  const fromPath = CARD_PATH.exec(pathname)
+  const kind = (params.get('kind') ?? fromPath?.[1]) as OgKind
   if (!(OG_KINDS as readonly string[]).includes(kind)) return fallback()
-  const id = cleanId(kind, params.get('id'))
+  const id = cleanId(kind, params.get('id') ?? (fromPath ? decodeURIComponent(fromPath[2]) : null))
   const admin = adminClientOrNull()
   if (!id || !admin) return fallback()
 

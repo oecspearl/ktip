@@ -228,21 +228,48 @@ export function siteCard(origin: string): OgCard {
   }
 }
 
-/** The card for one public item. */
-export function itemCard(origin: string, kind: OgKind, row: Row): OgCard {
+/**
+ * Query parameters a shared link carries that og:url keeps: the app tag, the
+ * language, and the share stamp (see taggedUrl in src/lib/share/platforms.ts).
+ * Anything else in the query is dropped, so nothing a caller makes up is
+ * echoed back.
+ */
+export const LINK_PARAMS = ['utm_source', 'utm_medium', 'lang', 's'] as const
+
+/**
+ * The address the card's picture is served from. Not under /api/: robots.txt
+ * closes /api/ to crawlers, and LinkedInBot and Twitterbot obey it, so a
+ * picture there never showed on LinkedIn. vercel.json rewrites this path to
+ * api/share-image.ts.
+ */
+export function cardImagePath(kind: OgKind, ref: string, version: string): string {
+  return `/og/${kind}/${encodeURIComponent(ref)}.jpg?v=${version}`
+}
+
+/**
+ * The card for one public item. `shared` is the query the link was shared
+ * with: og:url keeps its tags, because Facebook treats og:url as the post's ID
+ * and reads the preview saved under that address. A clean og:url sent every
+ * share back to whatever card was saved for the bare address.
+ */
+export function itemCard(origin: string, kind: OgKind, row: Row, shared?: URLSearchParams): OgCard {
   const title = rowTitle(kind, row)
   const picture = rowImage(kind, row)
   const ref = str(row.slug) || String(row.id)
   // Every item gets a drawn card, with or without a photo, since the facts are
   // printed on it. The version covers everything drawn, so an edit is refetched.
   const version = imageVersion([CARD_DESIGN, picture ?? '', title, ...cardFacts(kind, row)].join('|'))
-  const image = `${origin}/api/share-image?kind=${kind}&id=${encodeURIComponent(ref)}&v=${version}`
+  const url = new URL(rowPath(kind, row), origin)
+  for (const key of LINK_PARAMS) {
+    const value = shared?.get(key)
+    if (value && /^[\w-]{1,40}$/.test(value)) url.searchParams.set(key, value)
+  }
   return {
     title,
     description: rowDescription(kind, row),
-    image,
+    image: `${origin}${cardImagePath(kind, ref, version)}`,
     imageAlt: title,
-    url: `${origin}${rowPath(kind, row)}`,
+    url: url.toString(),
     type: kind === 'org' ? 'website' : 'article',
   }
 }
