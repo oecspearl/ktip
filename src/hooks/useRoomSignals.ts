@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLingui } from '@lingui/react/macro'
 import { supabase } from '../lib/supabase'
 import { freshChannel, releaseChannel } from '../lib/realtime'
+import { isReactionEmoji } from '../lib/own-reactions'
 
 /**
  * The three things a room needs to say that are not worth a row.
@@ -127,7 +128,9 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
           const emoji = typeof payload?.emoji === 'string' ? payload.emoji : ''
           const userId = typeof payload?.user_id === 'string' ? payload.user_id : ''
           if (!emoji || !userId) return
-          if (!(ROOM_REACTIONS as readonly string[]).includes(emoji)) return
+          // The standard set, or one emoji a member chose for themselves
+          // (own-reactions.ts). Anything that could read as text is dropped.
+          if (!isReactionEmoji(emoji)) return
 
           seqRef.current += 1
           const entry: FloatingReaction = {
@@ -220,7 +223,8 @@ export function useRoomSignals({ roomId, me, enabled = true }: UseRoomSignalsArg
   }, [active])
 
   const react = useCallback(
-    (emoji: RoomReaction) => {
+    (emoji: RoomReaction | string) => {
+      if (!isReactionEmoji(emoji)) return
       const channel = channelRef.current
       if (!channel || !me) return
       void channel.send({

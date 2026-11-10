@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Captions, CaptionsOff, Languages, Pause, Play, Volume2 } from 'lucide-react'
 import { useLocalParticipant } from '@livekit/components-react'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -264,48 +264,90 @@ export function SubtitleBand() {
   )
 }
 
-/** The row under the video: Subtitles, the language menu, and what is happening to my own words. */
-export function CallTranslateBar() {
-  const { t } = useLingui()
-  const { language, live, audience, subs, translationAllowed, canPublish } = useCallCaptions()
-  const [menuOpen, setMenuOpen] = useState(false)
+/** A square button in the call dock. Pressed states read green, like the rest of the site. */
+export const DOCK_BUTTON =
+  'relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:border-ktip-tropical-400/40 aria-pressed:bg-ktip-tropical-500/20 aria-pressed:text-ktip-tropical-300'
 
-  const pill = (on: boolean) =>
-    cn(
-      'inline-flex items-center gap-1.5 rounded-control px-2.5 py-1 text-micro font-semibold transition-colors',
-      on ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+const pill = (on: boolean) =>
+  cn(
+    'inline-flex items-center gap-1.5 rounded-control px-2.5 py-1 text-micro font-semibold transition-colors',
+    on ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+  )
+
+/** Subtitles on or off. `dock` is the square icon button; `pill` the labelled one. */
+export function SubtitlesToggle({ variant = 'pill' }: { variant?: 'pill' | 'dock' }) {
+  const { t } = useLingui()
+  const { language, subs } = useCallCaptions()
+  const toggle = () => language.setChoice(subs ? 'off' : 'captions')
+
+  if (variant === 'dock') {
+    const label = subs ? t`Turn subtitles off` : t`Turn subtitles on`
+    return (
+      <button type="button" aria-pressed={subs} aria-label={label} title={label} onClick={toggle} className={DOCK_BUTTON}>
+        {subs ? <Captions size={18} aria-hidden="true" /> : <CaptionsOff size={18} aria-hidden="true" />}
+      </button>
     )
+  }
+  return (
+    <button type="button" aria-pressed={subs} onClick={toggle} className={pill(subs)}>
+      {subs ? <Captions size={13} aria-hidden="true" /> : <CaptionsOff size={13} aria-hidden="true" />}
+      <Trans>Subtitles</Trans>
+    </button>
+  )
+}
+
+/** My language, with the menu of subtitle and voice settings behind it. */
+export function LanguageButton({ variant = 'pill' }: { variant?: 'pill' | 'dock' }) {
+  const { t } = useLingui()
+  const { language } = useCallCaptions()
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLDivElement>(null)
+
+  return (
+    <div ref={wrap} className="relative">
+      {variant === 'dock' ? (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-label={t`Language and subtitles`}
+          title={t`Language and subtitles`}
+          onClick={() => setOpen((current) => !current)}
+          className={DOCK_BUTTON}
+        >
+          <Languages size={18} aria-hidden="true" />
+          <span className="absolute -right-1.5 -top-1.5 rounded-full bg-ktip-tropical-500 px-1 text-micro font-extrabold leading-none text-ktip-ink">
+            {language.lang.toUpperCase()}
+          </span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          onClick={() => setOpen((current) => !current)}
+          className={pill(open)}
+        >
+          <Languages size={13} aria-hidden="true" />
+          {ENDONYM[language.lang]}
+        </button>
+      )}
+      {open && <LanguageMenu container={wrap} align={variant === 'dock' ? 'center' : 'left'} onClose={() => setOpen(false)} />}
+    </div>
+  )
+}
+
+/** What is happening to my own words, and anything that went wrong. */
+export function SpeakerStatus() {
+  const { t } = useLingui()
+  const { language, live, audience, translationAllowed, canPublish } = useCallCaptions()
 
   const audienceText = (Object.entries(audience.byLang) as [UiLang, number][])
     .map(([lang, count]) => `${ENDONYM[lang]} (${count})`)
     .join(', ')
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        aria-pressed={subs}
-        onClick={() => language.setChoice(subs ? 'off' : 'captions')}
-        className={pill(subs)}
-      >
-        {subs ? <Captions size={13} aria-hidden="true" /> : <CaptionsOff size={13} aria-hidden="true" />}
-        <Trans>Subtitles</Trans>
-      </button>
-
-      <div className="relative">
-        <button
-          type="button"
-          aria-expanded={menuOpen}
-          aria-haspopup="dialog"
-          onClick={() => setMenuOpen((open) => !open)}
-          className={pill(menuOpen)}
-        >
-          <Languages size={13} aria-hidden="true" />
-          {ENDONYM[language.lang]}
-        </button>
-        {menuOpen && <LanguageMenu onClose={() => setMenuOpen(false)} />}
-      </div>
-
+    <>
       {canPublish && language.paused && (
         <span className="inline-flex items-center gap-2 text-micro text-white/60">
           <Trans>Your subtitles are paused</Trans>
@@ -317,7 +359,10 @@ export function CallTranslateBar() {
       )}
 
       {canPublish && !language.paused && live.transcribing && audience.total > 0 && (
-        <span className="inline-flex min-w-0 items-center gap-2 text-micro text-white/70" title={t`Only while someone is reading your subtitles. Nothing is stored.`}>
+        <span
+          className="inline-flex min-w-0 items-center gap-2 text-micro text-white/70"
+          title={t`Only while someone is reading your subtitles. Nothing is stored.`}
+        >
           <span className="h-2 w-2 shrink-0 rounded-full bg-ktip-tropical-400" aria-hidden="true" />
           <span className="min-w-0 truncate">{t`Your words go out in ${audienceText}`}</span>
           <button type="button" onClick={() => language.setPaused(true)} className={pill(false)}>
@@ -338,7 +383,7 @@ export function CallTranslateBar() {
         </span>
       )}
       {live.error && <span className="text-micro text-ktip-sun-300">{errorText(live.error)}</span>}
-    </div>
+    </>
   )
 
   /** Every stop has a reason a member can act on. An unknown code shows as is. */
@@ -366,25 +411,42 @@ export function CallTranslateBar() {
   }
 }
 
-function LanguageMenu({ onClose }: { onClose: () => void }) {
+/** The row under a call that has no dock of its own (MeetingCall). */
+export function CallTranslateBar() {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <SubtitlesToggle />
+      <LanguageButton />
+      <SpeakerStatus />
+    </div>
+  )
+}
+
+function LanguageMenu({
+  container,
+  align,
+  onClose,
+}: {
+  /** The button and the menu together: a press anywhere inside is not "outside". */
+  container: RefObject<HTMLDivElement | null>
+  align: 'left' | 'center'
+  onClose: () => void
+}) {
   const { t } = useLingui()
   const { language, subs, voiceOn, translationAllowed, canPublish } = useCallCaptions()
-  const panel = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onDown = (event: PointerEvent) => {
-      if (!panel.current?.contains(event.target as Node)) onClose()
+      if (!container.current?.contains(event.target as Node)) onClose()
     }
     const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
-    // Next tick, so the click that opened the menu does not close it.
-    const timer = setTimeout(() => document.addEventListener('pointerdown', onDown), 0)
+    document.addEventListener('pointerdown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
-      clearTimeout(timer)
       document.removeEventListener('pointerdown', onDown)
       document.removeEventListener('keydown', onKey)
     }
-  }, [onClose])
+  }, [container, onClose])
 
   const row = (label: ReactNode, hint: ReactNode, control: ReactNode) => (
     <div className="flex items-center justify-between gap-3">
@@ -398,10 +460,12 @@ function LanguageMenu({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      ref={panel}
       role="dialog"
       aria-label={t`Language and subtitles`}
-      className="absolute bottom-full left-0 z-dropdown mb-2 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-4 rounded-surface border border-ktip-sand-200 bg-ktip-cream p-4 text-ktip-sand-900 shadow-card max-sm:fixed max-sm:inset-x-4 max-sm:bottom-24 max-sm:w-auto"
+      className={cn(
+        'absolute bottom-full z-dropdown mb-2 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-4 rounded-surface border border-ktip-sand-200 bg-ktip-cream p-4 text-ktip-sand-900 shadow-card max-sm:fixed max-sm:inset-x-4 max-sm:bottom-24 max-sm:w-auto max-sm:translate-x-0',
+        align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0'
+      )}
     >
       <div className="flex flex-col gap-2">
         <span className="text-micro font-semibold uppercase tracking-wider text-ktip-sand-500">

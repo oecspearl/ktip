@@ -339,6 +339,10 @@ msgstr "Warning: This will permanently delete:"
 msgid "Codes"
 msgstr "Codes"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Saved to your profile, so they follow you into every call."
+msgstr "Saved to your profile, so they follow you into every call."
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "End this call for everyone? Nobody will be able to rejoin it."
 msgstr "End this call for everyone? Nobody will be able to rejoin it."
@@ -454,6 +458,10 @@ msgstr "Verification link logged to the console (dev mode)."
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Recent Projects"
 msgstr "Recent Projects"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "One of yours"
+msgstr "One of yours"
 
 #: src/components/share/ShareSheet.tsx
 msgid "Couldn't copy the caption. Select it in the preview and copy it yourself."
@@ -922,6 +930,10 @@ msgstr "Post-Secondary Institutions"
 #: src/components/profile/BannerStudio.tsx
 msgid "Directory card"
 msgstr "Directory card"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Raise your hand"
+msgstr "Raise your hand"
 
 #: src/hooks/useSecondaryEmailCopy.ts
 msgid "Your main email is a school address, and so is this one. Use a personal address, like Gmail or Outlook, so you can still sign in after you leave school."
@@ -2074,6 +2086,10 @@ msgstr "Accounts, roles and permissions"
 msgid "Nothing matches “{term}”."
 msgstr "Nothing matches “{term}”."
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Share your screen"
+msgstr "Share your screen"
+
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — the organisation role is still added when the review comes back."
 msgstr "Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — the organisation role is still added when the review comes back."
@@ -2805,6 +2821,10 @@ msgstr "Datasets and APIs to build on, plus past winning entries."
 msgid "Record this room"
 msgstr "Record this room"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "You left the call. You are still in the room."
+msgstr "You left the call. You are still in the room."
+
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Portrait"
 msgstr "Portrait"
@@ -2970,6 +2990,10 @@ msgstr "Grant Application"
 #: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Add a card to {0}"
 msgstr "Add a card to {0}"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Choose a camera"
+msgstr "Choose a camera"
 
 #: src/i18n/harvested.ts
 msgid "Other entrants and the public"
@@ -4403,6 +4427,10 @@ msgstr "Looking for what you offer"
 msgid "design the venue"
 msgstr "design the venue"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Add your own · {count} of {max}"
+msgstr "Add your own · {count} of {max}"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Add document files"
 msgstr "Add document files"
@@ -4641,6 +4669,10 @@ msgstr "Team Homebase with a video wall and boards"
 #: src/i18n/harvested.ts
 msgid "Display name, email address, password (stored hashed)"
 msgstr "Display name, email address, password (stored hashed)"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Turn camera off"
+msgstr "Turn camera off"
 
 #: src/i18n/harvested.ts
 msgid "The rules binding organisations that read KTIP data through the partner API — what they may use it for, what they may never do, and how a member withdraws."
@@ -6417,6 +6449,10 @@ msgstr "What each one is for"
 msgid "Failed to update the role"
 msgstr "Failed to update the role"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "{name} is sharing their screen"
+msgstr "{name} is sharing their screen"
+
 #: src/i18n/harvested.ts
 msgid "Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice."
 msgstr "Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice."
@@ -7305,22 +7341,6 @@ msgstr "New Discussion"
 msgid "How do the AI writing tools work?"
 msgstr "How do the AI writing tools work?"
 
-#: src/i18n/harvested.ts
-msgid "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
-"\n"
-"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
-"\n"
-"Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.\n"
-"\n"
-"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
-msgstr "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
-"\n"
-"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
-"\n"
-"Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.\n"
-"\n"
-"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
-
 #: src/pages/auth/SignupPage.tsx
 msgid "Agree & Create Account"
 msgstr "Agree & Create Account"
@@ -7412,6 +7432,10 @@ msgstr "Untitled Whiteboard"
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
 msgstr "You are already on {0}. Each team gets one Homebase."
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Remove one to pick another."
+msgstr "Remove one to pick another."
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Attach screenshot"
@@ -7691,6 +7715,10 @@ msgstr "Entries by a team"
 #: src/i18n/harvested.ts
 msgid "You will receive a notification confirming your place."
 msgstr "You will receive a notification confirming your place."
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "That one is already in the standard set, or cannot be a reaction. Pick another."
+msgstr "That one is already in the standard set, or cannot be a reaction. Pick another."
 
 #: src/i18n/harvested.ts
 msgid "Reviewing an employer records who verified it and when — the history view shows that trail, which is what makes the badge auditable rather than merely present.\n"
@@ -11132,6 +11160,10 @@ msgstr "Failed to submit request"
 msgid "your details"
 msgstr "your details"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Back to reactions"
+msgstr "Back to reactions"
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Subscript"
@@ -11231,6 +11263,10 @@ msgstr "A second way into your account."
 #: src/lib/venue-room-sections.ts
 msgid "Elsewhere in the venue"
 msgstr "Elsewhere in the venue"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Turn camera on"
+msgstr "Turn camera on"
 
 #: src/i18n/harvested.ts
 msgid "Where are the whiteboards and documents I made?"
@@ -12096,6 +12132,10 @@ msgstr "Direct messages, group chats and the KTIP Assistant."
 msgid "Backup Zoom room"
 msgstr "Backup Zoom room"
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Show everyone"
+msgstr "Show everyone"
+
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "A live venue with rooms, teams, mentors and judging — all in the browser."
 msgstr "A live venue with rooms, teams, mentors and judging — all in the browser."
@@ -12565,6 +12605,10 @@ msgstr "Search by name"
 #: src/i18n/harvested.ts
 msgid "You keep ownership of everything you post. To display your work to other members we need a limited licence from you, and the exact scope of that licence — what it permits, what it does not permit, and when it ends — is set out in the IP, Content & Licensing Policy."
 msgstr "You keep ownership of everything you post. To display your work to other members we need a limited licence from you, and the exact scope of that licence — what it permits, what it does not permit, and when it ends — is set out in the IP, Content & Licensing Policy."
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Remove {emoji}"
+msgstr "Remove {emoji}"
 
 #: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Drag cards between columns, or use the arrow. Your team sees changes as they happen."
@@ -15037,6 +15081,10 @@ msgstr "Upcoming"
 msgid "URL"
 msgstr "URL"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Close reactions"
+msgstr "Close reactions"
+
 #: src/lib/venue-room-presets.ts
 msgid "Team points, side quests and who is in the lead."
 msgstr "Team points, side quests and who is in the lead."
@@ -15225,6 +15273,10 @@ msgstr "Points, badges and leaderboard positions have no monetary value, are not
 #: src/hooks/useConnections.ts
 msgid "New connection request"
 msgstr "New connection request"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Change your reactions"
+msgstr "Change your reactions"
 
 #: src/components/venue/room/QuestBoardPanel.tsx
 msgid "That didn't work"
@@ -17804,6 +17856,7 @@ msgstr "This goes to the OECS safety team, not to the person you are reporting. 
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
 #: src/pages/events/EventVenuePage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -18742,6 +18795,10 @@ msgstr "Your work in this tool"
 #: src/i18n/harvested.ts
 msgid "Help article — Troubleshooting"
 msgstr "Help article — Troubleshooting"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing your screen"
+msgstr "Stop sharing your screen"
 
 #: src/i18n/harvested.ts
 msgid "Privacy Violations"
@@ -20050,6 +20107,10 @@ msgstr "No invitations"
 msgid "Signature"
 msgstr "Signature"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "Rejoin the call"
+msgstr "Rejoin the call"
+
 #. placeholder {0}: room.name
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Message {0}…"
@@ -20144,6 +20205,7 @@ msgid "Code Block"
 msgstr "Code Block"
 
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/room/ReactionFan.tsx
 #: src/components/venue/RoomZone.tsx
 msgid "Empty"
 msgstr "Empty"
@@ -20611,6 +20673,10 @@ msgstr "Act as the faculty or school sponsor on a student application."
 #: src/components/calendar/DashboardCalendar.tsx
 msgid "Nothing scheduled on this day"
 msgstr "Nothing scheduled on this day"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Your reactions"
+msgstr "Your reactions"
 
 #: src/components/reusable-components/StatsWheel.tsx
 msgid "Platform statistics"
@@ -21951,6 +22017,10 @@ msgstr "Click \"Events\" in the navigation bar.\n"
 "\n"
 "A sort control at the top lets you order by date or by \"For You\", which ranks events against the topics you chose in your personalization settings."
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Full screen"
+msgstr "Full screen"
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Topics people can filter and search the library by."
 msgstr "Topics people can filter and search the library by."
@@ -22030,6 +22100,10 @@ msgstr "Receive reminders about upcoming events you've joined"
 msgid "Tags"
 msgstr "Tags"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "{count} of {max}"
+msgstr "{count} of {max}"
+
 #: src/lib/permissions.ts
 msgid "Super Admin"
 msgstr "Super Admin"
@@ -22090,6 +22164,10 @@ msgstr "by <0>{authorName}</0>"
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "Link text"
 msgstr "Link text"
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Everyone else in the call"
+msgstr "Everyone else in the call"
 
 #: src/i18n/harvested.ts
 msgid "Every account must declare a date of birth — including accounts created through Google, Microsoft or Virtual Campus single sign-on, because no sign-in provider supplies one."
@@ -24334,6 +24412,10 @@ msgstr "Title, summary and description are the whole of the required writing. Th
 "\n"
 "Nothing here is permanent: everything on this form can be changed after publishing."
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Mute"
+msgstr "Mute"
+
 #: src/i18n/harvested.ts
 msgid "Go to Dashboard › Security and scroll to the bottom."
 msgstr "Go to Dashboard › Security and scroll to the bottom."
@@ -24611,6 +24693,26 @@ msgstr "Produce aggregate statistics from them."
 msgid "Only the person who started this call can change it."
 msgstr "Only the person who started this call can change it."
 
+#: src/i18n/harvested.ts
+msgid "Open Security on your Dashboard, under Account.\n"
+"\n"
+"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
+"\n"
+"The new password follows the same rule as signup: at least 8 characters, with upper and lower case letters, a number and a symbol.\n"
+"\n"
+"Saving it signs you out on every other device. The one you are using stays signed in.\n"
+"\n"
+"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
+msgstr "Open Security on your Dashboard, under Account.\n"
+"\n"
+"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
+"\n"
+"The new password follows the same rule as signup: at least 8 characters, with upper and lower case letters, a number and a symbol.\n"
+"\n"
+"Saving it signs you out on every other device. The one you are using stays signed in.\n"
+"\n"
+"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
+
 #: src/pages/auth/SignupPage.tsx
 msgid "We sent a link to {backup}. Open it to confirm your backup email."
 msgstr "We sent a link to {backup}. Open it to confirm your backup email."
@@ -24770,6 +24872,10 @@ msgstr "Speakers prepare here before going on stage."
 #: src/pages/resources/MySubmissionsPage.tsx
 msgid "No reason was given. You can edit it and submit it again."
 msgstr "No reason was given. You can edit it and submit it again."
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Unmute"
+msgstr "Unmute"
 
 #: src/components/documents/DocumentCard.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -25154,6 +25260,22 @@ msgstr "To do"
 msgid "This event has ended"
 msgstr "This event has ended"
 
+#: src/i18n/harvested.ts
+msgid "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
+"\n"
+"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
+"\n"
+"Some roles must have it: Entrepreneur, and every administrator role. An account with one of them is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Entrepreneur accounts that existed before the requirement were left as they were. Administrator accounts were not.\n"
+"\n"
+"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
+msgstr "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
+"\n"
+"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
+"\n"
+"Some roles must have it: Entrepreneur, and every administrator role. An account with one of them is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Entrepreneur accounts that existed before the requirement were left as they were. Administrator accounts were not.\n"
+"\n"
+"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description must be at least 20 characters"
 msgstr "Description must be at least 20 characters"
@@ -25241,6 +25363,10 @@ msgstr "Participants submit their work — with their own supporting files — f
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
 msgstr "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Turn subtitles on"
+msgstr "Turn subtitles on"
 
 #: src/a11y/messages.ts
 msgid "sign up"
@@ -27286,6 +27412,10 @@ msgstr "Ordered List"
 msgid "How do I start a forum discussion?"
 msgstr "How do I start a forum discussion?"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "React"
+msgstr "React"
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Dates"
 msgstr "Dates"
@@ -27789,6 +27919,10 @@ msgstr "Checking the businesses waiting in your country."
 msgid "Project created successfully!"
 msgstr "Project created successfully!"
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Hide everyone else"
+msgstr "Hide everyone else"
+
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Research Institution"
@@ -28124,6 +28258,10 @@ msgstr "Add field"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Change Email"
 msgstr "Change Email"
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "You are sharing your screen"
+msgstr "You are sharing your screen"
 
 #: src/i18n/harvested.ts
 msgid "Conduct and content"
@@ -28636,6 +28774,10 @@ msgstr "Enter new password"
 #: src/pages/grants/GrantsPage.tsx
 msgid "apply for funding"
 msgstr "apply for funding"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Leave call"
+msgstr "Leave call"
 
 #: src/i18n/harvested.ts
 msgid "A rolling window of hours"
@@ -29291,6 +29433,10 @@ msgstr "This room is recorded"
 #: src/i18n/harvested.ts
 msgid "Translation"
 msgstr "Translation"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Choose a microphone"
+msgstr "Choose a microphone"
 
 #: src/i18n/harvested.ts
 msgid "Skills and interests are not only profile decoration — they are what the “Top Picks” and “For You” sorts rank against, on projects, events and grants.\n"
@@ -29983,22 +30129,6 @@ msgstr "Check that inbox for a confirmation link."
 msgid "“{text}” is not a command I know. Say “help” for the list."
 msgstr "“{text}” is not a command I know. Say “help” for the list."
 
-#: src/i18n/harvested.ts
-msgid "Open Security on your Dashboard, under Account.\n"
-"\n"
-"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
-"\n"
-"The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.\n"
-"\n"
-"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
-msgstr "Open Security on your Dashboard, under Account.\n"
-"\n"
-"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
-"\n"
-"The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.\n"
-"\n"
-"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
-
 #: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/venue/room/CallCaptions.tsx
@@ -30563,6 +30693,10 @@ msgstr "This browser cannot reach its speech service. Try Chrome or Edge, or tur
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Mark under review"
 msgstr "Mark under review"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Lower your hand"
+msgstr "Lower your hand"
 
 #: src/components/venue/room/SponsorLinksPanel.tsx
 msgid "{sponsorName} links"
@@ -31568,6 +31702,10 @@ msgstr "Each design is the same content in a different layout, and the choice st
 #: src/i18n/harvested.ts
 msgid "Cropping an image to fit a card, generating a preview or thumbnail, extracting a summary for a listing, building a search index. Formatting work, not editorial work."
 msgstr "Cropping an image to fit a card, generating a preview or thumbnail, extracting a summary for a listing, building a search index. Formatting work, not editorial work."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Turn subtitles off"
+msgstr "Turn subtitles off"
 
 #: src/i18n/harvested.ts
 msgid "Discover and fund projects"
@@ -32725,6 +32863,7 @@ msgstr "Declined"
 msgid "Could not nominate sponsor"
 msgstr "Could not nominate sponsor"
 
+#: src/components/venue/room/ReactionFan.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Reactions"
 msgstr "Reactions"

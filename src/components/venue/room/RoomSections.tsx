@@ -321,6 +321,7 @@ function RoomSection({
           occupants={inRoom}
           presenter={signals.presenter}
           fill={fill}
+          signals={signals}
         />
       )
 

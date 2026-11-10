@@ -1,4 +1,4 @@
-import { VideoPresets, type RoomOptions } from 'livekit-client'
+import { ScreenSharePresets, VideoPresets, type RoomOptions } from 'livekit-client'
 
 /**
  * Room options every LiveKit call in the app connects with.
@@ -12,6 +12,10 @@ import { VideoPresets, type RoomOptions } from 'livekit-client'
  * - dynacast: a publisher stops encoding simulcast layers nobody subscribes to.
  * - 540p capture: enough for a face in a grid tile; a screen share is a
  *   separate track and keeps its own resolution.
+ * - Screen shares at 1080p and 15 fps, so code and slides are readable when
+ *   the share fills the stage, with a 720p 5 fps layer for small screens.
+ *   adaptiveStream picks the layer each viewer's frame actually needs, so a
+ *   phone never pulls the 1080p one.
  *
  * A module constant on purpose. LiveKitRoom builds its Room from `options`, so
  * an object literal in a render would be a new Room every render.
@@ -24,5 +28,7 @@ export const LIVEKIT_ROOM_OPTIONS: RoomOptions = {
   },
   publishDefaults: {
     simulcast: true,
+    screenShareEncoding: ScreenSharePresets.h1080fps15.encoding,
+    screenShareSimulcastLayers: [ScreenSharePresets.h720fps5],
   },
 }

@@ -20,6 +20,7 @@ const VenueCall = lazy(() =>
 )
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { VenueOccupant, VenueRoom } from '../../../types'
+import type { useRoomSignals } from '../../../hooks/useRoomSignals'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -46,6 +47,7 @@ export function AvStage({
   occupants,
   presenter,
   fill,
+  signals,
 }: {
   room: VenueRoom
   mode: RoomCameraMode
@@ -55,6 +57,8 @@ export function AvStage({
   presenter?: { userId: string; name: string } | null
   /** True when the layout gave this the hero cell and it should fill it. */
   fill?: boolean
+  /** The room's reactions and raised hands, so the call's own buttons send them. */
+  signals?: ReturnType<typeof useRoomSignals>
 }) {
   const { t } = useLingui()
   // `mode === 'off'` must not connect. A LiveKit connection is billed by the
@@ -153,6 +157,14 @@ export function AvStage({
               grant={grant}
               fill={fill}
               translationAllowed={room.live_translation !== false}
+              signals={
+                signals && {
+                  react: signals.react,
+                  reactions: signals.reactions,
+                  myHandUp: signals.myHandUp,
+                  setHand: signals.setHand,
+                }
+              }
               onRecordingControl={
                 canRecord ? (
                   <RecordButton
@@ -275,22 +287,27 @@ function SpotlightStage({
   fill?: boolean
 }) {
   const { t } = useLingui()
+  // The same shape the live call takes (VenueCall's SpotlightLayout): the
+  // speaker big, everyone else in a column on the right, or a row under it on a
+  // narrow screen. So nothing jumps when the video arrives.
   return (
-    <>
-      <Frame
-        className={cn(fill ? 'min-h-[12rem] flex-1' : 'aspect-video w-full')}
-        person={lead}
-        size={72}
-        label={presenter?.name || lead?.display_name || t`Nobody on camera yet`}
-      />
-      {rest.length > 0 && (
-        <div className="mt-2 grid grid-cols-4 gap-2">
-          {rest.slice(0, cap).map((person) => (
-            <Frame key={person.user_id} className="aspect-video" person={person} size={28} />
-          ))}
-        </div>
-      )}
-    </>
+    <div className={cn('@container', fill && 'flex min-h-0 flex-1 flex-col')}>
+      <div className={cn('grid gap-2', rest.length > 0 && '@2xl:grid-cols-[minmax(0,1fr)_10.5rem]', fill && 'min-h-0 flex-1')}>
+        <Frame
+          className={cn(fill ? 'min-h-[12rem] h-full' : 'aspect-video w-full')}
+          person={lead}
+          size={72}
+          label={presenter?.name || lead?.display_name || t`Nobody on camera yet`}
+        />
+        {rest.length > 0 && (
+          <div className="grid grid-cols-4 content-start gap-2 @2xl:grid-cols-1">
+            {rest.slice(0, cap).map((person) => (
+              <Frame key={person.user_id} className="aspect-video" person={person} size={28} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 

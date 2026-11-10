@@ -90,12 +90,15 @@ export function EmojiPickerButton({
   )
 }
 
-function EmojiPanel({
+export function EmojiPanel({
   onPick,
   align,
+  className,
 }: {
   onPick: (emoji: string) => void
   align: 'left' | 'right'
+  /** Overrides the default popover placement, for a panel drawn inside another card. */
+  className?: string
 }) {
   const { t, i18n } = useLingui()
   const [query, setQuery] = useState('')
@@ -120,7 +123,8 @@ function EmojiPanel({
       aria-label={t`Emoji`}
       className={cn(
         'absolute bottom-full z-dropdown mb-2 w-[19rem] overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-cream shadow-hard animate-scale-in',
-        align === 'right' ? 'right-0' : 'left-0'
+        align === 'right' ? 'right-0' : 'left-0',
+        className
       )}
     >
       <div className="border-b border-ktip-sand-100 p-2">

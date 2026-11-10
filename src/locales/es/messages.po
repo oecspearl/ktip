@@ -333,6 +333,10 @@ msgstr "Advertencia: esto eliminará de forma permanente:"
 msgid "Codes"
 msgstr "Códigos"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Saved to your profile, so they follow you into every call."
+msgstr "Se guardan en tu perfil, así te acompañan en cada llamada."
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "End this call for everyone? Nobody will be able to rejoin it."
 msgstr "¿Terminar esta llamada para todos? Nadie podrá volver a unirse."
@@ -445,6 +449,10 @@ msgstr "Enlace de verificación registrado en la consola (modo desarrollador)."
 #: src/pages/projects/ProjectDetailPage.tsx
 msgid "Recent Projects"
 msgstr "Proyectos recientes"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "One of yours"
+msgstr "Una de las tuyas"
 
 #: src/components/share/ShareSheet.tsx
 msgid "Couldn't copy the caption. Select it in the preview and copy it yourself."
@@ -909,6 +917,10 @@ msgstr "Instituciones postsecundarias"
 #: src/components/profile/BannerStudio.tsx
 msgid "Directory card"
 msgstr "Tarjeta de directorio"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Raise your hand"
+msgstr "Levantar la mano"
 
 #: src/hooks/useSecondaryEmailCopy.ts
 msgid "Your main email is a school address, and so is this one. Use a personal address, like Gmail or Outlook, so you can still sign in after you leave school."
@@ -2028,6 +2040,10 @@ msgstr "Cuentas, roles y permisos"
 msgid "Nothing matches “{term}”."
 msgstr "No hay resultados para «{term}»."
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Share your screen"
+msgstr "Compartir tu pantalla"
+
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Your profile is saved either way. If you would rather start using KTIP now, pick a role that needs no approval — the organisation role is still added when the review comes back."
 msgstr "Su perfil se guarda de todos modos. Si prefiere comenzar a usar KTIP ahora, elija un rol que no requiera aprobación — el rol de organización se añadirá cuando regrese la revisión."
@@ -2753,6 +2769,10 @@ msgstr "Conjuntos de datos y API para construir, además de candidaturas ganador
 msgid "Record this room"
 msgstr "Grabar esta sala"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "You left the call. You are still in the room."
+msgstr "Saliste de la llamada. Sigues en la sala."
+
 #: src/pages/dashboard/tabs/my-profile/ProfileBlockModal.tsx
 msgid "Portrait"
 msgstr "Retrato"
@@ -2918,6 +2938,10 @@ msgstr "Solicitud de subvención"
 #: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Add a card to {0}"
 msgstr "Añadir una tarjeta a {0}"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Choose a camera"
+msgstr "Elegir una cámara"
 
 #: src/i18n/harvested.ts
 msgid "Other entrants and the public"
@@ -4331,6 +4355,10 @@ msgstr "Buscando lo que usted ofrece"
 msgid "design the venue"
 msgstr "diseñar el lugar"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Add your own · {count} of {max}"
+msgstr "Añadir las tuyas · {count} de {max}"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Add document files"
 msgstr "Añadir archivos de documento"
@@ -4568,6 +4596,10 @@ msgstr "Homebase de equipo con muro de video y tableros"
 #: src/i18n/harvested.ts
 msgid "Display name, email address, password (stored hashed)"
 msgstr "Nombre para mostrar, dirección de correo electrónico, contraseña (almacenada con hash)"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Turn camera off"
+msgstr "Apagar la cámara"
 
 #: src/i18n/harvested.ts
 msgid "The rules binding organisations that read KTIP data through the partner API — what they may use it for, what they may never do, and how a member withdraws."
@@ -6306,6 +6338,10 @@ msgstr "Para qué sirve cada uno"
 msgid "Failed to update the role"
 msgstr "Error al actualizar el rol"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "{name} is sharing their screen"
+msgstr "{name} está compartiendo su pantalla"
+
 #: src/i18n/harvested.ts
 msgid "Your session token, theme and accessibility preferences, recent searches, tutorial progress, and your analytics choice. Listed in full in the Cookie & Storage Notice."
 msgstr ""
@@ -7154,16 +7190,6 @@ msgstr ""
 msgid "How do the AI writing tools work?"
 msgstr "¿Cómo funcionan las herramientas de redacción con IA?"
 
-#: src/i18n/harvested.ts
-msgid "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
-"\n"
-"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
-"\n"
-"Some roles must have it. Entrepreneur is one — a new account with that role is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Accounts that already existed when the requirement arrived were left as they were.\n"
-"\n"
-"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
-msgstr ""
-
 #: src/pages/auth/SignupPage.tsx
 msgid "Agree & Create Account"
 msgstr ""
@@ -7255,6 +7281,10 @@ msgstr "Pizarra sin título"
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
 msgstr "Ya forma parte de {0}. Cada equipo tiene un Homebase."
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Remove one to pick another."
+msgstr "Quita una para elegir otra."
 
 #: src/components/feedback/ScreenshotAnnotator.tsx
 msgid "Attach screenshot"
@@ -7501,6 +7531,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "You will receive a notification confirming your place."
 msgstr "Recibirá una notificación confirmando su lugar."
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "That one is already in the standard set, or cannot be a reaction. Pick another."
+msgstr "Esa ya está entre las reacciones básicas, o no puede usarse como reacción. Elige otra."
 
 #: src/i18n/harvested.ts
 msgid "Reviewing an employer records who verified it and when — the history view shows that trail, which is what makes the badge auditable rather than merely present.\n"
@@ -10849,6 +10883,10 @@ msgstr "No se pudo enviar la solicitud"
 msgid "your details"
 msgstr ""
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Back to reactions"
+msgstr "Volver a las reacciones"
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/grants/application/RichTextField.tsx
 msgid "Subscript"
@@ -10948,6 +10986,10 @@ msgstr ""
 #: src/lib/venue-room-sections.ts
 msgid "Elsewhere in the venue"
 msgstr "En otra parte del lugar"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Turn camera on"
+msgstr "Encender la cámara"
 
 #: src/i18n/harvested.ts
 msgid "Where are the whiteboards and documents I made?"
@@ -11796,6 +11838,10 @@ msgstr "Mensajes directos, chats de grupo y el Asistente KTIP."
 msgid "Backup Zoom room"
 msgstr "Sala de Zoom de respaldo"
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Show everyone"
+msgstr "Mostrar a todos"
+
 #: src/pages/hackathons/HackathonsPage.tsx
 msgid "A live venue with rooms, teams, mentors and judging — all in the browser."
 msgstr "Un espacio en vivo con salas, equipos, mentores y evaluación, todo en el navegador."
@@ -12253,6 +12299,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "You keep ownership of everything you post. To display your work to other members we need a limited licence from you, and the exact scope of that licence — what it permits, what it does not permit, and when it ends — is set out in the IP, Content & Licensing Policy."
 msgstr ""
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Remove {emoji}"
+msgstr "Quitar {emoji}"
 
 #: src/components/venue/room/homebase/TeamTaskBoard.tsx
 msgid "Drag cards between columns, or use the arrow. Your team sees changes as they happen."
@@ -14642,6 +14692,10 @@ msgstr ""
 msgid "URL"
 msgstr "URL"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Close reactions"
+msgstr "Cerrar las reacciones"
+
 #: src/lib/venue-room-presets.ts
 msgid "Team points, side quests and who is in the lead."
 msgstr "Puntos de los equipos, misiones secundarias y quién va en cabeza."
@@ -14817,6 +14871,10 @@ msgstr ""
 #: src/hooks/useConnections.ts
 msgid "New connection request"
 msgstr "Nueva solicitud de conexión"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Change your reactions"
+msgstr "Cambiar tus reacciones"
 
 #: src/components/venue/room/QuestBoardPanel.tsx
 msgid "That didn't work"
@@ -17318,6 +17376,7 @@ msgstr "Esto se envía al equipo de seguridad de la OECS, no a la persona que es
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
 #: src/pages/events/EventVenuePage.tsx
 #: src/pages/onboarding/OnboardingPage.tsx
@@ -18223,6 +18282,10 @@ msgstr "Su trabajo en esta herramienta"
 #: src/i18n/harvested.ts
 msgid "Help article — Troubleshooting"
 msgstr "Artículo de ayuda: Solución de problemas"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing your screen"
+msgstr "Dejar de compartir tu pantalla"
 
 #: src/i18n/harvested.ts
 msgid "Privacy Violations"
@@ -19506,6 +19569,10 @@ msgstr "Sin invitaciones"
 msgid "Signature"
 msgstr "Firma"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "Rejoin the call"
+msgstr "Volver a la llamada"
+
 #. placeholder {0}: room.name
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Message {0}…"
@@ -19600,6 +19667,7 @@ msgid "Code Block"
 msgstr "Bloque de código"
 
 #: src/components/venue/map/VenueMapEditor.tsx
+#: src/components/venue/room/ReactionFan.tsx
 #: src/components/venue/RoomZone.tsx
 msgid "Empty"
 msgstr "Vacío"
@@ -20046,6 +20114,10 @@ msgstr "Actuar como el docente o patrocinador escolar en una solicitud de estudi
 #: src/components/calendar/DashboardCalendar.tsx
 msgid "Nothing scheduled on this day"
 msgstr "Nada programado para este día"
+
+#: src/components/venue/room/ReactionFan.tsx
+msgid "Your reactions"
+msgstr "Tus reacciones"
 
 #: src/components/reusable-components/StatsWheel.tsx
 msgid "Platform statistics"
@@ -21367,6 +21439,10 @@ msgid "Click \"Events\" in the navigation bar.\n"
 msgstr "Haga clic en «Eventos» en la barra de navegación.\n"
 ""
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Full screen"
+msgstr "Pantalla completa"
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Topics people can filter and search the library by."
 msgstr ""
@@ -21446,6 +21522,10 @@ msgstr "Recibir recordatorios de los próximos eventos a los que se ha unido"
 msgid "Tags"
 msgstr "Etiquetas"
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "{count} of {max}"
+msgstr "{count} de {max}"
+
 #: src/lib/permissions.ts
 msgid "Super Admin"
 msgstr "Superadministrador"
@@ -21506,6 +21586,10 @@ msgstr ""
 #: src/components/collaboration/editor/LinkModal.tsx
 msgid "Link text"
 msgstr "Texto del enlace"
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Everyone else in the call"
+msgstr "Las demás personas en la llamada"
 
 #: src/i18n/harvested.ts
 msgid "Every account must declare a date of birth — including accounts created through Google, Microsoft or Virtual Campus single sign-on, because no sign-in provider supplies one."
@@ -23668,6 +23752,10 @@ msgid "Title, summary and description are the whole of the required writing. The
 msgstr "El título, el resumen y la descripción son toda la redacción requerida. El resumen es la línea que aparece en la página de inicio y en las tarjetas, por lo que vale más de lo que su extensión sugiere.\n"
 ""
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Mute"
+msgstr "Silenciar"
+
 #: src/i18n/harvested.ts
 msgid "Go to Dashboard › Security and scroll to the bottom."
 msgstr ""
@@ -23929,6 +24017,18 @@ msgstr ""
 msgid "Only the person who started this call can change it."
 msgstr "Solo la persona que inició esta llamada puede cambiarla."
 
+#: src/i18n/harvested.ts
+msgid "Open Security on your Dashboard, under Account.\n"
+"\n"
+"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
+"\n"
+"The new password follows the same rule as signup: at least 8 characters, with upper and lower case letters, a number and a symbol.\n"
+"\n"
+"Saving it signs you out on every other device. The one you are using stays signed in.\n"
+"\n"
+"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
+msgstr ""
+
 #: src/pages/auth/SignupPage.tsx
 msgid "We sent a link to {backup}. Open it to confirm your backup email."
 msgstr ""
@@ -24085,6 +24185,10 @@ msgstr "Los ponentes se preparan aquí antes de salir al escenario."
 #: src/pages/resources/MySubmissionsPage.tsx
 msgid "No reason was given. You can edit it and submit it again."
 msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Unmute"
+msgstr "Activar el micrófono"
 
 #: src/components/documents/DocumentCard.tsx
 #: src/components/documents/DocumentUploadModal.tsx
@@ -24460,6 +24564,16 @@ msgstr "Por hacer"
 msgid "This event has ended"
 msgstr ""
 
+#: src/i18n/harvested.ts
+msgid "A second check after your password, so a stolen password is not enough on its own. Set it up under Security on your Dashboard.\n"
+"\n"
+"There are two methods and you pick one. An authenticator app shows a new six-digit code every 30 seconds and works with no signal; this is the recommended one. Email codes send a six-digit code to your address instead, which needs no app but does need you to reach your mail.\n"
+"\n"
+"Some roles must have it: Entrepreneur, and every administrator role. An account with one of them is held on the set-up screen until the second step is in place, and cannot turn it off afterwards. Entrepreneur accounts that existed before the requirement were left as they were. Administrator accounts were not.\n"
+"\n"
+"Either way you also get ten recovery codes. Keep them somewhere that is not the phone."
+msgstr ""
+
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "Description must be at least 20 characters"
 msgstr "La descripción debe tener al menos 20 caracteres"
@@ -24546,6 +24660,10 @@ msgstr "Los participantes envían su trabajo — con sus propios archivos de res
 #: src/pages/sme/OrgMembersPage.tsx
 msgid "Search KTIP members by name. They join as an ordinary member; change the role afterwards."
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Turn subtitles on"
+msgstr "Activar los subtítulos"
 
 #: src/a11y/messages.ts
 msgid "sign up"
@@ -26547,6 +26665,10 @@ msgstr "Lista ordenada"
 msgid "How do I start a forum discussion?"
 msgstr ""
 
+#: src/components/venue/room/ReactionFan.tsx
+msgid "React"
+msgstr "Reaccionar"
+
 #: src/pages/events/EventDetailPage.tsx
 msgid "Dates"
 msgstr ""
@@ -27039,6 +27161,10 @@ msgstr ""
 msgid "Project created successfully!"
 msgstr "¡Proyecto creado con éxito!"
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Hide everyone else"
+msgstr "Ocultar a los demás"
+
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Research Institution"
@@ -27368,6 +27494,10 @@ msgstr "Agregar campo"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Change Email"
 msgstr "Cambiar correo electrónico"
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "You are sharing your screen"
+msgstr "Estás compartiendo tu pantalla"
 
 #: src/i18n/harvested.ts
 msgid "Conduct and content"
@@ -27864,6 +27994,10 @@ msgstr "Ingrese una nueva contraseña"
 #: src/pages/grants/GrantsPage.tsx
 msgid "apply for funding"
 msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Leave call"
+msgstr "Salir de la llamada"
 
 #: src/i18n/harvested.ts
 msgid "A rolling window of hours"
@@ -28515,6 +28649,10 @@ msgstr "Esta sala se está grabando"
 #: src/i18n/harvested.ts
 msgid "Translation"
 msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Choose a microphone"
+msgstr "Elegir un micrófono"
 
 #: src/i18n/harvested.ts
 msgid "Skills and interests are not only profile decoration — they are what the “Top Picks” and “For You” sorts rank against, on projects, events and grants.\n"
@@ -29194,16 +29332,6 @@ msgstr "Revise esa bandeja de entrada para encontrar un enlace de confirmación.
 msgid "“{text}” is not a command I know. Say “help” for the list."
 msgstr ""
 
-#: src/i18n/harvested.ts
-msgid "Open Security on your Dashboard, under Account.\n"
-"\n"
-"Enter the new password twice and save. You are not asked for your current password — you are already signed in, which is the check.\n"
-"\n"
-"The change form only requires 6 characters. That is the floor, not advice: signup asks for 8 characters with a number, a symbol and mixed case, and that is the standard worth holding yourself to here.\n"
-"\n"
-"If you signed in with Google or Microsoft you have no KTIP password to change — manage it with that provider."
-msgstr ""
-
 #: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
 #: src/components/venue/room/CallCaptions.tsx
@@ -29759,6 +29887,10 @@ msgstr "Este navegador no puede conectarse a su servicio de reconocimiento de vo
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Mark under review"
 msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Lower your hand"
+msgstr "Bajar la mano"
 
 #: src/components/venue/room/SponsorLinksPanel.tsx
 msgid "{sponsorName} links"
@@ -30726,6 +30858,10 @@ msgstr "Cada diseño muestra el mismo contenido en un formato distinto, y la ele
 #: src/i18n/harvested.ts
 msgid "Cropping an image to fit a card, generating a preview or thumbnail, extracting a summary for a listing, building a search index. Formatting work, not editorial work."
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Turn subtitles off"
+msgstr "Desactivar los subtítulos"
 
 #: src/i18n/harvested.ts
 msgid "Discover and fund projects"
@@ -31819,6 +31955,7 @@ msgstr "Rechazado"
 msgid "Could not nominate sponsor"
 msgstr "No se pudo nominar al patrocinador"
 
+#: src/components/venue/room/ReactionFan.tsx
 #: src/lib/venue-room-sections.ts
 msgid "Reactions"
 msgstr "Reacciones"
