@@ -1,0 +1,755 @@
+{
+  "about": "One free Unsplash photo per seeded row (Unsplash licence). scripts/seed-images.mjs hosts them in Storage as WebP. Fictional people only: no real person gets a stranger's face.",
+  "items": [
+    {
+      "key": "e7188",
+      "kind": "event",
+      "id": "e7000000-0000-4000-8000-000000000188",
+      "photo": "photo-1760208181371-c0fa9e570c20",
+      "alt": "Fisherman casting a net from a small boat in a tropical bay",
+      "page": "https://unsplash.com/photos/0XTMsck0LrE"
+    },
+    {
+      "key": "ev01",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000001",
+      "photo": "photo-1531482615713-2afd69097998",
+      "alt": "Woman and man working side by side at laptops in a busy workspace",
+      "page": "https://unsplash.com/photos/woman-and-man-sitting-in-front-of-monitor-IgUR1iX0mqM"
+    },
+    {
+      "key": "ev02",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000002",
+      "photo": "photo-1677092419414-e974582c492c",
+      "alt": "Hand holding a microcontroller sensor board in front of a laptop showing code",
+      "page": "https://unsplash.com/photos/a-person-holding-a-small-device-in-front-of-a-laptop-ajIiyN9tUPY"
+    },
+    {
+      "key": "ev03",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000003",
+      "photo": "photo-1775163560631-6ff15eb2fa1f",
+      "alt": "People mingling and talking at an indoor evening event with warm lighting",
+      "page": "https://unsplash.com/photos/OsuDfn4vtLA"
+    },
+    {
+      "key": "ev04",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000004",
+      "photo": "photo-1769798643237-8642a3fbe5bc",
+      "alt": "Seated conference audience facing the stage",
+      "page": "https://unsplash.com/photos/speaker-on-stage-addressing-large-audience-6vAjp0pscX0"
+    },
+    {
+      "key": "ev05",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000005",
+      "photo": "photo-1679579664878-2c025e3f87b0",
+      "alt": "Woman presenting on a lit stage with the audience in silhouette",
+      "page": "https://unsplash.com/photos/a-woman-standing-on-a-stage-with-a-microphone-9zutjaUEN3Q"
+    },
+    {
+      "key": "ev06",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000006",
+      "photo": "photo-1771373119629-8f73d660cb7d",
+      "alt": "Sailing yachts anchored in a tropical harbour ringed by green hills",
+      "page": "https://unsplash.com/photos/sailing-yachts-anchored-in-a-tropical-bay-with-green-hills-pa4sHb8t9dE"
+    },
+    {
+      "key": "ev07",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000007",
+      "photo": "photo-1606770347238-77fcfd29906c",
+      "alt": "Laptop showing a video call with many participants beside a coffee mug",
+      "page": "https://unsplash.com/photos/fRGoTJFQAHM"
+    },
+    {
+      "key": "ev08",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000008",
+      "photo": "photo-1762512216893-34f371d163d7",
+      "alt": "Workers harvesting bagged banana bunches in a banana plantation",
+      "page": "https://unsplash.com/photos/workers-harvesting-bananas-covered-in-blue-bags-Z5M7C3KwE6c"
+    },
+    {
+      "key": "ev09",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000009",
+      "photo": "photo-1434030216411-0b793f4b4173",
+      "alt": "Person writing notes at a wooden table beside a coffee mug",
+      "page": "https://unsplash.com/photos/person-writing-on-brown-wooden-table-near-white-ceramic-mug-s9CC2SKySJM"
+    },
+    {
+      "key": "ev10",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000010",
+      "photo": "photo-1573165067541-4cd6d9837902",
+      "alt": "Three women in tech working together on laptops on a sofa",
+      "page": "https://unsplash.com/photos/three-women-sitting-on-sofa-with-macbook-OW5KP_Pj85Q"
+    },
+    {
+      "key": "ev11",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000011",
+      "photo": "photo-1701826262171-2d0a6e3f9d31",
+      "alt": "Aerial view of a Caribbean coastline where green hills meet a sandy beach",
+      "page": "https://unsplash.com/photos/an-aerial-view-of-a-beach-and-ocean-jkoGGTepQcc"
+    },
+    {
+      "key": "ev12",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000012",
+      "photo": "photo-1733222814719-9c756a54ad92",
+      "alt": "Woman with a microphone giving a presentation in a bright room",
+      "page": "https://unsplash.com/photos/a-woman-standing-in-front-of-a-projector-screen-giving-a-presentation-Ra23FmCoeiQ"
+    },
+    {
+      "key": "ev13",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000013",
+      "photo": "photo-1778489769184-45868633c527",
+      "alt": "Teacher guiding students at computers in a classroom lab",
+      "page": "https://unsplash.com/photos/teacher-guiding-students-on-computer-in-classroom-ereEoYDIl20"
+    },
+    {
+      "key": "ev14",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000014",
+      "photo": "photo-1762006221255-bbc5fc546b56",
+      "alt": "Wind turbines on a coastline under a bright blue sky",
+      "page": "https://unsplash.com/photos/wind-turbines-on-a-beach-under-a-blue-sky-fkw8M38KTzA"
+    },
+    {
+      "key": "ev15",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000015",
+      "photo": "photo-1653566031536-4d1b6a9da15e",
+      "alt": "Young Black girls building and wiring a robot together",
+      "page": "https://unsplash.com/photos/two-girls-are-working-on-a-project-together-Ib3ocAKccyI"
+    },
+    {
+      "key": "ev16",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000016",
+      "photo": "photo-1576540882014-86499436546b",
+      "alt": "White canopied beach cabanas facing a calm turquoise sea",
+      "page": "https://unsplash.com/photos/white-and-brown-wooden-cottages-near-seashore-4SSD35z9ZhM"
+    },
+    {
+      "key": "ev17",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000017",
+      "photo": "photo-1599050751795-6cdaafbc2319",
+      "alt": "Smartphone held over a card reader to make a contactless payment",
+      "page": "https://unsplash.com/photos/person-using-smartphone-for-contactless-payment-XH2JFgT4Abc"
+    },
+    {
+      "key": "ev18",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000018",
+      "photo": "photo-1611117775350-ac3950990985",
+      "alt": "A row of 3D printers printing blue parts on a workbench",
+      "page": "https://unsplash.com/photos/3d-printers-creating-blue-plastic-cylinders-aCniNTiIFd8"
+    },
+    {
+      "key": "ev19",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000019",
+      "photo": "photo-1509062522246-3755977927d7",
+      "alt": "Students in a classroom while a teacher presents at the front",
+      "page": "https://unsplash.com/photos/students-in-classroom-with-teacher-presenting-zFSo6bnZJTw"
+    },
+    {
+      "key": "ev20",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000020",
+      "photo": "photo-1790276319920-1fae470b441a",
+      "alt": "Dark storm clouds gathering over a turquoise sea and green coastal hillside",
+      "page": "https://unsplash.com/photos/5OKmLP1Ql7g"
+    },
+    {
+      "key": "ev21",
+      "kind": "event",
+      "id": "d0000000-0000-0000-0000-000000000021",
+      "photo": "photo-1758334949443-5acc8290159c",
+      "alt": "Research vessel working on turquoise open water",
+      "page": "https://unsplash.com/photos/J2Gt78GPCPc"
+    },
+    {
+      "key": "pr01",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000001",
+      "photo": "photo-1584795962384-dce385272216",
+      "alt": "Soil sensor with antenna planted in a pot of earth",
+      "page": "https://unsplash.com/photos/green-and-white-digital-device-on-brown-clay-pot-bNlDckdI3Sk"
+    },
+    {
+      "key": "pr02",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000002",
+      "photo": "photo-1758525865627-afc184e0e2c2",
+      "alt": "Two young Black students learning together on a tablet",
+      "page": "https://unsplash.com/photos/two-young-women-looking-at-a-tablet-together-vWDzlGNOwz0"
+    },
+    {
+      "key": "pr03",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000003",
+      "photo": "photo-1575221165108-1c5d11ee1c51",
+      "alt": "Twin waterfalls tumbling down a lush green rainforest mountainside",
+      "page": "https://unsplash.com/photos/waterfalls-and-grass-mountain-during-day-vu5Lhk35MRg"
+    },
+    {
+      "key": "pr04",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000004",
+      "photo": "photo-1509391366360-2e959784a276",
+      "alt": "Rows of solar panels on a green field under a bright sky",
+      "page": "https://unsplash.com/photos/solar-panels-on-green-field-513dBrMJ_5w"
+    },
+    {
+      "key": "pr05",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000005",
+      "photo": "photo-1708649290066-5f617003b93f",
+      "alt": "Underwater view of a colourful coral reef in clear blue water",
+      "page": "https://unsplash.com/photos/an-underwater-view-of-a-colorful-coral-reef-HYHYGLs-Rp8"
+    },
+    {
+      "key": "pr06",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000006",
+      "photo": "photo-1584169417032-d34e8d805e8b",
+      "alt": "Long aisle of server racks in a data centre",
+      "page": "https://unsplash.com/photos/server-room-aisle-with-metal-equipment-racks-lVZjvw-u9V8"
+    },
+    {
+      "key": "pr07",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000007",
+      "photo": "photo-1758691462743-f9fc9e430d39",
+      "alt": "Doctor consulting a patient over a video call on a laptop",
+      "page": "https://unsplash.com/photos/doctor-consulting-patient-via-video-call-on-laptop-c1ZGaJTOnJs"
+    },
+    {
+      "key": "pr08",
+      "kind": "project",
+      "id": "b0000000-0000-0000-0000-000000000008",
+      "photo": "photo-1652971799012-41787043b35d",
+      "alt": "Woman crouching at the water's edge to collect a water sample",
+      "page": "https://unsplash.com/photos/a-woman-crouches-down-to-collect-water-from-a-pond-dHXw8yEEpew"
+    },
+    {
+      "key": "rs01",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000001",
+      "photo": "photo-1741874299706-2b8e16839aaa",
+      "alt": "Black farmer tending a lush green crop field, hills behind",
+      "page": "https://unsplash.com/photos/a-farmer-tends-to-his-crops-in-a-green-field-1AoGjqdyDLU"
+    },
+    {
+      "key": "rs02",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000002",
+      "photo": "photo-1717292741426-d050f4f25503",
+      "alt": "Split over/under-water shot of mangrove roots in clear tropical water",
+      "page": "https://unsplash.com/photos/an-underwater-view-of-a-mangrove-forest-i5kMNyhiw6c"
+    },
+    {
+      "key": "rs03",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000003",
+      "photo": "photo-1632215861513-130b66fe97f4",
+      "alt": "Uniformed student reading aloud in a crowded classroom of Black pupils",
+      "page": "https://unsplash.com/photos/a-woman-standing-in-front-of-a-group-of-children-VC6MGt9ZoBA"
+    },
+    {
+      "key": "rs04",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000004",
+      "photo": "photo-1632152133952-98b268dc4b86",
+      "alt": "Blank form template and pen on a wooden desk with succulents (overhead)",
+      "page": "https://unsplash.com/photos/a-wooden-table-topped-with-papers-and-a-pen-VnK5iT01HYQ"
+    },
+    {
+      "key": "rs05",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000005",
+      "photo": "photo-1682687982502-1529b3b33f85",
+      "alt": "Diver photographing a coral reef with an underwater camera",
+      "page": "https://unsplash.com/photos/a-woman-scubas-in-the-ocean-with-a-camera-4AADxUsnufQ"
+    },
+    {
+      "key": "rs06",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000006",
+      "photo": "photo-1612115958726-9af4b6bd28d1",
+      "alt": "Smiling Black woman using a smartphone in a bright office corridor",
+      "page": "https://unsplash.com/photos/woman-in-black-long-sleeve-shirt-using-smartphone-DavJROC1lBM"
+    },
+    {
+      "key": "rs07",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000007",
+      "photo": "photo-1573164713347-df1f7d6aeb03",
+      "alt": "Young Black woman with a tablet by a window (founder portrait)",
+      "page": "https://unsplash.com/photos/woman-in-purple-dress-shirt-using-laptop-tKYfcTaXsf0"
+    },
+    {
+      "key": "rs08",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000008",
+      "photo": "photo-1786218422373-c16c97f5c4fd",
+      "alt": "Black hands handling sampling hoses and gear on a boat deck",
+      "page": "https://unsplash.com/photos/person-spraying-water-from-hose-srURlI9as_o"
+    },
+    {
+      "key": "rs09",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000009",
+      "photo": "photo-1775163024488-e88e4a71179f",
+      "alt": "Two people reviewing application paperwork at a table, phone and tablet",
+      "page": "https://unsplash.com/photos/two-people-reviewing-documents-at-a-table-MhqUBTxQ3Hw"
+    },
+    {
+      "key": "rs10",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000010",
+      "photo": "photo-1769147339214-076740872485",
+      "alt": "Machined metal parts resting on engineering blueprints",
+      "page": "https://unsplash.com/photos/two-metal-mechanical-parts-on-engineering-blueprints-SRqJ3eli-4I"
+    },
+    {
+      "key": "rs11",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000011",
+      "photo": "photo-1653565685060-e15e492a7fda",
+      "alt": "Black presenter at a whiteboard pitching to a small team",
+      "page": "https://unsplash.com/photos/a-man-giving-a-presentation-to-a-group-of-people-CjYnf6YL0NY"
+    },
+    {
+      "key": "rs12",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000012",
+      "photo": "photo-1676673419649-52ef910fdc00",
+      "alt": "Colourful fishing boats moored in a green Caribbean harbour",
+      "page": "https://unsplash.com/photos/sailing-yachts-anchored-in-a-tropical-bay-with-green-hills-pa4sHb8t9dE"
+    },
+    {
+      "key": "rs13",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000013",
+      "photo": "photo-1578674351410-8b28ab3c66b6",
+      "alt": "Framed vintage patent drawing on a white wall",
+      "page": "https://unsplash.com/photos/chair-parts-chart-hanging-on-wall-Mpq0LddqiTk"
+    },
+    {
+      "key": "rs14",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000014",
+      "photo": "photo-1781246435700-afec19012b45",
+      "alt": "Laptop showing financial charts on a sunlit desk with plants",
+      "page": "https://unsplash.com/photos/laptop-with-charts-on-a-desk-by-a-sunny-window-8OYcY9CRP_0"
+    },
+    {
+      "key": "rs15",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000015",
+      "photo": "photo-1597058557804-95ac4ee36e66",
+      "alt": "Trainee grinding steel in a vocational workshop with an instructor",
+      "page": "https://unsplash.com/photos/man-in-blue-long-sleeve-shirt-and-blue-vest-k9Dc5zT1Gq0"
+    },
+    {
+      "key": "rs16",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000016",
+      "photo": "photo-1785662340453-65067e98add3",
+      "alt": "Still reservoir reflecting dense tropical forest",
+      "page": "https://unsplash.com/photos/lush-green-jungle-reflected-in-tranquil-lake-jhobNcbZBvg"
+    },
+    {
+      "key": "rs17",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000017",
+      "photo": "photo-1771684512143-88bdb34782fa",
+      "alt": "Sprinklers watering a green crop field with palms on the horizon",
+      "page": "https://unsplash.com/photos/farmer-irrigating-crops-with-sprinklers-in-a-field-yCOmQ65e5xY"
+    },
+    {
+      "key": "rs18",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000018",
+      "photo": "photo-1785682117394-4c8d27afc12a",
+      "alt": "Technician testing a network rack with a handheld meter",
+      "page": "https://unsplash.com/photos/technician-inspecting-server-racks-with-a-handheld-diagnostic-tool-A-b2nPSSK6E"
+    },
+    {
+      "key": "rs19",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000019",
+      "photo": "photo-1727099079513-952d40de9d78",
+      "alt": "Rows of leafy greens inside a polytunnel shade-house",
+      "page": "https://unsplash.com/photos/a-greenhouse-filled-with-lots-of-green-plants-lq6RPxANYaQ"
+    },
+    {
+      "key": "rs20",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000020",
+      "photo": "photo-1609138429624-82b48e5f4cb0",
+      "alt": "Rows of plantlets growing in lab flasks (micropropagation)",
+      "page": "https://unsplash.com/photos/green-plant-on-clear-glass-vase-ymm91YNUPZE"
+    },
+    {
+      "key": "rs21",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000021",
+      "photo": "photo-1776875339303-d1b177734d56",
+      "alt": "Steaming volcanic crater with turquoise lake and green slopes",
+      "page": "https://unsplash.com/photos/volcanic-crater-with-turquoise-lake-and-steam-bpg0TUi_jtY"
+    },
+    {
+      "key": "rs22",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000022",
+      "photo": "photo-1639279387104-9f0367bea7f0",
+      "alt": "Palms bent by strong wind on a beach, boats offshore",
+      "page": "https://unsplash.com/photos/two-palm-trees-blowing-in-the-wind-on-a-beach-PHrn7UmOYjA"
+    },
+    {
+      "key": "rs23",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000023",
+      "photo": "photo-1780349622967-84c9d1fdb5a8",
+      "alt": "Orange sargassum washed up on a dark-sand beach, green headland",
+      "page": "https://unsplash.com/photos/orange-seaweed-covers-a-dark-sand-beach-with-ocean-waves-aj2-zez7VHE"
+    },
+    {
+      "key": "rs24",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000024",
+      "photo": "photo-1629190001805-8a10ba5ad103",
+      "alt": "Fishermen hauling a net into a colourful boat by a green shoreline",
+      "page": "https://unsplash.com/photos/man-in-gray-t-shirt-sitting-on-red-boat-during-daytime-kR7bcMlEnhw"
+    },
+    {
+      "key": "rs25",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000025",
+      "photo": "photo-1626714399979-00e645924c11",
+      "alt": "Aerial of a mangrove-lined lagoon with a jetty (St Lucia)",
+      "page": "https://unsplash.com/photos/aerial-view-of-green-trees-beside-body-of-water-during-daytime-tCorelWjQBg"
+    },
+    {
+      "key": "rs26",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000026",
+      "photo": "photo-1768357774088-cee45602e2bb",
+      "alt": "Rope canopy walkway through misty rainforest",
+      "page": "https://unsplash.com/photos/a-suspension-bridge-through-a-misty-lush-green-forest-7XxKeea9cVU"
+    },
+    {
+      "key": "rs27",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000027",
+      "photo": "photo-1591907303049-a5e5df26bcb9",
+      "alt": "Container port and cranes beside turquoise sea, aerial",
+      "page": "https://unsplash.com/photos/aerial-view-of-city-buildings-near-sea-during-daytime-vOpXnVlZTkU"
+    },
+    {
+      "key": "rs28",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000028",
+      "photo": "photo-1744809482817-9a9d4fc280af",
+      "alt": "Teacher at a whiteboard seen past Black students",
+      "page": "https://unsplash.com/photos/a-teacher-instructs-students-in-a-classroom-CXa6E3krENE"
+    },
+    {
+      "key": "rs29",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000029",
+      "photo": "photo-1620325867502-221cfb5faa5f",
+      "alt": "Hands arranging sticky notes on a business-model canvas",
+      "page": "https://unsplash.com/photos/person-writing-on-white-paper-Ax8IA8GAjVg"
+    },
+    {
+      "key": "rs30",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000030",
+      "photo": "photo-1584820537082-8e19daff36bd",
+      "alt": "Dark storm shelf cloud rolling over the ocean",
+      "page": "https://unsplash.com/photos/a-large-storm-moving-across-the-sky-over-a-body-of-water-GBkssTODNT0"
+    },
+    {
+      "key": "rs31",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000031",
+      "photo": "photo-1622896900858-99ad8da7b8d9",
+      "alt": "Aerial of Castries harbour, St Lucia, with cruise ships",
+      "page": "https://unsplash.com/photos/aerial-view-of-city-buildings-near-body-of-water-during-daytime-tn4t2tVC9uQ"
+    },
+    {
+      "key": "rs32",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000032",
+      "photo": "photo-1527612820672-5b56351f7346",
+      "alt": "Student-built robot on a competition mat",
+      "page": "https://unsplash.com/photos/two-girls-are-working-on-a-project-together-Ib3ocAKccyI"
+    },
+    {
+      "key": "rs33",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000033",
+      "photo": "photo-1681683967405-7efef2cd810c",
+      "alt": "Home music studio with keyboard, monitors, guitar and plants",
+      "page": "https://unsplash.com/photos/a-desk-with-a-keyboard-and-a-monitor-RINfyuHMZLg"
+    },
+    {
+      "key": "rs34",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000034",
+      "photo": "photo-1739298061707-cefee19941b7",
+      "alt": "Black founders and investor in a bright boardroom meeting",
+      "page": "https://unsplash.com/photos/a-group-of-people-sitting-around-a-white-table-AekHsx1SxXQ"
+    },
+    {
+      "key": "rs35",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000035",
+      "photo": "photo-1584433144859-1fc3ab64a957",
+      "alt": "Smartphone with padlock privacy screen on a desk, glasses and pencil",
+      "page": "https://unsplash.com/photos/smartphone-with-security-lock-icon-ah-HeguOe9k"
+    },
+    {
+      "key": "rs36",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000036",
+      "photo": "photo-1631006995557-9866a74ee05c",
+      "alt": "Misty mountain rainforest canopy (Dominica)",
+      "page": "https://unsplash.com/photos/green-trees-on-mountain-during-daytime-DNGC_M-Bvsk"
+    },
+    {
+      "key": "rs37",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000037",
+      "photo": "photo-1791570923980-055ca753584f",
+      "alt": "Banana plants and coffee bushes on a sunny tropical hillside",
+      "page": "https://unsplash.com/photos/banana-trees-in-coffee-plantation-hYobQ7Gc5_Y"
+    },
+    {
+      "key": "rs38",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000038",
+      "photo": "photo-1623251963103-511f665a9782",
+      "alt": "Vertical farm aisle of stacked greens under pink LED light",
+      "page": "https://unsplash.com/photos/a-large-room-filled-with-lots-of-plants--tbMPiOvwFA"
+    },
+    {
+      "key": "rs39",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000039",
+      "photo": "photo-1509017174183-0b7e0278f1ec",
+      "alt": "Phone tapped on a contactless payment terminal",
+      "page": "https://unsplash.com/photos/woman-holding-android-smartphone-0IVop5v4MMU"
+    },
+    {
+      "key": "rs40",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000040",
+      "photo": "photo-1758519288480-1489c17b1519",
+      "alt": "Two men, one Black, signing an agreement over coffee",
+      "page": "https://unsplash.com/photos/two-businessmen-signing-a-document-at-a-table-FKnEYIEVOyI"
+    },
+    {
+      "key": "rs41",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000041",
+      "photo": "photo-1589276534126-adef63a95e05",
+      "alt": "Solar array beside battery-storage container units",
+      "page": "https://unsplash.com/photos/white-and-black-solar-panels-under-white-clouds-and-blue-sky-during-daytime-itv-MC5S6cU"
+    },
+    {
+      "key": "rs42",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000042",
+      "photo": "photo-1717667745836-145a38948ebf",
+      "alt": "Truck tipping sorted waste into a recycling hall, worker in hi-vis",
+      "page": "https://unsplash.com/photos/a-man-standing-next-to-a-pile-of-trash-TQuq2OtLBNU"
+    },
+    {
+      "key": "rs43",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000043",
+      "photo": "photo-1682785868752-541af7ef8802",
+      "alt": "Hands holding a seedling over nursery propagation trays",
+      "page": "https://unsplash.com/photos/a-person-holding-a-plant-in-their-hands-gLLrdBH0fmI"
+    },
+    {
+      "key": "rs44",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000044",
+      "photo": "photo-1521791055366-0d553872125f",
+      "alt": "Black hand signing a contract with a fountain pen",
+      "page": "https://unsplash.com/photos/person-writing-on-white-paper-GJao3ZTX9gU"
+    },
+    {
+      "key": "rs45",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000045",
+      "photo": "photo-1581011277401-9f2953225051",
+      "alt": "Table coral formation in clear blue water",
+      "page": "https://unsplash.com/photos/brown-coral-reef-in-blue-water-DnLtZfBSjcU"
+    },
+    {
+      "key": "rs46",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000046",
+      "photo": "photo-1765454195979-812683c802aa",
+      "alt": "Jars of pickled peppers and preserves on a counter (unbranded)",
+      "page": "https://unsplash.com/photos/jars-of-preserved-vegetables-and-fruits-on-a-shelf-2O8ZZkc6I_s"
+    },
+    {
+      "key": "rs47",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000047",
+      "photo": "photo-1557223563-8db8e5e7d90b",
+      "alt": "Bus at a stop among tropical planting",
+      "page": "https://unsplash.com/photos/green-buses-parked-at-a-public-transportation-hub-EvvoBu0nBnc"
+    },
+    {
+      "key": "rs48",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000048",
+      "photo": "photo-1640677117376-573b9dbb8ea8",
+      "alt": "Young plants in rows with drip-irrigation lines in dark soil",
+      "page": "https://unsplash.com/photos/a-row-of-small-green-plants-growing-in-dirt-tlRkBCY9vsI"
+    },
+    {
+      "key": "rs49",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000049",
+      "photo": "photo-1666281466387-0639381c5680",
+      "alt": "Laptop showing a map with data points",
+      "page": "https://unsplash.com/photos/graphs-of-performance-analytics-on-a-laptop-screen-JKUTrJ4vK00"
+    },
+    {
+      "key": "rs50",
+      "kind": "resource",
+      "id": "c0000000-0000-0000-0000-000000000050",
+      "photo": "photo-1582719366767-dbbb6c6bf4aa",
+      "alt": "Black woman researcher working at a university lab bench",
+      "page": "https://unsplash.com/photos/woman-in-white-dress-shirt-standing-near-table-27KVI33BS_E"
+    },
+    {
+      "key": "pp01",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000001",
+      "photo": "photo-1507152832244-10d45c7eda57",
+      "alt": "Portrait of Marcia Joseph",
+      "speakerName": "Marcia Joseph"
+    },
+    {
+      "key": "pp02",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000002",
+      "photo": "photo-1614023342667-6f060e9d1e04",
+      "alt": "Portrait of Devon Charles",
+      "speakerName": "Devon Charles"
+    },
+    {
+      "key": "pp03",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000003",
+      "photo": "photo-1756588534346-e8899364757b",
+      "alt": "Portrait of Dr. Althea Williams",
+      "speakerName": "Dr. Althea Williams"
+    },
+    {
+      "key": "pp04",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000004",
+      "photo": "photo-1614890107637-fe96d74acf4b",
+      "alt": "Portrait of James Pierre",
+      "speakerName": "James Pierre"
+    },
+    {
+      "key": "pp05",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000005",
+      "photo": "photo-1502685104226-ee32379fefbe",
+      "alt": "Portrait of Keisha Baptiste",
+      "speakerName": "Keisha Baptiste"
+    },
+    {
+      "key": "pp06",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000006",
+      "photo": "photo-1649433658557-54cf58577c68",
+      "alt": "Portrait of Rashid Mohammed",
+      "speakerName": "Rashid Mohammed"
+    },
+    {
+      "key": "pp07",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000007",
+      "photo": "photo-1611432579699-484f7990b127",
+      "alt": "Portrait of Camille Fontaine",
+      "speakerName": "Camille Fontaine"
+    },
+    {
+      "key": "pp08",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000008",
+      "photo": "photo-1745510508933-8f7f387cfb71",
+      "alt": "Portrait of Tariq Phillip",
+      "speakerName": "Tariq Phillip"
+    },
+    {
+      "key": "pp09",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000009",
+      "photo": "photo-1758521540968-3af0cc2074a0",
+      "alt": "Portrait of Shania Lewis",
+      "speakerName": "Shania Lewis"
+    },
+    {
+      "key": "pp10",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000010",
+      "photo": "photo-1492462543947-040389c4a66c",
+      "alt": "Portrait of Marcus George",
+      "speakerName": "Marcus George"
+    },
+    {
+      "key": "pp11",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000011",
+      "photo": "photo-1573496527892-904f897eb744",
+      "alt": "Portrait of Sandra Mitchell",
+      "speakerName": "Sandra Mitchell"
+    },
+    {
+      "key": "pp12",
+      "kind": "avatar",
+      "id": "a0000000-0000-0000-0000-000000000012",
+      "photo": "photo-1688120320226-a73ed520c8b7",
+      "alt": "Portrait of Andre Williams",
+      "speakerName": "Andre Williams"
+    },
+    {
+      "key": "sp01",
+      "kind": "speaker",
+      "id": "e1000000-0000-0000-0000-000000000001",
+      "photo": "photo-1704286602312-71b5bedda30e",
+      "alt": "Portrait of Dr. Lorna Augustin"
+    },
+    {
+      "key": "sp03",
+      "kind": "speaker",
+      "id": "e1000000-0000-0000-0000-000000000003",
+      "photo": "photo-1654125992479-37dc114b3a5c",
+      "alt": "Portrait of Prof. Kerwin Lestrade"
+    }
+  ]
+}

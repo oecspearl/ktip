@@ -84,27 +84,27 @@ const COUNTRY_CODE = 'LC'
 // faculty supervision), so without it the role is a label with nothing behind it.
 const ACCOUNTS = [
   // Admin tier
-  { slug: 'admin', name: 'Test Admin', org: 'OECS Commission' },
-  { slug: 'people_supervisor', name: 'Test People Supervisor', org: 'OECS Commission' },
-  { slug: 'programme_supervisor', name: 'Test Programmes Supervisor', org: 'OECS Commission' },
-  { slug: 'safety_admin', name: 'Test Safety Admin', org: 'OECS Commission' },
+  { slug: 'admin', label: 'Admin', name: 'Test Admin', org: 'OECS Commission' },
+  { slug: 'people_supervisor', label: 'People Supervisor', name: 'Test People Supervisor', org: 'OECS Commission' },
+  { slug: 'programme_supervisor', label: 'Programmes Supervisor', name: 'Test Programmes Supervisor', org: 'OECS Commission' },
+  { slug: 'safety_admin', label: 'Safety Admin', name: 'Test Safety Admin', org: 'OECS Commission' },
   // Organisation tier
-  { slug: 'chamber_admin', name: 'Test Chamber', org: 'Test Chamber of Commerce', institution: ['chamber', 'admin'] },
-  { slug: 'diaspora', name: 'Test Diaspora Network', org: 'Test Diaspora Network' },
-  { slug: 'educational_partner', name: 'Test College', org: 'Test Community College', institution: ['university', 'admin'] },
-  { slug: 'government', name: 'Test Ministry', org: 'Test Ministry of Innovation' },
-  { slug: 'igo', name: 'Test Regional Body', org: 'Test Regional Organisation' },
-  { slug: 'investor', name: 'Test Investor', org: 'Test Ventures Fund' },
-  { slug: 'ngo', name: 'Test NGO', org: 'Test Foundation' },
-  { slug: 'private_sector', name: 'Test Business', org: 'Test Trading Ltd' },
-  { slug: 'research_institution', name: 'Test Research Institute', org: 'Test Research Institute' },
+  { slug: 'chamber_admin', label: 'Chamber of Commerce', name: 'Test Chamber', org: 'Test Chamber of Commerce', institution: ['chamber', 'admin'] },
+  { slug: 'diaspora', label: 'Diaspora', name: 'Test Diaspora Network', org: 'Test Diaspora Network' },
+  { slug: 'educational_partner', label: 'Educational Partner', name: 'Test College', org: 'Test Community College', institution: ['university', 'admin'] },
+  { slug: 'government', label: 'Government', name: 'Test Ministry', org: 'Test Ministry of Innovation' },
+  { slug: 'igo', label: 'Regional Organisation', name: 'Test Regional Body', org: 'Test Regional Organisation' },
+  { slug: 'investor', label: 'Investor', name: 'Test Investor', org: 'Test Ventures Fund' },
+  { slug: 'ngo', label: 'NGO', name: 'Test NGO', org: 'Test Foundation' },
+  { slug: 'private_sector', label: 'Private Sector', name: 'Test Business', org: 'Test Trading Ltd' },
+  { slug: 'research_institution', label: 'Research Institution', name: 'Test Research Institute', org: 'Test Research Institute' },
   // Individual tier
-  { slug: 'entrepreneur', name: 'Test Entrepreneur', org: 'Test Startup' },
-  { slug: 'faculty', name: 'Test Faculty', org: 'Test Community College', institution: ['university', 'educator'] },
-  { slug: 'ip_legal', name: 'Test IP Lawyer', org: 'Test Chambers & Co' },
-  { slug: 'mentor', name: 'Test Mentor', org: null },
-  { slug: 'researcher', name: 'Test Researcher', org: 'Test Research Institute' },
-  { slug: 'student', name: 'Test Student', org: 'Test Community College', institution: ['university', 'student'] },
+  { slug: 'entrepreneur', label: 'Entrepreneur', name: 'Test Entrepreneur', org: 'Test Startup' },
+  { slug: 'faculty', label: 'Faculty', name: 'Test Faculty', org: 'Test Community College', institution: ['university', 'educator'] },
+  { slug: 'ip_legal', label: 'IP and Legal', name: 'Test IP Lawyer', org: 'Test Chambers & Co' },
+  { slug: 'mentor', label: 'Mentor', name: 'Test Mentor', org: null },
+  { slug: 'researcher', label: 'Researcher', name: 'Test Researcher', org: 'Test Research Institute' },
+  { slug: 'student', label: 'Student', name: 'Test Student', org: 'Test Community College', institution: ['university', 'student'] },
 ].filter((a) => !only || only.includes(a.slug))
 
 const TEST_INSTITUTIONS = {
@@ -244,6 +244,24 @@ async function linkInstitution(userId, [kind, memberRole], verifiedBy) {
   }
 }
 
+// 204: ProtectedRoute holds any session without a confirmed backup address on
+// /security/backup-email. Rows in user_email_aliases are minted only under the
+// service role (056), so this writes one already verified: a token-less row
+// with verified_at set satisfies the 056 token_state CHECK. ktip-demo.org is
+// not a school domain, so the pair always passes is_school_email().
+async function ensureBackupEmail(userId, slug) {
+  const { error } = await admin.from('user_email_aliases').upsert(
+    {
+      user_id: userId,
+      email: `${slug}.backup@ktip-demo.org`.toLowerCase(),
+      verified_at: new Date().toISOString(),
+      verification_token: null,
+    },
+    { onConflict: 'user_id' }
+  )
+  if (error) throw new Error(`user_email_aliases: ${error.message}`)
+}
+
 // What the browser will see on first load: every gate ProtectedRoute reads
 // must be clear, and the permission set must be non-empty.
 async function verifyAsUser(email) {
@@ -259,6 +277,9 @@ async function verifyAsUser(email) {
     .eq('id', session.user.id)
     .single()
   const { data: perms } = await asUser.rpc('get_my_permissions')
+  // Errors before 204 is applied (no such function); only a definite
+  // non-compliant answer counts as owed.
+  const { data: backup } = await asUser.rpc('my_secondary_email_status')
   await asUser.auth.signOut()
 
   const owed = [
@@ -267,6 +288,7 @@ async function verifyAsUser(email) {
     p?.requires_consent && 'consent',
     p?.requires_mfa_enrollment && 'MFA enrolment',
     !perms?.length && 'no permissions',
+    backup?.compliant === false && 'backup email',
   ].filter(Boolean)
   return owed.length ? `still owes: ${owed.join(', ')}` : `ok (${perms.length} permissions)`
 }
@@ -296,7 +318,7 @@ for (const account of ACCOUNTS) {
         display_name: account.name,
         organization: account.org,
         country: COUNTRY,
-        bio: `Shared test account for the ${account.slug} role. Data here is not real.`,
+        bio: `Shared test login for the ${account.label} role. Nothing on this profile is real.`,
         is_verified: true,
         // 145: nobody verified is without a reason. These are set by hand.
         verified_via: 'admin',
@@ -314,6 +336,8 @@ for (const account of ACCOUNTS) {
           : `profile update: ${updateError.message}`
       )
     }
+
+    await ensureBackupEmail(id, account.slug)
 
     verifier ??= id
     if (account.institution) await linkInstitution(id, account.institution, verifier)
@@ -365,7 +389,7 @@ async function seedAssociationBusiness(biz, reviewerId, associationId) {
     display_name: ownerName,
     organization: biz.name,
     country: COUNTRY_NAMES[biz.country],
-    bio: 'Shared test account that owns a test business for association review. Data here is not real.',
+    bio: 'Shared test login. It owns a test business that is waiting on association review. Nothing on this profile is real.',
     is_verified: verified,
     // 186: a badge that came from a verified business.
     verified_via: verified ? 'association' : null,
@@ -383,6 +407,7 @@ async function seedAssociationBusiness(biz, reviewerId, associationId) {
       .eq('id', ownerId))
   }
   if (profileError) throw new Error(`owner profile: ${profileError.message}`)
+  await ensureBackupEmail(ownerId, ownerSlug)
 
   const reviewed = biz.reviewedDaysAgo !== undefined
   const { data: employer, error: employerError } = await admin

@@ -83,34 +83,50 @@ async function setEvents(table, fkColumn, id, rows) {
 }
 
 // --- demo content ------------------------------------------------------
+// Since 181 only a grant's created_by can decide its applications, so every
+// demo grant belongs to Sandra Mitchell, the demo investor.
+const GRANT_OWNER_ID = 'a0000000-0000-0000-0000-000000000011'
+
+// Deadlines are absolute so re-running does not push them out;
+// `npm run seed:dates` re-applies them. The first is already past, so the
+// closed state shows.
 const DEMO_GRANTS = [
   {
     title: `OECS Blue Economy Innovation Fund`,
-    description: 'Seed capital for marine-tech and sustainable fisheries ventures across the OECS.',
+    description:
+      'Seed money for fisheries and marine ventures in OECS member states. Past awards paid for sargassum collection trials off Dominica and a fish-landing logbook app used in Gros Islet.',
     amount_min: 15000,
     amount_max: 75000,
     grant_type: 'innovation',
+    deadline: '2027-02-05T23:59:00Z',
   },
   {
     title: `Caribbean AgriTech Accelerator Grant`,
-    description: 'Funding for climate-resilient agriculture pilots in the Eastern Caribbean.',
+    description:
+      'Twelve months of funding and mentoring for farm technology pilots. Priority goes to banana, nutmeg and root crop growers who sell into local hotels or the regional market.',
     amount_min: 10000,
     amount_max: 50000,
     grant_type: 'startup',
+    deadline: '2027-01-22T23:59:00Z',
   },
   {
     title: `Digital Skills & EdTech Research Award`,
-    description: 'Applied research into digital learning delivery for small island states.',
+    description:
+      'Applied research on teaching with poor or patchy internet. Studies must run in at least two member states and report results by school term.',
     amount_min: 5000,
     amount_max: 30000,
     grant_type: 'research',
+    // The closed one on purpose: its demo application is the rejected one.
+    deadline: '2026-10-30T23:59:00Z',
   },
   {
     title: `Renewable Energy Feasibility Grant`,
-    description: 'Feasibility studies for community-scale solar and geothermal projects.',
+    description:
+      'Covers feasibility studies for community solar and geothermal projects, including site surveys, grid studies and a costed plan a lender can read.',
     amount_min: 20000,
     amount_max: 120000,
     grant_type: 'development',
+    deadline: '2027-02-19T23:59:00Z',
   },
 ]
 
@@ -119,6 +135,8 @@ const APPLICATIONS = [
   {
     grant: 0,
     status: 'approved',
+    summary:
+      'Six solar sensor buoys on the reef at Soufrière, reporting water temperature to the Fisheries Department every 15 minutes. The grant pays for the hardware and a year of data costs.',
     createdDays: 118,
     updatedDays: 34,
     events: [
@@ -131,6 +149,8 @@ const APPLICATIONS = [
   {
     grant: 1,
     status: 'under_review',
+    summary:
+      'A weekly order sheet linking 40 farmers in the Babonneau cooperative with hotel kitchens around Rodney Bay.',
     createdDays: 76,
     updatedDays: 21,
     events: [
@@ -142,6 +162,8 @@ const APPLICATIONS = [
   {
     grant: 2,
     status: 'rejected',
+    summary:
+      'A term-long study of an offline learning app in three secondary schools, two in Kingstown and one on Bequia. We would compare module completion against classes using the online platform only.',
     createdDays: 152,
     updatedDays: 96,
     events: [
@@ -153,6 +175,8 @@ const APPLICATIONS = [
   {
     grant: 3,
     status: 'draft',
+    summary:
+      'Feasibility study for a 250 kW rooftop solar array shared by three health centres near Roseau, with battery storage for hurricane season.',
     createdDays: 12,
     updatedDays: 3,
     events: [{ status: 'draft', days: 12 }],
@@ -161,10 +185,10 @@ const APPLICATIONS = [
 
 const PROJECTS = [
   {
-    title: `Reef Guard — Coral Health Monitoring`,
-    summary: 'Low-cost sensor buoys streaming reef temperature and turbidity to a public dashboard.',
+    title: `Reef Guard: Coral Health Monitoring`,
+    summary: 'Low-cost sensor buoys that post reef temperature and turbidity to a public dashboard.',
     description:
-      'Reef Guard pairs solar buoys with a shore-side gateway so fisheries officers can spot bleaching conditions days earlier. Piloting in Soufrière Bay.',
+      'Reef Guard pairs solar buoys with a gateway on shore, so fisheries officers see bleaching conditions building days before divers would. Six buoys are in the water in Soufrière Bay.',
     category: 'environment',
     phase: 'launch',
     is_innovation: true,
@@ -178,10 +202,10 @@ const PROJECTS = [
     ],
   },
   {
-    title: `HarvestLink — Farmer to Hotel Marketplace`,
-    summary: 'Matching smallholder produce with hotel kitchens on a weekly ordering cycle.',
+    title: `HarvestLink: Farmer to Hotel Marketplace`,
+    summary: 'Small farms sell to hotel kitchens through one weekly order.',
     description:
-      'HarvestLink aggregates weekly availability from farm cooperatives and turns it into a single order sheet for hotel procurement teams.',
+      'Each Monday HarvestLink collects what cooperative farmers expect to pick that week and turns it into one order sheet for hotel buyers. Payment goes to the cooperative, which pays its members.',
     category: 'agriculture',
     phase: 'funding',
     createdDays: 98,
@@ -193,10 +217,10 @@ const PROJECTS = [
     ],
   },
   {
-    title: `SkillBridge — Offline-First Learning`,
-    summary: 'Course delivery that survives patchy connectivity on smaller islands.',
+    title: `SkillBridge: Offline-First Learning`,
+    summary: 'Course modules that keep working when the internet drops on the smaller islands.',
     description:
-      'A sync-on-reconnect learning client so students keep progressing through modules during outages, then reconcile with the campus LMS.',
+      'Students download a week of lessons while they have a signal and keep working through outages. Quiz results sync to the college system the next time the phone connects.',
     category: 'education',
     phase: 'prototype',
     is_innovation: true,
@@ -208,16 +232,25 @@ const PROJECTS = [
     ],
   },
   {
-    title: `CareRoute — Island Telehealth Triage`,
-    summary: 'Nurse-led triage routing for clinics without a resident physician.',
+    title: `CareRoute: Island Telehealth Triage`,
+    summary: 'Nurses at rural clinics send each case to the right doctor on another island.',
     description:
-      'A triage queue that routes clinic visits to the right remote specialist and keeps a shared case record across islands.',
+      'Many district clinics run without a resident doctor. CareRoute lets the duty nurse log a case, send it to an on-call doctor in Castries or Kingstown, and keep one record that both can read.',
     category: 'healthcare',
     phase: 'concept',
     createdDays: 23,
     updatedDays: 23,
     events: [{ phase: 'concept', days: 23 }],
   },
+]
+
+// Project titles from earlier runs (em dashes, before the copy pass). --clean
+// matches exact titles, so these are listed too or the old rows would stay.
+const LEGACY_TITLES = [
+  'Reef Guard — Coral Health Monitoring',
+  'HarvestLink — Farmer to Hotel Marketplace',
+  'SkillBridge — Offline-First Learning',
+  'CareRoute — Island Telehealth Triage',
 ]
 
 // --- clean -------------------------------------------------------------
@@ -238,7 +271,7 @@ async function removeSeed(userId) {
     .from('projects')
     .delete()
     .eq('owner_id', userId)
-    .in('title', PROJECTS.map((p) => p.title))
+    .in('title', [...PROJECTS.map((p) => p.title), ...LEGACY_TITLES])
   if (delProjects.error) throw delProjects.error
 
   console.log(`Removed ${grantIds.length} demo grants (+ their applications) and demo projects.`)
@@ -257,12 +290,13 @@ async function main() {
   const grantIns = await db
     .from('grants')
     .insert(
-      DEMO_GRANTS.map((g, i) => ({
+      DEMO_GRANTS.map((g) => ({
         ...g,
         currency: 'USD',
         is_active: true,
-        eligibility: 'Registered entities or individuals resident in an OECS member state.',
-        deadline: ago(-30 - i * 20),
+        eligibility:
+          'Open to registered businesses, cooperatives and individuals living in an OECS member state.',
+        created_by: GRANT_OWNER_ID,
         created_at: ago(200),
       }))
     )
@@ -280,7 +314,7 @@ async function main() {
         user_id: user.id,
         status: spec.status,
         application_data: {
-          summary: `Demo application for ${grant.title}.`,
+          summary: spec.summary,
           amount_requested: 25000,
           seeded: true,
         },

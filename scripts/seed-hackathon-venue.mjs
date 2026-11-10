@@ -80,17 +80,17 @@ const PEOPLE = [
   { slug: 'programme_supervisor', role: 'organizer', note: 'Host. Find me in Organiser HQ on the top floor.', skills: ['facilitation', 'ops'], room: 33 },
   { slug: 'investor', role: 'judge', note: 'Reading the briefs before the panel', skills: ['finance', 'due diligence'], room: 30 },
   { slug: 'igo', role: 'judge', note: 'Scoring demos this afternoon', skills: ['policy', 'regional programmes'], room: 30 },
-  { slug: 'mentor', role: 'mentor', note: 'On duty at the Help Desk: data, APIs, deployment', skills: ['cloud', 'python'], room: 4 },
+  { slug: 'mentor', role: 'mentor', note: 'On the Help Desk until 6pm for data and deployment questions', skills: ['cloud', 'python'], room: 4 },
   { slug: 'faculty', role: 'mentor', note: 'Pitch clinic at 4pm in the Workshop', skills: ['pitching', 'research methods'], room: 20 },
-  { slug: 'student', role: 'participant', note: 'Team Alpha: voice form nearly done', skills: ['react', 'ux'], team: 1, captain: true, room: 10 },
-  { slug: 'entrepreneur', role: 'participant', note: 'Team Alpha: pitch deck v2', skills: ['business', 'pitching'], team: 1, room: 10 },
-  { slug: 'researcher', role: 'participant', note: 'Team Alpha: cleaning landings data', skills: ['python', 'gis'], team: 1, room: 10 },
-  { slug: 'private_sector', role: 'participant', note: 'Breadfruit Labs: cold-chain sensors', skills: ['iot', 'logistics'], team: 2, captain: true, room: 11 },
-  { slug: 'ngo', role: 'participant', note: 'Breadfruit Labs: vendor interviews', skills: ['community', 'research'], team: 2, room: 11 },
-  { slug: 'diaspora', role: 'participant', note: 'Sargassum Squad: satellite tiles', skills: ['ml', 'remote sensing'], team: 3, captain: true, room: 12 },
-  { slug: 'research_institution', role: 'participant', note: 'Sargassum Squad: model validation', skills: ['oceanography'], team: 3, room: 12 },
-  { slug: 'educational_partner', role: 'participant', note: 'Pitons Collective: need a frontend dev!', skills: ['tourism', 'ops'], team: 4, captain: true, room: 13 },
-  { slug: 'government', role: 'participant', note: 'Lambi Works: booking flow', skills: ['go', 'apis'], team: 5, captain: true, room: 14 },
+  { slug: 'student', role: 'participant', note: 'Fish Pot Crew: voice form nearly done', skills: ['react', 'ux'], team: 1, captain: true, room: 10 },
+  { slug: 'entrepreneur', role: 'participant', note: 'Fish Pot Crew: second draft of the pitch deck', skills: ['business', 'pitching'], team: 1, room: 10 },
+  { slug: 'researcher', role: 'participant', note: 'Fish Pot Crew: cleaning the Gros Islet landings data', skills: ['python', 'gis'], team: 1, room: 10 },
+  { slug: 'private_sector', role: 'participant', note: 'Breadfruit Labs: wiring the cooler sensors', skills: ['iot', 'logistics'], team: 2, captain: true, room: 11 },
+  { slug: 'ngo', role: 'participant', note: 'Breadfruit Labs: interviewing vendors at Castries Market', skills: ['community', 'research'], team: 2, room: 11 },
+  { slug: 'diaspora', role: 'participant', note: 'Sargassum Squad: pulling satellite tiles', skills: ['ml', 'remote sensing'], team: 3, captain: true, room: 12 },
+  { slug: 'research_institution', role: 'participant', note: 'Sargassum Squad: checking the model against 2025 beach counts', skills: ['oceanography'], team: 3, room: 12 },
+  { slug: 'educational_partner', role: 'participant', note: 'Pitons Collective: looking for a frontend developer', skills: ['tourism', 'ops'], team: 4, captain: true, room: 13 },
+  { slug: 'government', role: 'participant', note: 'Lambi Works: closed-season alerts', skills: ['go', 'apis'], team: 5, captain: true, room: 14 },
   // Left out of the event on purpose, and removed again on every run, so
   // there is always one login that can try registering and being approved.
   { slug: 'chamber_admin', applicant: true },
@@ -132,16 +132,16 @@ const R = (n, floor, key, name, kind, furniture, cells, color, wall_height, extr
 
 const ROOMS = [
   // ---- ground (stairs block at 0..1,0..1; door at 13..14 on row 17)
-  R(1, 0, 'registration', 'Registration Desk', 'help_desk', 'counter', rect(11, 12, 16, 15), '#7E9EC7', 0.9, { description: 'Check in, read the rules, find your way around.' }),
-  R(2, 0, 'main-hall', 'Main Hall', 'main_hall', 'theatre', rect(3, 2, 11, 9), '#2A5788', 1.75, { description: 'Keynotes, stand-ups and announcements. Captions on.', audio_mode: 'moderated' }),
-  R(3, 0, 'networking', 'Networking Lounge', 'networking', 'cafe', rect(13, 2, 20, 8), '#7AB000', 1.25, { description: 'Open mics. Find a team, find a skill, say hello.' }),
-  R(4, 0, 'help-desk', 'Help Desk', 'help_desk', 'counter', rect(2, 11, 7, 15), '#7E9EC7', 1.1, { description: 'Stuck? A mentor is here.' }),
+  R(1, 0, 'registration', 'Registration Desk', 'help_desk', 'counter', rect(11, 12, 16, 15), '#7E9EC7', 0.9, { description: 'Check in here and pick up the rules sheet.' }),
+  R(2, 0, 'main-hall', 'Main Hall', 'main_hall', 'theatre', rect(3, 2, 11, 9), '#2A5788', 1.75, { description: 'Keynotes and the 9am stand-up. Captions are on.', audio_mode: 'moderated' }),
+  R(3, 0, 'networking', 'Networking Lounge', 'networking', 'cafe', rect(13, 2, 20, 8), '#7AB000', 1.25, { description: 'Mics are open. Come and meet people from other teams.' }),
+  R(4, 0, 'help-desk', 'Help Desk', 'help_desk', 'counter', rect(2, 11, 7, 15), '#7E9EC7', 1.1, { description: 'A mentor is on duty here if you get stuck.' }),
   R(5, 0, 'team-finder', 'Team Finder', 'networking', 'booth', rect(22, 2, 26, 6), '#E6AC09', 1.2, { description: 'Teams with openings, and people looking for one.' }),
   R(6, 0, 'booth-cdb', 'CDB Booth', 'sponsor_booth', 'booth', rect(22, 8, 26, 10), '#B38500', 1.1, { description: 'Accelerator places for the winning team.' }),
-  R(7, 0, 'quiet-room', 'Quiet Room', 'breakout', 'lounge', rect(19, 12, 26, 15), '#78716c', 0.9, { description: 'Heads-down focus. Listen only.', audio_mode: 'listen_only' }),
+  R(7, 0, 'quiet-room', 'Quiet Room', 'breakout', 'lounge', rect(19, 12, 26, 15), '#78716c', 0.9, { description: 'For heads-down work. Mics stay off.', audio_mode: 'listen_only' }),
 
   // ---- level 1: Homebase wing A
-  R(10, 1, 'hb-alpha', 'Team Alpha', 'team', 'homebase', rect(3, 2, 8, 6), '#2A5788', 1.2, {
+  R(10, 1, 'hb-alpha', 'Fish Pot Crew', 'team', 'homebase', rect(3, 2, 8, 6), '#2A5788', 1.2, {
     decor: { v: 1, color: '#2A5788', items: { rug: true, banner: true } },
   }),
   R(11, 1, 'hb-breadfruit', 'Breadfruit Labs', 'team', 'homebase', rect(10, 2, 15, 6), '#E6AC09', 1.2, {
@@ -156,14 +156,14 @@ const ROOMS = [
   R(14, 1, 'hb-lambi', 'Lambi Works', 'team', 'homebase', rect(10, 9, 15, 13), '#7AB000', 1.2),
   R(15, 1, 'hb-free-1', 'Team room 6', 'team', 'homebase', rect(17, 9, 22, 13), '#AEE12B', 1.2, { description: 'Free. Form a team to claim it.' }),
   R(16, 1, 'collab-commons', 'Collab Commons', 'networking', 'cafe', rect(24, 2, 27, 13), '#041E42', 1.3, {
-    description: 'Cross-team board and the bridges open between teams.',
+    description: 'A board every team can post to, plus the bridges teams have opened to each other.',
     sections: [{ id: 'collab_commons' }],
   }),
 
   // ---- level 2: Homebase wing B + build spaces
   R(20, 2, 'workshop', 'Workshop Room', 'workshop', 'classroom', rect(3, 2, 10, 7), '#E6AC09', 1.4, { description: 'Mentor sessions. Chalkboard included.', audio_mode: 'moderated' }),
-  R(21, 2, 'hardware', 'Hardware Bench', 'breakout', 'bench', rect(12, 2, 18, 7), '#78716c', 1.1, { description: 'Sensors, boards and a soldering iron with a queue.' }),
-  R(22, 2, 'library', 'Resource Library', 'breakout', 'library', rect(20, 2, 26, 7), '#B38500', 1.2, { description: 'Datasets, APIs and past winners.' }),
+  R(21, 2, 'hardware', 'Hardware Bench', 'breakout', 'bench', rect(12, 2, 18, 7), '#78716c', 1.1, { description: 'Spare sensors and dev boards. There is one soldering iron, so expect a queue.' }),
+  R(22, 2, 'library', 'Resource Library', 'breakout', 'library', rect(20, 2, 26, 7), '#B38500', 1.2, { description: "Open datasets and API docs. Last year's winning projects are on the back shelf." }),
   R(23, 2, 'hb-free-2', 'Team room 7', 'team', 'homebase', rect(2, 10, 7, 14), '#AEE12B', 1.2, { description: 'Free. Form a team to claim it.' }),
   R(24, 2, 'hb-free-3', 'Team room 8', 'team', 'homebase', rect(9, 10, 14, 14), '#AEE12B', 1.2, { description: 'Free. Form a team to claim it.' }),
   R(25, 2, 'hb-free-4', 'Team room 9', 'team', 'homebase', rect(16, 10, 21, 14), '#AEE12B', 1.2, { description: 'Free. Form a team to claim it.' }),
@@ -172,7 +172,7 @@ const ROOMS = [
   // ---- level 3: demos
   R(40, 3, 'showcase', 'Showcase Stage', 'stage', 'stage', rect(3, 2, 14, 9), '#041E42', 2, { description: 'Demos and pitches. Captions on.', audio_mode: 'listen_only', max_publishers: 6 }),
   R(41, 3, 'gallery', 'Spectator Gallery', 'main_hall', 'theatre', rect(16, 9, 26, 15), '#2A5788', 1.5, {
-    description: 'Watch the demos, cheer, vote.',
+    description: "Watch the demos and vote for the People's Choice award.",
     sections: [{ id: 'peoples_choice' }],
   }),
   R(42, 3, 'submission-desk', 'Submission Desk', 'help_desk', 'counter', rect(16, 2, 21, 6), '#7AB000', 1.1, {
@@ -220,11 +220,11 @@ for (const r of ROOMS) {
 }
 
 const TEAMS = [
-  { n: 1, name: 'Team Alpha', tagline: 'Catch logs that fishers fill in by voice, in any language', room: 10 },
-  { n: 2, name: 'Breadfruit Labs', tagline: 'Cold-chain alerts for small produce vendors', room: 11 },
-  { n: 3, name: 'Sargassum Squad', tagline: 'Forecasting sargassum landings from satellite data', room: 12 },
-  { n: 4, name: 'Pitons Collective', tagline: 'Reef tourism bookings that respect carrying capacity', room: 13 },
-  { n: 5, name: 'Lambi Works', tagline: 'Conch season tracking for co-ops', room: 14 },
+  { n: 1, name: 'Fish Pot Crew', tagline: 'Catch logs that fishers fill in by voice, in English or Kwéyòl', room: 10 },
+  { n: 2, name: 'Breadfruit Labs', tagline: 'Cooler temperature alerts for produce vendors at Castries Market', room: 11 },
+  { n: 3, name: 'Sargassum Squad', tagline: 'Forecasting sargassum landings on east coast beaches from satellite data', room: 12 },
+  { n: 4, name: 'Pitons Collective', tagline: 'Reef dive bookings capped at what the Soufrière reefs can take', room: 13 },
+  { n: 5, name: 'Lambi Works', tagline: 'Conch closed-season alerts for fishing co-ops in the Grenadines', room: 14 },
 ]
 
 const QUESTS = [
@@ -235,9 +235,9 @@ const QUESTS = [
 ]
 
 const COMMONS = [
-  [1, 'offers', 'Our landing-site data for Saint Lucia is clean. Happy to share.'],
-  [2, 'needs', 'Anyone know LoRa range near reefs?'],
-  [3, 'data', 'Satellite tiles for the Grenadines at 10 m, ask us for the bucket.'],
+  [1, 'offers', 'We cleaned the Saint Lucia landing-site data for 2019 to 2025. Ask and we will share the CSV.'],
+  [2, 'needs', 'Looking for someone who has tested LoRa range over open water near a reef.'],
+  [3, 'data', 'We have 10 m satellite tiles for the Grenadines. Message us for access to the bucket.'],
 ]
 
 const CRITERIA = [
@@ -277,22 +277,23 @@ async function main() {
   const event = {
     id: EVENT_ID,
     title: 'KTIP Test Hackathon: Five-Floor Venue',
-    summary: 'A test event for the 2.5D venue. Five floors, team Homebases, captions and calls.',
+    summary: 'A three-week test event for the 2.5D venue. Everyone in it is a shared test login.',
     description:
-      'A test build week for trying the virtual venue end to end. Walk the five floors, sit in on the Main Hall with captions in English, French or Spanish, open a call in your team Homebase and share screens, and customise your Homebase with your team colour and logo. Every person here is a shared test login.',
+      'A test build for trying the virtual venue end to end. The Main Hall runs live captions in English, French or Spanish. Each team Homebase has its own video call with screen sharing, and captains can set the team colour and logo. The brief is a real one. Much of the catch from small boats in the OECS is never recorded. Build something that gets better landing data from fishers to the fisheries divisions in Castries, Roseau and Kingstown, and make it work where the signal drops out at sea.',
     event_type: 'hackathon',
     status: 'published',
     is_virtual: true,
+    // Stays live for three weeks so the venue demo keeps working.
     start_date: hours(-24),
-    end_date: hours(24 * 5),
+    end_date: hours(24 * 21),
     capacity: 200,
     organizer_id: hostId,
     tags: ['test', 'hackathon', 'virtual', 'blue-economy'],
     has_challenge: true,
-    submission_deadline: hours(24 * 3),
+    submission_deadline: hours(24 * 18),
     has_venue: true,
     venue_opens_at: hours(-48),
-    venue_closes_at: hours(24 * 6),
+    venue_closes_at: hours(24 * 22),
     spectators_enabled: true,
     spectator_scope: 'members',
     venue_map: { v: 1, cols: 28, rows: 18, floors: FLOORS, flights: LAYOUT.flights },

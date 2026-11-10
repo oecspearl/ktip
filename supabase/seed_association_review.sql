@@ -60,7 +60,7 @@ BEGIN
       (3, 'ktip-test-assoc-soufriere-lc',  'Test Soufriere Craft Collective',  'LC', 'pending',  15, NULL,      'Creative industries', NULL,             NULL),
       (4, 'ktip-test-assoc-castries-lc',   'Test Castries Code Studio Ltd',    'LC', 'verified', 40, 30,        'Software',            'LC-C-2024-0098', NULL),
       (5, 'ktip-test-assoc-vieux-fort-lc', 'Test Vieux Fort Freight Ltd',      'LC', 'rejected', 20, 10,        'Logistics',           'LC-C-2023-7741',
-         'The registration number does not match the registry. Check it and submit again.'),
+         'The registration number does not match what the Registry of Companies has on file. Check the number on your certificate of incorporation and send it in again.'),
       (6, 'ktip-test-assoc-spice-gd',      'Test Spice Isle Agro Ltd',         'GD', 'pending',  9,  NULL,      'Agriculture',         'GD-2026-3310',   NULL)
     ) AS t(n, slug, legal_name, country, status, days_ago, reviewed_days_ago, industry, reg, note)
   LOOP
@@ -84,7 +84,14 @@ BEGIN
       b.slug, b.legal_name, b.industry, b.country,
       'test.assoc-owner-' || b.n || '@' || v_domain,
       b.reg,
-      b.legal_name || ' is a test business. Nothing about it is real.',
+      CASE b.n
+        WHEN 1 THEN 'Small bakery off Jeremie Street in Castries. Breadfruit loaves, cassava bread and coconut drops, sold to three supermarkets in the north of the island.'
+        WHEN 2 THEN 'Fits rooftop solar and battery backup for homes and guesthouses from Soufriere down to Laborie. Four installers and a van.'
+        WHEN 3 THEN 'Twelve craftspeople in Soufriere selling woven baskets, carved calabash and pottery to visitors and to hotel gift shops.'
+        WHEN 4 THEN 'Five developers in Castries building booking systems and mobile apps for hotels, clinics and small shops around the region.'
+        WHEN 5 THEN 'Clears and moves containers between the port at Vieux Fort and businesses in the south. Two trucks and a small warehouse near Hewanorra.'
+        WHEN 6 THEN 'Buys nutmeg, mace and cocoa from farmers in St. Andrew and St. Patrick and packs them for export from St. George''s.'
+      END || ' Test business for the association review demo; none of it is real.',
       b.status,
       CASE WHEN b.status = 'verified' THEN 'chamber_attestation' END,
       CASE WHEN b.status = 'verified' THEN now() - make_interval(days => b.reviewed_days_ago) END,

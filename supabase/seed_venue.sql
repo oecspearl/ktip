@@ -104,19 +104,19 @@ INSERT INTO events (id, title, summary, description, event_type, status, locatio
                     has_venue, venue_opens_at, venue_closes_at, spectators_enabled, spectator_scope,
                     venue_map) VALUES
   ('d0000000-0000-0000-0000-000000000021',
-   'OECS Blue Economy Hackathon: Virtual Build Week',
-   'Five days, three floors, one ocean. Build tools for fisheries, reefs and coastal resilience inside the KTIP virtual venue.',
-   'A fully virtual five-day build sprint on the blue economy. Teams from every OECS member state prototype tools for small-scale fisheries, reef monitoring, marine spatial planning and coastal resilience. The venue is a three-floor building: register and mingle on the ground floor, build in a team pod on the build floor, and pitch to the judges upstairs. Mentors rotate through the Help Desk around the clock; sponsors are on the ground floor all week.',
+   'OECS Blue Economy Hackathon: Virtual Build Fortnight',
+   'Two weeks online to build tools for fishers, reef wardens and coastal towns, inside a three-floor virtual venue.',
+   'A two-week online hackathon on the blue economy. Teams from across the OECS are building tools for small-scale fishers, reef monitoring, sargassum landfall warnings and coastal planning. The venue is a three-floor building. You check in and meet people on the ground floor, build in a team pod on the build floor, and pitch to the judges on the top floor. A mentor is on the Help Desk at most hours, and the sponsors keep their booths open on the ground floor for the full fortnight.',
    'hackathon', 'published', NULL, true,
-   NOW() - INTERVAL '2 days', NOW() + INTERVAL '3 days',
+   NOW() - INTERVAL '2 days', NOW() + INTERVAL '14 days',
    120,
-   'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop',
+   'https://jwvjzxqgbctttfbvrgmi.supabase.co/storage/v1/object/public/event-images/seed/events/d0000000-0000-0000-0000-000000000021.webp',
    true,
    'a0000000-0000-0000-0000-000000000002',
    NOW() - INTERVAL '30 days',
    ARRAY['blue-economy','virtual','hackathon','fisheries','coastal'],
-   TRUE, NOW() + INTERVAL '60 hours',
-   TRUE, NOW() - INTERVAL '3 days', NOW() + INTERVAL '4 days',
+   TRUE, NOW() + INTERVAL '12 days',
+   TRUE, NOW() - INTERVAL '3 days', NOW() + INTERVAL '15 days',
    TRUE, 'members',
    '{
      "v": 1, "cols": 28, "rows": 18,
@@ -160,7 +160,7 @@ INSERT INTO venue_rooms (
   -- ---------------------------------------------------------- ground floor
   ('7b000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021',
    'registration', 'Registration Desk', 'help_desk',
-   'Check in, read the rules, and find your way around the building.',
+   'Check in here first. The house rules and a floor guide are pinned in this room.',
    'open', 10, 12, FALSE, TRUE, 10, 0, venue_rect_cells(11, 14, 15, 16), '#7E9EC7', 0.88,
    '{}',
    '[{"id":"check_in"},{"id":"host_controls"},{"id":"rules"},{"id":"chat"},{"id":"onboarding"},{"id":"wayfinding"},{"id":"announcements"},{"id":"occupants"}]'::jsonb,
@@ -174,7 +174,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000021',
    'networking', 'Networking Lounge', 'networking',
-   'Open mics. Find a team, find a skill, or just say hello.',
+   'Mics are open. Come here to find a team, or someone with the skill your team is missing.',
    'open', 40, 12, FALSE, TRUE, 30, 0, venue_rect_cells(12, 2, 19, 7), '#7AB000', 1.25,
    '{}',
    '[{"id":"av_placeholder"},{"id":"chat"},{"id":"looking_for_team"},{"id":"skill_finder"},{"id":"occupants"},{"id":"venue_headcount"}]'::jsonb,
@@ -182,7 +182,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000021',
    'showcase', 'Showcase Stage', 'stage',
-   'Sponsor showcases, mid-week demos and the community vote.',
+   'Sponsor talks, the midpoint demos and the community vote.',
    'listen_only', NULL, 6, FALSE, TRUE, 40, 0, venue_rect_cells(21, 2, 26, 8), '#041E42', 2.0,
    '{}',
    '[{"id":"sponsor_hero"},{"id":"host_controls"},{"id":"av_placeholder"},{"id":"reactions"},{"id":"showcase_gallery"},{"id":"chat"},{"id":"occupants"},{"id":"hand_queue"},{"id":"countdown"}]'::jsonb,
@@ -190,7 +190,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000021',
    'help-desk', 'Help Desk', 'help_desk',
-   'Stuck? A mentor is on duty here around the clock.',
+   'A mentor is on duty here day and night. Bring your bug.',
    'open', 12, 12, FALSE, TRUE, 50, 0, venue_rect_cells(2, 10, 6, 13), '#7E9EC7', 1.13,
    '{}',
    '[{"id":"av_placeholder"},{"id":"chat"},{"id":"mentors_on_duty"},{"id":"help_nudge"},{"id":"occupants"}]'::jsonb,
@@ -229,7 +229,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000021',
    'mentor-lounge', 'Mentor Lounge', 'help_desk',
-   'Mentors, judges and organizers only. Compare notes between shifts.',
+   'Open to mentors, judges and organizers. Compare notes between shifts.',
    'open', 20, 12, FALSE, TRUE, 110, 1, venue_rect_cells(9, 2, 13, 5), '#7E9EC7', 1.25,
    ARRAY['mentor','judge','organizer'],
    '[{"id":"av_placeholder"},{"id":"chat"},{"id":"mentors_on_duty"},{"id":"occupants"},{"id":"activity_log"}]'::jsonb,
@@ -277,7 +277,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000021',
    'pod-4', 'Pod 4', 'breakout',
-   'Team pod. Unclaimed — grab it in the Networking Lounge.',
+   'Team pod. Still free, claim it from the Networking Lounge.',
    'open', 8, 8, FALSE, TRUE, 170, 1, venue_rect_cells(2, 12, 5, 14), '#AEE12B', 1.0,
    '{}',
    '[{"id":"host_controls"},{"id":"av_placeholder"},{"id":"objectives"},{"id":"chat"},{"id":"occupants"},{"id":"countdown"}]'::jsonb,
@@ -285,7 +285,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000021',
    'pod-5', 'Pod 5', 'breakout',
-   'Team pod. Unclaimed — grab it in the Networking Lounge.',
+   'Team pod. Still free, claim it from the Networking Lounge.',
    'open', 8, 8, FALSE, TRUE, 180, 1, venue_rect_cells(7, 12, 10, 14), '#AEE12B', 1.0,
    '{}',
    '[{"id":"host_controls"},{"id":"av_placeholder"},{"id":"objectives"},{"id":"chat"},{"id":"occupants"},{"id":"countdown"}]'::jsonb,
@@ -293,7 +293,7 @@ INSERT INTO venue_rooms (
 
   ('7b000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000021',
    'pod-6', 'Pod 6', 'breakout',
-   'Team pod. Unclaimed — grab it in the Networking Lounge.',
+   'Team pod. Still free, claim it from the Networking Lounge.',
    'open', 8, 8, FALSE, TRUE, 190, 1, venue_rect_cells(12, 12, 15, 14), '#AEE12B', 1.0,
    '{}',
    '[{"id":"host_controls"},{"id":"av_placeholder"},{"id":"objectives"},{"id":"chat"},{"id":"occupants"},{"id":"countdown"}]'::jsonb,
@@ -376,18 +376,17 @@ ON CONFLICT (event_id, key) DO UPDATE SET
 -- ============================================================
 
 INSERT INTO event_venue_members (event_id, user_id, role, availability, status_note, current_room_id, skills, looking_for_team, last_seen_at) VALUES
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000002', 'organizer',   'working',     'Host. Ping me in Organizer HQ.',                         '7b000000-0000-0000-0000-000000000024', ARRAY['facilitation','ops'],          FALSE, NOW()),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000001', 'judge',       'working',     'Reading briefs before the panel',                        '7b000000-0000-0000-0000-000000000020', ARRAY['policy','regional programmes'], FALSE, NOW() - INTERVAL '3 minutes'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000011', 'judge',       'busy',        'Scoring the mid-week demos',                             '7b000000-0000-0000-0000-000000000020', ARRAY['finance','due diligence'],     FALSE, NOW() - INTERVAL '1 minute'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000003', 'mentor',      'working',     'On duty at the Help Desk — marine data, sensors, models', '7b000000-0000-0000-0000-000000000005', ARRAY['data science','marine biology','python'], FALSE, NOW()),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000004', 'mentor',      'away',        'Back for the 4pm AST pitch clinic',                      '7b000000-0000-0000-0000-000000000010', ARRAY['business models','pitching'],  FALSE, NOW() - INTERVAL '50 minutes'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000012', 'participant', 'working',     'Speaking in the Workshop Room at 2pm — ocean data APIs',  '7b000000-0000-0000-0000-000000000009', ARRAY['gis','apis','node'],          FALSE, NOW()),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000005', 'participant', 'working',     'Reef Watch — wiring the dive-log parser',                '7b000000-0000-0000-0000-000000000013', ARRAY['react','node','iot'],          FALSE, NOW()),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000006', 'participant', 'busy',        'Reef Watch — do not disturb, migration in progress',     '7b000000-0000-0000-0000-000000000013', ARRAY['postgres','python'],           FALSE, NOW() - INTERVAL '4 minutes'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000007', 'participant', 'working',     'CatchLog — offline sync is nearly there',                '7b000000-0000-0000-0000-000000000014', ARRAY['flutter','sqlite','ux'],       FALSE, NOW() - INTERVAL '2 minutes'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000009', 'participant', 'working',     'Sargassum Radar — need a frontend dev!',                 '7b000000-0000-0000-0000-000000000015', ARRAY['ml','python','remote sensing'], TRUE,  NOW() - INTERVAL '6 minutes'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000008', 'participant', 'help_wanted', 'Buoy sim drops LoRa packets past 300m — anyone?',        '7b000000-0000-0000-0000-000000000019', ARRAY['arduino','lora','c++'],        FALSE, NOW() - INTERVAL '1 minute'),
-  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000010', 'participant', 'working',     'Looking for a team — business and pitch side',           '7b000000-0000-0000-0000-000000000003', ARRAY['business strategy','pitching'], TRUE,  NOW() - INTERVAL '90 seconds')
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000002', 'organizer',   'working',     'Host. Find me in Organizer HQ.',                         '7b000000-0000-0000-0000-000000000024', ARRAY['facilitation','ops'],          FALSE, NOW()),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000001', 'judge',       'working',     'Reading team briefs before the panel',                   '7b000000-0000-0000-0000-000000000020', ARRAY['policy','regional programmes'], FALSE, NOW() - INTERVAL '3 minutes'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000011', 'judge',       'busy',        'Going through team repos',                               '7b000000-0000-0000-0000-000000000020', ARRAY['finance','due diligence'],     FALSE, NOW() - INTERVAL '1 minute'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000003', 'mentor',      'working',     'On the Help Desk. Marine data, sensors and models',       '7b000000-0000-0000-0000-000000000005', ARRAY['data science','marine biology','python'], FALSE, NOW()),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000004', 'mentor',      'away',        'Back at 4pm AST',                                        '7b000000-0000-0000-0000-000000000010', ARRAY['business models','pitching'],  FALSE, NOW() - INTERVAL '50 minutes'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000012', 'participant', 'working',     'Giving the ocean data APIs talk in the Workshop Room',   '7b000000-0000-0000-0000-000000000009', ARRAY['gis','apis','node'],          FALSE, NOW()),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000005', 'participant', 'working',     'Reef Watch: wiring up the dive-log parser',              '7b000000-0000-0000-0000-000000000013', ARRAY['react','node','iot'],          FALSE, NOW()),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000006', 'participant', 'busy',        'Reef Watch: running a migration, please don''t merge',   '7b000000-0000-0000-0000-000000000013', ARRAY['postgres','python'],           FALSE, NOW() - INTERVAL '4 minutes'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000007', 'participant', 'working',     'CatchLog: offline sync nearly done',                     '7b000000-0000-0000-0000-000000000014', ARRAY['flutter','sqlite','ux'],       FALSE, NOW() - INTERVAL '2 minutes'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000009', 'participant', 'working',     'Sargassum Radar: looking for a frontend dev',            '7b000000-0000-0000-0000-000000000015', ARRAY['ml','python','remote sensing'], TRUE,  NOW() - INTERVAL '6 minutes'),
+  ('d0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000008', 'participant', 'help_wanted', 'Buoy sim drops LoRa packets past 300m. Any ideas?',      '7b000000-0000-0000-0000-000000000019', ARRAY['arduino','lora','c++'],        FALSE, NOW() - INTERVAL '1 minute')
 ON CONFLICT (event_id, user_id) DO UPDATE SET
   role            = EXCLUDED.role,
   availability    = EXCLUDED.availability,
@@ -396,6 +395,13 @@ ON CONFLICT (event_id, user_id) DO UPDATE SET
   skills          = EXCLUDED.skills,
   looking_for_team = EXCLUDED.looking_for_team,
   last_seen_at    = EXCLUDED.last_seen_at;
+
+-- Marcus George (a10) is the one unverified demo persona, and 205's trigger
+-- refuses venue memberships for unverified users. Older runs of this file
+-- seated him; clear that row so a re-run matches a fresh seed.
+DELETE FROM event_venue_members
+WHERE event_id = 'd0000000-0000-0000-0000-000000000021'
+  AND user_id  = 'a0000000-0000-0000-0000-000000000010';
 
 -- Room-scoped roles (109). Andre is a participant everywhere except the
 -- Workshop Room, where he holds the mic; Keisha pitches Reef Watch on the
@@ -413,32 +419,32 @@ ON CONFLICT (room_id, user_id) DO UPDATE SET role = EXCLUDED.role;
 
 INSERT INTO venue_room_messages (id, room_id, author_id, body, kind, created_at) VALUES
   -- Main Hall
-  ('8b000000-0000-0000-0000-000000000001', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Welcome to Blue Economy Build Week! Three floors: register and mingle down here, build upstairs, pitch on the top floor. Daily stand-up in this room at 9am AST.', 'chat', NOW() - INTERVAL '2 days'),
+  ('8b000000-0000-0000-0000-000000000001', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Welcome to the Blue Economy Build Fortnight. Check in and meet people down here, build on the floor above, and pitch on the top floor. Stand-up is in this room every morning at 9am AST.', 'chat', NOW() - INTERVAL '2 days'),
   ('8b000000-0000-0000-0000-000000000002', '7b000000-0000-0000-0000-000000000002', NULL, 'Venue opened by the host.', 'system', NOW() - INTERVAL '2 days'),
-  ('8b000000-0000-0000-0000-000000000003', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'Mentor rota is pinned in the Resource Library. Help Desk is staffed 24/7 until submissions close.', 'chat', NOW() - INTERVAL '47 hours'),
-  ('8b000000-0000-0000-0000-000000000004', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Reminder: Final Pitches stage stays closed until the last day. Finalists will be announced here at noon.', 'chat', NOW() - INTERVAL '5 hours'),
+  ('8b000000-0000-0000-0000-000000000003', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'Mentor rota is pinned in the Resource Library. Someone will be on the Help Desk at all hours until submissions close.', 'chat', NOW() - INTERVAL '47 hours'),
+  ('8b000000-0000-0000-0000-000000000004', '7b000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Reminder: the Final Pitches stage stays shut until finals day. We name the six finalists in this room the day before.', 'chat', NOW() - INTERVAL '5 hours'),
   -- Networking Lounge
-  ('8b000000-0000-0000-0000-000000000005', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000009', 'Shania from Grenada — Sargassum Radar needs a frontend dev. We have the model, we need the map!', 'chat', NOW() - INTERVAL '30 hours'),
-  ('8b000000-0000-0000-0000-000000000006', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000010', 'Marcus from Saint Lucia. I can do the pitch deck and business model if any pod needs one more.', 'chat', NOW() - INTERVAL '28 hours'),
-  ('8b000000-0000-0000-0000-000000000007', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000007', 'Pods 4–6 are still free upstairs if a new team forms. Claim one in the room description.', 'chat', NOW() - INTERVAL '20 hours'),
-  ('8b000000-0000-0000-0000-000000000008', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000005', 'Anyone else hitting the OECS Ocean Governance API rate limit? 60 req/min is tight.', 'chat', NOW() - INTERVAL '3 hours'),
+  ('8b000000-0000-0000-0000-000000000005', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000009', 'Shania from Grenada. Sargassum Radar has a working model but nobody to build the map. Any frontend people around?', 'chat', NOW() - INTERVAL '30 hours'),
+  ('8b000000-0000-0000-0000-000000000006', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000004', 'James here. Can''t help with the map, but once you have a demo, book a slot with me in the Mentor Lounge and we''ll tighten the pitch.', 'chat', NOW() - INTERVAL '28 hours'),
+  ('8b000000-0000-0000-0000-000000000007', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000007', 'Pods 4 to 6 upstairs are still free if a new team forms. Claim one by editing its room description.', 'chat', NOW() - INTERVAL '20 hours'),
+  ('8b000000-0000-0000-0000-000000000008', '7b000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000005', 'Anyone else hitting the rate limit on the OECS Ocean Governance API? 60 requests a minute is tight', 'chat', NOW() - INTERVAL '3 hours'),
   -- Help Desk
-  ('8b000000-0000-0000-0000-000000000009', '7b000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000009', 'What resolution is the Sentinel-2 sargassum index good down to? Beach-scale or bay-scale?', 'chat', NOW() - INTERVAL '4 hours'),
-  ('8b000000-0000-0000-0000-000000000010', '7b000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000003', 'Bay-scale honestly. 10m pixels but the index is noisy near shore. Pair it with a webcam or a drone frame for the last 200m.', 'chat', NOW() - INTERVAL '230 minutes'),
+  ('8b000000-0000-0000-0000-000000000009', '7b000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000009', 'How fine is the Sentinel-2 sargassum index? Good enough for one beach, or only a whole bay?', 'chat', NOW() - INTERVAL '4 hours'),
+  ('8b000000-0000-0000-0000-000000000010', '7b000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000003', 'Bay scale, honestly. The pixels are 10m but the index gets noisy close to shore. For the last 200m, pair it with a webcam or a drone shot.', 'chat', NOW() - INTERVAL '230 minutes'),
   -- Hardware Bench
-  ('8b000000-0000-0000-0000-000000000011', '7b000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000008', 'Buoy sim is dropping most packets past 300m. SF7, 125kHz. Camera is on if anyone wants to look at the wiring.', 'chat', NOW() - INTERVAL '70 minutes'),
-  ('8b000000-0000-0000-0000-000000000012', '7b000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000003', 'Try SF9 first. Salt spray on the antenna connector is the other usual culprit.', 'chat', NOW() - INTERVAL '55 minutes'),
+  ('8b000000-0000-0000-0000-000000000011', '7b000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000008', 'Buoy sim is losing most packets past 300m. SF7, 125kHz. Camera''s on if anyone wants to look at the wiring', 'chat', NOW() - INTERVAL '70 minutes'),
+  ('8b000000-0000-0000-0000-000000000012', '7b000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000003', 'Try SF9 first. If that doesn''t do it, check the antenna connector. Salt spray gets into those all the time.', 'chat', NOW() - INTERVAL '55 minutes'),
   -- Pod 1 · Reef Watch
-  ('8b000000-0000-0000-0000-000000000013', '7b000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000005', 'Parser handles the three dive-log formats now. Rashid, the schema migration is yours when you surface.', 'chat', NOW() - INTERVAL '2 hours'),
-  ('8b000000-0000-0000-0000-000000000014', '7b000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000006', 'On it. Do not merge anything for 20 minutes.', 'chat', NOW() - INTERVAL '25 minutes'),
+  ('8b000000-0000-0000-0000-000000000013', '7b000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000005', 'Parser reads all three dive-log formats now. Rashid, the schema migration is yours when you''re free', 'chat', NOW() - INTERVAL '2 hours'),
+  ('8b000000-0000-0000-0000-000000000014', '7b000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000006', 'On it. Nobody merge anything for 20 minutes pls', 'chat', NOW() - INTERVAL '25 minutes'),
   -- Workshop Room
-  ('8b000000-0000-0000-0000-000000000015', '7b000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000012', 'Slides for "Ocean data APIs in 40 minutes" are in the Resource Library. Bring questions about the CARICOM fisheries endpoints.', 'chat', NOW() - INTERVAL '6 hours'),
+  ('8b000000-0000-0000-0000-000000000015', '7b000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000012', 'Slides for my ocean data APIs session are in the Resource Library. Bring your questions on the CARICOM fisheries endpoints.', 'chat', NOW() - INTERVAL '6 hours'),
   -- Judging Room
-  ('8b000000-0000-0000-0000-000000000016', '7b000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000011', 'Scoring sheet for the mid-week demos is ready. Impact first, then execution, then story.', 'chat', NOW() - INTERVAL '90 minutes'),
-  ('8b000000-0000-0000-0000-000000000017', '7b000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000001', 'Agreed. Let us keep the Deliberation Room closed until all six have presented.', 'chat', NOW() - INTERVAL '80 minutes'),
+  ('8b000000-0000-0000-0000-000000000016', '7b000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000011', 'Scoring sheet for the midpoint demos is up. Impact first, then execution, then how well they tell it.', 'chat', NOW() - INTERVAL '90 minutes'),
+  ('8b000000-0000-0000-0000-000000000017', '7b000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000001', 'Agreed. And let''s keep the Deliberation Room closed until all six finalists have pitched.', 'chat', NOW() - INTERVAL '80 minutes'),
   -- Organizer HQ
-  ('8b000000-0000-0000-0000-000000000018', '7b000000-0000-0000-0000-000000000024', 'a0000000-0000-0000-0000-000000000002', 'Headcount 11 on the floor right now. Opening the Final Pitches stage Friday 09:00 AST.', 'chat', NOW() - INTERVAL '40 minutes')
-ON CONFLICT (id) DO NOTHING;
+  ('8b000000-0000-0000-0000-000000000018', '7b000000-0000-0000-0000-000000000024', 'a0000000-0000-0000-0000-000000000002', 'Headcount is 11 on the floor right now. Final Pitches stage opens at 09:00 AST on finals day.', 'chat', NOW() - INTERVAL '40 minutes')
+ON CONFLICT (id) DO UPDATE SET room_id = EXCLUDED.room_id, author_id = EXCLUDED.author_id, body = EXCLUDED.body, kind = EXCLUDED.kind, created_at = EXCLUDED.created_at;
 
 
 -- ============================================================
@@ -454,38 +460,38 @@ SELECT v.id::uuid, e.id, v.title, v.description,
 FROM events e
 CROSS JOIN (VALUES
   ('9b000000-0000-0000-0000-000000000001', 'Opening keynote: the OECS ocean economy',
-   'Why the region is betting on the blue economy, and what the judges are hoping to see by Friday.',
+   'Why governments in the region are putting money into fisheries, marine tourism and ocean research, and what the judges want to see at the final pitches.',
    INTERVAL '0 hours', INTERVAL '1 hour', '7b000000-0000-0000-0000-000000000002', 'keynote', 10),
   ('9b000000-0000-0000-0000-000000000002', 'Team forming',
-   'Pitch your idea in 60 seconds, then find your people. Pods 1–6 are claimed first come, first served.',
+   'Pitch your idea in 60 seconds, then find teammates. Pods 1 to 6 go to whichever teams claim them first.',
    INTERVAL '1 hour', INTERVAL '2 hours 30 minutes', '7b000000-0000-0000-0000-000000000003', 'networking', 20),
   ('9b000000-0000-0000-0000-000000000003', 'Sponsor showcase',
-   'Five minutes each from CDB, Flow and the OECS Commission on the data and credits they have brought.',
+   'CDB, Flow and the OECS Commission get five minutes each to explain the data and credits on offer.',
    INTERVAL '3 hours', INTERVAL '3 hours 45 minutes', '7b000000-0000-0000-0000-000000000004', 'session', 30),
   ('9b000000-0000-0000-0000-000000000004', 'Workshop: ocean data APIs in 40 minutes',
-   'Andre Williams walks the CARICOM fisheries and OECS Ocean Governance endpoints, live.',
-   INTERVAL '1 day 5 hours', INTERVAL '1 day 5 hours 45 minutes', '7b000000-0000-0000-0000-000000000009', 'workshop', 40),
+   'Andre Williams goes through the CARICOM fisheries and OECS Ocean Governance endpoints live, with real queries.',
+   INTERVAL '2 days 5 hours', INTERVAL '2 days 5 hours 45 minutes', '7b000000-0000-0000-0000-000000000009', 'workshop', 40),
   ('9b000000-0000-0000-0000-000000000005', 'Hardware clinic',
-   'Bring your buoy, your sensor or your wiring diagram to the bench.',
-   INTERVAL '1 day 7 hours', INTERVAL '1 day 9 hours', '7b000000-0000-0000-0000-000000000019', 'workshop', 50),
-  ('9b000000-0000-0000-0000-000000000006', 'Mid-week demos',
-   'Every pod shows two minutes of something working. Judges score, spectators react.',
-   INTERVAL '2 days 6 hours', INTERVAL '2 days 8 hours', '7b000000-0000-0000-0000-000000000004', 'session', 60),
+   'Bring your buoy, sensor or wiring diagram to the bench and a mentor will look at it on camera.',
+   INTERVAL '3 days 7 hours', INTERVAL '3 days 9 hours', '7b000000-0000-0000-0000-000000000019', 'workshop', 50),
+  ('9b000000-0000-0000-0000-000000000006', 'Midpoint demos',
+   'Each pod shows two minutes of something that works. Judges score it and spectators can react.',
+   INTERVAL '7 days 6 hours', INTERVAL '7 days 8 hours', '7b000000-0000-0000-0000-000000000004', 'session', 60),
   ('9b000000-0000-0000-0000-000000000007', 'Pitch clinic with James Pierre',
    'Ten-minute slots. Bring your deck.',
-   INTERVAL '3 days 7 hours', INTERVAL '3 days 9 hours', '7b000000-0000-0000-0000-000000000010', 'session', 70),
+   INTERVAL '11 days 7 hours', INTERVAL '11 days 9 hours', '7b000000-0000-0000-0000-000000000010', 'session', 70),
   ('9b000000-0000-0000-0000-000000000008', 'Submissions close',
-   'Repo link and demo video due. The Help Desk stays open for upload trouble.',
-   INTERVAL '4 days 4 hours', INTERVAL '4 days 4 hours 30 minutes', '7b000000-0000-0000-0000-000000000005', 'other', 80),
+   'Repo link and demo video are due. The Help Desk stays open if your upload gives trouble.',
+   INTERVAL '14 days', INTERVAL '14 days 30 minutes', '7b000000-0000-0000-0000-000000000005', 'other', 80),
   ('9b000000-0000-0000-0000-000000000009', 'Final pitches',
-   'Six finalists, five minutes each, live scoring. The stage opens 30 minutes before.',
-   INTERVAL '4 days 6 hours', INTERVAL '4 days 8 hours', '7b000000-0000-0000-0000-000000000023', 'session', 90),
+   'Six finalists get five minutes each, scored live. The stage opens 30 minutes before the first pitch.',
+   INTERVAL '15 days 6 hours', INTERVAL '15 days 8 hours', '7b000000-0000-0000-0000-000000000023', 'session', 90),
   ('9b000000-0000-0000-0000-000000000010', 'Judges deliberate',
    'Closed session.',
-   INTERVAL '4 days 8 hours', INTERVAL '4 days 9 hours', '7b000000-0000-0000-0000-000000000021', 'break', 100),
+   INTERVAL '15 days 8 hours', INTERVAL '15 days 9 hours', '7b000000-0000-0000-0000-000000000021', 'break', 100),
   ('9b000000-0000-0000-0000-000000000011', 'Closing ceremony and awards',
-   'Winners, the CDB accelerator invitations, and what happens next.',
-   INTERVAL '4 days 9 hours', INTERVAL '4 days 10 hours', '7b000000-0000-0000-0000-000000000002', 'keynote', 110)
+   'Winners are announced, CDB hands out its accelerator invitations, and we explain how teams can keep building after the hackathon.',
+   INTERVAL '15 days 9 hours', INTERVAL '15 days 10 hours', '7b000000-0000-0000-0000-000000000002', 'keynote', 110)
 ) AS v(id, title, description, starts_after, ends_after, room_id, schedule_type, sort_order)
 WHERE e.id = 'd0000000-0000-0000-0000-000000000021'
 ON CONFLICT (id) DO UPDATE SET
@@ -503,17 +509,17 @@ ON CONFLICT (id) DO UPDATE SET
 -- ============================================================
 
 INSERT INTO event_criteria (id, event_id, kind, title, description, is_required, weight, sort_order) VALUES
-  ('7a000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Build for the blue economy',        'Fisheries, reefs, marine spatial planning, coastal resilience or ocean-based livelihoods in an OECS member state.', TRUE, NULL, 10),
-  ('7a000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Work offline or on 2G',              'Fishers and dive operators are often out of coverage. The tool must degrade gracefully and sync later.', TRUE, NULL, 20),
-  ('7a000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Name the operator',                  'Who runs this after the week ends — a co-op, a ministry, a dive shop, an NGO?', FALSE, NULL, 30),
-  ('7a000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000021', 'constraint',        'Teams of 2–5',                       'Solo entries may attend but are not eligible for prizes. Claim a pod on the build floor.', TRUE, NULL, 40),
+  ('7a000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Build for the blue economy',        'Fisheries, reefs, marine spatial planning, coastal resilience or ocean-based jobs in an OECS member state.', TRUE, NULL, 10),
+  ('7a000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Work offline or on 2G',              'Fishers and dive operators are often out of signal. The tool has to keep working and sync when they are back in range.', TRUE, NULL, 20),
+  ('7a000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000021', 'objective',         'Name the operator',                  'Say who runs this once the hackathon ends: a fishers'' co-op, a ministry, a dive shop or an NGO.', FALSE, NULL, 30),
+  ('7a000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000021', 'constraint',        'Teams of 2 to 5',                    'Solo entrants can take part but cannot win prizes. Claim a pod on the build floor.', TRUE, NULL, 40),
   ('7a000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000021', 'constraint',        'Use at least one sponsor data set',  'OECS Ocean Governance, CARICOM fisheries, Sentinel-2, or a set from the Resource Library.', TRUE, NULL, 50),
   ('7a000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000021', 'deliverable',       '3-minute demo video',                'A recorded walkthrough of the working prototype.', TRUE, NULL, 60),
   ('7a000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000021', 'deliverable',       'Public code repository',             'Source under an OSI-approved licence.', TRUE, NULL, 70),
-  ('7a000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Impact',                             'Benefit to coastal communities and marine ecosystems.', TRUE, 35, 80),
-  ('7a000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Execution',                          'How much actually works, on a phone, offline.', TRUE, 35, 90),
-  ('7a000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Path to adoption',                   'Is there a named operator and a credible first deployment?', TRUE, 30, 100)
-ON CONFLICT (id) DO NOTHING;
+  ('7a000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Impact',                             'How much it helps coastal communities and the reefs and fish stocks they depend on.', TRUE, 35, 80),
+  ('7a000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Execution',                          'How much of it works on a phone with no signal.', TRUE, 35, 90),
+  ('7a000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000021', 'judging_criterion', 'Path to adoption',                   'A named operator and a believable first deployment, for example with a fisheries co-op in Gouyave or Soufriere.', TRUE, 30, 100)
+ON CONFLICT (id) DO UPDATE SET event_id = EXCLUDED.event_id, kind = EXCLUDED.kind, title = EXCLUDED.title, description = EXCLUDED.description, is_required = EXCLUDED.is_required, weight = EXCLUDED.weight, sort_order = EXCLUDED.sort_order;
 
 
 -- ============================================================
@@ -521,18 +527,18 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 
 INSERT INTO event_page_sections (id, event_id, section_type, title, content, sort_order, is_visible) VALUES
-  ('7c000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'about', 'About Build Week',
-   '{"body": "Blue Economy Build Week is a fully virtual five-day sprint for developers, designers, marine scientists and entrepreneurs across the OECS. Everything happens inside the KTIP virtual venue: a three-floor building with a registration desk and sponsor booths on the ground floor, team pods and a hardware bench on the build floor, and the judging rooms and final-pitch stage upstairs. Mentors staff the Help Desk around the clock. Prizes include Caribbean Development Bank accelerator places and Flow connectivity credits for field pilots."}'::jsonb, 10, true),
+  ('7c000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'about', 'About the Build Fortnight',
+   '{"body": "The Blue Economy Build Fortnight is a two-week online hackathon for developers, designers, marine scientists and founders across the OECS. It all happens inside the KTIP virtual venue, a three-floor building. The registration desk and sponsor booths are on the ground floor. Team pods and a hardware bench are on the build floor. The judging rooms and the final-pitch stage are on the top floor. A mentor is on the Help Desk at most hours of the day. Winners can earn places in the Caribbean Development Bank accelerator and Flow data credits for field pilots in places like Gouyave, Soufriere and Brades."}'::jsonb, 10, true),
   ('7c000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000021', 'venue', 'Finding your way around',
-   '{"body": "Enter through the Registration Desk on the ground floor and check in. Use the stairs in the corner to move between floors. Team pods 1–6 are on the build floor — claim a free one by editing its description. The Mentor Lounge, Judging Room and Organizer HQ are role-restricted; the Deliberation Room and Final Pitches stage stay closed until the last day."}'::jsonb, 20, true),
+   '{"body": "Come in through the Registration Desk on the ground floor and check in. The stairs in the corner take you between floors. Team pods 1 to 6 are on the build floor, and you claim a free one by editing its description. Only people with the right role can enter the Mentor Lounge, Judging Room and Organizer HQ. The Deliberation Room and the Final Pitches stage stay closed until the last day."}'::jsonb, 20, true),
   ('7c000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000021', 'faq', 'Frequently Asked Questions',
    '{"items": [
-     {"question": "Do I need a team to register?", "answer": "No. Team forming runs in the Networking Lounge on day one, and the Looking-for-team panel there works all week."},
+     {"question": "Do I need a team to register?", "answer": "No. Team forming runs in the Networking Lounge on day one, and the Looking-for-team panel there stays up for the whole fortnight."},
      {"question": "Which rooms can I enter?", "answer": "Every room on the ground and build floors is open to all members. The Mentor Lounge, Judging Room and Organizer HQ are limited to those roles, and two rooms on the judges'' floor stay closed until the finals."},
-     {"question": "Can I watch without competing?", "answer": "Yes. Any signed-in KTIP member can spectate: watch the stages, read the chat, react to demos."},
+     {"question": "Can I watch without competing?", "answer": "Yes. Any verified KTIP member can come in as a spectator to watch the stages, follow the chat and react to demos."},
      {"question": "Who owns what we build?", "answer": "Your team does. Sponsors get no licence or claim on your work."}
    ]}'::jsonb, 30, true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET event_id = EXCLUDED.event_id, section_type = EXCLUDED.section_type, title = EXCLUDED.title, content = EXCLUDED.content, sort_order = EXCLUDED.sort_order, is_visible = EXCLUDED.is_visible;
 
 
 -- ============================================================
@@ -546,9 +552,8 @@ INSERT INTO event_rsvps (id, event_id, user_id, status, created_at) VALUES
   (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000007', 'confirmed', NOW() - INTERVAL '22 days'),
   (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000008', 'confirmed', NOW() - INTERVAL '20 days'),
   (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000009', 'confirmed', NOW() - INTERVAL '18 days'),
-  (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000010', 'confirmed', NOW() - INTERVAL '15 days'),
   (gen_random_uuid(), 'd0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000012', 'confirmed', NOW() - INTERVAL '12 days')
-ON CONFLICT (event_id, user_id) DO NOTHING;
+ON CONFLICT (event_id, user_id) DO UPDATE SET status = EXCLUDED.status, created_at = EXCLUDED.created_at;
 
 
 -- ============================================================

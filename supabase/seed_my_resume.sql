@@ -56,9 +56,9 @@ BEGIN
   -- NULLIF means anything already written is kept.
   UPDATE profiles SET
     bio = COALESCE(NULLIF(bio, ''),
-      'Education and training specialist at the OECS Commission, working on '
-      || 'regional skills programmes and the digital delivery of learning '
-      || 'across the Eastern Caribbean.'),
+      'Education and training specialist at the OECS Commission in Castries. '
+      || 'I work on the regional skills programmes and on moving courses '
+      || 'online through the OECS Virtual Campus.'),
     country = COALESCE(NULLIF(country, ''), 'Saint Lucia'),
     organization = COALESCE(NULLIF(organization, ''), 'OECS Commission'),
     industry = COALESCE(NULLIF(industry, ''), 'Education & Training'),
@@ -93,7 +93,7 @@ BEGIN
       'profile', jsonb_build_object(
         'name', v_name,
         'role', 'Education & Training · OECS Commission',
-        'motto', 'Skills that travel across the region.',
+        'motto', 'A certificate earned in Roseau should count in Castries.',
         'location', 'Saint Lucia',
         'email', v_email,
         'phone', '+1 758 555 0142',
@@ -102,26 +102,26 @@ BEGIN
           jsonb_build_object('label', 'OECS', 'href', 'https://www.oecs.int')
         ),
         'about', jsonb_build_array(
-          'Education and training specialist working on regional skills programmes and the digital delivery of learning across the Eastern Caribbean.',
-          'Interested in what makes a qualification portable between member states, and in the systems that let a learner carry their record with them.'
+          'I run regional skills programmes at the OECS Commission and help put courses online through the Virtual Campus, so a learner in Brades or Basseterre can sit the same course as someone in Castries.',
+          'A lot of my time goes into getting member states to recognise each other''s qualifications, and into the records that let a learner take their results with them when they move island.'
         )
       ),
       'roles', jsonb_build_array(
         jsonb_build_object(
           'org', 'OECS Commission', 'title', 'Education & Training Specialist',
-          'period', '2023 — now', 'location', 'Castries, Saint Lucia',
+          'period', '2023 to present', 'location', 'Castries, Saint Lucia',
           'points', jsonb_build_array(
-            'Coordinate regional skills programmes across the nine member states.',
-            'Lead the digital delivery workstream for the OECS Virtual Campus.',
-            'Run monitoring and evaluation for donor-funded training projects.'
+            'Coordinate TVET and short-course programmes with the education ministries of the seven full member states.',
+            'Lead online delivery for the OECS Virtual Campus, which put 14 courses online in its first year.',
+            'Track results on donor-funded training projects and write the quarterly reports to funders.'
           )
         ),
         jsonb_build_object(
           'org', 'Ministry of Education', 'title', 'Programme Officer',
-          'period', '2019 — 2023', 'location', 'Saint Lucia',
+          'period', '2019 to 2023', 'location', 'Saint Lucia',
           'points', jsonb_build_array(
-            'Designed and rolled out a national teacher training curriculum.',
-            'Managed reporting for three multi-year education grants.'
+            'Wrote the national teacher training curriculum and took it into more than 70 primary schools.',
+            'Handled reporting on three multi-year education grants, two of them from the Caribbean Development Bank.'
           )
         )
       ),
@@ -172,7 +172,7 @@ BEGIN
         jsonb_build_object('subject', 'Research Methods', 'skills', 'Mixed methods, survey instruments, focus groups'),
         jsonb_build_object('subject', 'Development Economics', 'skills', 'Small-island economies, labour market analysis')
       ),
-      'interests', 'Education technology, youth development and regional integration. Sailing when the weather allows.'
+      'interests', 'Education technology and youth programmes. Out sailing off Rodney Bay most Sundays if the weather holds.'
     ),
     '{}'::jsonb,
     FALSE
@@ -200,7 +200,7 @@ BEGIN
       )
     $q$;
   ELSE
-    RAISE NOTICE 'resumes.design missing — apply migration 078 to switch designs.';
+    RAISE NOTICE 'resumes.design missing: apply migration 078 to switch designs.';
   END IF;
 END $$;
 
