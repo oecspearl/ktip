@@ -31,7 +31,6 @@ import { entityPath } from '../../lib/slug'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePersonalizedFeed, type FeedItem } from '../../hooks/usePersonalizedFeed'
 import {
-  defaultModeFor,
   personalizedHref,
   type DiscoverMode,
   type RankableEntity,
@@ -296,7 +295,7 @@ const FEATURES: Feature[] = [
     category: msg`Collaboration`,
     description: msg`Launch and collaborate on innovative projects with creators across the Caribbean.`,
     href: '/projects',
-    image: '/photos/workshop-1.webp',
+    image: '/photos/nature-1.webp',
     gradient: 'from-[#041E42] via-[#163A63]/70 to-[#2A5788]/10',
     span: 'md:col-span-2 md:row-span-2',
   },
@@ -314,7 +313,7 @@ const FEATURES: Feature[] = [
     category: msg`Funding`,
     description: msg`Find funding opportunities and grants to turn your ideas into reality.`,
     href: '/grants',
-    image: '/photos/pairing-1.webp',
+    image: '/photos/talk-4.webp',
     gradient: 'from-[#020F21] via-[#041E42]/70 to-[#4F7AAE]/10',
     span: '',
   },
@@ -323,7 +322,7 @@ const FEATURES: Feature[] = [
     category: msg`Discussion`,
     description: msg`Join discussions, share knowledge, and engage with the community.`,
     href: '/forums',
-    image: '/photos/discussion-1.webp',
+    image: '/photos/people-6.webp',
     gradient: 'from-[#806000] via-[#B38500]/70 to-[#FFC72C]/10',
     span: '',
   },
@@ -332,7 +331,7 @@ const FEATURES: Feature[] = [
     category: msg`Communication`,
     description: msg`Connect directly with mentors, investors, and fellow innovators.`,
     href: '/messages',
-    image: '/photos/discussion-3.webp',
+    image: '/photos/tech-5.webp',
     gradient: 'from-[#163A63] via-[#2A5788]/70 to-[#7AB000]/10',
     span: '',
     authOnly: true,
@@ -342,7 +341,7 @@ const FEATURES: Feature[] = [
     category: msg`Knowledge`,
     description: msg`Access articles, guides, case studies, and tools for Caribbean innovation.`,
     href: '/resources',
-    image: '/photos/focus-1.webp',
+    image: '/photos/team-6.webp',
     gradient: 'from-[#4D3900] via-[#E6AC09]/70 to-[#FFD75C]/10',
     span: 'md:col-span-2',
   },
@@ -457,17 +456,10 @@ export default function DiscoverPage() {
 
   // --- Mode toggle + live data ---
   const auth = useAuth()
-  // The hero opens on the mode this member's role tends to want (an investor
-  // sees grants, a student sees events) and re-tailors when they switch
-  // operating context — but only until they touch the toggle themselves. A
-  // manual pick always wins for the rest of the visit.
-  const [mode, setMode] = useState<Mode>(() => defaultModeFor(auth.roles, auth.activeRole))
-  const userPickedMode = useRef(false)
-  useEffect(() => {
-    if (userPickedMode.current) return
-    setMode(defaultModeFor(auth.roles, auth.activeRole))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.activeRole, auth.roles.join(',')])
+  // The hero opens on a random tab each visit (grants, projects or events), so
+  // the home page does not always lead with the same kind of thing. Picked once
+  // per mount; the toggle takes over from there.
+  const [mode, setMode] = useState<Mode>(() => MODES[Math.floor(Math.random() * MODES.length)].id)
   // `for_you` ranks for a signed-in member with personalization on; every
   // other viewer takes the hook's own fallback — deadline, newest, soonest —
   // which is exactly the ordering this page always had.
@@ -827,7 +819,6 @@ export default function DiscoverPage() {
   }, [next, prev])
 
   const switchMode = (m: Mode) => {
-    userPickedMode.current = true
     setMode(m)
     setIndex(0)
     setPendingIndex(null)

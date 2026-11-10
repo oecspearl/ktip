@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  GRANT_IMAGES,
   HERO_IMAGES,
   PAGE_HERO_IMAGES,
+  grantImageFor,
   PHOTO_SETS,
+  STOCK_SETS,
   epochAt,
   heroImageFor,
   pageHeroFor,
@@ -142,10 +145,40 @@ describe('daily rotation', () => {
 })
 
 describe('photo sets', () => {
-  it('puts every photo in exactly one set and every set in the generic pool', () => {
-    const all = Object.values(PHOTO_SETS).flat()
+  const session = Object.values(PHOTO_SETS).flat() as string[]
+  const stock = Object.values(STOCK_SETS).flat() as string[]
+
+  it('puts every photo in exactly one set', () => {
+    const all = [...session, ...stock]
     expect(new Set(all).size).toBe(all.length)
-    expect([...HERO_IMAGES].sort()).toEqual([...all].sort())
+  })
+
+  it('keeps the card pool to every general photo plus a share of session ones', () => {
+    for (const photo of stock) expect(HERO_IMAGES).toContain(photo)
+    for (const photo of HERO_IMAGES) expect([...session, ...stock]).toContain(photo)
+    expect(new Set(HERO_IMAGES).size).toBe(HERO_IMAGES.length)
+  })
+
+  it('holds the card pool and the page topics near 70% general photography', () => {
+    const share = (pool: readonly string[]) =>
+      pool.filter((p) => stock.includes(p)).length / pool.length
+    expect(share(HERO_IMAGES)).toBeGreaterThanOrEqual(0.68)
+    expect(share(HERO_IMAGES)).toBeLessThanOrEqual(0.75)
+    const topics = Object.values(PAGE_HERO_IMAGES)
+    const general = topics.filter((set) => (Object.values(STOCK_SETS) as readonly unknown[]).includes(set))
+    expect(general.length / topics.length).toBeGreaterThanOrEqual(0.65)
+    expect(general.length / topics.length).toBeLessThanOrEqual(0.75)
+  })
+
+  it('keeps grant cards at roughly 70/30 general to session photography', () => {
+    const types = ['startup', 'research', 'innovation', 'development', 'education', 'other', null]
+    const picks = types.flatMap((type) =>
+      Array.from({ length: 200 }, (_, i) => grantImageFor(`grant-${i}`, type)),
+    )
+    const sessionShare = picks.filter((p) => session.includes(p)).length / picks.length
+    expect(sessionShare).toBeGreaterThan(0.2)
+    expect(sessionShare).toBeLessThan(0.4)
+    for (const p of GRANT_IMAGES) expect([...session, ...stock]).toContain(p)
   })
 
   it('points every topic at a set that has room to rotate', () => {

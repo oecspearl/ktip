@@ -256,7 +256,7 @@ export default function GrantFormPage() {
             ? t`Change the terms, extend the deadline, or close the call.`
             : t`Publish a funding opportunity of any kind — grant, venture, angel, debt. Applicants see it as soon as you post it.`
         }
-        image="/photos/pairing-2.webp"
+        image="/photos/learn-4.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },

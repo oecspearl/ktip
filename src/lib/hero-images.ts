@@ -2,7 +2,8 @@ export const FALLBACK_IMAGE = '/ktiphero.webp'
 
 /**
  * The platform's own photography, from the OECS SKIP sessions, grouped by what
- * is happening in the frame rather than by which page first needed it.
+ * is happening in the frame rather than by which page first needed it. About a
+ * third of what the platform shows; STOCK_SETS below carries the rest.
  *
  * Grouping by moment is what makes rotation possible. The old set was one stock
  * photo per slot, so every Events page in the product showed the same picture
@@ -69,6 +70,86 @@ export const PHOTO_SETS = {
 } as const
 
 /**
+ * General photography: the coast, the desk, people working, none of it from
+ * our own sessions. Grouped by theme the same way PHOTO_SETS is grouped by
+ * moment, so a topic can point at a kind of picture and still rotate.
+ *
+ * This is the majority of what the platform shows. Session photos read as
+ * proof the programme is real, but a whole product of the same three rooms
+ * reads as a photo album, so the mix is held at roughly 70% from these sets
+ * and 30% from PHOTO_SETS — see HERO_IMAGES, TOPIC_RULES and the grant pools.
+ */
+export const STOCK_SETS = {
+  /** Sea, reef, coastline, solar. The Caribbean side of the platform. */
+  nature: [
+    '/photos/nature-1.webp',
+    '/photos/nature-2.webp',
+    '/photos/nature-3.webp',
+    '/photos/nature-4.webp',
+    '/photos/nature-5.webp',
+  ],
+  /** Code on screen, circuit boards, server rooms. */
+  tech: [
+    '/photos/tech-1.webp',
+    '/photos/tech-2.webp',
+    '/photos/tech-3.webp',
+    '/photos/tech-4.webp',
+    '/photos/tech-5.webp',
+    '/photos/tech-6.webp',
+  ],
+  /** Dashboards, charts, a padlock, a quiet office. */
+  data: [
+    '/photos/data-1.webp',
+    '/photos/data-2.webp',
+    '/photos/data-3.webp',
+    '/photos/data-4.webp',
+  ],
+  /** Pen on paper, a laptop and coffee, one person at a desk. */
+  desk: [
+    '/photos/desk-1.webp',
+    '/photos/desk-2.webp',
+    '/photos/desk-3.webp',
+    '/photos/desk-4.webp',
+  ],
+  /** Small teams around a whiteboard or a table. */
+  team: [
+    '/photos/team-1.webp',
+    '/photos/team-2.webp',
+    '/photos/team-3.webp',
+    '/photos/team-4.webp',
+    '/photos/team-5.webp',
+    '/photos/team-6.webp',
+  ],
+  /** Two people talking: a call, a meeting, a headset, a coffee. */
+  talk: [
+    '/photos/talk-1.webp',
+    '/photos/talk-2.webp',
+    '/photos/talk-3.webp',
+    '/photos/talk-4.webp',
+    '/photos/talk-5.webp',
+    '/photos/talk-6.webp',
+  ],
+  /** Campus, library, mentoring, someone at a flipchart. */
+  learn: [
+    '/photos/learn-1.webp',
+    '/photos/learn-2.webp',
+    '/photos/learn-3.webp',
+    '/photos/learn-4.webp',
+    '/photos/learn-5.webp',
+  ],
+  /** Groups of people: a team portrait, a crowd, a handshake, a market. */
+  people: [
+    '/photos/people-1.webp',
+    '/photos/people-2.webp',
+    '/photos/people-3.webp',
+    '/photos/people-4.webp',
+    '/photos/people-5.webp',
+    '/photos/people-6.webp',
+    '/photos/people-7.webp',
+  ],
+} as const
+
+/**
  * Where the faces are, as the Y half of an `object-position`.
  *
  * A page band is about 5.5:1 and the photos are 3:2, so a band shows roughly a
@@ -92,6 +173,13 @@ const PHOTO_FOCUS: Record<string, number> = {
   'pairing-4': 41, 'pairing-5': 69, 'pairing-6': 41,
   'workshop-1': 44, 'workshop-2': 34, 'workshop-3': 45,
   'workshop-4': 66, 'workshop-5': 50, 'workshop-6': 48,
+  // General photography. Scenery and screens sit at the default centre; only
+  // frames with faces off the middle are listed.
+  'tech-4': 35, 'tech-5': 40, 'desk-3': 35,
+  'team-1': 35, 'team-2': 28, 'team-3': 30, 'team-4': 45, 'team-5': 40, 'team-6': 40,
+  'talk-2': 40, 'talk-3': 40, 'talk-4': 45, 'talk-5': 35, 'talk-6': 40,
+  'learn-3': 25, 'learn-4': 35, 'learn-5': 35,
+  'people-1': 35, 'people-3': 40, 'people-4': 45, 'people-6': 40, 'people-7': 40,
 }
 
 /**
@@ -106,17 +194,14 @@ export const focalFor = (src?: string | null): string | undefined => {
   return y === undefined ? undefined : `50% ${y}%`
 }
 
-// Pool of hero images assigned to items that have no image of their own — every
-// photo we have, so a wall of cards stays varied. The pick is a stable hash of
-// the seed, so a card keeps its image across every render of a session rather
-// than reshuffling on each one; see ROTATION for how it moves between sessions.
+// Pool of hero images assigned to items that have no image of their own: every
+// general photo plus the three strongest frames of each session set, which
+// lands at 43 to 18, about 70/30. The pick is a stable hash of the seed, so a
+// card keeps its image across every render of a session rather than
+// reshuffling on each one; see ROTATION for how it moves between sessions.
 export const HERO_IMAGES = [
-  ...PHOTO_SETS.cohort,
-  ...PHOTO_SETS.workshop,
-  ...PHOTO_SETS.keynote,
-  ...PHOTO_SETS.pairing,
-  ...PHOTO_SETS.discussion,
-  ...PHOTO_SETS.focus,
+  ...Object.values(STOCK_SETS).flat(),
+  ...Object.values(PHOTO_SETS).flatMap((set) => set.slice(0, 3)),
 ]
 
 const hash = (seed: string) => {
@@ -188,35 +273,41 @@ const pick = (pool: readonly string[], seed: string, start = 0) =>
 // Each entry is a set, not a single file: two pages that match the same rule
 // still get different photos of the same kind of moment.
 // Most specific patterns first — the first match wins.
+//
+// Session photos go to the eight topics that are about the programme and its
+// people (events, hackathons, community, the institutions and chambers behind
+// it); the other nineteen use general photography. That split is the 70/30.
 export const PAGE_HERO_IMAGES = {
-  projects: PHOTO_SETS.workshop,
+  // Session photography
   events: PHOTO_SETS.keynote,
   eventDetail: PHOTO_SETS.cohort,
+  hackathon: PHOTO_SETS.workshop,
+  institutions: PHOTO_SETS.keynote,
+  chamber: PHOTO_SETS.keynote,
   forums: PHOTO_SETS.discussion,
   community: PHOTO_SETS.cohort,
-  directory: PHOTO_SETS.cohort,
-  resources: PHOTO_SETS.workshop,
-  collaborate: PHOTO_SETS.workshop,
-  documents: PHOTO_SETS.focus,
-  code: PHOTO_SETS.pairing,
-  video: PHOTO_SETS.discussion,
-  whiteboards: PHOTO_SETS.workshop,
-  hackathon: PHOTO_SETS.workshop,
-  help: PHOTO_SETS.discussion,
-  admin: PHOTO_SETS.keynote,
-  analytics: PHOTO_SETS.focus,
-  applications: PHOTO_SETS.pairing,
-  institutions: PHOTO_SETS.keynote,
-  office: PHOTO_SETS.cohort,
-  integrations: PHOTO_SETS.pairing,
-  api: PHOTO_SETS.pairing,
-  security: PHOTO_SETS.keynote,
   network: PHOTO_SETS.cohort,
-  settings: PHOTO_SETS.pairing,
-  notFound: PHOTO_SETS.focus,
-  chamber: PHOTO_SETS.keynote,
-  meeting: PHOTO_SETS.discussion,
-  dev: PHOTO_SETS.workshop,
+  office: PHOTO_SETS.cohort,
+  // General photography
+  projects: STOCK_SETS.team,
+  collaborate: STOCK_SETS.team,
+  whiteboards: STOCK_SETS.team,
+  directory: STOCK_SETS.people,
+  resources: STOCK_SETS.learn,
+  documents: STOCK_SETS.desk,
+  applications: STOCK_SETS.desk,
+  settings: STOCK_SETS.desk,
+  code: STOCK_SETS.tech,
+  integrations: STOCK_SETS.tech,
+  api: STOCK_SETS.tech,
+  dev: STOCK_SETS.tech,
+  notFound: STOCK_SETS.tech,
+  video: STOCK_SETS.talk,
+  help: STOCK_SETS.talk,
+  meeting: STOCK_SETS.talk,
+  admin: STOCK_SETS.data,
+  analytics: STOCK_SETS.data,
+  security: STOCK_SETS.data,
 } as const
 
 // Domain nouns run before the generic admin/community catch-alls so
@@ -284,6 +375,14 @@ const TOPIC_SLOT: number[] = (() => {
 
 export const heroImageFor = (seed: string) => pick(HERO_IMAGES, seed)
 
+/**
+ * The picture that belongs to one row: its own upload, else the pool photo its
+ * card shows. A detail page passes this to its hero so opening a card lands on
+ * the same picture, instead of a topical stock frame the card never showed.
+ */
+export const cardImageFor = (image: string | null | undefined, seed: string) =>
+  image || heroImageFor(seed)
+
 /** Hero for a page band: a stable pick from the photo set for the first seed
  *  that names a known topic (imageSeed, then the eyebrow), else a stable pick
  *  from the generic pool. The set is chosen by topic and the frame within it by
@@ -307,20 +406,46 @@ export const pageHeroFor = (...seeds: Array<string | null | undefined>) => {
   return heroImageFor(present[0] ?? 'ktip')
 }
 
-// Grants have no image column of their own, so they draw from the same
+// Grants have no image column of their own, so they draw from the same 70/30
 // photography as everything else, narrowed by grant_type so a startup fund and
 // a research fellowship do not sit on the same frame in a carousel.
 export const GRANT_IMAGES = HERO_IMAGES
 
-// Four to six deep per type, not two: a two-image pool puts a pair of same-type
-// grants on the same photo roughly half the time, which is visible the moment
-// two of them sit side by side in a carousel.
+// Ten deep per type, not two: a two-image pool puts a pair of same-type grants
+// on the same photo roughly half the time, which is visible the moment two of
+// them sit side by side in a carousel. Seven general frames and three session
+// frames each, the same 70/30 as everywhere else.
 const GRANT_TYPE_IMAGES: Record<string, readonly string[]> = {
-  startup: [...PHOTO_SETS.pairing, ...PHOTO_SETS.cohort.slice(0, 2)],
-  research: [...PHOTO_SETS.focus, ...PHOTO_SETS.pairing.slice(0, 2)],
-  innovation: [...PHOTO_SETS.workshop, ...PHOTO_SETS.discussion.slice(0, 2)],
-  development: [...PHOTO_SETS.cohort, ...PHOTO_SETS.workshop.slice(0, 2)],
-  education: [...PHOTO_SETS.keynote, ...PHOTO_SETS.discussion.slice(0, 2)],
+  startup: [
+    '/photos/team-3.webp', '/photos/tech-5.webp', '/photos/learn-4.webp',
+    '/photos/team-4.webp', '/photos/people-7.webp', '/photos/talk-4.webp',
+    '/photos/desk-2.webp',
+    PHOTO_SETS.pairing[0], PHOTO_SETS.cohort[1], PHOTO_SETS.keynote[2],
+  ],
+  research: [
+    '/photos/nature-2.webp', '/photos/nature-3.webp', '/photos/nature-4.webp',
+    '/photos/desk-3.webp', '/photos/learn-2.webp', '/photos/tech-4.webp',
+    '/photos/data-1.webp',
+    PHOTO_SETS.focus[0], PHOTO_SETS.pairing[2], PHOTO_SETS.focus[2],
+  ],
+  innovation: [
+    '/photos/nature-5.webp', '/photos/tech-3.webp', '/photos/team-2.webp',
+    '/photos/learn-5.webp', '/photos/team-1.webp', '/photos/tech-1.webp',
+    '/photos/data-4.webp',
+    PHOTO_SETS.workshop[0], PHOTO_SETS.discussion[0], PHOTO_SETS.pairing[3],
+  ],
+  development: [
+    '/photos/desk-4.webp', '/photos/nature-1.webp', '/photos/people-2.webp',
+    '/photos/team-6.webp', '/photos/people-3.webp', '/photos/people-5.webp',
+    '/photos/data-2.webp',
+    PHOTO_SETS.cohort[0], PHOTO_SETS.workshop[1], PHOTO_SETS.cohort[3],
+  ],
+  education: [
+    '/photos/learn-3.webp', '/photos/learn-1.webp', '/photos/talk-6.webp',
+    '/photos/people-4.webp', '/photos/team-5.webp', '/photos/people-1.webp',
+    '/photos/talk-2.webp',
+    PHOTO_SETS.keynote[1], PHOTO_SETS.discussion[1], PHOTO_SETS.workshop[2],
+  ],
 }
 
 export const grantImageFor = (seed: string, grantType?: string | null) => {

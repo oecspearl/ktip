@@ -127,7 +127,7 @@ export default function MyGrantsPage() {
         eyebrow={t`My Grants`}
         title={t`Funding You Posted`}
         subtitle={t`The calls your organisation has published, open and closed.`}
-        image="/photos/pairing-1.webp"
+        image="/photos/desk-2.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },

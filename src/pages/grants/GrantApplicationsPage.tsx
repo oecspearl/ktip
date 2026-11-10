@@ -197,7 +197,7 @@ export default function GrantApplicationsPage() {
         eyebrow={t`Applications`}
         title={grant.title}
         subtitle={t`Everything submitted to this call. Drafts are never shown — an application appears here once the applicant submits it.`}
-        image="/photos/keynote-1.webp"
+        image="/photos/desk-3.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },

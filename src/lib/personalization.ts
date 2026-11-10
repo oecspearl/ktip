@@ -1,10 +1,9 @@
 import { supabase } from './supabase'
 import { ROLE_LABELS, ROUTES } from './constants'
-import type { MatchReason, Ranked, RoleSlug } from '../types'
+import type { MatchReason, Ranked } from '../types'
 import { msg } from '@lingui/core/macro'
 import type { I18n, MessageDescriptor } from '@lingui/core'
 import { resolveCopy } from '../i18n/copy'
-import { effectiveRoles } from './permissions'
 
 export type { MatchReason, Ranked }
 
@@ -12,43 +11,8 @@ export type ContentSort = 'for_you' | 'newest' | 'deadline' | 'upcoming' | 'popu
 
 export type RankableEntity = 'project' | 'resource' | 'event' | 'grant'
 
-/** The homepage hero's three modes. Lives here so the role default is testable. */
+/** The homepage hero's three modes. It opens on a random one each visit. */
 export type DiscoverMode = 'grants' | 'projects' | 'events'
-
-/**
- * Which hero mode the homepage opens on for a role. Admin-tier roles and
- * anything unlisted fall through to the signed-out default, `grants`.
- */
-export const DEFAULT_MODE_BY_ROLE: Partial<Record<RoleSlug, DiscoverMode>> = {
-  investor: 'grants',
-  private_sector: 'grants',
-  entrepreneur: 'grants',
-  ngo: 'grants',
-  government: 'grants',
-  igo: 'grants',
-  diaspora: 'grants',
-  student: 'events',
-  faculty: 'events',
-  educational_partner: 'events',
-  mentor: 'projects',
-  // Advises on what is being built, so it opens on the projects.
-  ip_legal: 'projects',
-  researcher: 'projects',
-  research_institution: 'projects',
-  chamber_admin: 'projects',
-}
-
-/** The hero mode for this account's operating context. */
-export function defaultModeFor(
-  roles: readonly string[] | null | undefined,
-  activeRole: string | null | undefined
-): DiscoverMode {
-  for (const role of effectiveRoles(roles, activeRole)) {
-    const mode = DEFAULT_MODE_BY_ROLE[role]
-    if (mode) return mode
-  }
-  return 'grants'
-}
 
 /**
  * One sentence per reason code the ranker (154) can emit. Codes with a

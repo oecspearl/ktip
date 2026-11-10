@@ -51,15 +51,14 @@ const STEPS = [
  * Photos pinned to individual signup steps, indexed from zero. Step 1 is the
  * hole: it falls through to the rotating pool the shell uses everywhere else.
  *
- * Step 4 names a pool frame explicitly rather than leaving a hole, because a
- * hole there would resolve by position and the positions have all shifted —
- * it is pinned so it keeps the frame it was picked for.
+ * Steps 2 to 4 use general photography and the last step keeps the session
+ * frame, so signup sits at the same mostly-general mix as the rest of the site.
  */
 const STEP_PHOTOS = [
   undefined,
-  '/photos/signup-about.webp',
-  '/photos/signup-collab.webp',
-  '/photos/cohort-5.webp',
+  '/photos/people-1.webp',
+  '/photos/team-2.webp',
+  '/photos/desk-1.webp',
   '/photos/signup-verify.webp',
 ]
 

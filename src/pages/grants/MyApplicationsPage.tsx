@@ -127,7 +127,7 @@ export default function MyApplicationsPage() {
         eyebrow={t`My Applications`}
         title={t`Grant Applications`}
         subtitle={t`Track the status of your funding applications`}
-        image="/photos/focus-1.webp"
+        image="/photos/desk-1.webp"
         imageSeed="grants"
         breadcrumb={[
           { label: t`Home`, href: '/' },
