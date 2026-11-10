@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
-  GridLayout,
   LiveKitRoom,
-  ParticipantTile,
   RoomAudioRenderer,
   VideoTrack,
   useSpeakingParticipants,
@@ -17,6 +15,7 @@ import { Trans, useLingui } from '@lingui/react/macro'
 import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationOffer } from './CallCaptions'
 import { CallDock, type CallSignals } from './CallDock'
 import { BoardCanvas, useBoardShare } from './CallBoard'
+import { CallPeopleProvider, CallTile, type CallPerson } from './CallTile'
 import { BOARD_TRACK } from '../../../lib/call-board'
 import { cn } from '../../../lib/utils'
 import { reactionArt } from '../../../lib/reaction-emoji'
@@ -40,9 +39,11 @@ import type { FloatingReaction } from '../../../hooks/useRoomSignals'
  * travels as a screen share, so it takes the same presentation layout.
  *
  * A huddle joins with cameras off (LiveKit bills downstream bandwidth, and a
- * huddle is people working, not watching). Anyone may turn theirs on; the
- * cameras that are on show as a row of small tiles, and AvStage's bubbles
- * still show who is there.
+ * huddle is people working, not watching). Everyone in it is a small tile,
+ * with their photo until they turn their camera on.
+ *
+ * Tiles are ours (CallTile), not LiveKit's: a camera that is off shows the
+ * person's profile photo and name, not a grey silhouette.
  *
  * What this component does NOT do is decide anything. `canPublish` arrives in a
  * signed token from `venue_room_grant()`; passing `video`/`audio` below only
@@ -68,6 +69,7 @@ export function VenueCall({
   signals,
   allowBoard = false,
   onShareChange,
+  people,
   onRecordingControl,
 }: {
   mode: RoomCameraMode
@@ -83,6 +85,8 @@ export function VenueCall({
   allowBoard?: boolean
   /** Told whenever a share starts, changes hands or ends, and null on leaving. */
   onShareChange?: (sharer: CallSharer | null) => void
+  /** Names and photos by user id (the call identity), for camera-off tiles. */
+  people?: ReadonlyMap<string, CallPerson>
   /**
    * The host's record button, passed in rather than rendered here.
    *
@@ -115,8 +119,11 @@ export function VenueCall({
       video={grant.can_publish && wantsVideo}
       audio={grant.can_publish}
       data-lk-theme="default"
-      className={cn('flex min-h-0 flex-col gap-2', fill && 'flex-1', className)}
+      // LiveKit's theme paints the room near-black. The card around it is the
+      // site's navy, so the call sits on that instead of a black slab.
+      className={cn('flex min-h-0 flex-col gap-2 bg-transparent!', fill && 'flex-1', className)}
     >
+      <CallPeopleProvider people={people ?? NO_PEOPLE}>
       {/* Without this nobody hears anybody. It renders no UI. */}
       <RoomAudioRenderer />
 
@@ -134,9 +141,12 @@ export function VenueCall({
         />
       </CallCaptionsProvider>
       {onRecordingControl}
+      </CallPeopleProvider>
     </LiveKitRoom>
   )
 }
+
+const NO_PEOPLE: ReadonlyMap<string, CallPerson> = new Map()
 
 function LeftCall({ onRejoin }: { onRejoin: () => void }) {
   return (
@@ -318,7 +328,7 @@ function PresentLayout({
           </span>
           {presenter && (
             <div className="absolute bottom-3 right-3 z-raised aspect-[4/3] w-[24%] max-w-56 overflow-hidden rounded-control shadow-card ring-2 ring-white/90 @max-2xl:bottom-auto @max-2xl:right-2 @max-2xl:top-2 @max-2xl:w-[30%]">
-              <ParticipantTile trackRef={presenter} className="h-full w-full" />
+              <CallTile trackRef={presenter} avatarSize={36} className="h-full w-full" />
             </div>
           )}
           <CaptionOverlay className="@2xl:left-3 @2xl:right-[calc(min(24%,14rem)+1.5rem)]" />
@@ -331,23 +341,18 @@ function PresentLayout({
 }
 
 /**
- * A huddle: small tiles for the cameras that are on, in a row that scrolls,
- * and the subtitle band under them. Nobody on camera leaves only the band.
+ * A huddle: everyone in the call as a small tile, in a row that scrolls, and
+ * the subtitle band under it. A camera that is off shows the person's photo.
  */
 function HuddleStrip({ cameras }: { cameras: TrackReferenceOrPlaceholder[] }) {
   const { t } = useLingui()
-  const on = cameras.filter((track) => track.publication && !track.publication.isMuted)
   return (
     <div className="flex flex-col gap-2">
-      {on.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t`Cameras that are on`}>
-          {on.map((track) => (
-            <div key={tileKey(track)} className="aspect-[4/3] w-36 shrink-0 overflow-hidden rounded-control sm:w-42">
-              <ParticipantTile trackRef={track} className="h-full w-full" />
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t`Everyone in the call`}>
+        {cameras.map((track) => (
+          <CallTile key={tileKey(track)} trackRef={track} avatarSize={44} className="aspect-[4/3] w-36 shrink-0 sm:w-42" />
+        ))}
+      </div>
       <SubtitleBand />
     </div>
   )
@@ -373,11 +378,11 @@ function SpotlightLayout({ cameras, fill }: { cameras: TrackReferenceOrPlacehold
       <div className={cn('grid gap-2', others.length > 0 && '@2xl:grid-cols-[minmax(0,1fr)_10.5rem]', fill && 'min-h-0 flex-1')}>
         <div
           className={cn(
-            'relative min-w-0 overflow-hidden rounded-control bg-black @container',
+            'relative min-w-0 overflow-hidden rounded-control @container',
             fill ? 'min-h-48 h-full' : 'aspect-video'
           )}
         >
-          <ParticipantTile trackRef={lead} className="h-full w-full" />
+          <CallTile trackRef={lead} avatarSize={96} className="h-full w-full" />
           <CaptionOverlay />
           <TranslationOffer />
         </div>
@@ -397,12 +402,12 @@ function SideColumn({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
     <div className="relative h-24 @2xl:h-auto" aria-label={t`Everyone else in the call`}>
       <div className="absolute inset-0 flex gap-2 overflow-auto @2xl:flex-col">
         {tracks.map((track) => (
-          <div
+          <CallTile
             key={tileKey(track)}
-            className="aspect-video h-full shrink-0 overflow-hidden rounded-control @2xl:h-auto @2xl:w-full"
-          >
-            <ParticipantTile trackRef={track} className="h-full w-full" />
-          </div>
+            trackRef={track}
+            avatarSize={32}
+            className="aspect-video h-full shrink-0 @2xl:h-auto @2xl:w-full"
+          />
         ))}
       </div>
     </div>
@@ -412,10 +417,12 @@ function SideColumn({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
 /** Equal tiles. Nobody is the main one, which is the point in a judging room. */
 function GridStage({ cameras, fill }: { cameras: TrackReferenceOrPlaceholder[]; fill?: boolean }) {
   return (
-    <div className={cn('relative min-h-0 @container', fill ? 'flex-1' : 'h-[22rem]')}>
-      <GridLayout tracks={cameras}>
-        <ParticipantTile />
-      </GridLayout>
+    <div className={cn('relative min-h-0 @container', fill && 'flex-1')}>
+      <div className={cn('grid grid-cols-2 content-start gap-2 @2xl:grid-cols-3', fill && 'h-full overflow-y-auto')}>
+        {cameras.map((track) => (
+          <CallTile key={tileKey(track)} trackRef={track} avatarSize={56} className="aspect-video" />
+        ))}
+      </div>
       <CaptionOverlay />
       <TranslationOffer />
     </div>

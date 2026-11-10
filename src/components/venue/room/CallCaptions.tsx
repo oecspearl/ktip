@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Captions, CaptionsOff, Languages, Pause, Play, Volume2 } from 'lucide-react'
 import { useLocalParticipant } from '@livekit/components-react'
+import { useLanguage } from '../../../i18n/LanguageContext'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
@@ -85,8 +86,8 @@ export function CallCaptionsProvider({
   const { isMicrophoneEnabled } = useLocalParticipant()
 
   const audience = useMemo(
-    () => audienceFor(language.roster.values(), language.lang, translationAllowed),
-    [language.roster, language.lang, translationAllowed]
+    () => audienceFor(language.roster.values(), language.speaks, translationAllowed),
+    [language.roster, language.speaks, translationAllowed]
   )
 
   // Transcribe only while someone is following AND my microphone is live. The
@@ -97,14 +98,14 @@ export function CallCaptionsProvider({
 
   const live = useLiveCaptions({
     transcribe,
-    speaks: language.lang,
+    speaks: language.speaks,
     targets: audience.targets,
-    reads: language.lang,
+    reads: language.reads,
   })
 
   const subs = wantsSubtitles(language.choice)
   const voiceOn = language.choice === 'voice' && translationAllowed
-  useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.lang })
+  useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
 
   const value = useMemo<CallCaptionsValue>(
     () => ({ language, live, audience, subs, voiceOn, translationAllowed, canPublish }),
@@ -170,11 +171,11 @@ export function CaptionOverlay({ className }: { className?: string }) {
     >
       <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-0.5 text-micro font-bold tracking-wide text-white/75">
         {last.name && <span className="text-white">{last.name}</span>}
-        {translated ? `${from.toUpperCase()} → ${language.lang.toUpperCase()}` : from.toUpperCase()}
+        {translated ? `${from.toUpperCase()} → ${language.reads.toUpperCase()}` : from.toUpperCase()}
         {translated && voiceOn && <Volume2 size={11} className="text-ktip-tropical-400" aria-label={t`Read aloud`} />}
       </span>
       {/* lang= on the text, so a screen reader reads French with a French voice. */}
-      <p lang={translated ? language.lang : from} className="max-w-[44ch] text-balance text-[clamp(0.875rem,2.4cqw,1.625rem)] font-bold">
+      <p lang={translated ? language.reads : from} className="max-w-[44ch] text-balance text-[clamp(0.875rem,2.4cqw,1.625rem)] font-bold">
         <span className="box-decoration-clone rounded-[0.2em] bg-black/75 px-[0.4em] leading-[1.6] text-white">
           {shown}
         </span>
@@ -203,7 +204,7 @@ export function TranslationOffer({ className }: { className?: string }) {
 
   const name = offer.name.split(' ')[0]
   const theirs = i18n._(LANG_NAME[offer.speaks])
-  const mine = i18n._(LANG_NAME[language.lang])
+  const mine = i18n._(LANG_NAME[language.reads])
 
   return (
     <div
@@ -237,7 +238,7 @@ export function TranslationOffer({ className }: { className?: string }) {
             <Trans>Subtitles only</Trans>
           </Button>
           <Button size="sm" variant="ghost" onClick={() => language.setChoice('off')}>
-            <Trans>Not now</Trans>
+            <Trans>Keep the original</Trans>
           </Button>
         </div>
       </div>
@@ -317,7 +318,7 @@ export function LanguageButton({ variant = 'pill' }: { variant?: 'pill' | 'dock'
         >
           <Languages size={18} aria-hidden="true" />
           <span className="absolute -right-1.5 -top-1.5 rounded-full bg-ktip-tropical-500 px-1 text-micro font-extrabold leading-none text-ktip-ink">
-            {language.lang.toUpperCase()}
+            {language.reads.toUpperCase()}
           </span>
         </button>
       ) : (
@@ -329,7 +330,7 @@ export function LanguageButton({ variant = 'pill' }: { variant?: 'pill' | 'dock'
           className={pill(open)}
         >
           <Languages size={13} aria-hidden="true" />
-          {ENDONYM[language.lang]}
+          {ENDONYM[language.reads]}
         </button>
       )}
       {open && <LanguageMenu container={wrap} align={variant === 'dock' ? 'center' : 'left'} onClose={() => setOpen(false)} />}
@@ -432,8 +433,12 @@ function LanguageMenu({
   align: 'left' | 'center'
   onClose: () => void
 }) {
-  const { t } = useLingui()
+  const { t, i18n } = useLingui()
   const { language, subs, voiceOn, translationAllowed, canPublish } = useCallCaptions()
+  const site = useLanguage()
+  const [pickSpeaks, setPickSpeaks] = useState(false)
+  const mine = i18n._(LANG_NAME[language.reads])
+  const spoken = i18n._(LANG_NAME[language.speaks])
 
   useEffect(() => {
     const onDown = (event: PointerEvent) => {
@@ -469,20 +474,24 @@ function LanguageMenu({
     >
       <div className="flex flex-col gap-2">
         <span className="text-micro font-semibold uppercase tracking-wider text-ktip-sand-500">
-          <Trans>I speak and read</Trans>
+          <Trans>Your language</Trans>
         </span>
+        {/* The site's own language, the same switch as the top bar. */}
         <Segmented
-          value={language.lang}
+          value={language.reads}
           options={UI_LANGS.map((lang) => ({ value: lang, label: ENDONYM[lang] }))}
-          onChange={language.setLang}
-          label={t`My language`}
+          onChange={(next) => site.setLang(next)}
+          label={t`Your language`}
           radius="sm"
         />
+        <span className="text-micro text-ktip-sand-500">
+          <Trans>The site's language. Changing it here changes the whole site.</Trans>
+        </span>
       </div>
       <div className="flex flex-col gap-3">
         {row(
           <Trans>Subtitles</Trans>,
-          <Trans>On the video, in your language</Trans>,
+          t`On the video, in ${mine}`,
           <Switch
             checked={subs}
             onChange={(on) => language.setChoice(on ? 'captions' : 'off')}
@@ -490,7 +499,7 @@ function LanguageMenu({
           />
         )}
         {row(
-          <Trans>Hear translations</Trans>,
+          t`Hear it in ${mine}`,
           <Trans>The speaker’s own voice drops while it plays</Trans>,
           <Switch
             checked={voiceOn}
@@ -504,8 +513,10 @@ function LanguageMenu({
           <Trans>Under each translated line</Trans>,
           <Switch checked={language.showOriginal} onChange={language.setShowOriginal} label={t`Show the original`} />
         )}
-        {canPublish &&
-          row(
+      </div>
+      {canPublish && (
+        <div className="flex flex-col gap-3 border-t border-ktip-sand-200 pt-3">
+          {row(
             <Trans>Subtitle me for others</Trans>,
             <Trans>Runs only while someone is reading your subtitles</Trans>,
             <Switch
@@ -514,7 +525,30 @@ function LanguageMenu({
               label={t`Subtitle me for others`}
             />
           )}
-      </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-micro text-ktip-sand-600">
+              {t`You are subtitled as ${spoken}.`}{' '}
+              <button
+                type="button"
+                aria-expanded={pickSpeaks}
+                onClick={() => setPickSpeaks((open) => !open)}
+                className="font-semibold text-ktip-ocean-700 underline underline-offset-2 hover:text-ktip-ocean-800"
+              >
+                <Trans>Speaking another language?</Trans>
+              </button>
+            </span>
+            {pickSpeaks && (
+              <Segmented
+                value={language.speaks}
+                options={UI_LANGS.map((lang) => ({ value: lang, label: ENDONYM[lang] }))}
+                onChange={(next) => language.setSpeaks(next === language.reads ? null : next)}
+                label={t`The language you are speaking`}
+                radius="sm"
+              />
+            )}
+          </div>
+        </div>
+      )}
       {!translationAllowed && (
         <p className="text-micro text-ktip-sand-600">
           <Trans>The organiser has turned translation off in this room. Subtitles still show what is said.</Trans>

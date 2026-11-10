@@ -4,11 +4,10 @@ import { acquireMic } from '@a11y-kit'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { cn } from '../../../lib/utils'
 import { UI_LANGS, type UiLang } from '../../../lib/i18n/protocol'
-import { useContentLanguage } from '../../../i18n/useContentLanguage'
+import { useLanguage } from '../../../i18n/LanguageContext'
 import { captionEngine, createSpeechRecognizer, type SpeechRecognizer } from '../../../lib/captions/speech'
 import { createWhisperRecognizer } from '../../../lib/captions/whisper-speech'
 import { translateCaption } from '../../../lib/captions/caption-translate'
-import { readCallLanguage } from '../../../hooks/useCallLanguage'
 import { Segmented } from '../../ui/Segmented'
 import { RoomPanel } from './RoomPanel'
 import type { VenueRoom } from '../../../types'
@@ -34,8 +33,9 @@ type Problem = 'unsupported' | 'no-mic' | 'unreachable' | 'used-up' | 'service' 
  */
 export function CaptionTestPanel({ room }: { room: Pick<VenueRoom, 'id' | 'live_translation'> }) {
   const { t } = useLingui()
-  const { lang: contentLang } = useContentLanguage()
-  const [speaks, setSpeaks] = useState<UiLang>(() => readCallLanguage() ?? contentLang)
+  // The call subtitles you in the site's language, so the test starts there.
+  const { uiLang } = useLanguage()
+  const [speaks, setSpeaks] = useState<UiLang>(uiLang)
   const [phase, setPhase] = useState<Phase>('idle')
   const [problem, setProblem] = useState<Problem | null>(null)
   const [heard, setHeard] = useState('')

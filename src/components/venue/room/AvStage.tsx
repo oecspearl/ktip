@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useMemo } from 'react'
 import { MicOff, Radio, ScreenShare, Video, VideoOff } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { VENUE_AUDIO_MODE_LABELS } from '../../../lib/constants'
@@ -81,6 +81,12 @@ export function AvStage({
   const canRecord = Boolean(grant?.is_host && grant?.recording)
   const recording = useRoomRecording(room.id, canRecord)
 
+  // The call's tiles show photos and names by user id, the call identity.
+  const people = useMemo(
+    () => new Map(occupants.map((o) => [o.user_id, { name: o.display_name, avatar: o.avatar_url }])),
+    [occupants]
+  )
+
   if (mode === 'off') return null
 
   const needsConsent = Boolean(room.recording_enabled) && !acknowledged
@@ -162,6 +168,7 @@ export function AvStage({
               fill={fill}
               translationAllowed={room.live_translation !== false}
               allowBoard={room.kind === 'workshop'}
+              people={people}
               onShareChange={onShareChange}
               signals={
                 signals && {
@@ -183,11 +190,6 @@ export function AvStage({
                 ) : undefined
               }
             />
-            {/* A huddle shows only the cameras that are on. The bubbles stay:
-                they are how you can see who is actually in here. */}
-            {mode === 'huddle' && (
-              <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />
-            )}
           </Suspense>
           </CallErrorBoundary>
         ) : (

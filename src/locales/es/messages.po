@@ -624,6 +624,10 @@ msgstr "Su CV ahora es público."
 msgid "You will be told, and you can have it restored by filing a counter-notice."
 msgstr "Se le informará y podrá restaurarlo presentando una contranotificación."
 
+#: src/components/venue/room/CallTile.tsx
+msgid "{name} (you)"
+msgstr "{name} (tú)"
+
 #: src/lib/venue-room-presets.ts
 msgid "Organisers only."
 msgstr "Solo organizadores."
@@ -760,10 +764,6 @@ msgstr "Cuando marca un proyecto, evento o perfil como público, cualquiera pued
 msgid "Email address, message content"
 msgstr "Dirección de correo electrónico, contenido del mensaje"
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "On the video, in your language"
-msgstr "Sobre el video, en tu idioma"
-
 #: src/pages/events/EventVenuePage.tsx
 msgid "This event has no virtual venue"
 msgstr "Este evento no tiene sede virtual"
@@ -853,6 +853,10 @@ msgstr "La consola de administración"
 #: src/components/settings/VerificationTab.tsx
 msgid "Drop files to add"
 msgstr "Suelte archivos para añadirlos"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Keep the original"
+msgstr "Mantener el original"
 
 #: src/pages/directory/DirectoryPage.tsx
 msgid "All Skills"
@@ -2158,6 +2162,10 @@ msgstr "Invitación no encontrada"
 msgid "Back to My Whiteboards"
 msgstr "Volver a Mis pizarras"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The site's language. Changing it here changes the whole site."
+msgstr "El idioma del sitio. Cambiarlo aquí cambia todo el sitio."
+
 #: src/i18n/harvested.ts
 msgid "How do I continue a draft application?"
 msgstr "¿Cómo continúo una solicitud en borrador?"
@@ -3214,10 +3222,6 @@ msgstr "Logros convierte esa misma actividad en insignias y puntos. Envíos cons
 #: src/i18n/harvested.ts
 msgid "The default if you say nothing. Readable, not reusable."
 msgstr "La opción predeterminada si no dice nada. Legible, no reutilizable."
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "My language"
-msgstr "Mi idioma"
 
 #: src/components/ui/ImageUpload.tsx
 msgid "Image uploaded"
@@ -8316,6 +8320,10 @@ msgstr "Elija el icono de sol o luna que se despliega encima."
 msgid "Step {stepNumber} not started"
 msgstr "Paso {stepNumber} sin empezar"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Speaking another language?"
+msgstr "¿Hablas otro idioma?"
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "The host has stopped new people joining. Ask them to open it again, then reload this page."
 msgstr "El anfitrión ha impedido que se una gente nueva. Pídale que la vuelva a abrir y luego recargue esta página."
@@ -10924,6 +10932,10 @@ msgstr "Hoy"
 #: src/i18n/harvested.ts
 msgid "Click \"Run AI Review\" to get a score and section-by-section suggestions."
 msgstr "Haga clic en «Ejecutar revisión de IA» para obtener una puntuación y sugerencias sección por sección."
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Everyone in the call"
+msgstr "Todos en la llamada"
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Failed to submit request"
@@ -16619,10 +16631,6 @@ msgstr ""
 msgid "The parts you keep for connections are left out. This is what a member who has not connected with you sees."
 msgstr ""
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "I speak and read"
-msgstr "Hablo y leo"
-
 #: src/i18n/harvested.ts
 msgid "Row actions, and what they mean to the member"
 msgstr "Acciones de fila, y qué significan para el miembro"
@@ -17785,6 +17793,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "Category and phase"
 msgstr "Categoría y fase"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "You are subtitled as {spoken}."
+msgstr "Tus subtítulos salen en {spoken}."
 
 #: src/a11y/messages.ts
 msgid "Reading"
@@ -20139,6 +20151,10 @@ msgstr "Haga clic en Guardar. Usted sigue obteniendo puntos y puede seguir viend
 msgid "Subtitles and voice"
 msgstr "Subtítulos y voz"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "On the video, in {mine}"
+msgstr "En el video, en {mine}"
+
 #: src/lib/delete-guard.ts
 msgid "The project page and everything on it"
 msgstr "La página del proyecto y todo su contenido"
@@ -20427,10 +20443,6 @@ msgstr "Gestionar proyectos (admin)"
 #: src/lib/venue-room-presets.ts
 msgid "Meet the sponsor. Roles, prizes and questions."
 msgstr "Conozca al patrocinador. Roles, premios y preguntas."
-
-#: src/components/venue/room/VenueCall.tsx
-msgid "Cameras that are on"
-msgstr "Cámaras encendidas"
 
 #: src/components/shared/DetailsEditor.tsx
 msgid "Add item"
@@ -21504,6 +21516,7 @@ msgstr "Cierre de inscripciones"
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/components/venue/map/VenueRoomBrief.tsx
 #: src/components/venue/room/AvStage.tsx
+#: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/components/venue/room/RoleRosterPanel.tsx
@@ -21922,7 +21935,6 @@ msgstr "Los enlaces de restablecimiento funcionan una sola vez, caducan al cabo 
 #: src/a11y/messages.ts
 #: src/components/legal/AgreementGate.tsx
 #: src/components/legal/ReconsentBanner.tsx
-#: src/components/venue/room/CallCaptions.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Not now"
 msgstr "Ahora no"
@@ -22264,6 +22276,7 @@ msgstr "No se pudieron guardar sus puntuaciones."
 msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
 msgstr "Desactive esto y sus puntos permanecen solo suyos: usted sigue ganándolos y puede ver su propia clasificación, pero nadie más puede hacerlo. Si hace privados su nivel y sus puntos en su perfil, tampoco aparece en la clasificación para nadie salvo sus conexiones."
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomArrivalPanels.tsx
 msgid "Your language"
 msgstr "Tu idioma"
@@ -26056,6 +26069,10 @@ msgstr "Emoji"
 msgid "Install"
 msgstr ""
 
+#: src/components/venue/room/CallTile.tsx
+msgid "Microphone off"
+msgstr "Micrófono apagado"
+
 #: src/components/messages/ChatWindow.tsx
 msgid "Loading earlier messages…"
 msgstr ""
@@ -26112,6 +26129,10 @@ msgstr ""
 #: src/i18n/harvested.ts
 msgid "No — clearable in your browser"
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Hear it in {mine}"
+msgstr "Oírlo en {mine}"
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "You disappear from the directory and can no longer post. What you have already contributed stays where it is. Sign in within 90 days and everything is exactly as you left it; after that the account is anonymised."
@@ -28516,6 +28537,10 @@ msgstr "Verificación retirada"
 #: src/lib/permissions.ts
 msgid "Business Association"
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The language you are speaking"
+msgstr "El idioma que hablas"
 
 #: src/i18n/harvested.ts
 msgid "Drafts the commentary and suggested actions of the monthly and quarterly KPI report for administrators; every report is reviewed and published by a person, and the model never decides a KPI’s status"

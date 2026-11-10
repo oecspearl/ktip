@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Hand, Maximize, Mic, MicOff, PanelRightClose, PanelRightOpen, PhoneOff, Presentation, ScreenShare, Video, VideoOff } from 'lucide-react'
+import { ChevronUp, Hand, Maximize, Mic, MicOff, PanelRightClose, PanelRightOpen, PhoneOff, Presentation, ScreenShare, Video, VideoOff } from 'lucide-react'
 import { MediaDeviceMenu, useLocalParticipant, useTrackToggle } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -173,13 +173,17 @@ function DeviceToggle({
         {enabled ? on : off}
       </button>
       {/* LiveKit's own device picker, so device choice stays where it was. */}
-      {/* Important modifiers: LiveKit's .lk-button rules would otherwise win. */}
+      {/* Important modifiers: LiveKit's .lk-button rules would otherwise win.
+          Its CSS arrow (::after) does not survive the narrow button, so the
+          arrow is an icon instead. */}
       <MediaDeviceMenu
         kind={kind}
         aria-label={menuLabel}
         title={menuLabel}
-        className="h-10! w-6! min-w-0! rounded-l-none! rounded-r-control! border! border-l-0! border-white/10! bg-white/10! px-0! text-white! hover:bg-white/15!"
-      />
+        className="h-10! w-6! min-w-0! rounded-l-none! rounded-r-control! border! border-l-0! border-white/10! bg-white/10! px-0! text-white! after:hidden! hover:bg-white/15!"
+      >
+        <ChevronUp size={14} aria-hidden="true" />
+      </MediaDeviceMenu>
     </div>
   )
 }

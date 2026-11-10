@@ -614,6 +614,10 @@ msgstr ""
 msgid "You will be told, and you can have it restored by filing a counter-notice."
 msgstr ""
 
+#: src/components/venue/room/CallTile.tsx
+msgid "{name} (you)"
+msgstr ""
+
 #: src/lib/venue-room-presets.ts
 msgid "Organisers only."
 msgstr ""
@@ -749,10 +753,6 @@ msgstr ""
 msgid "Email address, message content"
 msgstr ""
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "On the video, in your language"
-msgstr ""
-
 #: src/pages/events/EventVenuePage.tsx
 msgid "This event has no virtual venue"
 msgstr ""
@@ -841,6 +841,10 @@ msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Drop files to add"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Keep the original"
 msgstr ""
 
 #: src/pages/directory/DirectoryPage.tsx
@@ -2127,6 +2131,10 @@ msgstr ""
 msgid "Back to My Whiteboards"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The site's language. Changing it here changes the whole site."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How do I continue a draft application?"
 msgstr ""
@@ -3165,10 +3173,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "The default if you say nothing. Readable, not reusable."
-msgstr ""
-
-#: src/components/venue/room/CallCaptions.tsx
-msgid "My language"
 msgstr ""
 
 #: src/components/ui/ImageUpload.tsx
@@ -8208,6 +8212,10 @@ msgstr ""
 msgid "Step {stepNumber} not started"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Speaking another language?"
+msgstr ""
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "The host has stopped new people joining. Ask them to open it again, then reload this page."
 msgstr ""
@@ -10799,6 +10807,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Click \"Run AI Review\" to get a score and section-by-section suggestions."
+msgstr ""
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Everyone in the call"
 msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
@@ -16466,10 +16478,6 @@ msgstr ""
 msgid "The parts you keep for connections are left out. This is what a member who has not connected with you sees."
 msgstr ""
 
-#: src/components/venue/room/CallCaptions.tsx
-msgid "I speak and read"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "Row actions, and what they mean to the member"
 msgstr ""
@@ -17623,6 +17631,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Category and phase"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "You are subtitled as {spoken}."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -19968,6 +19980,10 @@ msgstr ""
 msgid "Subtitles and voice"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "On the video, in {mine}"
+msgstr ""
+
 #: src/lib/delete-guard.ts
 msgid "The project page and everything on it"
 msgstr ""
@@ -20255,10 +20271,6 @@ msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Meet the sponsor. Roles, prizes and questions."
-msgstr ""
-
-#: src/components/venue/room/VenueCall.tsx
-msgid "Cameras that are on"
 msgstr ""
 
 #: src/components/shared/DetailsEditor.tsx
@@ -21329,6 +21341,7 @@ msgstr ""
 #: src/components/venue/map/VenueMapExplorer.tsx
 #: src/components/venue/map/VenueRoomBrief.tsx
 #: src/components/venue/room/AvStage.tsx
+#: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/LookingForTeamPanel.tsx
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 #: src/components/venue/room/RoleRosterPanel.tsx
@@ -21746,7 +21759,6 @@ msgstr ""
 #: src/a11y/messages.ts
 #: src/components/legal/AgreementGate.tsx
 #: src/components/legal/ReconsentBanner.tsx
-#: src/components/venue/room/CallCaptions.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Not now"
 msgstr ""
@@ -22087,6 +22099,7 @@ msgstr ""
 msgid "Turn this off and your points stay yours alone — you keep earning and can still see your own rank, but nobody else can. Making your level and points private on your profile also keeps you off the board for everyone but your connections."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/RoomArrivalPanels.tsx
 msgid "Your language"
 msgstr ""
@@ -25851,6 +25864,10 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
+#: src/components/venue/room/CallTile.tsx
+msgid "Microphone off"
+msgstr ""
+
 #: src/components/messages/ChatWindow.tsx
 msgid "Loading earlier messages…"
 msgstr ""
@@ -25905,6 +25922,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "No — clearable in your browser"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Hear it in {mine}"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -28299,6 +28320,10 @@ msgstr ""
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Business Association"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The language you are speaking"
 msgstr ""
 
 #: src/i18n/harvested.ts

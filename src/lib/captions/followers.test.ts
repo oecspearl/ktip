@@ -101,3 +101,26 @@ describe('choices', () => {
     expect(isFollowChoice('yes')).toBe(false)
   })
 })
+
+// Delon's case (2026-11-10): he speaks English with the site in English; a
+// listener has the site in French. Nobody sets anything but the listener's
+// answer to the offer.
+describe('an English speaker and a French listener', () => {
+  const listener = (choice: Parameters<typeof wantsSubtitles>[0]) =>
+    person({ speaks: 'fr', reads: 'fr', subs: wantsSubtitles(choice) })
+
+  it('offers the French listener the choice when the speaker starts talking', () => {
+    expect(shouldOffer({ choice: 'ask', myLang: 'fr', speakerLang: 'en', translationAllowed: true })).toBe(true)
+  })
+
+  it('transcribes nothing while the listener has not answered or kept the original', () => {
+    expect(audienceFor([listener('ask')], 'en', true).total).toBe(0)
+    expect(audienceFor([listener('off')], 'en', true).total).toBe(0)
+  })
+
+  it('translates into French once the listener picks subtitles and voice', () => {
+    const audience = audienceFor([listener('voice')], 'en', true)
+    expect(audience.total).toBe(1)
+    expect(audience.targets).toEqual(['fr'])
+  })
+})

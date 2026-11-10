@@ -6,8 +6,8 @@ import {
   useSpeakingParticipants,
 } from '@livekit/components-react'
 import { ConnectionState, RoomEvent, type RemoteParticipant } from 'livekit-client'
-import { useContentLanguage } from '../i18n/useContentLanguage'
-import { isUiLang, type UiLang } from '../lib/i18n/protocol'
+import { useLanguage } from '../i18n/LanguageContext'
+import { type UiLang } from '../lib/i18n/protocol'
 import {
   LANG_TOPIC,
   decodeLangState,
@@ -23,6 +23,13 @@ import {
  * What I speak and read in a call, what everyone else does, and whether to ask
  * me to follow someone in my own language.
  *
+ * Both come from the site's language (the switch in the top bar), 2026-11-10.
+ * A speaker sets nothing: they are subtitled in the language the site is in,
+ * and can only pause it or, rarely, say they are speaking another one for
+ * this call. A listener reads in the site's language, and when someone speaks
+ * another one they choose: keep the original, or subtitles (and a voice) in
+ * theirs. Changing the site's language changes the call's at once.
+ *
  * Each member tells the call their language state over a reliable data
  * message (captions/followers.ts says why not participant attributes). A
  * message sent before someone joined never reaches them, so everyone answers a
@@ -32,12 +39,13 @@ import {
  * Must be rendered inside <LiveKitRoom>.
  */
 
-const PREF_KEY = 'ktip.call.language'
+// v2 when the language moved to the site's own (2026-11-10): choices made
+// under the old picker are dropped, so everyone is offered the choice afresh.
+const PREF_KEY = 'ktip.call.language.v2'
 /** The caption strip's old preferences, read once so nobody loses a choice they made. */
 const LEGACY_KEY = 'ktip.captions.prefs'
 
 interface Prefs {
-  lang?: UiLang
   choice?: FollowChoice
   /** Show the original under each translated line. */
   original?: boolean
@@ -47,26 +55,20 @@ function readPrefs(): Prefs {
   try {
     const raw = JSON.parse(localStorage.getItem(PREF_KEY) || 'null')
     if (raw && typeof raw === 'object') {
+      // A stored `lang` from before the site's language took over is ignored.
       return {
-        lang: isUiLang(raw.lang) ? raw.lang : undefined,
         choice: isFollowChoice(raw.choice) ? raw.choice : undefined,
         original: raw.original === true,
       }
     }
     const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '{}')
     return {
-      lang: isUiLang(legacy.lang) ? legacy.lang : undefined,
       choice: legacy.voice === true ? 'voice' : undefined,
       original: legacy.original === true,
     }
   } catch {
     return {}
   }
-}
-
-/** The language this browser last said it speaks in calls, if it ever did. */
-export function readCallLanguage(): UiLang | undefined {
-  return readPrefs().lang
 }
 
 function writePrefs(prefs: Prefs) {
@@ -85,9 +87,12 @@ export interface OfferTarget {
 }
 
 export interface CallLanguage {
-  /** The language I speak and read. Defaults to my content language. */
-  lang: UiLang
-  setLang: (lang: UiLang) => void
+  /** The language I read subtitles and hear voices in: the site's language. */
+  reads: UiLang
+  /** The language I am subtitled as. The site's language unless I said otherwise for this call. */
+  speaks: UiLang
+  /** Say I am speaking another language in this call. Null goes back to the site's. */
+  setSpeaks: (lang: UiLang | null) => void
   choice: FollowChoice
   setChoice: (choice: FollowChoice) => void
   showOriginal: boolean
@@ -101,10 +106,14 @@ export interface CallLanguage {
 }
 
 export function useCallLanguage(translationAllowed: boolean): CallLanguage {
-  const { lang: contentLang } = useContentLanguage()
+  const { uiLang } = useLanguage()
   const [prefs, setPrefs] = useState<Prefs>(readPrefs)
   const [paused, setPaused] = useState(false)
-  const lang = prefs.lang ?? contentLang
+  // Per call on purpose: someone who presents in French once should not be
+  // transcribed as French in every call after it.
+  const [speakOverride, setSpeakOverride] = useState<UiLang | null>(null)
+  const reads = uiLang
+  const speaks = speakOverride ?? uiLang
   const choice = prefs.choice ?? 'ask'
 
   const update = useCallback((patch: Prefs) => {
@@ -132,8 +141,8 @@ export function useCallLanguage(translationAllowed: boolean): CallLanguage {
   })
 
   const mine = useMemo<CallLangState>(
-    () => ({ speaks: lang, reads: lang, subs: wantsSubtitles(choice), paused }),
-    [lang, choice, paused]
+    () => ({ speaks, reads, subs: wantsSubtitles(choice), paused }),
+    [speaks, reads, choice, paused]
   )
   const mineRef = useRef(mine)
   mineRef.current = mine
@@ -185,22 +194,23 @@ export function useCallLanguage(translationAllowed: boolean): CallLanguage {
       if (offer) setOffer(null)
       return
     }
-    if (offer && offer.speaks !== lang) return
+    if (offer && offer.speaks !== reads) return
     for (const participant of speaking) {
       if (participant.isLocal) continue
-      const speaks = roster.get(participant.identity)?.speaks
-      if (shouldOffer({ choice, myLang: lang, speakerLang: speaks, translationAllowed }) && speaks) {
-        setOffer({ identity: participant.identity, name: participant.name || participant.identity, speaks })
+      const theirs = roster.get(participant.identity)?.speaks
+      if (shouldOffer({ choice, myLang: reads, speakerLang: theirs, translationAllowed }) && theirs) {
+        setOffer({ identity: participant.identity, name: participant.name || participant.identity, speaks: theirs })
         return
       }
     }
-    // Switching my own language to theirs answers the question for me.
+    // Switching the site to their language answers the question for me.
     if (offer) setOffer(null)
-  }, [speaking, roster, choice, lang, translationAllowed, offer])
+  }, [speaking, roster, choice, reads, translationAllowed, offer])
 
   return {
-    lang,
-    setLang: useCallback((next: UiLang) => update({ lang: next }), [update]),
+    reads,
+    speaks,
+    setSpeaks: setSpeakOverride,
     choice,
     setChoice: useCallback((next: FollowChoice) => update({ choice: next }), [update]),
     showOriginal: prefs.original === true,

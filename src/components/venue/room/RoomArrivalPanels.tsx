@@ -6,7 +6,7 @@ import { entityPath } from '../../../lib/slug'
 import { Button } from '../../ui/Button'
 import { Segmented } from '../../ui/Segmented'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useContentLanguage } from '../../../i18n/useContentLanguage'
+import { useLanguage } from '../../../i18n/LanguageContext'
 import { UI_LANGS, type UiLang } from '../../../lib/i18n/protocol'
 import { RoomPanel } from './RoomPanel'
 import type { Event, EventVenueMember } from '../../../types'
@@ -79,15 +79,16 @@ const ENDONYM: Record<UiLang, string> = { en: 'English', fr: 'Français', es: 'E
 /**
  * The language talks and chat reach this member in, asked on arrival.
  *
- * The same setting as Preferences (profiles.content_language). Calls use it by
- * default, so answering here is what makes the "follow along in your language"
- * offer appear for someone speaking another one.
+ * It is the site's own language, the switch in the top bar: calls subtitle
+ * and translate in it (useCallLanguage). A chat-language override from
+ * Preferences (profiles.content_language) is moved along with it, so chat and
+ * calls do not end up in two different languages.
  */
 function ArrivalLanguage() {
   const { t } = useLingui()
   const auth = useAuth()
   const toast = useToast()
-  const { lang } = useContentLanguage()
+  const { uiLang: lang, setLang } = useLanguage()
 
   return (
     <div className="flex w-full flex-wrap items-center gap-2 text-sm text-ktip-sun-800">
@@ -98,6 +99,9 @@ function ArrivalLanguage() {
         value={lang}
         options={UI_LANGS.map((code) => ({ value: code, label: ENDONYM[code] }))}
         onChange={async (next) => {
+          setLang(next)
+          const override = auth.profile?.content_language
+          if (!override || override === next) return
           try {
             await auth.updateProfile({ content_language: next })
           } catch (err: any) {
