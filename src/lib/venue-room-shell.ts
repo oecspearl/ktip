@@ -40,7 +40,9 @@ const ROOM_TAB: Record<VenueRoomKind, RoomSectionId[]> = {
   workshop: ['hand_queue', 'resources'],
   judging: ['judges_present'],
   sponsor_booth: ['sponsor_links'],
-  networking: ['looking_for_team', 'skill_finder'],
+  // The design keeps Networking's dock to Chat and People: who is looking for
+  // a team sits on the shelf, next to the skills in the room.
+  networking: [],
   help_desk: ['mentors_on_duty'],
   team: ['announcements'],
   breakout: ['announcements'],

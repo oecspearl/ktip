@@ -634,10 +634,6 @@ msgstr "Your CV is now public."
 msgid "You will be told, and you can have it restored by filing a counter-notice."
 msgstr "You will be told, and you can have it restored by filing a counter-notice."
 
-#: src/components/venue/room/CallTile.tsx
-msgid "{name} (you)"
-msgstr "{name} (you)"
-
 #: src/lib/venue-room-presets.ts
 msgid "Organisers only."
 msgstr "Organisers only."
@@ -4671,6 +4667,10 @@ msgstr "Individuals"
 msgid "Then, back on the screen that sent you here:"
 msgstr "Then, back on the screen that sent you here:"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Coffee roulette"
+msgstr "Coffee roulette"
+
 #: src/i18n/harvested.ts
 msgid "Projects & Teams"
 msgstr "Projects & Teams"
@@ -5460,6 +5460,10 @@ msgstr "Check the legal entity’s name and registration, not just its brand."
 msgid "{description} — not yet earned"
 msgstr "{description} — not yet earned"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Someone is following you, but this browser cannot subtitle you. Use Chrome, Edge or Safari."
+msgstr "Someone is following you, but this browser cannot subtitle you. Use Chrome, Edge or Safari."
+
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "Do Not Accept"
 msgstr "Do Not Accept"
@@ -5748,6 +5752,10 @@ msgstr "Use it to train a machine-learning model, our own or anyone else’s."
 msgid "Administer resources"
 msgstr "Administer resources"
 
+#: src/components/venue/room/AvStage.tsx
+msgid "Call"
+msgstr "Call"
+
 #: src/i18n/harvested.ts
 msgid "Reading and downloading a resource."
 msgstr "Reading and downloading a resource."
@@ -5998,11 +6006,6 @@ msgstr "Checking photo…"
 #: src/components/grants/application/AIFieldActions.tsx
 msgid "Generate AI suggestion for this section"
 msgstr "Generate AI suggestion for this section"
-
-#. placeholder {0}: state.waiting
-#: src/components/venue/room/CoffeeTablesPanel.tsx
-msgid "{0} waiting"
-msgstr "{0} waiting"
 
 #: src/components/collaboration/OutputPanel.tsx
 msgid "Console Output"
@@ -7659,6 +7662,10 @@ msgstr "optional"
 msgid "Review, then submit"
 msgstr "Review, then submit"
 
+#: src/components/venue/room/AvStage.tsx
+msgid "Room call"
+msgstr "Room call"
+
 #: src/i18n/harvested.ts
 msgid "If you are a member, not a partner"
 msgstr "If you are a member, not a partner"
@@ -8165,6 +8172,10 @@ msgstr "Untitled document"
 msgid "Common questions"
 msgstr "Common questions"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Your table"
+msgstr "Your table"
+
 #: src/components/layout/Navbar.tsx
 msgid "Sign Out"
 msgstr "Sign Out"
@@ -8466,10 +8477,6 @@ msgstr "Check in"
 #: src/lib/venue-furniture.ts
 msgid "Bookshelves and a reading table"
 msgstr "Bookshelves and a reading table"
-
-#: src/components/venue/room/AvStage.tsx
-msgid "Voice and screen sharing are on"
-msgstr "Voice and screen sharing are on"
 
 #: src/i18n/harvested.ts
 msgid "Display records to its own authorised users for that purpose."
@@ -9141,6 +9148,10 @@ msgstr "A free app on your phone or computer shows a new code every 30 seconds. 
 msgid "Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder."
 msgstr "Grant listings, funding opportunities, events and partner offerings on KTIP are published by their sponsors. %entityShort% does not guarantee their accuracy, availability or outcome, is not a party to any agreement you reach with a sponsor, and does not disburse funds unless it is expressly the named funder."
 
+#: src/components/venue/room/AvStage.tsx
+msgid "You are listening"
+msgstr "You are listening"
+
 #: src/components/verification/VerificationWall.tsx
 msgid "This page opens when your verification is approved."
 msgstr "This page opens when your verification is approved."
@@ -9335,10 +9346,6 @@ msgstr "You can now open \"{0}\"."
 #: src/i18n/harvested.ts
 msgid "If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help."
 msgstr "If AI wrote a full first draft, say that. Fixing your spelling or grammar does not count as material help."
-
-#: src/components/venue/room/AvStage.tsx
-msgid "You are listening. A host can give you the floor."
-msgstr "You are listening. A host can give you the floor."
 
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "50 min"
@@ -12787,6 +12794,10 @@ msgstr "No reason was recorded."
 msgid "Use \"Mark all read\" at the top of the panel to clear the unread count."
 msgstr "Use \"Mark all read\" at the top of the panel to clear the unread count."
 
+#: src/components/venue/room/CallTile.tsx
+msgid "Hand up"
+msgstr "Hand up"
+
 #: src/a11y/messages.ts
 msgid "Read the page aloud, or pause"
 msgstr "Read the page aloud, or pause"
@@ -14180,6 +14191,10 @@ msgstr "Unpin — the panel stops fading and closes on an outside click"
 msgid "Go to Sign In"
 msgstr "Go to Sign In"
 
+#: src/components/venue/VenueTopBar.tsx
+msgid "Venue map"
+msgstr "Venue map"
+
 #: src/i18n/harvested.ts
 msgid "Forgot password"
 msgstr "Forgot password"
@@ -15162,10 +15177,6 @@ msgstr "Search integrations"
 msgid "Add someone"
 msgstr "Add someone"
 
-#: src/components/venue/room/CoffeeTablesPanel.tsx
-msgid "Tables now"
-msgstr "Tables now"
-
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Enter your new password below"
 msgstr "Enter your new password below"
@@ -15306,10 +15317,6 @@ msgstr "Toggle AI-guided navigation"
 #: src/components/feedback/FeedbackModal.tsx
 msgid "Looking for answers instead? <0>Check the FAQ</0>"
 msgstr "Looking for answers instead? <0>Check the FAQ</0>"
-
-#: src/components/venue/VenueTopBar.tsx
-msgid "{headcount} here"
-msgstr "{headcount} here"
 
 #: src/pages/collaborate/CodeEditorPage.tsx
 msgid "Snippet"
@@ -15603,6 +15610,7 @@ msgid "Failed to sign out"
 msgstr "Failed to sign out"
 
 #: src/a11y/messages.ts
+#: src/components/venue/room/CallCaptions.tsx
 msgid "Turn on"
 msgstr "Turn on"
 
@@ -15950,6 +15958,7 @@ msgid "Only an owner or admin of your organisation can change this."
 msgstr "Only an owner or admin of your organisation can change this."
 
 #: src/components/layout/BreadcrumbNav.tsx
+#: src/components/venue/VenueTopBar.tsx
 #: src/pages/dashboard/DashboardTopBar.tsx
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
@@ -16021,10 +16030,6 @@ msgstr "Search resources..."
 #: src/i18n/harvested.ts
 msgid "End your session on this device"
 msgstr "End your session on this device"
-
-#: src/components/venue/room/CoffeeTablesPanel.tsx
-msgid "Sit down with three or four people from other teams for ten minutes. Every table is listed below, and organisers can drop in."
-msgstr "Sit down with three or four people from other teams for ten minutes. Every table is listed below, and organisers can drop in."
 
 #: src/lib/venue-room-presets.ts
 msgid "Where the organising team runs the event."
@@ -16128,6 +16133,10 @@ msgstr "Everyone is inside a room."
 #: src/components/venue/room/judging/ResultsBoardPanel.tsx
 msgid "{conflicts, plural, one {# conflict} other {# conflicts}}"
 msgstr "{conflicts, plural, one {# conflict} other {# conflicts}}"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles · {code} · voice"
+msgstr "Subtitles · {code} · voice"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/resources/ResourceFileField.tsx
@@ -16540,6 +16549,10 @@ msgstr "This member hasn't verified their account yet, so they can't receive mes
 msgid "AI-drafted"
 msgstr "AI-drafted"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Translation off"
+msgstr "Translation off"
+
 #: src/i18n/harvested.ts
 msgid "Minors"
 msgstr "Minors"
@@ -16754,6 +16767,10 @@ msgstr "{0, plural, one {Delete # resource} other {Delete # resources}}"
 #: src/i18n/harvested.ts
 msgid "When the licence ends"
 msgstr "When the licence ends"
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "{count} in the call"
+msgstr "{count} in the call"
 
 #. placeholder {0}: categoryGroups.length
 #: src/pages/projects/ProjectsPage.tsx
@@ -17966,6 +17983,7 @@ msgstr "This goes to the OECS safety team, not to the person you are reporting. 
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
 #: src/pages/events/EventVenuePage.tsx
@@ -18893,6 +18911,10 @@ msgstr "Vote"
 #: src/i18n/harvested.ts
 msgid "What are the different user roles?"
 msgstr "What are the different user roles?"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "Table {number}"
+msgstr "Table {number}"
 
 #: src/pages/projects/EditProjectPage.tsx
 msgid "Back to Project"
@@ -21757,6 +21779,10 @@ msgstr "Confirm your email address first — open the link KTIP sent when you si
 #: src/components/ui/Coachmark.tsx
 msgid "Guided tour"
 msgstr "Guided tour"
+
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "{tableCount} tables · up to 4 seats"
+msgstr "{tableCount} tables · up to 4 seats"
 
 #: src/hooks/useExternalCourses.ts
 msgid "Could not load courses"
@@ -25719,6 +25745,10 @@ msgstr "We email {email} a link to confirm you are still there."
 msgid "Files"
 msgstr "Files"
 
+#: src/components/venue/room/CoffeeTablesPanel.tsx
+msgid "We seat you with three or four people from other teams, for ten minutes."
+msgstr "We seat you with three or four people from other teams, for ten minutes."
+
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Save showcase"
 msgstr "Save showcase"
@@ -25797,6 +25827,10 @@ msgstr "KTIP’s own interface is translated by people. Content written by membe
 #: src/pages/grievances/ReportUserPage.tsx
 msgid "False or malicious reports may result in action against your account. All reports are reviewed by our administration team."
 msgstr "False or malicious reports may result in action against your account. All reports are reviewed by our administration team."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles · {code}"
+msgstr "Subtitles · {code}"
 
 #: src/i18n/harvested.ts
 msgid "Direct and group messaging with other members"
@@ -33165,6 +33199,10 @@ msgstr "Rooms, invitations and who can join."
 #: src/lib/delete-guard.ts
 msgid "Comments, likes, follows and view history"
 msgstr "Comments, likes, follows and view history"
+
+#: src/components/venue/VenueTopBar.tsx
+msgid "{headcount} in the venue"
+msgstr "{headcount} in the venue"
 
 #: src/pages/InvitationsPage.tsx
 msgid "Sent — awaiting a response"

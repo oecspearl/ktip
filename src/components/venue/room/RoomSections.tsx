@@ -195,9 +195,9 @@ export function RoomSections({
           {grewNote && (
             <p
               role="status"
-              className="flex items-start gap-2 rounded-control border border-ktip-ocean-100 bg-ktip-ocean-50 px-3 py-2 text-sm text-ktip-ocean-800"
+              className="flex items-start gap-2 rounded-surface border border-dashed border-ktip-sand-300 bg-ktip-cream px-4 py-3 text-sm text-ktip-sand-700"
             >
-              <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <Info size={16} className="mt-0.5 shrink-0 text-ktip-ocean-600" aria-hidden="true" />
               {grewNote}
             </p>
           )}

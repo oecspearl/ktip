@@ -1,8 +1,7 @@
-import { Suspense, lazy, useMemo } from 'react'
-import { MicOff, Radio, ScreenShare, Video, VideoOff } from 'lucide-react'
+import { Suspense, lazy, useMemo, useState } from 'react'
+import { VideoOff } from 'lucide-react'
 import { cn } from '../../../lib/utils'
-import { VENUE_AUDIO_MODE_LABELS } from '../../../lib/constants'
-import { ROOM_CAMERA_LABELS, type RoomCameraMode } from '../../../lib/venue-room-layout'
+import type { RoomCameraMode } from '../../../lib/venue-room-layout'
 import { isVenueVideoConfigured, useVenueRoomToken } from '../../../hooks/useVenueRoomToken'
 import { useRoomRecording } from '../../../hooks/useRoomRecording'
 import { CallErrorBoundary } from '../../CallErrorBoundary'
@@ -87,6 +86,10 @@ export function AvStage({
     [occupants]
   )
 
+  // Where the call puts its count and its subtitle chip, in this header.
+  const [countSlot, setCountSlot] = useState<HTMLElement | null>(null)
+  const [chipSlot, setChipSlot] = useState<HTMLElement | null>(null)
+
   if (mode === 'off') return null
 
   const needsConsent = Boolean(room.recording_enabled) && !acknowledged
@@ -119,41 +122,60 @@ export function AvStage({
     </>
   )
 
+  // What the old footer said, now one chip in the header: why there is no
+  // call yet, or that this member is listening. Nothing at all once all is well.
+  const status = !isVenueVideoConfigured()
+    ? { text: t`Video is not switched on for this venue yet`, warn: false }
+    : error
+      ? // venue_room_grant()'s own message: "this room is closed", "not a member
+        // of this venue". Nothing the member could not read off the map.
+        { text: error.message, warn: true }
+      : !connected
+        ? { text: t`Connecting…`, warn: false }
+        : !grant?.can_publish
+          ? { text: t`You are listening`, warn: false }
+          : null
+
+  const chip =
+    'inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/12 bg-white/9 px-2.5 text-micro font-bold text-white/74'
+
   return (
-    <div
+    <section
+      aria-label={t`Call`}
       className={cn(
-        'overflow-hidden rounded-2xl border border-ktip-sand-200 bg-ktip-ink text-white shadow-card',
+        // The revamp's call card: the site's navy, lit from the top left.
+        'relative overflow-hidden rounded-surface bg-[radial-gradient(140%_120%_at_20%_0%,#0B2A50,#061A33_55%,#020B18)] text-white shadow-card',
         fill && 'flex h-full flex-col'
       )}
     >
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
-        <Video size={14} className="shrink-0 text-white/60" aria-hidden="true" />
-        <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-white/70">
-          {presenter ? t`${presenter.name} is presenting` : ROOM_CAMERA_LABELS[mode]}
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/12 px-4 py-3">
+        <span className="min-w-0 truncate text-sm font-extrabold">
+          {presenter ? t`${presenter.name} is presenting` : t`Room call`}
         </span>
-        {/* Two different claims, and conflating them was the old bug: a room
-            that MAY be recorded is not a room that IS being recorded. Only a
-            host can see the live state (they are the only one who may ask
-            LiveKit), so everyone else gets the honest weaker statement — which
-            is also what they already consented to. */}
-        {room.recording_enabled && (
-          <span
-            className={cn(
-              'ml-auto flex shrink-0 items-center gap-1 text-micro font-semibold uppercase tracking-wider',
-              recording.recording ? 'text-red-300' : 'text-white/40'
-            )}
-          >
-            <span
-              className={cn(
-                'h-1.5 w-1.5 rounded-full',
-                recording.recording ? 'animate-pulse bg-red-400' : 'bg-white/30'
-              )}
-              aria-hidden="true"
-            />
-            {recording.recording ? <Trans>Recording</Trans> : <Trans>Can be recorded</Trans>}
-          </span>
-        )}
-      </div>
+        {/* "3 in the call", filled in by the call once it is connected. */}
+        <span ref={setCountSlot} className="text-xs font-semibold text-white/52 empty:hidden" />
+        <span className="ml-auto flex flex-wrap items-center gap-2">
+          <span ref={setChipSlot} className="contents" />
+          {status && (
+            <span className={cn(chip, status.warn && 'border-ktip-sun-400/40 text-ktip-sun-200')} role="status">
+              {status.text}
+            </span>
+          )}
+          {/* Two different claims, and conflating them was the old bug: a room
+              that MAY be recorded is not a room that IS being recorded. Only a
+              host can see the live state, so everyone else gets the honest
+              weaker statement, which is also what they consented to. */}
+          {room.recording_enabled && (
+            <span className={cn(chip, recording.recording && 'border-red-400/40 text-red-200')}>
+              <span
+                className={cn('h-1.5 w-1.5 rounded-full', recording.recording ? 'animate-pulse bg-red-400' : 'bg-white/40')}
+                aria-hidden="true"
+              />
+              {recording.recording ? <Trans>Recording</Trans> : <Trans>Can be recorded</Trans>}
+            </span>
+          )}
+        </span>
+      </header>
 
       <div className={cn('p-3', fill && 'flex min-h-0 flex-1 flex-col')}>
         {needsConsent ? (
@@ -169,6 +191,8 @@ export function AvStage({
               translationAllowed={room.live_translation !== false}
               allowBoard={room.kind === 'workshop'}
               people={people}
+              hands={signals?.hands.map((hand) => hand.userId)}
+              headerSlots={{ count: countSlot, chips: chipSlot }}
               onShareChange={onShareChange}
               signals={
                 signals && {
@@ -196,38 +220,7 @@ export function AvStage({
           placeholders
         )}
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 px-4 py-2 text-[11px] text-white/50">
-        <span className="flex items-center gap-1">
-          {room.audio_mode === 'listen_only' ? (
-            <MicOff size={11} aria-hidden="true" />
-          ) : (
-            <Radio size={11} aria-hidden="true" />
-          )}
-          {VENUE_AUDIO_MODE_LABELS[room.audio_mode] || room.audio_mode}
-        </span>
-        {/* Says what is actually true right now. A camera button that silently
-            does nothing is the failure this replaces — if somebody cannot speak,
-            the room should say so, and say which rule did it. */}
-        <span className="flex items-center gap-1">
-          <ScreenShare size={11} aria-hidden="true" />
-          {!isVenueVideoConfigured() ? (
-            <Trans>Video is not switched on for this venue yet</Trans>
-          ) : error ? (
-            // venue_room_grant()'s own message — "this room is closed", "not a
-            // member of this venue". None of it reveals anything the member
-            // could not already read off the map.
-            <span className="text-amber-300/80">{error.message}</span>
-          ) : !connected ? (
-            <Trans>Connecting…</Trans>
-          ) : grant?.can_publish ? (
-            <Trans>Voice and screen sharing are on</Trans>
-          ) : (
-            <Trans>You are listening. A host can give you the floor.</Trans>
-          )}
-        </span>
-      </div>
-    </div>
+    </section>
   )
 }
 

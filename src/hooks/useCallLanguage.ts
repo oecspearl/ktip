@@ -42,6 +42,8 @@ import {
 // v2 when the language moved to the site's own (2026-11-10): choices made
 // under the old picker are dropped, so everyone is offered the choice afresh.
 const PREF_KEY = 'ktip.call.language.v2'
+/** How often my language state is re-sent to the call. */
+const REANNOUNCE_MS = 10_000
 /** The caption strip's old preferences, read once so nobody loses a choice they made. */
 const LEGACY_KEY = 'ktip.captions.prefs'
 
@@ -166,6 +168,16 @@ export function useCallLanguage(translationAllowed: boolean): CallLanguage {
   useEffect(() => {
     if (connection === ConnectionState.Connected) announce()
   }, [connection, mine, announce])
+
+  // Say it again every few seconds. A hello sent the instant someone joined
+  // can land before their side is listening, and then the speaker never learns
+  // that anyone wants a translation (Delon's first two-device test). A few
+  // dozen bytes every ten seconds makes the roster heal itself.
+  useEffect(() => {
+    if (connection !== ConnectionState.Connected) return
+    const timer = window.setInterval(() => announce(), REANNOUNCE_MS)
+    return () => window.clearInterval(timer)
+  }, [connection, announce])
 
   useEffect(() => {
     if (!room) return

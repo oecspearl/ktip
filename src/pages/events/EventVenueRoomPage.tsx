@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { Lock } from 'lucide-react'
+import { cn } from '../../lib/utils'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { venuePath } from '../../lib/event-slug'
@@ -32,6 +33,24 @@ import {
 import { resolveIcon } from '../../lib/icon-map'
 import { entityPath } from '../../lib/slug'
 import { Trans, useLingui } from '@lingui/react/macro'
+
+
+/**
+ * Each kind of room's colour, from the revamp's design: sun for meeting
+ * people, ocean for talks and team rooms, green for building, sand for quiet
+ * and judging. Only the site's own colour families.
+ */
+const KIND_TONE: Record<string, { tile: string; eyebrow: string }> = {
+  main_hall: { tile: 'bg-ktip-ocean-50 text-ktip-ocean-700', eyebrow: 'text-ktip-ocean-600' },
+  stage: { tile: 'bg-ktip-ocean-50 text-ktip-ocean-700', eyebrow: 'text-ktip-ocean-600' },
+  team: { tile: 'bg-ktip-ocean-50 text-ktip-ocean-700', eyebrow: 'text-ktip-ocean-600' },
+  sponsor_booth: { tile: 'bg-ktip-ocean-50 text-ktip-ocean-700', eyebrow: 'text-ktip-ocean-600' },
+  networking: { tile: 'bg-ktip-sun-50 text-ktip-sun-700', eyebrow: 'text-ktip-sun-700' },
+  help_desk: { tile: 'bg-ktip-sun-50 text-ktip-sun-700', eyebrow: 'text-ktip-sun-700' },
+  workshop: { tile: 'bg-ktip-tropical-50 text-ktip-tropical-700', eyebrow: 'text-ktip-tropical-700' },
+  judging: { tile: 'bg-ktip-sand-100 text-ktip-sand-700', eyebrow: 'text-ktip-sand-600' },
+  breakout: { tile: 'bg-ktip-sand-100 text-ktip-sand-700', eyebrow: 'text-ktip-sand-600' },
+}
 
 /**
  * Inside one room.
@@ -244,28 +263,45 @@ export default function EventVenueRoomPage() {
         onAvailabilityChange={presence.setAvailability}
         submissionDeadline={event.submission_deadline}
         backToMap
+        crumbs={{ floor: floorName, room: room.name }}
       />
 
       <div className="mx-auto max-w-[1640px] px-3 py-6 sm:px-4">
-        <div className="mb-6 flex flex-wrap items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ktip-ocean-50 text-ktip-ocean-700">
-            <Icon size={20} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-ktip-ocean-600">
-              {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
-              {/* Which level, on a venue that has more than one. */}
-              {floorName && <span className="text-ktip-sand-400"> · {floorName}</span>}
-            </p>
-            <h1 className="font-display text-2xl font-bold text-ktip-sand-900">{room.name}</h1>
-            {room.description && (
-              <p className="mt-1 text-sm text-ktip-sand-600">{room.description}</p>
-            )}
+        {/* The room's header, as in the revamp's design: a tile in the room's
+            tone, the kind and level above a large name, and who is here. */}
+        <div className="mb-5 flex flex-wrap items-end gap-x-6 gap-y-4 pt-2">
+          <div className="flex min-w-0 flex-[1_1_26rem] items-start gap-4">
+            <span
+              className={cn(
+                'flex h-13 w-13 shrink-0 items-center justify-center rounded-control',
+                KIND_TONE[room.kind]?.tile ?? KIND_TONE.main_hall.tile
+              )}
+            >
+              <Icon size={26} aria-hidden="true" />
+            </span>
+            <div className="flex min-w-0 flex-col gap-1">
+              <p
+                className={cn(
+                  'flex flex-wrap items-center gap-x-2 text-micro font-extrabold uppercase tracking-[0.08em]',
+                  KIND_TONE[room.kind]?.eyebrow ?? KIND_TONE.main_hall.eyebrow
+                )}
+              >
+                {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
+                {/* Which level, on a venue that has more than one. */}
+                {floorName && <span className="text-ktip-sand-400">· {floorName}</span>}
+              </p>
+              <h1 className="text-balance font-display text-3xl font-bold leading-none text-ktip-sand-900 sm:text-4xl">
+                {room.name}
+              </h1>
+              {room.description && (
+                <p className="max-w-[66ch] text-sm text-ktip-sand-600">{room.description}</p>
+              )}
+            </div>
           </div>
           {/* Who is here, at a glance: the same faces the People tab lists. */}
-          <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2 self-center">
+          <div className="flex shrink-0 flex-wrap items-center gap-x-3.5 gap-y-2.5">
             {inRoom.length > 0 && (
-              <span className="flex items-center gap-2 text-xs font-semibold text-ktip-sand-600">
+              <span className="flex items-center gap-2 text-xs font-bold text-ktip-sand-600">
                 <AvatarCluster occupants={inRoom.slice(0, 4)} overflow={Math.max(0, inRoom.length - 4)} size="sm" />
                 <Trans>{hereCount} here</Trans>
               </span>

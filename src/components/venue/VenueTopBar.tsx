@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowLeft, Timer, WifiOff } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Map as MapIcon, Timer, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
 import { IrisLink } from '../ui/IrisTransition'
@@ -26,6 +26,11 @@ interface VenueTopBarProps {
   submissionDeadline?: string | null
   /** Set when inside a room, so the bar can offer a way back to the map. */
   backToMap?: boolean
+  /**
+   * Inside a room: the trail "Venue map / Event / Floor › Room" replaces the
+   * plain back link (the room revamp's design, 2026-11-10).
+   */
+  crumbs?: { floor: string | null; room: string }
   /** Extra chrome (e.g. the organizer's "Edit the map" button), before the picker. */
   trailing?: ReactNode
   /** The floorplan page has no other h1; the room page keeps the default. */
@@ -93,6 +98,7 @@ export function VenueTopBar({
   onAvailabilityChange,
   submissionDeadline,
   backToMap,
+  crumbs,
   trailing,
   titleAs,
   className,
@@ -131,23 +137,55 @@ export function VenueTopBar({
         className
       )}
     >
-      <BackLink
-        to={
-          backToMap
-            ? venuePath({ id: eventId, slug: eventSlug, event_type: eventType })
-            : `/events/${eventSlug || eventId}`
-        }
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
-      >
-        <ArrowLeft size={15} aria-hidden="true" />
-        {backToMap ? t`Back to the map` : t`Event page`}
-      </BackLink>
+      {backToMap && crumbs ? (
+        <nav aria-label={t`Breadcrumb`} className="min-w-0 flex-1">
+          <ol className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <li>
+              <BackLink
+                to={venuePath({ id: eventId, slug: eventSlug, event_type: eventType })}
+                className="inline-flex items-center gap-1.5 font-bold text-ktip-ocean-600 hover:underline"
+              >
+                <MapIcon size={15} aria-hidden="true" />
+                <Trans>Venue map</Trans>
+              </BackLink>
+            </li>
+            <li aria-hidden="true" className="text-ktip-sand-400">/</li>
+            <li className="min-w-0">
+              <TitleTag className="truncate font-bold text-ktip-sand-900">{eventTitle}</TitleTag>
+            </li>
+            <li aria-hidden="true" className="hidden text-ktip-sand-400 sm:block">/</li>
+            <li className="hidden min-w-0 items-center gap-1 font-semibold text-ktip-sand-500 sm:flex" aria-current="page">
+              {crumbs.floor && (
+                <>
+                  <span className="truncate">{crumbs.floor}</span>
+                  <ChevronRight size={13} className="shrink-0" aria-hidden="true" />
+                </>
+              )}
+              <span className="truncate">{crumbs.room}</span>
+            </li>
+          </ol>
+        </nav>
+      ) : (
+        <>
+          <BackLink
+            to={
+              backToMap
+                ? venuePath({ id: eventId, slug: eventSlug, event_type: eventType })
+                : `/events/${eventSlug || eventId}`
+            }
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-ktip-ocean-600 hover:underline"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            {backToMap ? t`Back to the map` : t`Event page`}
+          </BackLink>
 
-      <span className="hidden h-4 w-px bg-ktip-sand-200 sm:block" aria-hidden="true" />
+          <span className="hidden h-4 w-px bg-ktip-sand-200 sm:block" aria-hidden="true" />
 
-      <TitleTag className="min-w-0 flex-1 truncate font-display text-sm font-bold text-ktip-sand-900">
-        {eventTitle}
-      </TitleTag>
+          <TitleTag className="min-w-0 flex-1 truncate font-display text-sm font-bold text-ktip-sand-900">
+            {eventTitle}
+          </TitleTag>
+        </>
+      )}
 
       {/* One chip carries both facts: the count, and whether it can be
           trusted. Live is the default state, so it earns only a dot — the
@@ -168,7 +206,7 @@ export function VenueTopBar({
           ) : (
             <WifiOff size={13} aria-hidden="true" />
           )}
-          {connected ? <Trans>{headcount} here</Trans> : t`Reconnecting`}
+          {connected ? <Trans>{headcount} in the venue</Trans> : t`Reconnecting`}
         </span>
       )}
 

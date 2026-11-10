@@ -25,8 +25,8 @@ export function RoomPanel({ title, meta, children, className }: RoomPanelProps) 
         className
       )}
     >
-      <div data-panel-head className="flex items-center justify-between gap-2 border-b border-ktip-sand-100 px-4 py-3">
-        <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
+      <div data-panel-head className="flex min-h-11.5 flex-wrap items-center justify-between gap-2 border-b border-ktip-sand-100 px-4 py-2">
+        <h2 className="text-micro font-extrabold uppercase tracking-[0.08em] text-ktip-sand-500">
           {title}
         </h2>
         {meta !== undefined && (

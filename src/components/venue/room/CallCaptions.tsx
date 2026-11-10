@@ -61,6 +61,9 @@ interface CallCaptionsValue {
   voiceOn: boolean
   translationAllowed: boolean
   canPublish: boolean
+  /** My recogniser should be running right now. */
+  transcribe: boolean
+  micOn: boolean
 }
 
 const CallCaptionsContext = createContext<CallCaptionsValue | null>(null)
@@ -108,11 +111,69 @@ export function CallCaptionsProvider({
   useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
 
   const value = useMemo<CallCaptionsValue>(
-    () => ({ language, live, audience, subs, voiceOn, translationAllowed, canPublish }),
-    [language, live, audience, subs, voiceOn, translationAllowed, canPublish]
+    () => ({
+      language,
+      live,
+      audience,
+      subs,
+      voiceOn,
+      translationAllowed,
+      canPublish,
+      transcribe,
+      micOn: isMicrophoneEnabled,
+    }),
+    [language, live, audience, subs, voiceOn, translationAllowed, canPublish, transcribe, isMicrophoneEnabled]
   )
 
   return <CallCaptionsContext.Provider value={value}>{children}</CallCaptionsContext.Provider>
+}
+
+/**
+ * The language someone in the call speaks, for the code on their tile. Null
+ * outside a call's provider or before they have said.
+ */
+export function useSpeakerLang(identity: string, isLocal: boolean): UiLang | null {
+  const value = useContext(CallCaptionsContext)
+  if (!value) return null
+  if (isLocal) return value.language.speaks
+  return value.language.roster.get(identity)?.speaks ?? null
+}
+
+/**
+ * The chip in the call's header: what my subtitles are doing. "Subtitles · FR",
+ * with "· voice" when translations are read aloud, or "Translation off" with a
+ * way back on after I chose to keep the original.
+ */
+export function TranslationChip() {
+  const { t } = useLingui()
+  const { language, subs, voiceOn, translationAllowed } = useCallCaptions()
+  const chip =
+    'inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-micro font-bold'
+  const code = language.reads.toUpperCase()
+  if (subs) {
+    return (
+      <span className={cn(chip, 'border-ktip-tropical-400/35 bg-ktip-tropical-400/15 text-ktip-tropical-300')}>
+        <Captions size={12} aria-hidden="true" />
+        {voiceOn ? t`Subtitles · ${code} · voice` : t`Subtitles · ${code}`}
+      </span>
+    )
+  }
+  if (language.choice === 'off' && translationAllowed) {
+    return (
+      <span className={cn(chip, 'border-white/12 bg-white/9 text-white/74')}>
+        <Languages size={12} aria-hidden="true" />
+        <Trans>Translation off</Trans>
+        <button
+          type="button"
+          onClick={() => language.setChoice('captions')}
+          className="font-extrabold text-white underline underline-offset-2"
+        >
+          <Trans>Turn on</Trans>
+        </button>
+      </span>
+    )
+  }
+  return null
 }
 
 /** Re-render once a second while there is something that could expire. */
@@ -267,7 +328,7 @@ export function SubtitleBand() {
 
 /** A square button in the call dock. Pressed states read green, like the rest of the site. */
 export const DOCK_BUTTON =
-  'relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-white/10 bg-white/10 text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:border-ktip-tropical-400/40 aria-pressed:bg-ktip-tropical-500/20 aria-pressed:text-ktip-tropical-300'
+  'relative inline-flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-control border border-white/12 bg-white/9 text-white transition-colors hover:bg-white/16 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:border-ktip-tropical-400/40 aria-pressed:bg-ktip-tropical-400/18 aria-pressed:text-ktip-tropical-300'
 
 const pill = (on: boolean) =>
   cn(
@@ -383,6 +444,13 @@ export function SpeakerStatus() {
           <Trans>Translation is off in this room.</Trans>
         </span>
       )}
+      {/* People want my words but this browser cannot hear them. Silent before,
+          which looked exactly like translation not working. */}
+      {canPublish && !language.paused && audience.total > 0 && !live.supported && (
+        <span className="text-micro text-ktip-sun-300">
+          <Trans>Someone is following you, but this browser cannot subtitle you. Use Chrome, Edge or Safari.</Trans>
+        </span>
+      )}
       {live.error && <span className="text-micro text-ktip-sun-300">{errorText(live.error)}</span>}
     </>
   )
@@ -410,6 +478,36 @@ export function SpeakerStatus() {
         return code
     }
   }
+}
+
+/**
+ * What the call knows, for testing with two devices: add ?calldebug to the
+ * address. English only and unstyled on purpose; it is a tool, not a feature.
+ */
+export function CallDebug() {
+  const value = useContext(CallCaptionsContext)
+  const [on] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).has('calldebug')
+    } catch {
+      return false
+    }
+  })
+  if (!on || !value) return null
+  const { language, live, audience, subs, transcribe, micOn, translationAllowed } = value
+  const last = live.captions[live.captions.length - 1]
+  const roster = [...language.roster.entries()]
+  return (
+    <pre className="col-span-full max-h-48 overflow-auto whitespace-pre-wrap rounded-control bg-black/60 p-2 font-mono text-micro leading-snug text-white/80">
+      {[
+        `me: speaks ${language.speaks}, reads ${language.reads}, choice ${language.choice}, subs ${subs}, paused ${language.paused}, mic ${micOn}`,
+        `room translation ${translationAllowed ? 'on' : 'off'}; offer ${language.offer ? `${language.offer.name} (${language.offer.speaks})` : 'none'}`,
+        `following me: ${audience.total}, translate into [${audience.targets.join(', ')}]; transcribe ${transcribe}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, error ${live.error ?? 'none'}`,
+        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} subs ${s.subs}${s.paused ? ' paused' : ''}`).join(' | ') || 'empty'}`,
+        `captions: ${live.captions.length}${last ? `, last ${last.own ? 'mine' : 'theirs'} ${last.lang}${last.translated ? ` → ${language.reads}` : ''}: "${last.display.slice(0, 60)}"` : ''}`,
+      ].join('\n')}
+    </pre>
+  )
 }
 
 /** The row under a call that has no dock of its own (MeetingCall). */

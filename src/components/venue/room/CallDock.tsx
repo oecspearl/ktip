@@ -4,7 +4,7 @@ import { MediaDeviceMenu, useLocalParticipant, useTrackToggle } from '@livekit/c
 import { Track } from 'livekit-client'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { cn } from '../../../lib/utils'
-import { DOCK_BUTTON, LanguageButton, SpeakerStatus, SubtitlesToggle } from './CallCaptions'
+import { CallDebug, DOCK_BUTTON, LanguageButton, SpeakerStatus, SubtitlesToggle } from './CallCaptions'
 import { ReactionFan } from './ReactionFan'
 
 /**
@@ -62,8 +62,10 @@ export function CallDock({
   const { t } = useLingui()
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/10 pt-3">
-      <div className="flex min-w-0 flex-1 basis-48 flex-wrap items-center gap-2">
+    // Three parts, as in the design: what is happening to my words, the
+    // buttons, and how the call is laid out. Stacked on a narrow call.
+    <div className="grid grid-cols-1 items-center gap-x-3 gap-y-2.5 border-t border-white/12 pt-3 @3xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 @max-3xl:justify-center">
         <SpeakerStatus />
       </div>
 
@@ -108,14 +110,15 @@ export function CallDock({
         <button
           type="button"
           onClick={onLeave}
-          className="inline-flex h-10 items-center gap-1.5 rounded-control bg-red-600 px-3 text-label font-bold text-white transition-colors hover:bg-red-700"
+          className="inline-flex h-10.5 items-center gap-1.5 rounded-control bg-red-600 px-3.5 text-label font-extrabold text-white transition-colors hover:bg-red-700"
         >
           <PhoneOff size={16} aria-hidden="true" />
           <Trans>Leave call</Trans>
         </button>
       </div>
 
-      <div className="flex flex-1 basis-20 items-center justify-end gap-2">
+      <CallDebug />
+      <div className="flex items-center justify-end gap-2 @max-3xl:justify-center">
         {sharing && (
           <button
             type="button"
@@ -123,12 +126,12 @@ export function CallDock({
             aria-label={columnHidden ? t`Show everyone` : t`Hide everyone else`}
             title={columnHidden ? t`Show everyone` : t`Hide everyone else`}
             onClick={onToggleColumn}
-            className={DOCK_BUTTON}
+            className={cn(DOCK_BUTTON, 'h-8.5 w-8.5')}
           >
             {columnHidden ? <PanelRightOpen size={18} aria-hidden="true" /> : <PanelRightClose size={18} aria-hidden="true" />}
           </button>
         )}
-        <button type="button" aria-label={t`Full screen`} title={t`Full screen`} onClick={onFullscreen} className={DOCK_BUTTON}>
+        <button type="button" aria-label={t`Full screen`} title={t`Full screen`} onClick={onFullscreen} className={cn(DOCK_BUTTON, 'h-8.5 w-8.5')}>
           <Maximize size={18} aria-hidden="true" />
         </button>
       </div>
@@ -180,7 +183,7 @@ function DeviceToggle({
         kind={kind}
         aria-label={menuLabel}
         title={menuLabel}
-        className="h-10! w-6! min-w-0! rounded-l-none! rounded-r-control! border! border-l-0! border-white/10! bg-white/10! px-0! text-white! after:hidden! hover:bg-white/15!"
+        className="h-10.5! w-6! min-w-0! rounded-l-none! rounded-r-control! border! border-l-0! border-white/10! bg-white/10! px-0! text-white! after:hidden! hover:bg-white/15!"
       >
         <ChevronUp size={14} aria-hidden="true" />
       </MediaDeviceMenu>

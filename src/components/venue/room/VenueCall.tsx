@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   LiveKitRoom,
   RoomAudioRenderer,
+  useParticipants,
   VideoTrack,
   useSpeakingParticipants,
   useTracks,
@@ -12,7 +14,7 @@ import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 import { PhoneCall, Presentation, ScreenShare } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
-import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationOffer } from './CallCaptions'
+import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationChip, TranslationOffer } from './CallCaptions'
 import { CallDock, type CallSignals } from './CallDock'
 import { BoardCanvas, useBoardShare } from './CallBoard'
 import { CallPeopleProvider, CallTile, type CallPerson } from './CallTile'
@@ -70,6 +72,8 @@ export function VenueCall({
   allowBoard = false,
   onShareChange,
   people,
+  hands,
+  headerSlots,
   onRecordingControl,
 }: {
   mode: RoomCameraMode
@@ -87,6 +91,10 @@ export function VenueCall({
   onShareChange?: (sharer: CallSharer | null) => void
   /** Names and photos by user id (the call identity), for camera-off tiles. */
   people?: ReadonlyMap<string, CallPerson>
+  /** User ids with a hand up, for the "Hand up" badge on their tile. */
+  hands?: readonly string[]
+  /** Places in the card's header for "3 in the call" and the subtitle chip. */
+  headerSlots?: { count: HTMLElement | null; chips: HTMLElement | null }
   /**
    * The host's record button, passed in rather than rendered here.
    *
@@ -123,7 +131,7 @@ export function VenueCall({
       // site's navy, so the call sits on that instead of a black slab.
       className={cn('flex min-h-0 flex-col gap-2 bg-transparent!', fill && 'flex-1', className)}
     >
-      <CallPeopleProvider people={people ?? NO_PEOPLE}>
+      <CallPeopleProvider people={people ?? NO_PEOPLE} hands={hands}>
       {/* Without this nobody hears anybody. It renders no UI. */}
       <RoomAudioRenderer />
 
@@ -139,6 +147,7 @@ export function VenueCall({
           onShareChange={onShareChange}
           onLeave={() => setInCall(false)}
         />
+        {headerSlots && <HeaderBits slots={headerSlots} />}
       </CallCaptionsProvider>
       {onRecordingControl}
       </CallPeopleProvider>
@@ -147,6 +156,18 @@ export function VenueCall({
 }
 
 const NO_PEOPLE: ReadonlyMap<string, CallPerson> = new Map()
+
+/** "3 in the call" and the subtitle chip, drawn into the card's header. */
+function HeaderBits({ slots }: { slots: { count: HTMLElement | null; chips: HTMLElement | null } }) {
+  const { t } = useLingui()
+  const count = useParticipants().length
+  return (
+    <>
+      {slots.count && createPortal(t`${count} in the call`, slots.count)}
+      {slots.chips && createPortal(<TranslationChip />, slots.chips)}
+    </>
+  )
+}
 
 function LeftCall({ onRejoin }: { onRejoin: () => void }) {
   return (
@@ -250,7 +271,7 @@ function CallBody({
     <div
       ref={shell}
       className={cn(
-        'relative flex min-h-0 flex-col gap-2 [&:fullscreen]:bg-ktip-ink [&:fullscreen]:p-4',
+        'relative flex min-h-0 flex-col gap-2 @container [&:fullscreen]:bg-ktip-ink [&:fullscreen]:p-4',
         fill && 'flex-1'
       )}
     >
@@ -348,9 +369,9 @@ function HuddleStrip({ cameras }: { cameras: TrackReferenceOrPlaceholder[] }) {
   const { t } = useLingui()
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t`Everyone in the call`}>
+      <div className="flex gap-2.5 overflow-x-auto pb-0.5" aria-label={t`Everyone in the call`}>
         {cameras.map((track) => (
-          <CallTile key={tileKey(track)} trackRef={track} avatarSize={44} className="aspect-[4/3] w-36 shrink-0 sm:w-42" />
+          <CallTile key={tileKey(track)} trackRef={track} avatarSize={52} className="aspect-[4/3] w-36 shrink-0 sm:w-42" />
         ))}
       </div>
       <SubtitleBand />
