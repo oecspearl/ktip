@@ -2254,6 +2254,10 @@ msgstr ""
 msgid "Translates member-written content between English, French and Spanish"
 msgstr ""
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Eraser"
+msgstr ""
+
 #: src/components/directory/MemberPanel.tsx
 msgid "Only {firstName}'s connections can see their full profile or send them a message. Send a connection request to ask."
 msgstr ""
@@ -2636,6 +2640,10 @@ msgstr ""
 msgid "What is the invitations inbox?"
 msgstr ""
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Yellow chalk"
+msgstr ""
+
 #: src/components/admin/ModerationReasonModal.tsx
 msgid "Restore {label}?"
 msgstr ""
@@ -2967,6 +2975,10 @@ msgstr ""
 msgid "All Countries"
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The language you will speak"
+msgstr ""
+
 #: src/components/venue/room/homebase/TeamIntegrations.tsx
 msgid "GitHub repository"
 msgstr ""
@@ -3175,6 +3187,10 @@ msgstr ""
 #. placeholder {1}: confirmed.label
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "{0} belongs to {1}, which verifies your KTIP account. Your profile now shows the badge."
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "This browser cannot make subtitles. Try Chrome, Edge or Safari."
 msgstr ""
 
 #: src/components/settings/PreferencesTab.tsx
@@ -4587,6 +4603,10 @@ msgstr ""
 msgid "Click where the stairs up from this floor go. They arrive in the same spot on the floor above, so it has to be clear on both."
 msgstr ""
 
+#: src/components/venue/room/RoomSections.tsx
+msgid "You are sharing, so the call grew to fill the room. {toolName} is just below."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "If we act on it, the content is removed or made inaccessible, and the member who posted it is told what was removed, why, and who filed the notice."
 msgstr ""
@@ -4810,6 +4830,10 @@ msgstr ""
 
 #: src/lib/venue-room-sections.ts
 msgid "The same chat, but only organizers may post. Use instead of Chat, not alongside it."
+msgstr ""
+
+#: src/lib/venue-room-sections.ts
+msgid "A speaker says one sentence and sees it in each language before going on stage. Nothing is stored."
 msgstr ""
 
 #. placeholder {0}: display(current, i18n)
@@ -7255,6 +7279,10 @@ msgstr ""
 msgid "Jump to next event"
 msgstr ""
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Wipe the board"
+msgstr ""
+
 #: src/components/verification/BusinessVerificationCard.tsx
 msgid "Submit to your business association"
 msgstr ""
@@ -8262,6 +8290,10 @@ msgstr ""
 
 #: src/pages/events/EventsPage.tsx
 msgid "Be the first to create an event!"
+msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing your screen to share a board"
 msgstr ""
 
 #: src/components/grants/SponsorNominationCard.tsx
@@ -10972,6 +11004,10 @@ msgstr ""
 msgid "A counter-notice needs:"
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Your subtitles appear here."
+msgstr ""
+
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Most of KTIP can be used with the keyboard alone. Hold Alt and Shift (Option and Shift on a Mac) and press a number from 1 to 9 to go to a main page, C for the main content, F to search, A for accessibility settings, or K for <0>the full list</0>. These keys do not clash with screen readers. Single-key shortcuts are off unless you switch them on."
 msgstr ""
@@ -11161,6 +11197,10 @@ msgstr ""
 
 #: src/pages/auth/LoginPage.tsx
 msgid "Session cleared. Please try signing in again."
+msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing the board to share your screen"
 msgstr ""
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
@@ -11357,6 +11397,10 @@ msgstr ""
 msgid "User not found"
 msgstr ""
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Green chalk"
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Team Size (Optional)"
 msgstr ""
@@ -11524,6 +11568,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "My Invitations"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Start the test"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -12727,6 +12775,10 @@ msgstr ""
 
 #: src/pages/events/EventVenuePage.tsx
 msgid "Draw the rooms on the Venue tab of this event's management page — there is a one-click starter set."
+msgstr ""
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Share a board"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -14039,6 +14091,10 @@ msgstr ""
 msgid "Say what you do and what you are working on. It is the first thing members read here."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Nothing is stored"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Each card carries the project’s title, summary, category and phase, plus the team behind it.\n"
 "\n"
@@ -14345,6 +14401,10 @@ msgstr ""
 
 #: src/hooks/useDocumentAccess.ts
 msgid "an editor"
+msgstr ""
+
+#: src/components/venue/room/CallBoard.tsx
+msgid "Blue chalk"
 msgstr ""
 
 #: src/pages/resources/ResourceDetailPage.tsx
@@ -14674,6 +14734,10 @@ msgstr ""
 msgid "Caption and link copied. Paste them into your Instagram story or post."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The subtitle service did not answer. Try again in a moment."
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 #: src/components/settings/PreferencesTab.tsx
 #: src/i18n/harvested.ts
@@ -14836,6 +14900,10 @@ msgstr ""
 
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "This application is already approved. Recording an amount updates the funding totals on your dashboard and the applicant's."
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The translation did not come back this time. Try again in a moment."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -16694,6 +16762,10 @@ msgstr ""
 msgid "What would you bring to this project? It helps the owner decide."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Translation is off in this room, so this shows your subtitles in the language you speak."
+msgstr ""
+
 #: src/components/events/EventScheduleTimeline.tsx
 msgid "Schedule will be announced soon."
 msgstr ""
@@ -17792,6 +17864,10 @@ msgstr ""
 #: src/components/profile/editorial/ProfileHero.tsx
 #: src/components/ui/VerifiedBadge.tsx
 msgid "Verified member"
+msgstr ""
+
+#: src/components/venue/room/CallBoard.tsx
+msgid "White chalk"
 msgstr ""
 
 #: src/pages/events/EventDetailPage.tsx
@@ -18964,6 +19040,10 @@ msgstr ""
 msgid "Translation results are cached so that the next reader of the same content does not trigger a second call."
 msgstr ""
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Board tools"
+msgstr ""
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Choose a category."
 msgstr ""
@@ -19259,6 +19339,10 @@ msgstr ""
 msgid "Who will directly benefit from this project? Describe the target population."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Say one sentence from your talk. You will see it the way listeners in the other languages will."
+msgstr ""
+
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Nothing matched “{term}”."
 msgstr ""
@@ -19515,6 +19599,10 @@ msgstr ""
 msgid "The speaker’s own voice drops while it plays"
 msgstr ""
 
+#: src/hooks/useVenueRoomToken.ts
+msgid "Your sign-in has ended. Sign out and back in to join the call."
+msgstr ""
+
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Reference"
 msgstr ""
@@ -19556,6 +19644,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I use the Document Editor?"
+msgstr ""
+
+#: src/components/venue/room/RoomSections.tsx
+msgid "{sharerName} started sharing, so the call grew to fill the room. {toolName} is just below."
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -20163,6 +20255,10 @@ msgstr ""
 
 #: src/lib/venue-room-presets.ts
 msgid "Meet the sponsor. Roles, prizes and questions."
+msgstr ""
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Cameras that are on"
 msgstr ""
 
 #: src/components/shared/DetailsEditor.tsx
@@ -21735,6 +21831,11 @@ msgstr ""
 
 #: src/components/security/TotpEnrollCard.tsx
 msgid "Copy setup key"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Subtitle test"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -23650,6 +23751,10 @@ msgstr ""
 
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Only {displayName}'s connections can see their full profile or send them a message. Send a connection request to ask."
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The test needs your microphone. Allow it in the browser and try again."
 msgstr ""
 
 #: src/components/venue/map/VenueMapEditor.tsx
@@ -25908,6 +26013,10 @@ msgstr ""
 msgid "{n, plural, one {# like on a single project} other {# likes on a single project}}"
 msgstr ""
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "{name} is sharing a board"
+msgstr ""
+
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Awaiting review"
 msgstr ""
@@ -27043,6 +27152,10 @@ msgstr ""
 msgid "Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page."
 msgstr ""
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing the board"
+msgstr ""
+
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "{hours} h"
 msgstr ""
@@ -27778,6 +27891,10 @@ msgstr ""
 msgid "Hosting and serverless execution"
 msgstr ""
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "You are sharing a board"
+msgstr ""
+
 #: src/pages/grants/GrantFormPage.tsx
 msgid "What the fund is for, what it will pay for, and how decisions are made."
 msgstr ""
@@ -28015,6 +28132,10 @@ msgstr ""
 msgid "Climate Innovation"
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Try another sentence"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Edit, feature, archive and delete any project, not only owned ones."
 msgstr ""
@@ -28045,6 +28166,10 @@ msgstr ""
 #: src/pages/collaborate/CodeEditorPage.tsx
 #: src/pages/courses/CourseDetailPage.tsx
 msgid "Language"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Nothing came through. Check your microphone is on and try again."
 msgstr ""
 
 #: src/components/venue/room/OrganiserOpsPanel.tsx
@@ -28651,6 +28776,10 @@ msgstr ""
 msgid "Sign in to join this call."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Your live subtitles are using the microphone. Pause them in the call, then run the test."
+msgstr ""
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Pin panel open"
 msgstr ""
@@ -28904,6 +29033,10 @@ msgstr ""
 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Use a full link starting with https://"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Subtitles in this browser have used today's free allowance. Chrome, Edge or Safari can still run the test."
 msgstr ""
 
 #: src/components/venue/room/CollabCommonsPanel.tsx
@@ -29745,6 +29878,10 @@ msgstr ""
 
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Listen only — no mics"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "I will speak"
 msgstr ""
 
 #: src/lib/venue-room-sections.ts
@@ -31448,6 +31585,10 @@ msgstr ""
 msgid "Signing in from the OECS Virtual Campus"
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "This browser's speech service is out of reach from here. Try Chrome, Edge or Safari."
+msgstr ""
+
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Hide pinned message"
 msgstr ""
@@ -31819,6 +31960,7 @@ msgid "Usage by team"
 msgstr ""
 
 #: src/a11y/messages.ts
+#: src/components/venue/room/CaptionTestPanel.tsx
 msgid "Listening…"
 msgstr ""
 
@@ -31898,6 +32040,10 @@ msgstr ""
 
 #: src/components/calendar/CalendarYearPicker.tsx
 msgid "Change year"
+msgstr ""
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Translating…"
 msgstr ""
 
 #: src/pages/achievements/AchievementsPage.tsx

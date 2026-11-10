@@ -64,6 +64,11 @@ function readPrefs(): Prefs {
   }
 }
 
+/** The language this browser last said it speaks in calls, if it ever did. */
+export function readCallLanguage(): UiLang | undefined {
+  return readPrefs().lang
+}
+
 function writePrefs(prefs: Prefs) {
   try {
     localStorage.setItem(PREF_KEY, JSON.stringify(prefs))

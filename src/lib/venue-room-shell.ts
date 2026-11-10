@@ -56,7 +56,7 @@ const TOOL: Record<VenueRoomKind, RoomSectionId[]> = {
   networking: ['coffee_tables', 'team_finder', 'collab_commons'],
   help_desk: ['help_nudge', 'submission_desk', 'faq'],
   team: ['team_workspace', 'submission_desk'],
-  breakout: ['organiser_ops', 'quest_board', 'collab_commons', 'focus_timer', 'objectives'],
+  breakout: ['organiser_ops', 'caption_test', 'quest_board', 'collab_commons', 'focus_timer', 'objectives'],
 }
 
 /**

@@ -32,6 +32,7 @@ export type RoomSectionId =
   | 'av_placeholder'
   | 'reactions'
   | 'focus_timer'
+  | 'caption_test'
   | 'objectives'
   | 'challenge_brief'
   | 'showcase_gallery'
@@ -175,6 +176,15 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: [],
     order: 24,
+  },
+  {
+    id: 'caption_test',
+    label: msg`Subtitle test`,
+    blurb: msg`A speaker says one sentence and sees it in each language before going on stage. Nothing is stored.`,
+    slot: 'main',
+    // Opt-in: it belongs in the green room, not in every breakout.
+    defaultFor: [],
+    order: 25,
   },
   {
     id: 'objectives',

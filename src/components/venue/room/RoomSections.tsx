@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { Info } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { useEventCriteria } from '../../../hooks/useEventCriteria'
 import { isVenueVideoConfigured } from '../../../hooks/useVenueRoomToken'
@@ -12,7 +13,9 @@ import { EventSolutionsPanel } from '../../events/EventSolutionsPanel'
 import { RoomChatPanel } from '../RoomChatPanel'
 import { RoomOccupantList } from '../RoomOccupantList'
 import { AvStage } from './AvStage'
+import type { CallSharer } from './VenueCall'
 import { FocusTimerPanel } from './FocusTimerPanel'
+import { CaptionTestPanel } from './CaptionTestPanel'
 import { LookingForTeamPanel } from './LookingForTeamPanel'
 import { RoleRosterPanel } from './RoleRosterPanel'
 import { RoomAnnouncements } from './RoomAnnouncements'
@@ -109,6 +112,7 @@ export function RoomSections({
   const { t, i18n } = useLingui()
   const { event, room, viewerRole } = context
   const [dockCollapsed, setDockCollapsed] = useDockCollapsed()
+  const [sharer, setSharer] = useState<CallSharer | null>(null)
 
   const resolved = useMemo(
     () => sectionsForRoom(room, viewerRole, event.event_type),
@@ -137,8 +141,27 @@ export function RoomSections({
 
   const render = (id: RoomSectionId, fill = false) => {
     const section = byId.get(id)
-    return section ? <RoomSection section={section} context={context} fill={fill} /> : null
+    return section ? (
+      <RoomSection
+        section={section}
+        context={context}
+        fill={fill}
+        onShareChange={id === 'av_placeholder' ? setSharer : undefined}
+      />
+    ) : null
   }
+
+  // A huddle's call is a slim strip over the room's tool. A share grows it into
+  // a presentation and pushes the tool down, so say where the tool went.
+  const huddle = cameraModeFor(room, { presenting: !!context.signals.presenter }) === 'huddle'
+  const toolName = plan.tool ? i18n._(byId.get(plan.tool)!.def.label) : null
+  const sharerName = sharer?.name ?? ''
+  const grewNote =
+    sharer && huddle && toolName
+      ? sharer.mine
+        ? t`You are sharing, so the call grew to fill the room. ${toolName} is just below.`
+        : t`${sharerName} started sharing, so the call grew to fill the room. ${toolName} is just below.`
+      : null
   const cell = (id: RoomSectionId, extra?: string) => (
     <div key={id} className={cn('min-w-0 [&:has(>div:empty)]:hidden', extra)}>
       <div>{render(id)}</div>
@@ -169,6 +192,15 @@ export function RoomSections({
       >
         <div className="flex min-w-0 flex-col gap-4">
           {plan.call && cell(plan.call)}
+          {grewNote && (
+            <p
+              role="status"
+              className="flex items-start gap-2 rounded-control border border-ktip-ocean-100 bg-ktip-ocean-50 px-3 py-2 text-sm text-ktip-ocean-800"
+            >
+              <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+              {grewNote}
+            </p>
+          )}
           {plan.tool && cell(plan.tool)}
         </div>
 
@@ -238,11 +270,14 @@ function RoomSection({
   section,
   context,
   fill,
+  onShareChange,
 }: {
   section: ResolvedRoomSection
   context: RoomSectionContext
   /** True when the layout gave this a tall cell to fill. */
   fill: boolean
+  /** The call reports who is sharing, for the note under it. */
+  onShareChange?: (sharer: CallSharer | null) => void
 }) {
   const { t } = useLingui()
   const {
@@ -282,6 +317,7 @@ function RoomSection({
           presenter={signals.presenter}
           fill={fill}
           signals={signals}
+          onShareChange={onShareChange}
         />
       )
 
@@ -290,6 +326,9 @@ function RoomSection({
 
     case 'focus_timer':
       return <FocusTimerPanel />
+
+    case 'caption_test':
+      return <CaptionTestPanel room={room} />
 
     case 'objectives':
       return <RoomTextSection variant="objectives" config={section.config} room={room} />

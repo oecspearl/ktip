@@ -30,8 +30,8 @@
  *   Floor 1  Homebase A   six team rooms (five claimed), Collab Commons
  *   Floor 2  Homebase B   workshop, hardware bench, library, three free team
  *                         rooms, mentor lounge
- *   Floor 3  Demos        showcase stage, submission desk, quest board,
- *                         spectator gallery
+ *   Floor 3  Demos        showcase stage (with the People's Choice vote),
+ *                         submission desk, quest board
  *   Floor 4  Judging      judging room, deliberation (closed), organiser HQ,
  *                         green room
  */
@@ -170,11 +170,9 @@ const ROOMS = [
   R(26, 2, 'mentor-lounge', 'Mentor Lounge', 'breakout', 'lounge', rect(23, 10, 27, 15), '#7E9EC7', 1, { description: 'Mentors only.', allowed_roles: ['mentor', 'organizer'] }),
 
   // ---- level 3: demos
-  R(40, 3, 'showcase', 'Showcase Stage', 'stage', 'stage', rect(3, 2, 14, 9), '#041E42', 2, { description: 'Demos and pitches. Captions on.', audio_mode: 'listen_only', max_publishers: 6 }),
-  R(41, 3, 'gallery', 'Spectator Gallery', 'main_hall', 'theatre', rect(16, 9, 26, 15), '#2A5788', 1.5, {
-    description: "Watch the demos and vote for the People's Choice award.",
-    sections: [{ id: 'peoples_choice' }],
-  }),
+  // The Spectator Gallery folded in here (2026-11-10): a stage shows People's
+  // Choice by default, and a second room for the same demos split the audience.
+  R(40, 3, 'showcase', 'Showcase Stage', 'stage', 'stage', rect(3, 2, 14, 9), '#041E42', 2, { description: "Demos and pitches, and the People's Choice vote. Subtitles on.", audio_mode: 'listen_only', max_publishers: 6 }),
   R(42, 3, 'submission-desk', 'Submission Desk', 'help_desk', 'counter', rect(16, 2, 21, 6), '#7AB000', 1.1, {
     description: 'Hand in your project before the deadline.',
     sections: [{ id: 'submission_desk' }],
@@ -192,7 +190,11 @@ const ROOMS = [
     allowed_roles: ['organizer'],
     sections: [{ id: 'organiser_ops' }],
   }),
-  R(34, 4, 'green-room', 'Green Room', 'breakout', 'lounge', rect(3, 11, 9, 15), '#7AB000', 1, { description: 'Pitchers wait here before going on stage.' }),
+  R(34, 4, 'green-room', 'Green Room', 'breakout', 'lounge', rect(3, 11, 9, 15), '#7AB000', 1, {
+    description: 'Pitchers wait here before going on stage.',
+    // The Green Room preset's panels, plus the subtitle test.
+    sections: ['host_controls', 'av_placeholder', 'caption_test', 'chat', 'occupants', 'countdown', 'activity_log'].map((id) => ({ id })),
+  }),
 ]
 
 // ---- layout: stairs first, then each floor packed around them ----

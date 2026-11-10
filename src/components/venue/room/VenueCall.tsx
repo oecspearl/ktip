@@ -12,10 +12,12 @@ import {
 } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import '@livekit/components-styles'
-import { PhoneCall, ScreenShare } from 'lucide-react'
+import { PhoneCall, Presentation, ScreenShare } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationOffer } from './CallCaptions'
 import { CallDock, type CallSignals } from './CallDock'
+import { BoardCanvas, useBoardShare } from './CallBoard'
+import { BOARD_TRACK } from '../../../lib/call-board'
 import { cn } from '../../../lib/utils'
 import { reactionArt } from '../../../lib/reaction-emoji'
 import { LIVEKIT_ROOM_OPTIONS } from '../../../lib/livekit-options'
@@ -34,8 +36,13 @@ import type { FloatingReaction } from '../../../hooks/useRoomSignals'
  *   - Spotlight: whoever spoke last is big, everyone else in the same column.
  *   - Grid: equal tiles, for a judging panel.
  *
- * A huddle with nobody sharing has no video at all (it is audio-only on
- * purpose: LiveKit bills downstream bandwidth), so AvStage draws its bubbles.
+ * A workshop host can share a board instead of a screen (CallBoard.tsx). It
+ * travels as a screen share, so it takes the same presentation layout.
+ *
+ * A huddle joins with cameras off (LiveKit bills downstream bandwidth, and a
+ * huddle is people working, not watching). Anyone may turn theirs on; the
+ * cameras that are on show as a row of small tiles, and AvStage's bubbles
+ * still show who is there.
  *
  * What this component does NOT do is decide anything. `canPublish` arrives in a
  * signed token from `venue_room_grant()`; passing `video`/`audio` below only
@@ -43,6 +50,14 @@ import type { FloatingReaction } from '../../../hooks/useRoomSignals'
  * be refused by the media server, which is the difference between a rule and a
  * convention.
  */
+/** Who has the stage with a share, for the room around the call. */
+export interface CallSharer {
+  name: string
+  mine: boolean
+  /** A board rather than a screen. */
+  board: boolean
+}
+
 export function VenueCall({
   mode,
   token,
@@ -51,6 +66,8 @@ export function VenueCall({
   className,
   translationAllowed = true,
   signals,
+  allowBoard = false,
+  onShareChange,
   onRecordingControl,
 }: {
   mode: RoomCameraMode
@@ -62,6 +79,10 @@ export function VenueCall({
   translationAllowed?: boolean
   /** Reactions and hands from the room's channel, plus what is floating right now. */
   signals?: CallSignals & { reactions: FloatingReaction[] }
+  /** Offer "Share a board" (workshop rooms). */
+  allowBoard?: boolean
+  /** Told whenever a share starts, changes hands or ends, and null on leaving. */
+  onShareChange?: (sharer: CallSharer | null) => void
   /**
    * The host's record button, passed in rather than rendered here.
    *
@@ -73,6 +94,8 @@ export function VenueCall({
    */
   onRecordingControl?: ReactNode
 }) {
+  // Spotlight and grid rooms turn the camera on as you join. A huddle offers
+  // it, off, from the dock.
   const wantsVideo = mode === 'spotlight' || mode === 'grid'
   // Leaving the call is not leaving the room: chat, panels and the map stay.
   // Unmounting LiveKitRoom disconnects; mounting it again rejoins.
@@ -103,9 +126,10 @@ export function VenueCall({
         <CallBody
           mode={mode}
           fill={fill}
-          wantsVideo={wantsVideo}
           canPublish={grant.can_publish}
           signals={signals}
+          allowBoard={allowBoard}
+          onShareChange={onShareChange}
           onLeave={() => setInCall(false)}
         />
       </CallCaptionsProvider>
@@ -140,20 +164,23 @@ function LeftCall({ onRejoin }: { onRejoin: () => void }) {
 function CallBody({
   mode,
   fill,
-  wantsVideo,
   canPublish,
   signals,
+  allowBoard,
+  onShareChange,
   onLeave,
 }: {
   mode: RoomCameraMode
   fill?: boolean
-  wantsVideo: boolean
   canPublish: boolean
   signals?: CallSignals & { reactions: FloatingReaction[] }
+  allowBoard: boolean
+  onShareChange?: (sharer: CallSharer | null) => void
   onLeave: () => void
 }) {
   const shell = useRef<HTMLDivElement>(null)
   const [columnHidden, setColumnHidden] = useState(false)
+  const board = useBoardShare()
 
   const tracks = useTracks(
     [
@@ -171,14 +198,41 @@ function CallBody({
   )
   const cameras = tracks.filter((track) => track.source === Track.Source.Camera)
 
+  const sharer: CallSharer | null = screen
+    ? {
+        name: screen.participant.name || screen.participant.identity,
+        mine: screen.participant.isLocal,
+        board: screen.publication.trackName === BOARD_TRACK,
+      }
+    : null
+  const sharerKey = sharer ? `${sharer.name}|${sharer.mine}|${sharer.board}` : ''
+  const report = useRef(onShareChange)
+  report.current = onShareChange
+  useEffect(() => {
+    report.current?.(sharer)
+    // Keyed on the string: a new object every render is not a new sharer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharerKey])
+  useEffect(() => () => report.current?.(null), [])
+
   const fullscreen = () => {
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
     else void shell.current?.requestFullscreen?.().catch(() => {})
   }
 
   let stage: ReactNode
-  if (screen) stage = <PresentLayout screen={screen} cameras={cameras} columnHidden={columnHidden} fill={fill} />
-  else if (!wantsVideo || cameras.length === 0) stage = <SubtitleBand />
+  if (screen)
+    stage = (
+      <PresentLayout
+        screen={screen}
+        cameras={cameras}
+        columnHidden={columnHidden}
+        fill={fill}
+        boardCanvas={screen.participant.isLocal && sharer?.board ? board.canvas : null}
+      />
+    )
+  else if (mode === 'huddle') stage = <HuddleStrip cameras={cameras} />
+  else if (cameras.length === 0) stage = <SubtitleBand />
   else if (mode === 'grid') stage = <GridStage cameras={cameras} fill={fill} />
   else stage = <SpotlightLayout cameras={cameras} fill={fill} />
 
@@ -194,9 +248,10 @@ function CallBody({
       {signals && <FloatingReactions reactions={signals.reactions} />}
       <CallDock
         canPublish={canPublish}
-        allowCamera={wantsVideo}
+        allowCamera
         signals={signals}
         sharing={!!screen}
+        board={allowBoard ? board : undefined}
         columnHidden={columnHidden}
         onToggleColumn={() => setColumnHidden((hidden) => !hidden)}
         onFullscreen={fullscreen}
@@ -218,14 +273,21 @@ function PresentLayout({
   cameras,
   columnHidden,
   fill,
+  boardCanvas,
 }: {
   screen: TrackReference
   cameras: TrackReferenceOrPlaceholder[]
   columnHidden: boolean
   fill?: boolean
+  /** My own board, to draw on, in place of the video of it. */
+  boardCanvas: HTMLCanvasElement | null
 }) {
   const { t } = useLingui()
-  const presenter = cameras.find((track) => track.participant.identity === screen.participant.identity)
+  const isBoard = screen.publication.trackName === BOARD_TRACK
+  // The host drawing on their own board needs the corner the camera would take.
+  const presenter = boardCanvas
+    ? undefined
+    : cameras.find((track) => track.participant.identity === screen.participant.identity)
   const others = cameras.filter((track) => track !== presenter)
   const showColumn = !columnHidden && others.length > 0
   const name = screen.participant.isLocal ? t`You` : screen.participant.name || screen.participant.identity
@@ -239,10 +301,20 @@ function PresentLayout({
             fill ? 'min-h-48 h-full' : 'aspect-video'
           )}
         >
-          <VideoTrack trackRef={screen} className="h-full w-full object-contain" />
-          <span className="absolute left-3 top-3 z-raised inline-flex items-center gap-1.5 rounded-control bg-black/60 px-2 py-1 text-micro font-semibold text-white">
-            <ScreenShare size={12} aria-hidden="true" />
-            {screen.participant.isLocal ? t`You are sharing your screen` : t`${name} is sharing their screen`}
+          {boardCanvas ? (
+            <BoardCanvas canvas={boardCanvas} />
+          ) : (
+            <VideoTrack trackRef={screen} className="h-full w-full object-contain" />
+          )}
+          <span className="pointer-events-none absolute left-3 top-3 z-raised inline-flex items-center gap-1.5 rounded-control bg-black/60 px-2 py-1 text-micro font-semibold text-white">
+            {isBoard ? <Presentation size={12} aria-hidden="true" /> : <ScreenShare size={12} aria-hidden="true" />}
+            {isBoard
+              ? screen.participant.isLocal
+                ? t`You are sharing a board`
+                : t`${name} is sharing a board`
+              : screen.participant.isLocal
+                ? t`You are sharing your screen`
+                : t`${name} is sharing their screen`}
           </span>
           {presenter && (
             <div className="absolute bottom-3 right-3 z-raised aspect-[4/3] w-[24%] max-w-56 overflow-hidden rounded-control shadow-card ring-2 ring-white/90 @max-2xl:bottom-auto @max-2xl:right-2 @max-2xl:top-2 @max-2xl:w-[30%]">
@@ -254,6 +326,29 @@ function PresentLayout({
         </div>
         {showColumn && <SideColumn tracks={others} />}
       </div>
+    </div>
+  )
+}
+
+/**
+ * A huddle: small tiles for the cameras that are on, in a row that scrolls,
+ * and the subtitle band under them. Nobody on camera leaves only the band.
+ */
+function HuddleStrip({ cameras }: { cameras: TrackReferenceOrPlaceholder[] }) {
+  const { t } = useLingui()
+  const on = cameras.filter((track) => track.publication && !track.publication.isMuted)
+  return (
+    <div className="flex flex-col gap-2">
+      {on.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t`Cameras that are on`}>
+          {on.map((track) => (
+            <div key={tileKey(track)} className="aspect-[4/3] w-36 shrink-0 overflow-hidden rounded-control sm:w-42">
+              <ParticipantTile trackRef={track} className="h-full w-full" />
+            </div>
+          ))}
+        </div>
+      )}
+      <SubtitleBand />
     </div>
   )
 }

@@ -21,6 +21,7 @@ const VenueCall = lazy(() =>
 import { DiamondAvatar } from '../../ui/DiamondAvatar'
 import type { VenueOccupant, VenueRoom } from '../../../types'
 import type { useRoomSignals } from '../../../hooks/useRoomSignals'
+import type { CallSharer } from './VenueCall'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -48,6 +49,7 @@ export function AvStage({
   presenter,
   fill,
   signals,
+  onShareChange,
 }: {
   room: VenueRoom
   mode: RoomCameraMode
@@ -59,6 +61,8 @@ export function AvStage({
   fill?: boolean
   /** The room's reactions and raised hands, so the call's own buttons send them. */
   signals?: ReturnType<typeof useRoomSignals>
+  /** Who is sharing, for the room around the call. */
+  onShareChange?: (sharer: CallSharer | null) => void
 }) {
   const { t } = useLingui()
   // `mode === 'off'` must not connect. A LiveKit connection is billed by the
@@ -157,6 +161,8 @@ export function AvStage({
               grant={grant}
               fill={fill}
               translationAllowed={room.live_translation !== false}
+              allowBoard={room.kind === 'workshop'}
+              onShareChange={onShareChange}
               signals={
                 signals && {
                   react: signals.react,
@@ -177,8 +183,8 @@ export function AvStage({
                 ) : undefined
               }
             />
-            {/* Huddle is audio-only, so VenueCall renders no video. The bubbles
-                stay: they are how you can see who is actually in here. */}
+            {/* A huddle shows only the cameras that are on. The bubbles stay:
+                they are how you can see who is actually in here. */}
             {mode === 'huddle' && (
               <HuddleStage people={[lead, ...rest].filter(Boolean) as VenueOccupant[]} cap={cap} />
             )}

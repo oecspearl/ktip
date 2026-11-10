@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { i18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { supabase } from '../lib/supabase'
 import { keys } from '../queries/keys'
 
@@ -49,6 +51,8 @@ export function isVenueVideoConfigured(): boolean {
   return typeof LIVEKIT_URL === 'string' && LIVEKIT_URL.startsWith('wss://')
 }
 
+const SIGNED_OUT = msg`Your sign-in has ended. Sign out and back in to join the call.`
+
 /** The one request both hooks make. The route asks Postgres; this only carries the answer. */
 async function fetchVenueToken(
   target: { roomId: string } | { coffeeTableId: string } | { callId: string }
@@ -56,16 +60,28 @@ async function fetchVenueToken(
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not signed in')
+  if (!session) throw new Error(i18n._(SIGNED_OUT))
 
-  const res = await fetch('/api/venue/room-token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify(target),
-  })
+  const ask = (accessToken: string) =>
+    fetch('/api/venue/room-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(target),
+    })
+
+  let res = await ask(session.access_token)
+  // 401 means the sign-in server no longer knows this session, while the page
+  // can still read for up to an hour on the key it has. Signing out on another
+  // device does this. One refresh, then say so plainly.
+  if (res.status === 401) {
+    const { data: refreshed } = await supabase.auth.refreshSession()
+    if (!refreshed.session) throw new Error(i18n._(SIGNED_OUT))
+    res = await ask(refreshed.session.access_token)
+    if (res.status === 401) throw new Error(i18n._(SIGNED_OUT))
+  }
 
   const body = (await res.json().catch(() => ({}))) as Partial<VenueRoomToken> & {
     error?: string

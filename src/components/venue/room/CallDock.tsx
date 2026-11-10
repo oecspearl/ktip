@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Hand, Maximize, Mic, MicOff, PanelRightClose, PanelRightOpen, PhoneOff, ScreenShare, Video, VideoOff } from 'lucide-react'
-import { MediaDeviceMenu, useTrackToggle } from '@livekit/components-react'
+import { Hand, Maximize, Mic, MicOff, PanelRightClose, PanelRightOpen, PhoneOff, Presentation, ScreenShare, Video, VideoOff } from 'lucide-react'
+import { MediaDeviceMenu, useLocalParticipant, useTrackToggle } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { cn } from '../../../lib/utils'
@@ -17,6 +17,14 @@ export interface CallSignals {
   setHand: (up: boolean) => void
 }
 
+/** The workshop board's switch, from useBoardShare. */
+export interface BoardSwitch {
+  on: boolean
+  pending: boolean
+  start: () => Promise<void>
+  stop: () => Promise<void>
+}
+
 /**
  * Our own control bar, replacing LiveKit's.
  *
@@ -31,6 +39,7 @@ export function CallDock({
   allowCamera,
   signals,
   sharing,
+  board,
   columnHidden,
   onToggleColumn,
   onFullscreen,
@@ -38,11 +47,13 @@ export function CallDock({
 }: {
   /** From the signed grant. A listener has no microphone, camera or share. */
   canPublish: boolean
-  /** Huddle rooms are audio-only, so they offer no camera. */
+  /** Every room's call offers the camera; huddles join with it off. */
   allowCamera: boolean
   signals?: CallSignals
   /** Someone's screen is up, so the people column can be hidden. */
   sharing: boolean
+  /** Present in rooms that offer a board (workshops). */
+  board?: BoardSwitch
   columnHidden: boolean
   onToggleColumn: () => void
   onFullscreen: () => void
@@ -77,7 +88,8 @@ export function CallDock({
             labelOff={t`Turn camera on`}
           />
         )}
-        {canPublish && <ShareToggle />}
+        {canPublish && <ShareToggle boardOn={!!board?.on} />}
+        {canPublish && board && <BoardToggle board={board} />}
         <SubtitlesToggle variant="dock" />
         <LanguageButton variant="dock" />
         {signals && <ReactionFan onReact={signals.react} buttonClassName={DOCK_BUTTON} />}
@@ -173,24 +185,55 @@ function DeviceToggle({
 }
 
 /** Share my screen. Captured with a "detail" hint so code and slides stay sharp. */
-function ShareToggle() {
+function ShareToggle({ boardOn }: { boardOn: boolean }) {
   const { t } = useLingui()
   const { toggle, enabled, pending } = useTrackToggle({
     source: Track.Source.ScreenShare,
     captureOptions: { audio: false, contentHint: 'detail' },
   })
-  const label = enabled ? t`Stop sharing your screen` : t`Share your screen`
+  // The board is a screen share too, so while it is up this button would read
+  // as on and stopping it would take the board down. Stop the board first.
+  const label = boardOn
+    ? t`Stop sharing the board to share your screen`
+    : enabled
+      ? t`Stop sharing your screen`
+      : t`Share your screen`
   return (
     <button
       type="button"
-      aria-pressed={enabled}
+      aria-pressed={enabled && !boardOn}
       aria-label={label}
       title={label}
-      disabled={pending}
+      disabled={pending || boardOn}
       onClick={() => void toggle()}
       className={DOCK_BUTTON}
     >
       <ScreenShare size={18} aria-hidden="true" />
+    </button>
+  )
+}
+
+/** Share a board: a chalkboard everyone sees like a shared screen. */
+function BoardToggle({ board }: { board: BoardSwitch }) {
+  const { t } = useLingui()
+  const { isScreenShareEnabled } = useLocalParticipant()
+  const blocked = isScreenShareEnabled && !board.on
+  const label = board.on
+    ? t`Stop sharing the board`
+    : blocked
+      ? t`Stop sharing your screen to share a board`
+      : t`Share a board`
+  return (
+    <button
+      type="button"
+      aria-pressed={board.on}
+      aria-label={label}
+      title={label}
+      disabled={board.pending || blocked}
+      onClick={() => void (board.on ? board.stop() : board.start())}
+      className={DOCK_BUTTON}
+    >
+      <Presentation size={18} aria-hidden="true" />
     </button>
   )
 }

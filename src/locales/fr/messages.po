@@ -2287,6 +2287,10 @@ msgstr "Un document d'identité"
 msgid "Translates member-written content between English, French and Spanish"
 msgstr "Traduit le contenu rédigé par les membres entre l'anglais, le français et l'espagnol"
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Eraser"
+msgstr "Gomme"
+
 #: src/components/directory/MemberPanel.tsx
 msgid "Only {firstName}'s connections can see their full profile or send them a message. Send a connection request to ask."
 msgstr "Seules les connexions de {firstName} peuvent voir son profil complet ou lui envoyer un message. Envoyez une demande de connexion pour demander."
@@ -2681,6 +2685,10 @@ msgstr "Parcourir les subventions"
 msgid "What is the invitations inbox?"
 msgstr "Qu'est-ce que la boîte de réception des invitations ?"
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Yellow chalk"
+msgstr "Craie jaune"
+
 #: src/components/admin/ModerationReasonModal.tsx
 msgid "Restore {label}?"
 msgstr "Restaurer {label} ?"
@@ -3012,6 +3020,10 @@ msgstr "Compétences ou temps que votre équipe peut offrir"
 msgid "All Countries"
 msgstr "Tous les pays"
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The language you will speak"
+msgstr "La langue dans laquelle vous allez parler"
+
 #: src/components/venue/room/homebase/TeamIntegrations.tsx
 msgid "GitHub repository"
 msgstr "Dépôt GitHub"
@@ -3224,6 +3236,10 @@ msgstr "Envoi des invitations…"
 #: src/pages/auth/VerifyEmailProofPage.tsx
 msgid "{0} belongs to {1}, which verifies your KTIP account. Your profile now shows the badge."
 msgstr "{0} appartient à {1}, ce qui vérifie votre compte KTIP. Votre profil affiche maintenant le badge."
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "This browser cannot make subtitles. Try Chrome, Edge or Safari."
+msgstr "Ce navigateur ne peut pas créer de sous-titres. Essayez Chrome, Edge ou Safari."
 
 #: src/components/settings/PreferencesTab.tsx
 msgid "Save Preferences"
@@ -4647,6 +4663,10 @@ msgstr "Retour à Mes extraits"
 msgid "Click where the stairs up from this floor go. They arrive in the same spot on the floor above, so it has to be clear on both."
 msgstr "Cliquez là où vont les escaliers qui montent depuis cet étage. Ils arrivent au même endroit à l'étage du dessus, qui doit donc être libre sur les deux."
 
+#: src/components/venue/room/RoomSections.tsx
+msgid "You are sharing, so the call grew to fill the room. {toolName} is just below."
+msgstr "Vous partagez : l’appel s’est agrandi pour occuper la salle. {toolName} se trouve juste en dessous."
+
 #: src/i18n/harvested.ts
 msgid "If we act on it, the content is removed or made inaccessible, and the member who posted it is told what was removed, why, and who filed the notice."
 msgstr "Si nous agissons, le contenu est supprimé ou rendu inaccessible, et le membre qui l'a publié est informé de ce qui a été retiré, pourquoi, et qui a déposé la notification."
@@ -4878,6 +4898,10 @@ msgstr "Publiez uniquement du matériel que vous possédez ou que vous êtes aut
 #: src/lib/venue-room-sections.ts
 msgid "The same chat, but only organizers may post. Use instead of Chat, not alongside it."
 msgstr "Le même chat, mais seuls les organisateurs peuvent y publier. À utiliser à la place du Chat, pas en complément."
+
+#: src/lib/venue-room-sections.ts
+msgid "A speaker says one sentence and sees it in each language before going on stage. Nothing is stored."
+msgstr "Avant de monter sur scène, l’intervenant dit une phrase et la voit dans chaque langue. Rien n’est conservé."
 
 #. placeholder {0}: display(current, i18n)
 #: src/components/documents/ExtractionReviewPanel.tsx
@@ -7372,6 +7396,10 @@ msgstr "Aucun élément ouvert ne correspond à ces filtres — les appels ferm�
 msgid "Jump to next event"
 msgstr "Aller à l'événement suivant"
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Wipe the board"
+msgstr "Effacer le tableau"
+
 #: src/components/verification/BusinessVerificationCard.tsx
 msgid "Submit to your business association"
 msgstr "Soumettre à votre association d'entreprise"
@@ -8391,6 +8419,10 @@ msgstr "Cliquez sur « Créer un événement » (vous devez être connecté)."
 #: src/pages/events/EventsPage.tsx
 msgid "Be the first to create an event!"
 msgstr "Soyez le premier à créer un événement !"
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing your screen to share a board"
+msgstr "Arrêtez de partager votre écran pour partager un tableau"
 
 #: src/components/grants/SponsorNominationCard.tsx
 msgid "Could not remove sponsor"
@@ -11154,6 +11186,10 @@ msgstr "Où cela s'est-il produit ? (facultatif)"
 msgid "A counter-notice needs:"
 msgstr "Une contre-notification nécessite :"
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Your subtitles appear here."
+msgstr "Vos sous-titres s’affichent ici."
+
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Most of KTIP can be used with the keyboard alone. Hold Alt and Shift (Option and Shift on a Mac) and press a number from 1 to 9 to go to a main page, C for the main content, F to search, A for accessibility settings, or K for <0>the full list</0>. These keys do not clash with screen readers. Single-key shortcuts are off unless you switch them on."
 msgstr "La plupart de KTIP peut être utilisé uniquement avec le clavier. Maintenez Alt et Maj (Option et Maj sur Mac) et appuyez sur un chiffre de 1 à 9 pour accéder à une page principale, C pour le contenu principal, F pour rechercher, A pour les paramètres d'accessibilité, ou K pour <0>la liste complète</0>. Ces touches n'interfèrent pas avec les lecteurs d'écran. Les raccourcis à une seule touche sont désactivés sauf si vous les activez."
@@ -11346,6 +11382,10 @@ msgstr "Membre introuvable"
 #: src/pages/auth/LoginPage.tsx
 msgid "Session cleared. Please try signing in again."
 msgstr "Session effacée. Veuillez réessayer de vous connecter."
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing the board to share your screen"
+msgstr "Arrêtez de partager le tableau pour partager votre écran"
 
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 #: src/components/collaboration/ShareEntityModal.tsx
@@ -11541,6 +11581,10 @@ msgstr "Obtenez des conseils professionnels pour tout ce qui est important. Cett
 msgid "User not found"
 msgstr "Utilisateur introuvable"
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Green chalk"
+msgstr "Craie verte"
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Team Size (Optional)"
 msgstr "Taille de l'équipe (facultatif)"
@@ -11716,6 +11760,10 @@ msgstr "Choisir un fichier"
 #: src/i18n/harvested.ts
 msgid "My Invitations"
 msgstr "Mes invitations"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Start the test"
+msgstr "Lancer le test"
 
 #: src/i18n/harvested.ts
 msgid "Approve students and sponsor their applications"
@@ -12937,6 +12985,10 @@ msgstr "Pour vous"
 #: src/pages/events/EventVenuePage.tsx
 msgid "Draw the rooms on the Venue tab of this event's management page — there is a one-click starter set."
 msgstr "Dessinez les salles dans l'onglet Lieu de la page de gestion de cet événement — un jeu de départ s'installe en un clic."
+
+#: src/components/venue/room/CallDock.tsx
+msgid "Share a board"
+msgstr "Partager un tableau"
 
 #: src/i18n/harvested.ts
 msgid "Only the purpose named in the partner’s agreement — typically matching opportunities to members, or reporting on regional programme outcomes. A partner may:"
@@ -14295,6 +14347,10 @@ msgstr "Lien vers votre présentation, ou téléversez un fichier ci-dessous"
 msgid "Say what you do and what you are working on. It is the first thing members read here."
 msgstr "Dites ce que vous faites et sur quoi vous travaillez. C'est la première chose que les membres lisent ici."
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Nothing is stored"
+msgstr "Rien n’est conservé"
+
 #: src/i18n/harvested.ts
 msgid "Each card carries the project’s title, summary, category and phase, plus the team behind it.\n"
 "\n"
@@ -14622,6 +14678,10 @@ msgstr "Quel type"
 #: src/hooks/useDocumentAccess.ts
 msgid "an editor"
 msgstr "un éditeur"
+
+#: src/components/venue/room/CallBoard.tsx
+msgid "Blue chalk"
+msgstr "Craie bleue"
 
 #: src/pages/resources/ResourceDetailPage.tsx
 msgid "Access the full resource file"
@@ -14951,6 +15011,10 @@ msgstr "Enregistré"
 msgid "Caption and link copied. Paste them into your Instagram story or post."
 msgstr ""
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The subtitle service did not answer. Try again in a moment."
+msgstr "Le service de sous-titres n’a pas répondu. Réessayez dans un instant."
+
 #: src/components/layout/Navbar.tsx
 #: src/components/settings/PreferencesTab.tsx
 #: src/i18n/harvested.ts
@@ -15118,6 +15182,10 @@ msgstr "Créez un compte, connectez-vous et configurez votre profil."
 #: src/pages/grants/GrantApplicationsPage.tsx
 msgid "This application is already approved. Recording an amount updates the funding totals on your dashboard and the applicant's."
 msgstr "Cette candidature est déjà approuvée. Enregistrer un montant met à jour les totaux de financement sur votre tableau de bord et celui du demandeur."
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The translation did not come back this time. Try again in a moment."
+msgstr "La traduction n’est pas revenue cette fois. Réessayez dans un instant."
 
 #: src/i18n/harvested.ts
 msgid "Writing, running and sharing snippets."
@@ -17007,6 +17075,10 @@ msgstr "Entrer dans une salle"
 msgid "What would you bring to this project? It helps the owner decide."
 msgstr "Qu'apporteriez-vous à ce projet ? Cela aide le porteur du projet à décider."
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Translation is off in this room, so this shows your subtitles in the language you speak."
+msgstr "La traduction est désactivée dans cette salle : vous voyez donc vos sous-titres dans la langue que vous parlez."
+
 #: src/components/events/EventScheduleTimeline.tsx
 msgid "Schedule will be announced soon."
 msgstr "Le programme sera annoncé prochainement."
@@ -18125,6 +18197,10 @@ msgstr "Enregistrez vos codes de récupération"
 #: src/components/ui/VerifiedBadge.tsx
 msgid "Verified member"
 msgstr "Membre vérifié"
+
+#: src/components/venue/room/CallBoard.tsx
+msgid "White chalk"
+msgstr "Craie blanche"
 
 #: src/pages/events/EventDetailPage.tsx
 msgid "Failed to publish event"
@@ -19320,6 +19396,10 @@ msgstr "Soumis. Vous pouvez encore modifier jusqu'à la date limite."
 msgid "Translation results are cached so that the next reader of the same content does not trigger a second call."
 msgstr "Les résultats de traduction sont mis en cache afin que le lecteur suivant du même contenu ne déclenche pas un second appel."
 
+#: src/components/venue/room/CallBoard.tsx
+msgid "Board tools"
+msgstr "Outils du tableau"
+
 #: src/pages/resources/SubmitResourcePage.tsx
 msgid "Choose a category."
 msgstr "Choisissez une catégorie."
@@ -19622,6 +19702,10 @@ msgstr "Cette adresse est déjà vérifiée."
 msgid "Who will directly benefit from this project? Describe the target population."
 msgstr "Qui bénéficiera directement de ce projet ? Décrivez la population cible."
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Say one sentence from your talk. You will see it the way listeners in the other languages will."
+msgstr "Dites une phrase de votre intervention. Vous la verrez comme la verront les personnes qui suivent dans les autres langues."
+
 #: src/components/layout/NavbarSearchPanel.tsx
 msgid "Nothing matched “{term}”."
 msgstr "Aucun résultat pour « {term} »."
@@ -19879,6 +19963,10 @@ msgstr "Facultatif, interne, et rien n'est enregistré à moins que vous ne le p
 msgid "The speaker’s own voice drops while it plays"
 msgstr "La voix de l’intervenant baisse pendant la lecture"
 
+#: src/hooks/useVenueRoomToken.ts
+msgid "Your sign-in has ended. Sign out and back in to join the call."
+msgstr "Votre session a expiré. Déconnectez-vous puis reconnectez-vous pour rejoindre l’appel."
+
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "Reference"
 msgstr "Référence"
@@ -19921,6 +20009,10 @@ msgstr "Échec de la suppression du membre"
 #: src/i18n/harvested.ts
 msgid "How do I use the Document Editor?"
 msgstr "Comment utiliser l'éditeur de documents ?"
+
+#: src/components/venue/room/RoomSections.tsx
+msgid "{sharerName} started sharing, so the call grew to fill the room. {toolName} is just below."
+msgstr "{sharerName} a commencé à partager : l’appel s’est agrandi pour occuper la salle. {toolName} se trouve juste en dessous."
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "north edge"
@@ -20543,6 +20635,10 @@ msgstr "Gérer les projets (admin)"
 #: src/lib/venue-room-presets.ts
 msgid "Meet the sponsor. Roles, prizes and questions."
 msgstr "Rencontrez le sponsor. Rôles, prix et questions."
+
+#: src/components/venue/room/VenueCall.tsx
+msgid "Cameras that are on"
+msgstr "Caméras allumées"
 
 #: src/components/shared/DetailsEditor.tsx
 msgid "Add item"
@@ -22128,6 +22224,11 @@ msgstr "Appareil"
 #: src/components/security/TotpEnrollCard.tsx
 msgid "Copy setup key"
 msgstr "Copier la clé de configuration"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+#: src/lib/venue-room-sections.ts
+msgid "Subtitle test"
+msgstr "Test des sous-titres"
 
 #: src/i18n/harvested.ts
 msgid "An established business that is actively engaged in selling and delivering products or services to customers in markets outside its home country, whether regionally or internationally."
@@ -24109,6 +24210,10 @@ msgstr "Chaque graphique se trouve désormais sur un seul hub : membres par rôl
 #: src/pages/profile/PublicProfilePage.tsx
 msgid "Only {displayName}'s connections can see their full profile or send them a message. Send a connection request to ask."
 msgstr "Seules les relations de {displayName} peuvent voir son profil complet ou lui envoyer un message. Envoyez une demande de connexion pour en faire la demande."
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "The test needs your microphone. Allow it in the browser and try again."
+msgstr "Le test a besoin de votre micro. Autorisez-le dans le navigateur, puis réessayez."
 
 #: src/components/venue/map/VenueMapEditor.tsx
 msgid "Match the room type"
@@ -26398,6 +26503,10 @@ msgstr "{0, plural, one {# sélectionné} other {# sélectionnés}}"
 msgid "{n, plural, one {# like on a single project} other {# likes on a single project}}"
 msgstr "{n, plural, one {# j'aime sur un projet unique} other {# j'aiment sur un projet unique}}"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "{name} is sharing a board"
+msgstr "{name} partage un tableau"
+
 #: src/pages/grants/MyGrantsPage.tsx
 msgid "Awaiting review"
 msgstr "En attente de révision"
@@ -27554,6 +27663,10 @@ msgstr "{n, plural, one {# événement déplacé en brouillon} other {# événem
 msgid "Dense two-column at 9pt with a narrow facts column. Fits a long history onto one page."
 msgstr "Mise en page dense sur deux colonnes en 9 pt avec une colonne d'informations étroite. Fait tenir un long parcours sur une seule page."
 
+#: src/components/venue/room/CallDock.tsx
+msgid "Stop sharing the board"
+msgstr "Arrêter de partager le tableau"
+
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "{hours} h"
 msgstr "{hours} h"
@@ -28294,6 +28407,10 @@ msgstr "Supprimer l'élément"
 msgid "Hosting and serverless execution"
 msgstr "Hébergement et exécution sans serveur"
 
+#: src/components/venue/room/VenueCall.tsx
+msgid "You are sharing a board"
+msgstr "Vous partagez un tableau"
+
 #: src/pages/grants/GrantFormPage.tsx
 msgid "What the fund is for, what it will pay for, and how decisions are made."
 msgstr "À quoi sert le fonds, ce qu'il financera, et comment les décisions sont prises."
@@ -28532,6 +28649,10 @@ msgstr "Échangez en face à face avec les membres de votre équipe grâce à la
 msgid "Climate Innovation"
 msgstr "Innovation climatique"
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Try another sentence"
+msgstr "Essayer une autre phrase"
+
 #: src/lib/permissions.ts
 msgid "Edit, feature, archive and delete any project, not only owned ones."
 msgstr "Modifier, mettre en avant, archiver et supprimer tout projet, pas seulement ceux que vous possédez."
@@ -28563,6 +28684,10 @@ msgstr "Mot de passe, adresse e-mail et suppression de compte"
 #: src/pages/courses/CourseDetailPage.tsx
 msgid "Language"
 msgstr "Langue"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Nothing came through. Check your microphone is on and try again."
+msgstr "Rien n’a été capté. Vérifiez que votre micro est activé, puis réessayez."
 
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "The meters could not be loaded. They try again every minute."
@@ -29170,6 +29295,10 @@ msgstr "Utilisateur inconnu"
 msgid "Sign in to join this call."
 msgstr "Connectez-vous pour rejoindre cet appel."
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Your live subtitles are using the microphone. Pause them in the call, then run the test."
+msgstr "Vos sous-titres en direct utilisent le micro. Mettez-les en pause dans l’appel, puis lancez le test."
+
 #: src/components/messages/MessagingPanel.tsx
 msgid "Pin panel open"
 msgstr "Épingler le panneau ouvert"
@@ -29431,6 +29560,10 @@ msgstr "La grille du mois montre ce qui se passe chaque jour ; les événements 
 #: src/components/venue/room/judging/SubmissionDeskPanel.tsx
 msgid "Use a full link starting with https://"
 msgstr "Utilisez un lien complet commençant par https://"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Subtitles in this browser have used today's free allowance. Chrome, Edge or Safari can still run the test."
+msgstr "Les sous-titres de ce navigateur ont épuisé le quota gratuit du jour. Chrome, Edge ou Safari peuvent encore lancer le test."
 
 #: src/components/venue/room/CollabCommonsPanel.tsx
 msgid "Column"
@@ -30278,6 +30411,10 @@ msgstr "Budget et équipe"
 #: src/components/venue/map/VenueRoomBrief.tsx
 msgid "Listen only — no mics"
 msgstr "Écoute seule — micros coupés"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "I will speak"
+msgstr "Je vais parler"
 
 #: src/lib/venue-room-sections.ts
 msgid "Every score and average, with the switch that publishes them. Organisers only."
@@ -32041,6 +32178,10 @@ msgstr "Passer en brouillon"
 msgid "Signing in from the OECS Virtual Campus"
 msgstr "Connexion depuis le Virtual Campus de l'OECS"
 
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "This browser's speech service is out of reach from here. Try Chrome, Edge or Safari."
+msgstr "Le service vocal de ce navigateur est inaccessible d’ici. Essayez Chrome, Edge ou Safari."
+
 #: src/components/venue/RoomChatPanel.tsx
 msgid "Hide pinned message"
 msgstr "Masquer le message épinglé"
@@ -32419,6 +32560,7 @@ msgid "Usage by team"
 msgstr "Utilisation par équipe"
 
 #: src/a11y/messages.ts
+#: src/components/venue/room/CaptionTestPanel.tsx
 msgid "Listening…"
 msgstr "Écoute…"
 
@@ -32499,6 +32641,10 @@ msgstr "Ajoutez une seconde étape à la connexion — une application d'authe
 #: src/components/calendar/CalendarYearPicker.tsx
 msgid "Change year"
 msgstr "Changer d'année"
+
+#: src/components/venue/room/CaptionTestPanel.tsx
+msgid "Translating…"
+msgstr "Traduction en cours…"
 
 #: src/pages/achievements/AchievementsPage.tsx
 msgid "Collections & filters"

@@ -300,11 +300,13 @@ export const VENUE_ROOM_PRESETS: VenueRoomPreset[] = [
     wall_height: 1.25,
     size: { w: 4, h: 4 },
     icon: 'Sparkles',
-    // Backstage: who is on, how long is left, and a room log so a presenter
-    // can catch up on what was announced while they were rehearsing.
+    // Backstage: who is on, how long is left, a room log so a presenter can
+    // catch up on what was announced while they were rehearsing, and a
+    // subtitle test so they hear how they will read in other languages.
     sections: [
       'host_controls',
       'av_placeholder',
+      'caption_test',
       'chat',
       'occupants',
       'countdown',
