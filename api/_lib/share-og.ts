@@ -102,7 +102,11 @@ function clip(text: string, max = 200): string {
 }
 
 const firstSentence = (s: string | null) => s?.split(/(?<=[.!?])\s/)[0] ?? null
-const strings = (...xs: unknown[]) => xs.filter((x): x is string => typeof x === 'string' && !!x.trim())
+/** Non-empty strings, first letter capitalised: categories are stored lower case ("education"). */
+const strings = (...xs: unknown[]) =>
+  xs
+    .filter((x): x is string => typeof x === 'string' && !!x.trim())
+    .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
 
 /** The word over the title on the card picture. */
 export const KIND_LABEL: Record<OgKind, string> = {

@@ -336,3 +336,13 @@ export async function GET(request: Request): Promise<Response> {
     },
   })
 }
+
+/**
+ * Some crawlers check an image with HEAD before fetching it, and a 405 there
+ * reads as "no image". Same answer as GET, without the body; the CDN caches
+ * the GET it rides on.
+ */
+export async function HEAD(request: Request): Promise<Response> {
+  const res = await GET(request)
+  return new Response(null, { status: res.status, headers: res.headers })
+}
