@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
+  cardFacts,
   cleanId,
-  imageVersion,
   itemCard,
   loadShareable,
   ogHtml,
@@ -89,18 +89,28 @@ describe('itemCard', () => {
     const card = itemCard(ORIGIN, 'project', project)
     expect(card.title).toBe('EduCarib Platform')
     expect(card.url).toBe(`${ORIGIN}/projects/educarib-platform`)
-    expect(card.image).toBe(
-      `${ORIGIN}/api/share-image?kind=project&id=educarib-platform&v=${imageVersion(project.image_url)}`
-    )
+    expect(card.image).toMatch(/^https:\/\/ktip\.test\/api\/share-image\?kind=project&id=educarib-platform&v=\w+$/)
     expect(card.description).toContain('Lessons download overnight')
   })
 
-  it('falls back to the KTIP picture when the item has none', () => {
-    expect(itemCard(ORIGIN, 'project', { ...project, image_url: null }).image).toBe(`${ORIGIN}/og-default.jpg`)
+  it('draws a card even when the item has no photo, since the facts go on it', () => {
+    expect(itemCard(ORIGIN, 'project', { ...project, image_url: null }).image).toContain('/api/share-image?')
   })
 
-  it('changes the image address when the photo changes', () => {
-    expect(imageVersion('a.webp?v=1')).not.toBe(imageVersion('a.webp?v=2'))
+  it('changes the image address when anything drawn on it changes', () => {
+    const v = (row: Record<string, unknown>) => new URL(itemCard(ORIGIN, 'project', row).image).searchParams.get('v')
+    expect(v({ ...project, image_url: 'a.webp?v=2' })).not.toBe(v(project))
+    expect(v({ ...project, title: 'EduCarib' })).not.toBe(v(project))
+    expect(v({ ...project, phase: 'launch' })).not.toBe(v(project))
+    expect(v({ ...project, summary: 'Different summary.' })).toBe(v(project))
+  })
+})
+
+describe('cardFacts', () => {
+  it('gives funding its award and closing date', () => {
+    expect(
+      cardFacts('grant', { amount_min: 25000, amount_max: 150000, currency: 'XCD', deadline: '2027-01-15T12:00:00Z' })
+    ).toEqual(['EC$25,000 to EC$150,000', 'Closes 15 January 2027'])
   })
 })
 

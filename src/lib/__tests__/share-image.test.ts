@@ -15,16 +15,18 @@ const webp = (width: number, height: number, alpha = false) =>
     .webp()
     .toBuffer()
 
+const TEXT = { label: 'EVENT', title: 'OECS Youth Robotics Showcase', facts: ['18 February 2027', 'Grenada'] }
+
 describe('renderCard', () => {
   it('turns a WebP photo into a 1200×630 JPEG', async () => {
-    const out = await renderCard('project', await webp(1600, 1200))
+    const out = await renderCard('project', await webp(1600, 1200), TEXT)
     const meta = await sharp(out).metadata()
     expect([meta.format, meta.width, meta.height]).toEqual(['jpeg', 1200, 630])
     expect(out.byteLength).toBeLessThan(300_000)
   })
 
   it('sets a transparent logo whole on a white card', async () => {
-    const out = await renderCard('org', await webp(512, 512, true))
+    const out = await renderCard('org', await webp(512, 512, true), TEXT)
     const meta = await sharp(out).metadata()
     expect([meta.format, meta.width, meta.height]).toEqual(['jpeg', 1200, 630])
     const { data } = await sharp(out).extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer({ resolveWithObject: true })

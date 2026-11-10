@@ -6259,6 +6259,10 @@ msgstr "Les messages privés sont également soumis aux règles"
 msgid "Business"
 msgstr "Entreprise"
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, press and hold the post box, then tap Paste."
+msgstr "Votre message est copié. Dans {name}, appuyez longuement sur la zone de publication, puis touchez Coller."
+
 #: src/i18n/harvested.ts
 msgid "AI help with applications"
 msgstr "Aide IA pour les candidatures"
@@ -9642,10 +9646,6 @@ msgstr "Article d'aide — Événements"
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
 msgstr "En continuant, vous acceptez les documents du compte."
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied. Paste it into {appName} above the link."
-msgstr ""
 
 #: src/a11y/messages.ts
 msgid "Reading speed {speed}. Change speed"
@@ -15781,10 +15781,6 @@ msgstr "Accepté la première fois que vous publiez un projet, un événement, u
 msgid "Search members..."
 msgstr "Rechercher des membres..."
 
-#: src/components/share/share-apps.tsx
-msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
-msgstr "Facebook ne permet pas aux applications de rédiger une publication à votre place. Quand vous appuyez sur Partager, nous copions votre message pour que vous puissiez le coller au-dessus du lien."
-
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr "Appel sans titre"
@@ -16540,10 +16536,6 @@ msgstr "Qui est dans la salle"
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
 msgstr "{applicationCount, plural, one {# candidature sera détruite ainsi que ses brouillons. Les candidats ne seront pas prévenus.} other {# candidatures seront détruites ainsi que leurs brouillons. Les candidats ne seront pas prévenus.}}"
-
-#: src/components/share/share-apps.tsx
-msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
-msgstr "Ouvre LinkedIn avec ce message et le lien. Nous copions aussi le message, au cas où LinkedIn laisserait la zone vide."
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Expired or no longer accepting applications"
@@ -18528,6 +18520,10 @@ msgstr "Durée de conservation"
 msgid "{n, plural, one {# connection made} other {# connections made}}"
 msgstr "{n, plural, one {# connexion établie} other {# connexions établies}}"
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, click the post box and press {pasteKeys} to paste it."
+msgstr "Votre message est copié. Dans {name}, cliquez dans la zone de publication et appuyez sur {pasteKeys} pour le coller."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-step verification is on, using your authenticator app."
 msgstr "La vérification en deux étapes est activée, en utilisant votre application d'authentificateur."
@@ -19763,6 +19759,10 @@ msgstr "Agriculture"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "That address is already verified."
 msgstr "Cette adresse est déjà vérifiée."
+
+#: src/components/share/share-apps.tsx
+msgid "{app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in."
+msgstr "{app} ne permet pas aux autres sites de remplir votre publication. Quand vous appuyez sur Partager, nous copions votre message pour que vous puissiez le coller."
 
 #: src/lib/grant-application-template.ts
 msgid "Who will directly benefit from this project? Describe the target population."
@@ -25368,10 +25368,6 @@ msgstr "Enregistrer la vitrine"
 #: src/i18n/harvested.ts
 msgid "Community & Network"
 msgstr "Communauté et réseau"
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
-msgstr "Message copié aussi. Si LinkedIn s'ouvre avec une zone vide, collez-le."
 
 #: src/hooks/useMfa.ts
 msgid "This account uses an authenticator app. Enter the code from the app instead."

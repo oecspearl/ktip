@@ -96,6 +96,8 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
   const [finished, setFinished] = useState(false)
   const [allowed, setAllowed] = useState<string[]>([])
   const [failure, setFailure] = useState<DraftFailure | null>(null)
+  /** The app the member was last sent to with a message to paste; the reminder stays until the next share. */
+  const [pasteIn, setPasteIn] = useState<string | null>(null)
 
   const host = new URL(target.url).host
   const app = appById[active] ?? apps[0]
@@ -270,6 +272,14 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
   }
 
   // ---- sharing -------------------------------------------------------------
+  /** Apps that take only the link: the member pastes the message there. */
+  const needsPaste = (id: ShareAppId) => id === 'linkedin' || id === 'facebook'
+  const pasteKeys = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘V' : 'Ctrl+V'
+  const pasteHint = (name: string) =>
+    isMobile
+      ? t`Your message is copied. In ${name}, press and hold the post box, then tap Paste.`
+      : t`Your message is copied. In ${name}, click the post box and press ${pasteKeys} to paste it.`
+
   const copyLink = async () => {
     if (await copyText(taggedUrl(target.url, 'copy', i18n.locale))) toast.success(t`Link copied`)
     else toast.error(t`Couldn't copy the link. Select it in the address bar instead.`)
@@ -301,13 +311,13 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
       const href = shareHref(id, { url, message, title: target.title })
       if (!href) return
       // Copy before opening: some browsers only allow the clipboard while the tap is still fresh.
-      // LinkedIn opens with the message filled in, through an address LinkedIn
-      // doesn't document; the copy is the fallback if that ever stops working.
-      if ((id === 'linkedin' || id === 'facebook') && message) {
+      // The reminder shows twice: a toast for the moment, and a line in the
+      // panel for when the member comes back to this tab from the other app.
+      if (needsPaste(id) && message) {
         copyText(message).then((ok) => {
           if (!ok) return
-          if (id === 'linkedin') toast.info(t`Message copied too. If LinkedIn opens with an empty box, paste it in.`)
-          else toast.info(t`Message copied. Paste it into ${appName} above the link.`)
+          setPasteIn(appName)
+          toast.info(pasteHint(appName), 10_000)
         })
       }
       if (id === 'email') window.location.href = href
@@ -671,8 +681,8 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
             </div>
 
             <p className="text-sm leading-snug text-ktip-sand-600">
-              {/* Facebook's line sits by the Share button instead, where it can't be scrolled past. */}
-              {failure ? failureText[failure] : active === 'facebook' ? null : app.how} <Trans>Tap the text to edit it.</Trans>
+              {/* For apps the member pastes into, the line sits by the Share button instead, where it can't be scrolled past. */}
+              {failure ? failureText[failure] : needsPaste(active) ? null : app.how} <Trans>Tap the text to edit it.</Trans>
             </p>
             <button
               type="button"
@@ -685,6 +695,15 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
         )}
       </div>
       <div className="shrink-0 border-t border-ktip-sand-200 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
+        {pasteIn && (
+          <p
+            role="status"
+            className="mb-3 flex items-start gap-2 rounded-xl bg-ktip-tropical-50 px-3 py-2.5 text-sm font-bold leading-snug text-ktip-tropical-900"
+          >
+            <Check className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0">{pasteHint(pasteIn)}</span>
+          </p>
+        )}
         {allDone ? (
           <button
             type="button"
@@ -695,7 +714,7 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
           </button>
         ) : (
           <>
-            {active === 'facebook' && (
+            {needsPaste(active) && pasteIn !== appName && (
               <p className="mb-3 flex items-start gap-2 text-sm leading-snug text-ktip-sand-700">
                 <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 <span className="min-w-0">{app.how}</span>

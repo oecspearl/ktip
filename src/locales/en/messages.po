@@ -6356,6 +6356,10 @@ msgstr "Private messages follow the rules too"
 msgid "Business"
 msgstr "Business"
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, press and hold the post box, then tap Paste."
+msgstr "Your message is copied. In {name}, press and hold the post box, then tap Paste."
+
 #: src/i18n/harvested.ts
 msgid "AI help with applications"
 msgstr "AI help with applications"
@@ -9833,10 +9837,6 @@ msgstr "Help article — Events"
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
 msgstr "By continuing you agree to the account documents."
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied. Paste it into {appName} above the link."
-msgstr "Message copied. Paste it into {appName} above the link."
 
 #: src/a11y/messages.ts
 msgid "Reading speed {speed}. Change speed"
@@ -16065,10 +16065,6 @@ msgstr "Accepted the first time you publish a project, event, post, CV or organi
 msgid "Search members..."
 msgstr "Search members..."
 
-#: src/components/share/share-apps.tsx
-msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
-msgstr "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
-
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr "Untitled call"
@@ -16829,10 +16825,6 @@ msgstr "Who is in the room"
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
 msgstr "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
-
-#: src/components/share/share-apps.tsx
-msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
-msgstr "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Expired or no longer accepting applications"
@@ -18857,6 +18849,10 @@ msgstr "How long we keep it"
 msgid "{n, plural, one {# connection made} other {# connections made}}"
 msgstr "{n, plural, one {# connection made} other {# connections made}}"
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, click the post box and press {pasteKeys} to paste it."
+msgstr "Your message is copied. In {name}, click the post box and press {pasteKeys} to paste it."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-step verification is on, using your authenticator app."
 msgstr "Two-step verification is on, using your authenticator app."
@@ -20104,6 +20100,10 @@ msgstr "Agriculture"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "That address is already verified."
 msgstr "That address is already verified."
+
+#: src/components/share/share-apps.tsx
+msgid "{app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in."
+msgstr "{app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in."
 
 #: src/lib/grant-application-template.ts
 msgid "Who will directly benefit from this project? Describe the target population."
@@ -25792,10 +25792,6 @@ msgstr "Save showcase"
 #: src/i18n/harvested.ts
 msgid "Community & Network"
 msgstr "Community & Network"
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
-msgstr "Message copied too. If LinkedIn opens with an empty box, paste it in."
 
 #: src/hooks/useMfa.ts
 msgid "This account uses an authenticator app. Enter the code from the app instead."

@@ -108,27 +108,57 @@
     },
     {
       "source": "/projects/:id",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*"
+        }
+      ],
       "destination": "/api/share?og=project&id=:id"
     },
     {
       "source": "/events/:id",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*"
+        }
+      ],
       "destination": "/api/share?og=event&id=:id"
     },
     {
       "source": "/grants/:id",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*"
+        }
+      ],
       "destination": "/api/share?og=grant&id=:id"
     },
     {
       "source": "/org/:slug",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*"
+        }
+      ],
       "destination": "/api/share?og=org&id=:slug"
     },
     {
       "source": "/((?!assets/|api/).*)",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*" }],
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|SkypeUriPreview|MicrosoftPreview|Embedly|Iframely).*"
+        }
+      ],
       "destination": "/api/share?og=site"
     },
     {
@@ -161,5 +191,10 @@
       "path": "/api/cron/quarterly-report",
       "schedule": "0 6 1 1,4,7,10 *"
     }
-  ]
+  ],
+  "functions": {
+    "api/share-image.ts": {
+      "includeFiles": "api/_assets/**"
+    }
+  }
 }

@@ -30,6 +30,8 @@ export const canNativeShare = () => typeof navigator !== 'undefined' && typeof n
 export function useShareApps(): ShareApp[] {
   const { t } = useLingui()
   const isMobile = useIsMobile()
+  const pastes = (app: string) =>
+    t`${app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in.`
   return [
     {
       id: 'whatsapp',
@@ -45,7 +47,7 @@ export function useShareApps(): ShareApp[] {
       draft: 'linkedin',
       icon: <Linkedin className="size-5" aria-hidden="true" />,
       tone: 'bg-[#0A66C2] text-white',
-      how: t`Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty.`,
+      how: pastes('LinkedIn'),
     },
     {
       id: 'facebook',
@@ -53,7 +55,7 @@ export function useShareApps(): ShareApp[] {
       draft: 'facebook',
       icon: <Facebook className="size-5" aria-hidden="true" />,
       tone: 'bg-[#1877F2] text-white',
-      how: t`Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link.`,
+      how: pastes('Facebook'),
     },
     {
       id: 'x',

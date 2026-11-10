@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 // `.js` on the relative imports: api/share-image.ts runs on Node as plain ES
 // modules and loads this file too. The edge bundler resolves them either way.
-import { eventRecord, grantRecord, isShareable, plainText } from '../../src/lib/share/records.js'
+import { eventRecord, grantRecord, isShareable, orgRecord, plainText, projectRecord } from '../../src/lib/share/records.js'
 
 /**
  * Link previews for shared items.
@@ -28,6 +28,8 @@ export const SITE_DESCRIPTION = 'Caribbean innovators collaborate, connect, and 
 export const DEFAULT_IMAGE_PATH = '/og-default.jpg'
 export const CARD_WIDTH = 1200
 export const CARD_HEIGHT = 630
+/** Bump when the card's drawing changes, so crawlers fetch the new look. */
+export const CARD_DESIGN = 'band-1'
 
 const TABLE: Record<Exclude<OgKind, 'org'>, string> = {
   event: 'events',
@@ -100,35 +102,50 @@ function clip(text: string, max = 200): string {
 }
 
 const firstSentence = (s: string | null) => s?.split(/(?<=[.!?])\s/)[0] ?? null
+const strings = (...xs: unknown[]) => xs.filter((x): x is string => typeof x === 'string' && !!x.trim())
 
-/** One line under the title: the facts people decide on, then the summary. */
-export function rowDescription(kind: OgKind, row: Row): string {
-  let lead: string[] = []
-  let body: string | null = null
+/** The word over the title on the card picture. */
+export const KIND_LABEL: Record<OgKind, string> = {
+  event: 'EVENT',
+  grant: 'FUNDING',
+  project: 'PROJECT',
+  org: 'BUSINESS',
+}
+
+/**
+ * The facts people decide on, shortest first: when and where for an event,
+ * how much and until when for funding. Printed on the card picture and leading
+ * the description, because Facebook shows the picture and title but not the
+ * description.
+ */
+export function cardFacts(kind: OgKind, row: Row): string[] {
   switch (kind) {
     case 'event': {
       const r = eventRecord(row)
-      lead = [r.dates, r.where].filter((x): x is string => typeof x === 'string')
-      body = plainText(row.summary, 300) ?? firstSentence(plainText(row.description, 300))
-      break
+      return strings(r.dates, r.where)
     }
     case 'grant': {
       const r = grantRecord(row)
-      lead = [r.award, r.applications_close ? `Applications close ${r.applications_close}` : null].filter(
-        (x): x is string => typeof x === 'string'
-      )
-      body = plainText(row.summary, 300) ?? firstSentence(plainText(row.description, 300))
-      break
+      return strings(r.award, r.applications_close ? `Closes ${r.applications_close}` : null)
     }
-    case 'project':
-      body = plainText(row.summary, 300) ?? firstSentence(plainText(row.description, 300))
-      break
-    case 'org':
-      lead = [str(row.industry)].filter((x): x is string => !!x)
-      body = firstSentence(plainText(row.description, 300))
-      break
+    case 'project': {
+      const r = projectRecord(row)
+      return strings(r.stage, r.category)
+    }
+    case 'org': {
+      const r = orgRecord(row)
+      return strings(r.sector, r.based_in)
+    }
   }
-  const text = [lead.join(' · '), body].filter(Boolean).join('. ')
+}
+
+/** One line under the title: the facts, then the summary. */
+export function rowDescription(kind: OgKind, row: Row): string {
+  const body =
+    kind === 'org'
+      ? firstSentence(plainText(row.description, 300))
+      : (plainText(row.summary, 300) ?? firstSentence(plainText(row.description, 300)))
+  const text = [cardFacts(kind, row).join(' · '), body].filter(Boolean).join('. ')
   return clip(text || SITE_DESCRIPTION)
 }
 
@@ -212,9 +229,10 @@ export function itemCard(origin: string, kind: OgKind, row: Row): OgCard {
   const title = rowTitle(kind, row)
   const picture = rowImage(kind, row)
   const ref = str(row.slug) || String(row.id)
-  const image = picture
-    ? `${origin}/api/share-image?kind=${kind}&id=${encodeURIComponent(ref)}&v=${imageVersion(picture)}`
-    : `${origin}${DEFAULT_IMAGE_PATH}`
+  // Every item gets a drawn card, with or without a photo, since the facts are
+  // printed on it. The version covers everything drawn, so an edit is refetched.
+  const version = imageVersion([CARD_DESIGN, picture ?? '', title, ...cardFacts(kind, row)].join('|'))
+  const image = `${origin}/api/share-image?kind=${kind}&id=${encodeURIComponent(ref)}&v=${version}`
   return {
     title,
     description: rowDescription(kind, row),

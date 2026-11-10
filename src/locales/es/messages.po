@@ -6249,6 +6249,10 @@ msgstr ""
 msgid "Business"
 msgstr "Empresa"
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, press and hold the post box, then tap Paste."
+msgstr "Su mensaje está copiado. En {name}, mantenga pulsado el cuadro de publicación y toque Pegar."
+
 #: src/i18n/harvested.ts
 msgid "AI help with applications"
 msgstr ""
@@ -9601,10 +9605,6 @@ msgstr "Artículo de ayuda — Eventos"
 
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
-msgstr ""
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied. Paste it into {appName} above the link."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -15639,10 +15639,6 @@ msgstr ""
 msgid "Search members..."
 msgstr "Buscar miembros..."
 
-#: src/components/share/share-apps.tsx
-msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
-msgstr "Facebook no permite que las aplicaciones escriban una publicación por usted. Cuando pulse Compartir, copiamos su mensaje para que pueda pegarlo encima del enlace."
-
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr "Llamada sin título"
@@ -16386,10 +16382,6 @@ msgstr "Quién está en la sala"
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
 msgstr "{applicationCount, plural, one {# solicitud será destruida junto con sus borradores. Los solicitantes no serán notificados.} other {# solicitudes serán destruidas junto con sus borradores. Los solicitantes no serán notificados.}}"
-
-#: src/components/share/share-apps.tsx
-msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
-msgstr "Abre LinkedIn con este mensaje y el enlace. También copiamos el mensaje, por si LinkedIn deja el cuadro vacío."
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Expired or no longer accepting applications"
@@ -18344,6 +18336,10 @@ msgstr ""
 msgid "{n, plural, one {# connection made} other {# connections made}}"
 msgstr ""
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, click the post box and press {pasteKeys} to paste it."
+msgstr "Su mensaje está copiado. En {name}, haga clic en el cuadro de publicación y pulse {pasteKeys} para pegarlo."
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-step verification is on, using your authenticator app."
 msgstr ""
@@ -19567,6 +19563,10 @@ msgstr "Agricultura"
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "That address is already verified."
 msgstr "Esa dirección ya está verificada."
+
+#: src/components/share/share-apps.tsx
+msgid "{app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in."
+msgstr "{app} no permite que otros sitios rellenen su publicación. Cuando pulse Compartir, copiamos su mensaje para que pueda pegarlo."
 
 #: src/lib/grant-application-template.ts
 msgid "Who will directly benefit from this project? Describe the target population."
@@ -25088,10 +25088,6 @@ msgstr "Guardar la vitrina"
 #: src/i18n/harvested.ts
 msgid "Community & Network"
 msgstr "Comunidad y red"
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
-msgstr "Mensaje copiado también. Si LinkedIn se abre con el cuadro vacío, péguelo."
 
 #: src/hooks/useMfa.ts
 msgid "This account uses an authenticator app. Enter the code from the app instead."

@@ -6161,6 +6161,10 @@ msgstr ""
 msgid "Business"
 msgstr ""
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, press and hold the post box, then tap Paste."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "AI help with applications"
 msgstr ""
@@ -9485,10 +9489,6 @@ msgstr ""
 
 #: src/components/legal/AgreementGate.tsx
 msgid "By continuing you agree to the account documents."
-msgstr ""
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied. Paste it into {appName} above the link."
 msgstr ""
 
 #: src/a11y/messages.ts
@@ -15488,10 +15488,6 @@ msgstr ""
 msgid "Search members..."
 msgstr ""
 
-#: src/components/share/share-apps.tsx
-msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
-msgstr ""
-
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr ""
@@ -16233,10 +16229,6 @@ msgstr ""
 
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
-msgstr ""
-
-#: src/components/share/share-apps.tsx
-msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -18181,6 +18173,10 @@ msgstr ""
 msgid "{n, plural, one {# connection made} other {# connections made}}"
 msgstr ""
 
+#: src/components/share/ShareSheet.tsx
+msgid "Your message is copied. In {name}, click the post box and press {pasteKeys} to paste it."
+msgstr ""
+
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Two-step verification is on, using your authenticator app."
 msgstr ""
@@ -19399,6 +19395,10 @@ msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "That address is already verified."
+msgstr ""
+
+#: src/components/share/share-apps.tsx
+msgid "{app} doesn't let other sites fill in your post. When you press Share, we copy your message so you can paste it in."
 msgstr ""
 
 #: src/lib/grant-application-template.ts
@@ -24887,10 +24887,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Community & Network"
-msgstr ""
-
-#: src/components/share/ShareSheet.tsx
-msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
 msgstr ""
 
 #: src/hooks/useMfa.ts

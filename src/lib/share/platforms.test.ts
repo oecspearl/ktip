@@ -43,14 +43,11 @@ describe('shareHref', () => {
     expect(href.searchParams.get('url')).toBe(url)
   })
 
-  it('opens the LinkedIn composer with message and link', () => {
-    const href = new URL(shareHref('linkedin', args)!)
-    expect(href.origin + href.pathname).toBe('https://www.linkedin.com/feed/')
-    expect(href.searchParams.get('shareActive')).toBe('true')
-    expect(href.searchParams.get('text')).toBe(`${args.message}\n\n${url}`)
-  })
-
-  it('gives Facebook the link only', () => {
+  it('gives LinkedIn and Facebook the link only, so they show a clean card', () => {
+    const linkedin = new URL(shareHref('linkedin', args)!)
+    expect(linkedin.origin + linkedin.pathname).toBe('https://www.linkedin.com/sharing/share-offsite/')
+    expect(linkedin.searchParams.get('url')).toBe(url)
+    expect(shareHref('linkedin', args)).not.toContain('Closes')
     expect(shareHref('facebook', args)).not.toContain('Closes')
   })
 
