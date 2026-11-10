@@ -36,6 +36,23 @@ interface QueuedLine {
 
 const supported = () => typeof window !== 'undefined' && 'speechSynthesis' in window
 
+/**
+ * Call from inside the tap that turns voice on. Phones (iOS always, Android
+ * Chrome often) keep speechSynthesis silent until a user gesture has spoken
+ * once, and the first translation arrives seconds after the tap, outside it.
+ * A silent utterance spent inside the tap unlocks the rest.
+ */
+export function primeSpeechVoice() {
+  if (!supported()) return
+  try {
+    const silent = new SpeechSynthesisUtterance(' ')
+    silent.volume = 0
+    window.speechSynthesis.speak(silent)
+  } catch {
+    // No voice engine at all: the subtitles still show.
+  }
+}
+
 function loadSlow(): Set<string> {
   try {
     const raw = JSON.parse(sessionStorage.getItem(SLOW_KEY) || '[]')

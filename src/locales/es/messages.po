@@ -8584,6 +8584,10 @@ msgstr "Los roles determinan lo que usted ve"
 msgid "Reporting a member"
 msgstr "Denunciar a un miembro"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Translation isn't working right now, so listeners see your words in {spoken}."
+msgstr "La traducción no funciona ahora mismo, así que quienes te escuchan ven tus palabras en {spoken}."
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "My profile"
 msgstr "Mi perfil"
@@ -8703,6 +8707,7 @@ msgstr "Buscar pizarras…"
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/directory/ConnectButton.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CollabCommonsPanel.tsx
 #: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/events/EventDetailPage.tsx
@@ -10405,6 +10410,11 @@ msgstr "Entrada: {doorSide}"
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Waiting on KTIP review"
 msgstr ""
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s microphone is off."
+msgstr "El micrófono de {0} está apagado."
 
 #: src/i18n/harvested.ts
 msgid "Read the funding agreement, including what rights it takes over your work, before signing."
@@ -15589,6 +15599,10 @@ msgstr ""
 msgid "Help article — Collaboration Tools"
 msgstr "Artículo de ayuda: Herramientas de colaboración"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Every microphone is off."
+msgstr "Todos los micrófonos están apagados."
+
 #: src/lib/forum-board-icons.ts
 msgid "Ideas"
 msgstr ""
@@ -18163,6 +18177,11 @@ msgstr ""
 msgid "If your organisation has no email domain we trust, an administrator of a verified business, school or college can give you a one-time code. Type it into the Verification page."
 msgstr ""
 
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0} has paused their subtitles."
+msgstr "{0} ha pausado sus subtítulos."
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
@@ -19394,6 +19413,11 @@ msgstr "Encuentre cualquier cosa con la búsqueda global"
 #: src/i18n/harvested.ts
 msgid "Your copy of everything you have submitted"
 msgstr "Su copia de todo lo que ha enviado"
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s browser can't make subtitles."
+msgstr "El navegador de {0} no puede crear subtítulos."
 
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "Close panel"
@@ -24547,6 +24571,10 @@ msgstr "{0} · {1} pts"
 msgid "You manage this call"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Heard: {heard}"
+msgstr "Escuchado: {heard}"
+
 #: src/components/calendar/CalendarShell.tsx
 msgid "12h"
 msgstr ""
@@ -24959,6 +24987,10 @@ msgstr "Ninguna institución verificada posee @{domain}. Pida a su institución 
 #: src/i18n/harvested.ts
 msgid "No — it is the record of your answer"
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles show here when someone speaks."
+msgstr "Los subtítulos aparecen aquí cuando alguien habla."
 
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Your solution and its files go in the Solutions section below."
@@ -28632,6 +28664,10 @@ msgstr "{applicationCount, plural, one {# solicitud enviada} other {# solicitude
 #: src/i18n/harvested.ts
 msgid "Welcome to Events"
 msgstr "Bienvenido a Eventos"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Someone wants to read what you say. Unmute so they can."
+msgstr "Alguien quiere leer lo que dices. Activa tu micrófono."
 
 #: src/components/venue/room/RoomSections.tsx
 msgid "You are the first one here."

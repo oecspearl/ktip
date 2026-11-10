@@ -99,7 +99,7 @@ export function CaptionTestPanel({ room }: { room: Pick<VenueRoom, 'id' | 'live_
         return
       }
       setPhase('translating')
-      void translateCaption({ text, from: speaks, targets: others, roomId: room.id }).then((variants) => {
+      void translateCaption({ text, from: speaks, targets: others, roomId: room.id }).then(({ variants }) => {
         setResults(variants)
         if (Object.keys(variants).length === 0) setProblem('no-translation')
         setPhase('done')

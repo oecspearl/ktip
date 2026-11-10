@@ -33,6 +33,87 @@ export interface CallLangState {
   subs: boolean
   /** They have paused their own captions for everyone else. */
   paused: boolean
+  /**
+   * What their recogniser is doing for the people following them. Absent from
+   * older clients and from anyone nobody follows. It lets a listener's empty
+   * subtitle band say why it is empty: before it, a speaker who was muted, on
+   * a browser that cannot transcribe, or paused looked exactly like
+   * translation not working (2026-11-10 two-device test).
+   */
+  cap?: CaptionStatus
+}
+
+/**
+ * live: transcribing now. muted: followed, microphone off. paused: they paused
+ * their subtitles. cannot: followed, but this browser cannot transcribe them.
+ */
+export type CaptionStatus = 'live' | 'muted' | 'paused' | 'cannot'
+
+const isCaptionStatus = (value: unknown): value is CaptionStatus =>
+  value === 'live' || value === 'muted' || value === 'paused' || value === 'cannot'
+
+/**
+ * My own caption status, for the call. Undefined when there is nothing a
+ * listener needs to know: I cannot publish, nobody follows me, or the
+ * recogniser is still starting.
+ */
+export function captionStatus({
+  canPublish,
+  followed,
+  paused,
+  micOn,
+  supported,
+  running,
+  failed,
+}: {
+  canPublish: boolean
+  followed: boolean
+  paused: boolean
+  micOn: boolean
+  supported: boolean
+  running: boolean
+  /** The recogniser stopped on an error it cannot get past. */
+  failed: boolean
+}): CaptionStatus | undefined {
+  if (!canPublish) return undefined
+  if (paused) return 'paused'
+  if (!followed) return undefined
+  if (!supported || failed) return 'cannot'
+  if (!micOn) return 'muted'
+  return running ? 'live' : undefined
+}
+
+/** Someone else in the call, as a listener's subtitle area sees them. */
+export interface NoticePerson {
+  name: string
+  cap?: CaptionStatus
+  /** LiveKit hears them talking right now. */
+  speaking: boolean
+}
+
+export type SubtitleNotice =
+  | { kind: 'cannot' | 'paused' | 'muted'; name: string }
+  | { kind: 'all-muted' }
+  | { kind: 'waiting' }
+
+/**
+ * What a listener's subtitle area says while no subtitle is showing.
+ *
+ * Someone talking who cannot be subtitled is worth saying anywhere, video
+ * included. The rest (waiting, microphones off) only where there is a band
+ * with room for it, never over somebody's face.
+ */
+export function subtitleNotice(people: readonly NoticePerson[], band: boolean): SubtitleNotice | null {
+  const talking = people.find((p) => p.speaking && (p.cap === 'cannot' || p.cap === 'paused'))
+  if (talking?.cap === 'cannot' || talking?.cap === 'paused') return { kind: talking.cap, name: talking.name }
+  if (!band) return null
+  if (people.some((p) => p.cap === 'live')) return { kind: 'waiting' }
+  const muted = people.filter((p) => p.cap === 'muted')
+  if (muted.length === 1) return { kind: 'muted', name: muted[0].name }
+  if (muted.length > 1) return { kind: 'all-muted' }
+  const stuck = people.find((p) => p.cap === 'cannot' || p.cap === 'paused')
+  if (stuck?.cap === 'cannot' || stuck?.cap === 'paused') return { kind: stuck.cap, name: stuck.name }
+  return null
 }
 
 /** A listener's answer to "follow along in your language?". */
@@ -58,7 +139,11 @@ export function decodeLangState(payload: Uint8Array): CallLangState | null {
   try {
     const raw = JSON.parse(new TextDecoder().decode(payload)) as Partial<LangWire>
     if (raw?.v !== 1 || !isUiLang(raw.speaks) || !isUiLang(raw.reads)) return null
-    return { speaks: raw.speaks, reads: raw.reads, subs: raw.subs === true, paused: raw.paused === true }
+    const state: CallLangState = { speaks: raw.speaks, reads: raw.reads, subs: raw.subs === true, paused: raw.paused === true }
+    // Still v1: an older client ignores the field, and a status it does not
+    // know is dropped here rather than failing the whole message.
+    if (isCaptionStatus(raw.cap)) state.cap = raw.cap
+    return state
   } catch {
     return null
   }

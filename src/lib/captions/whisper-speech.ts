@@ -102,6 +102,10 @@ export function createWhisperRecognizer(options: WhisperRecognizerOptions): Spee
     }
 
     const context = new AudioContext()
+    // A context made outside a tap can start suspended, and a suspended one
+    // reads silence: the detector below would never hear a phrase start, and
+    // nothing would ever be sent.
+    if (context.state === 'suspended') void context.resume().catch(() => {})
     const analyser = context.createAnalyser()
     analyser.fftSize = 2048
     context.createMediaStreamSource(stream).connect(analyser)

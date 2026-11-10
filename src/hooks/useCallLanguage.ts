@@ -16,6 +16,7 @@ import {
   shouldOffer,
   wantsSubtitles,
   type CallLangState,
+  type CaptionStatus,
   type FollowChoice,
 } from '../lib/captions/followers'
 
@@ -107,7 +108,11 @@ export interface CallLanguage {
   offer: OfferTarget | null
 }
 
-export function useCallLanguage(translationAllowed: boolean): CallLanguage {
+export function useCallLanguage(
+  translationAllowed: boolean,
+  /** What my recogniser is doing for my followers, worked out by the provider after the fact. */
+  cap?: CaptionStatus
+): CallLanguage {
   const { uiLang } = useLanguage()
   const [prefs, setPrefs] = useState<Prefs>(readPrefs)
   const [paused, setPaused] = useState(false)
@@ -143,8 +148,8 @@ export function useCallLanguage(translationAllowed: boolean): CallLanguage {
   })
 
   const mine = useMemo<CallLangState>(
-    () => ({ speaks, reads, subs: wantsSubtitles(choice), paused }),
-    [speaks, reads, choice, paused]
+    () => ({ speaks, reads, subs: wantsSubtitles(choice), paused, ...(cap ? { cap } : {}) }),
+    [speaks, reads, choice, paused, cap]
   )
   const mineRef = useRef(mine)
   mineRef.current = mine

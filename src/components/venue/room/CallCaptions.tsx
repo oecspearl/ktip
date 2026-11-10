@@ -1,17 +1,25 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Captions, CaptionsOff, Languages, Pause, Play, Volume2 } from 'lucide-react'
-import { useLocalParticipant } from '@livekit/components-react'
+import { useLocalParticipant, useRemoteParticipants, useSpeakingParticipants } from '@livekit/components-react'
 import { useLanguage } from '../../../i18n/LanguageContext'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
 import { cn } from '../../../lib/utils'
 import { UI_LANGS, type UiLang } from '../../../lib/i18n/protocol'
-import { audienceFor, wantsSubtitles, type Audience } from '../../../lib/captions/followers'
-import { captionRuns } from '../../../lib/captions/runs'
+import {
+  audienceFor,
+  captionStatus,
+  subtitleNotice,
+  wantsSubtitles,
+  type Audience,
+  type CaptionStatus,
+  type SubtitleNotice,
+} from '../../../lib/captions/followers'
+import { captionRuns, type CaptionRun } from '../../../lib/captions/runs'
 import { useCallLanguage, type CallLanguage } from '../../../hooks/useCallLanguage'
-import { useLiveCaptions, type LiveCaptions } from '../../../hooks/useLiveCaptions'
-import { useTranslationVoice } from '../../../hooks/useTranslationVoice'
+import { useLiveCaptions, type LiveCaptions, type ResolvedCaption } from '../../../hooks/useLiveCaptions'
+import { primeSpeechVoice, useTranslationVoice } from '../../../hooks/useTranslationVoice'
 import { Button } from '../../ui/Button'
 import { Switch } from '../../ui/Toggle'
 import { Segmented } from '../../ui/Segmented'
@@ -64,6 +72,8 @@ interface CallCaptionsValue {
   /** My recogniser should be running right now. */
   transcribe: boolean
   micOn: boolean
+  /** What the call is told about my recogniser (followers.ts). */
+  cap: CaptionStatus | undefined
 }
 
 const CallCaptionsContext = createContext<CallCaptionsValue | null>(null)
@@ -85,7 +95,10 @@ export function CallCaptionsProvider({
   /** From the signed grant. A listen-only member is never transcribed. */
   canPublish?: boolean
 }) {
-  const language = useCallLanguage(translationAllowed)
+  // My caption status is worked out from the recogniser below, which depends on
+  // the language state above it, so it reaches the call one render later.
+  const [cap, setCap] = useState<CaptionStatus | undefined>(undefined)
+  const language = useCallLanguage(translationAllowed, cap)
   const { isMicrophoneEnabled } = useLocalParticipant()
 
   const audience = useMemo(
@@ -106,6 +119,17 @@ export function CallCaptionsProvider({
     reads: language.reads,
   })
 
+  const nextCap = captionStatus({
+    canPublish,
+    followed: audience.total > 0,
+    paused: language.paused,
+    micOn: isMicrophoneEnabled,
+    supported: live.supported,
+    running: live.transcribing,
+    failed: live.failed,
+  })
+  useEffect(() => setCap(nextCap), [nextCap])
+
   const subs = wantsSubtitles(language.choice)
   const voiceOn = language.choice === 'voice' && translationAllowed
   useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
@@ -121,8 +145,9 @@ export function CallCaptionsProvider({
       canPublish,
       transcribe,
       micOn: isMicrophoneEnabled,
+      cap,
     }),
-    [language, live, audience, subs, voiceOn, translationAllowed, canPublish, transcribe, isMicrophoneEnabled]
+    [language, live, audience, subs, voiceOn, translationAllowed, canPublish, transcribe, isMicrophoneEnabled, cap]
   )
 
   return <CallCaptionsContext.Provider value={value}>{children}</CallCaptionsContext.Provider>
@@ -200,43 +225,95 @@ function tail(text: string, max: number): string {
  * Subtitles on the picture. The parent must be positioned and carry Tailwind's
  * `@container`, so the text scales with the video rather than the window.
  */
-export function CaptionOverlay({ className }: { className?: string }) {
+export function CaptionOverlay({
+  className,
+  band = false,
+}: {
+  className?: string
+  /** In a subtitle band rather than over video: there is room to say "waiting" and whose microphone is off. */
+  band?: boolean
+}) {
   const { t } = useLingui()
   const { live, subs, voiceOn, language } = useCallCaptions()
   const lines = useMemo(() => live.captions.filter((caption) => !caption.own), [live.captions])
   const now = useNow(subs && lines.length > 0)
+  const notice = useSubtitleNotice(subs, band)
 
   if (!subs) return null
   const runs = captionRuns(lines)
   const last = runs[runs.length - 1]
-  if (!last) return null
-  const newest = last.pieces[last.pieces.length - 1]
-  if (now - newest.at > HOLD_MS) return null
-
-  const from = last.pieces[0].lang
-  const translated = last.pieces.some((piece) => piece.translated)
-  const shown = tail(last.pieces.map((piece) => piece.display).join(' '), MAX_SUBTITLE_CHARS)
-  const original =
-    translated && language.showOriginal
-      ? tail(last.pieces.map((piece) => piece.text).join(' '), MAX_SUBTITLE_CHARS)
-      : null
+  const newest = last?.pieces[last.pieces.length - 1]
+  const showing = last && newest && now - newest.at <= HOLD_MS ? last : null
 
   return (
     <div
-      // Polite: a screen reader finishes its sentence before reading the next line.
+      // Polite: a screen reader finishes its sentence before reading the next
+      // line. Always mounted while subtitles are on, so the region is there
+      // before the first line arrives.
       aria-live="polite"
       className={cn(
         'pointer-events-none absolute inset-x-[5%] bottom-[7%] z-raised flex flex-col items-center gap-1 text-center',
         className
       )}
     >
+      {showing ? (
+        <SubtitleLine run={showing} reads={language.reads} showOriginal={language.showOriginal} voiceOn={voiceOn} readAloud={t`Read aloud`} />
+      ) : (
+        // Nothing to read: say why, rather than an empty band that looks
+        // exactly like subtitles not working.
+        notice && (
+          <span className="rounded-full bg-black/60 px-3 py-1 text-micro font-semibold text-white/75">
+            {noticeText(notice)}
+          </span>
+        )
+      )}
+    </div>
+  )
+
+  function noticeText(next: SubtitleNotice): string {
+    switch (next.kind) {
+      case 'waiting':
+        return t`Subtitles show here when someone speaks.`
+      case 'muted':
+        return t`${next.name}'s microphone is off.`
+      case 'all-muted':
+        return t`Every microphone is off.`
+      case 'paused':
+        return t`${next.name} has paused their subtitles.`
+      case 'cannot':
+        return t`${next.name}'s browser can't make subtitles.`
+    }
+  }
+}
+
+function SubtitleLine({
+  run,
+  reads,
+  showOriginal,
+  voiceOn,
+  readAloud,
+}: {
+  run: CaptionRun<ResolvedCaption>
+  reads: UiLang
+  showOriginal: boolean
+  voiceOn: boolean
+  readAloud: string
+}) {
+  const from = run.pieces[0].lang
+  const translated = run.pieces.some((piece) => piece.translated)
+  const shown = tail(run.pieces.map((piece) => piece.display).join(' '), MAX_SUBTITLE_CHARS)
+  const original =
+    translated && showOriginal ? tail(run.pieces.map((piece) => piece.text).join(' '), MAX_SUBTITLE_CHARS) : null
+
+  return (
+    <>
       <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-0.5 text-micro font-bold tracking-wide text-white/75">
-        {last.name && <span className="text-white">{last.name}</span>}
-        {translated ? `${from.toUpperCase()} → ${language.reads.toUpperCase()}` : from.toUpperCase()}
-        {translated && voiceOn && <Volume2 size={11} className="text-ktip-tropical-400" aria-label={t`Read aloud`} />}
+        {run.name && <span className="text-white">{run.name}</span>}
+        {translated ? `${from.toUpperCase()} → ${reads.toUpperCase()}` : from.toUpperCase()}
+        {translated && voiceOn && <Volume2 size={11} className="text-ktip-tropical-400" aria-label={readAloud} />}
       </span>
       {/* lang= on the text, so a screen reader reads French with a French voice. */}
-      <p lang={translated ? language.reads : from} className="max-w-[44ch] text-balance text-[clamp(0.875rem,2.4cqw,1.625rem)] font-bold">
+      <p lang={translated ? reads : from} className="max-w-[44ch] text-balance text-[clamp(0.875rem,2.4cqw,1.625rem)] font-bold">
         <span className="box-decoration-clone rounded-[0.2em] bg-black/75 px-[0.4em] leading-[1.6] text-white">
           {shown}
         </span>
@@ -248,8 +325,33 @@ export function CaptionOverlay({ className }: { className?: string }) {
           </span>
         </p>
       )}
-    </div>
+    </>
   )
+}
+
+/**
+ * Why my subtitle area is empty, from what everyone else's browser reports
+ * (followers.ts `subtitleNotice`). Null while subtitles are off.
+ */
+function useSubtitleNotice(active: boolean, band: boolean): SubtitleNotice | null {
+  const { t } = useLingui()
+  const { language } = useCallCaptions()
+  const remotes = useRemoteParticipants()
+  const speaking = useSpeakingParticipants()
+  const someone = t`Someone`
+  return useMemo(() => {
+    if (!active) return null
+    const talking = new Set(speaking.map((participant) => participant.identity))
+    return subtitleNotice(
+      remotes.map((participant) => ({
+        // First name, as in the offer. The identity is a user id: never shown.
+        name: participant.name?.trim().split(/\s+/)[0] || someone,
+        cap: language.roster.get(participant.identity)?.cap,
+        speaking: talking.has(participant.identity),
+      })),
+      band
+    )
+  }, [active, band, remotes, speaking, language.roster, someone])
 }
 
 /**
@@ -290,7 +392,14 @@ export function TranslationOffer({ className }: { className?: string }) {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Button size="sm" onClick={() => language.setChoice('voice')}>
+        <Button
+          size="sm"
+          onClick={() => {
+            // Inside the tap: phones keep speech silent until a gesture has spoken once.
+            primeSpeechVoice()
+            language.setChoice('voice')
+          }}
+        >
           <Volume2 size={14} aria-hidden="true" />
           <Trans>Subtitles and voice</Trans>
         </Button>
@@ -321,7 +430,7 @@ export function SubtitleBand() {
   return (
     <div className="relative flex min-h-28 flex-col gap-2 rounded-surface bg-black/30 p-3 @container">
       <TranslationOffer className="static w-full" />
-      <CaptionOverlay />
+      <CaptionOverlay band />
     </div>
   )
 }
@@ -401,12 +510,28 @@ export function LanguageButton({ variant = 'pill' }: { variant?: 'pill' | 'dock'
 
 /** What is happening to my own words, and anything that went wrong. */
 export function SpeakerStatus() {
-  const { t } = useLingui()
-  const { language, live, audience, translationAllowed, canPublish } = useCallCaptions()
+  const { t, i18n } = useLingui()
+  const { language, live, audience, translationAllowed, canPublish, micOn } = useCallCaptions()
 
   const audienceText = (Object.entries(audience.byLang) as [UiLang, number][])
     .map(([lang, count]) => `${ENDONYM[lang]} (${count})`)
     .join(', ')
+
+  // What went out from my microphone just now. Never a subtitle on my own
+  // video; a faint line here, so a speaker can see they are being heard
+  // (2026-11-10: a two-device test could not tell which side had failed).
+  const mine = useMemo(() => {
+    const own = live.captions.filter((caption) => caption.own)
+    const runs = captionRuns(own)
+    return runs[runs.length - 1] ?? null
+  }, [live.captions])
+  const newestMine = mine?.pieces[mine.pieces.length - 1]
+  const now = useNow(live.transcribing && !!newestMine)
+  const heard =
+    live.transcribing && mine && newestMine && now - newestMine.at <= HOLD_MS
+      ? tail(mine.pieces.map((piece) => piece.text).join(' '), 90)
+      : null
+  const spoken = i18n._(LANG_NAME[language.speaks])
 
   return (
     <>
@@ -431,6 +556,26 @@ export function SpeakerStatus() {
             <Pause size={12} aria-hidden="true" />
             <Trans>Pause</Trans>
           </button>
+        </span>
+      )}
+
+      {/* Followed, but muted: the recogniser stays off, so say so here instead
+          of leaving the listener's band empty with no reason on this side. */}
+      {canPublish && !language.paused && audience.total > 0 && !micOn && (
+        <span className="text-micro text-white/70">
+          <Trans>Someone wants to read what you say. Unmute so they can.</Trans>
+        </span>
+      )}
+
+      {heard && (
+        <span lang={language.speaks} className="w-full min-w-0 truncate text-micro text-white/55 @max-3xl:text-center">
+          {t`Heard: ${heard}`}
+        </span>
+      )}
+
+      {live.transcribing && live.translationIssue && (
+        <span className="text-micro text-ktip-sun-300">
+          {t`Translation isn't working right now, so listeners see your words in ${spoken}.`}
         </span>
       )}
 
@@ -494,7 +639,7 @@ export function CallDebug() {
     }
   })
   if (!on || !value) return null
-  const { language, live, audience, subs, transcribe, micOn, translationAllowed } = value
+  const { language, live, audience, subs, transcribe, micOn, translationAllowed, cap } = value
   const last = live.captions[live.captions.length - 1]
   const roster = [...language.roster.entries()]
   return (
@@ -502,8 +647,8 @@ export function CallDebug() {
       {[
         `me: speaks ${language.speaks}, reads ${language.reads}, choice ${language.choice}, subs ${subs}, paused ${language.paused}, mic ${micOn}`,
         `room translation ${translationAllowed ? 'on' : 'off'}; offer ${language.offer ? `${language.offer.name} (${language.offer.speaks})` : 'none'}`,
-        `following me: ${audience.total}, translate into [${audience.targets.join(', ')}]; transcribe ${transcribe}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, error ${live.error ?? 'none'}`,
-        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} subs ${s.subs}${s.paused ? ' paused' : ''}`).join(' | ') || 'empty'}`,
+        `following me: ${audience.total}, translate into [${audience.targets.join(', ')}]; transcribe ${transcribe}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, cap ${cap ?? 'none'}, error ${live.error ?? 'none'}${live.failed ? ' (stopped)' : ''}, translation ${live.translationIssue ?? 'ok'}`,
+        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} subs ${s.subs}${s.paused ? ' paused' : ''} cap ${s.cap ?? '-'}`).join(' | ') || 'empty'}`,
         `captions: ${live.captions.length}${last ? `, last ${last.own ? 'mine' : 'theirs'} ${last.lang}${last.translated ? ` → ${language.reads}` : ''}: "${last.display.slice(0, 60)}"` : ''}`,
       ].join('\n')}
     </pre>
@@ -602,7 +747,10 @@ function LanguageMenu({
           <Switch
             checked={voiceOn}
             disabled={!translationAllowed}
-            onChange={(on) => language.setChoice(on ? 'voice' : 'captions')}
+            onChange={(on) => {
+              if (on) primeSpeechVoice()
+              language.setChoice(on ? 'voice' : 'captions')
+            }}
             label={t`Hear translations`}
           />
         )}

@@ -94,6 +94,10 @@ export interface LiveCaptions {
   /** browser: instant, free and unlimited. whisper: Firefox, or a browser whose own service is out of reach. */
   engine: CaptionEngine | null
   error: string | null
+  /** Why my last piece came back untranslated, until one comes back translated. */
+  translationIssue: string | null
+  /** The last run stopped on an error it cannot get past (allowance, microphone, service). */
+  failed: boolean
 }
 
 export function useLiveCaptions({
@@ -114,6 +118,9 @@ export function useLiveCaptions({
   const [captions, setCaptions] = useState<Caption[]>([])
   const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [translationIssue, setTranslationIssue] = useState<string | null>(null)
+  // A stop the recogniser cannot get past, as against a phrase lost on the way.
+  const [failed, setFailed] = useState(false)
 
   // What the browser can do, decided once. The only change is one way: a
   // browser whose own speech service is out of reach moves to Whisper.
@@ -210,10 +217,17 @@ export function useLiveCaptions({
       if (to.length === 0 || !shouldTranslate(text)) return
 
       void translateCaption({ text, from: spoken, targets: to, context, roomId: roomIdRef.current || undefined }).then(
-        (variants) => {
+        ({ variants, degraded }) => {
           // A language that did not come back is left out, so its readers keep
           // the original rather than being told it is the translation.
-          if (Object.keys(variants).length === 0) return
+          if (Object.keys(variants).length === 0) {
+            // The organiser's switch already has its own line; anything else
+            // the speaker should know about, since their listeners can only
+            // see that the subtitle is still in the original.
+            if (degraded && degraded !== 'room_off') setTranslationIssue(degraded)
+            return
+          }
+          setTranslationIssue(null)
           const follow: CaptionWire = { v: 1, id, variants }
           publishRef.current(follow, true)
           merge(follow, identityRef.current, true)
@@ -258,7 +272,10 @@ export function useLiveCaptions({
             // ends this run; "busy" only shows.
             onError: (reason, fatal) => {
               setError(reason)
-              if (fatal) setRunning(false)
+              if (fatal) {
+                setRunning(false)
+                setFailed(true)
+              }
             },
           })
         : createSpeechRecognizer({
@@ -278,9 +295,12 @@ export function useLiveCaptions({
               }
               setError(failure === 'no-mic' ? 'speech-no-mic' : 'speech-browser-unreachable')
               setRunning(false)
+              setFailed(true)
             },
           })
     setError(null)
+    setFailed(false)
+    setTranslationIssue(null)
     setRunning(true)
     recognizerRef.current = recognizer
     // Captions outrank voice commands for the microphone: Chrome allows one
@@ -320,5 +340,5 @@ export function useLiveCaptions({
     [captions, reads]
   )
 
-  return { captions: resolved, transcribing: running, supported, engine, error }
+  return { captions: resolved, transcribing: running, supported, engine, error, translationIssue, failed }
 }

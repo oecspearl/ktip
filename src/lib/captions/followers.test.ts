@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   audienceFor,
+  captionStatus,
+  subtitleNotice,
   decodeLangState,
   encodeLangState,
   isFollowChoice,
@@ -85,6 +87,69 @@ describe('language messages', () => {
   it('treats a missing flag as false', () => {
     const raw = new TextEncoder().encode(JSON.stringify({ v: 1, speaks: 'en', reads: 'fr' }))
     expect(decodeLangState(raw)).toEqual({ speaks: 'en', reads: 'fr', subs: false, paused: false })
+  })
+
+  it('carries the caption status, and drops one it does not know without failing the message', () => {
+    const state = person({ cap: 'muted' })
+    expect(decodeLangState(encodeLangState(state))).toEqual(state)
+    const raw = new TextEncoder().encode(JSON.stringify({ v: 1, speaks: 'en', reads: 'fr', cap: 'singing' }))
+    const decoded = decodeLangState(raw)
+    expect(decoded).not.toBeNull()
+    expect(decoded && 'cap' in decoded).toBe(false)
+  })
+})
+
+describe('captionStatus', () => {
+  const base = { canPublish: true, followed: true, paused: false, micOn: true, supported: true, running: true, failed: false }
+
+  it('is live while transcribing for a follower', () => {
+    expect(captionStatus(base)).toBe('live')
+  })
+
+  it('says muted when followed with the microphone off', () => {
+    expect(captionStatus({ ...base, micOn: false, running: false })).toBe('muted')
+  })
+
+  it('says cannot for a browser that cannot transcribe, or a recogniser that gave up', () => {
+    expect(captionStatus({ ...base, supported: false, running: false })).toBe('cannot')
+    expect(captionStatus({ ...base, failed: true, running: false })).toBe('cannot')
+  })
+
+  it('reports a pause even before anyone follows', () => {
+    expect(captionStatus({ ...base, followed: false, paused: true })).toBe('paused')
+  })
+
+  it('says nothing when nobody follows, for a listen-only member, or while starting', () => {
+    expect(captionStatus({ ...base, followed: false })).toBeUndefined()
+    expect(captionStatus({ ...base, canPublish: false })).toBeUndefined()
+    expect(captionStatus({ ...base, running: false })).toBeUndefined()
+  })
+})
+
+describe('subtitleNotice', () => {
+  const p = (name: string, cap: CallLangState['cap'], speaking = false) => ({ name, cap, speaking })
+
+  it('names a speaker who is talking but cannot be subtitled, even over video', () => {
+    expect(subtitleNotice([p('Ana', 'live'), p('Kemar', 'cannot', true)], false)).toEqual({ kind: 'cannot', name: 'Kemar' })
+    expect(subtitleNotice([p('Kemar', 'paused', true)], false)).toEqual({ kind: 'paused', name: 'Kemar' })
+  })
+
+  it('keeps the video clear of everything else', () => {
+    expect(subtitleNotice([p('Delon', 'muted')], false)).toBeNull()
+    expect(subtitleNotice([p('Delon', 'live')], false)).toBeNull()
+  })
+
+  it('in a band, waits while anyone is live', () => {
+    expect(subtitleNotice([p('Delon', 'live'), p('Ana', 'muted')], true)).toEqual({ kind: 'waiting' })
+  })
+
+  it('in a band, says whose microphone is off', () => {
+    expect(subtitleNotice([p('Delon', 'muted')], true)).toEqual({ kind: 'muted', name: 'Delon' })
+    expect(subtitleNotice([p('Delon', 'muted'), p('Ana', 'muted')], true)).toEqual({ kind: 'all-muted' })
+  })
+
+  it('says nothing about people who have not reported a status', () => {
+    expect(subtitleNotice([p('Delon', undefined, true)], true)).toBeNull()
   })
 })
 

@@ -1,5 +1,23 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { browserSpeechFailure, createSpeechRecognizer } from './speech'
+import { browserSpeechFailure, createSpeechRecognizer, speechLocale } from './speech'
+
+describe('speechLocale', () => {
+  it('turns a bare language into a full tag, which Edge needs', () => {
+    expect(speechLocale('en', [])).toBe('en-US')
+    expect(speechLocale('fr', [])).toBe('fr-FR')
+    expect(speechLocale('es', [])).toBe('es-ES')
+  })
+
+  it("prefers the browser's own regional variant", () => {
+    expect(speechLocale('en', ['fr-FR', 'en-GB', 'en'])).toBe('en-GB')
+    expect(speechLocale('fr', ['fr-CA'])).toBe('fr-CA')
+  })
+
+  it('keeps a tag that already has a region, and falls back to English when empty', () => {
+    expect(speechLocale('en-TT', ['en-GB'])).toBe('en-TT')
+    expect(speechLocale('', [])).toBe('en-US')
+  })
+})
 
 describe('browserSpeechFailure', () => {
   it('treats a network error before anything was heard as an unreachable service', () => {
@@ -61,6 +79,12 @@ describe('createSpeechRecognizer', () => {
   afterEach(() => {
     vi.useRealTimers()
     vi.unstubAllGlobals()
+  })
+
+  it('hands the recogniser a full language tag', () => {
+    vi.stubGlobal('navigator', { languages: [] })
+    createSpeechRecognizer({ lang: 'fr', onSegment: () => {} }).start()
+    expect(FakeRecognition.instances[0].lang).toBe('fr-FR')
   })
 
   it('stops for good when the speech service is out of reach, instead of retrying', () => {

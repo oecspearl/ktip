@@ -4,9 +4,9 @@ import { isUiLang, type UiLang } from '../i18n/protocol'
  * Translate one caption piece into the languages its listeners read, through
  * api/captions/translate.ts: one request, one provider call, nothing cached.
  *
- * Resolves with whatever languages came back, possibly none. Never rejects:
- * the original is already on every screen, so a failure costs nothing but the
- * translation.
+ * Resolves with whatever languages came back, possibly none, and why when none
+ * did. Never rejects: the original is already on every screen, so a failure
+ * costs nothing but the translation.
  */
 
 const ENDPOINT = '/api/captions/translate'
@@ -49,10 +49,20 @@ export function readVariants(raw: unknown, from: UiLang): Partial<Record<UiLang,
   return out
 }
 
-export async function translateCaption(
-  request: CaptionTranslateRequest
-): Promise<Partial<Record<UiLang, string>>> {
-  if (Date.now() < backoffUntil || request.targets.length === 0) return {}
+export interface CaptionTranslateResult {
+  variants: Partial<Record<UiLang, string>>
+  /**
+   * Why nothing came back, when nothing did: the server's own reason
+   * (rate_limited, over_budget, no_key, provider_error, room_off, ...), or
+   * `unreachable` when the request itself failed. The speaker is told, so a
+   * listener reading the original is not the only one who knows.
+   */
+  degraded?: string
+}
+
+export async function translateCaption(request: CaptionTranslateRequest): Promise<CaptionTranslateResult> {
+  if (request.targets.length === 0) return { variants: {} }
+  if (Date.now() < backoffUntil) return { variants: {}, degraded: 'rate_limited' }
   const token = await accessToken()
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -66,15 +76,17 @@ export async function translateCaption(
       },
       body: JSON.stringify(request),
     })
-    if (!res.ok) return {}
+    if (!res.ok) return { variants: {}, degraded: `http_${res.status}` }
     const body = (await res.json()) as { variants?: unknown; degraded?: unknown; retryAfter?: unknown }
     if (body.degraded === 'rate_limited' || body.degraded === 'over_budget') {
       const seconds = typeof body.retryAfter === 'number' && body.retryAfter > 0 ? body.retryAfter : 30
       backoffUntil = Date.now() + seconds * 1000
     }
-    return readVariants(body.variants, request.from)
+    const variants = readVariants(body.variants, request.from)
+    const degraded = typeof body.degraded === 'string' ? body.degraded : undefined
+    return Object.keys(variants).length > 0 || !degraded ? { variants } : { variants, degraded }
   } catch {
-    return {}
+    return { variants: {}, degraded: 'unreachable' }
   } finally {
     clearTimeout(timer)
   }

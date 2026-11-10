@@ -8610,6 +8610,10 @@ msgstr "Les rôles déterminent ce que vous voyez"
 msgid "Reporting a member"
 msgstr "Signaler un membre"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Translation isn't working right now, so listeners see your words in {spoken}."
+msgstr "La traduction ne fonctionne pas pour l’instant, donc vos auditeurs voient vos paroles en {spoken}."
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "My profile"
 msgstr "Mon profil"
@@ -8729,6 +8733,7 @@ msgstr "Rechercher des tableaux blancs…"
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/directory/ConnectButton.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CollabCommonsPanel.tsx
 #: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/events/EventDetailPage.tsx
@@ -10447,6 +10452,11 @@ msgstr "Entrée : {doorSide}"
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Waiting on KTIP review"
 msgstr "En attente de la révision KTIP"
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s microphone is off."
+msgstr "Le micro de {0} est coupé."
 
 #: src/i18n/harvested.ts
 msgid "Read the funding agreement, including what rights it takes over your work, before signing."
@@ -15731,6 +15741,10 @@ msgstr "Appuyez sur le microphone, ou Alt+Shift+V, puis parlez."
 msgid "Help article — Collaboration Tools"
 msgstr "Article d'aide — Outils de collaboration"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Every microphone is off."
+msgstr "Tous les micros sont coupés."
+
 #: src/lib/forum-board-icons.ts
 msgid "Ideas"
 msgstr "Idées"
@@ -18341,6 +18355,11 @@ msgstr "Ouvrez Communauté → Forums et cliquez sur Démarrer un tableau. Le bo
 msgid "If your organisation has no email domain we trust, an administrator of a verified business, school or college can give you a one-time code. Type it into the Verification page."
 msgstr "Si votre organisation n'a aucun domaine e-mail de confiance, un administrateur d'une entreprise, école ou collège vérifié peut vous fournir un code unique. Saisissez-le sur la page Vérification."
 
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0} has paused their subtitles."
+msgstr "{0} a mis ses sous-titres en pause."
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
@@ -19584,6 +19603,11 @@ msgstr "Trouvez tout grâce à la recherche globale"
 #: src/i18n/harvested.ts
 msgid "Your copy of everything you have submitted"
 msgstr "Votre copie de tout ce que vous avez soumis"
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s browser can't make subtitles."
+msgstr "Le navigateur de {0} ne peut pas créer de sous-titres."
 
 #: src/components/notes/StickyNoteFabPanel.tsx
 msgid "Close panel"
@@ -24823,6 +24847,10 @@ msgstr "{0} · {1} pts"
 msgid "You manage this call"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Heard: {heard}"
+msgstr "Entendu : {heard}"
+
 #: src/components/calendar/CalendarShell.tsx
 msgid "12h"
 msgstr "12 h"
@@ -25239,6 +25267,10 @@ msgstr "Aucun établissement vérifié ne possède @{domain}. Demandez à votre 
 #: src/i18n/harvested.ts
 msgid "No — it is the record of your answer"
 msgstr "Non — c'est l'enregistrement de votre réponse"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles show here when someone speaks."
+msgstr "Les sous-titres s’affichent ici quand quelqu’un parle."
 
 #: src/components/documents/DocumentsPanel.tsx
 msgid "Your solution and its files go in the Solutions section below."
@@ -28934,6 +28966,10 @@ msgstr "{applicationCount, plural, one {# candidature soumise} other {# candidat
 #: src/i18n/harvested.ts
 msgid "Welcome to Events"
 msgstr "Bienvenue dans Événements"
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Someone wants to read what you say. Unmute so they can."
+msgstr "Quelqu’un veut lire ce que vous dites. Réactivez votre micro."
 
 #: src/components/venue/room/RoomSections.tsx
 msgid "You are the first one here."

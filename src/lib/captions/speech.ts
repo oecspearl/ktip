@@ -93,6 +93,29 @@ export function canCaptionWithWhisper(): boolean {
 export type CaptionEngine = 'browser' | 'whisper'
 
 /**
+ * Edge's speech service answers a bare language ("en") with a `network` error;
+ * Chrome accepts it. Both take a full tag. Before this, every Edge speaker
+ * failed on the first phrase and was moved to Whisper without a word: seconds
+ * late, metered against the organisation's daily allowance, and dependent on a
+ * second microphone capture (2026-11-10, a laptop in Edge captioned nothing for
+ * a phone). The same fix as a11y-kit's recognitionLang (1eb5e76), kept as a
+ * local copy because the kit is synced with its own product.
+ */
+const SPEECH_REGION: Record<string, string> = { en: 'en-US', fr: 'fr-FR', es: 'es-ES' }
+
+/** A full language tag for the recogniser: the browser's own regional variant first, so en-GB stays en-GB. */
+export function speechLocale(
+  lang: string,
+  preferred: readonly string[] = typeof navigator !== 'undefined' ? (navigator.languages ?? []) : []
+): string {
+  const tag = (lang || 'en').trim()
+  if (tag.includes('-')) return tag
+  const base = tag.toLowerCase()
+  const regional = preferred.find((p) => p.includes('-') && p.split('-')[0].toLowerCase() === base)
+  return regional ?? SPEECH_REGION[base] ?? tag
+}
+
+/**
  * Which recogniser captions this member's speech.
  *
  * The browser's own whenever it has one: instant, free and unlimited. Whisper
@@ -153,7 +176,7 @@ export interface SpeechRecognizer {
 }
 
 export interface SpeechRecognizerOptions {
-  /** BCP-47. The speaker's own content language, not the reader's. */
+  /** The speaker's own content language, not the reader's. A bare "en" is widened by speechLocale. */
   lang: string
   onSegment: (segment: SpeechSegment) => void
   /** Anything but `transient` has already stopped the recogniser for good. */
@@ -186,7 +209,7 @@ export function createSpeechRecognizer(options: SpeechRecognizerOptions): Speech
 
   const build = (): SpeechRecognitionLike => {
     const instance = new Ctor()
-    instance.lang = options.lang
+    instance.lang = speechLocale(options.lang)
     instance.continuous = true
     instance.interimResults = true
     // One alternative. Nobody is going to pick between spellings of a caption

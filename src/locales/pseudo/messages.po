@@ -8473,6 +8473,10 @@ msgstr ""
 msgid "Reporting a member"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Translation isn't working right now, so listeners see your words in {spoken}."
+msgstr ""
+
 #: src/components/settings/PersonalizationTab.tsx
 msgid "My profile"
 msgstr ""
@@ -8591,6 +8595,7 @@ msgstr ""
 
 #: src/components/collaboration/ShareEntityModal.tsx
 #: src/components/directory/ConnectButton.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CollabCommonsPanel.tsx
 #: src/components/venue/room/TeamFinderPanel.tsx
 #: src/pages/events/EventDetailPage.tsx
@@ -10281,6 +10286,11 @@ msgstr ""
 
 #: src/pages/onboarding/OnboardingPage.tsx
 msgid "Waiting on KTIP review"
+msgstr ""
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s microphone is off."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -15438,6 +15448,10 @@ msgstr ""
 msgid "Help article — Collaboration Tools"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Every microphone is off."
+msgstr ""
+
 #: src/lib/forum-board-icons.ts
 msgid "Ideas"
 msgstr ""
@@ -18000,6 +18014,11 @@ msgstr ""
 msgid "If your organisation has no email domain we trust, an administrator of a verified business, school or college can give you a one-time code. Type it into the Verification page."
 msgstr ""
 
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0} has paused their subtitles."
+msgstr ""
+
 #. placeholder {0}: formatDate(grant.deadline!)
 #: src/components/grants/GrantCard.tsx
 msgid " · Deadline {0}"
@@ -19226,6 +19245,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Your copy of everything you have submitted"
+msgstr ""
+
+#. placeholder {0}: next.name
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{0}'s browser can't make subtitles."
 msgstr ""
 
 #: src/components/notes/StickyNoteFabPanel.tsx
@@ -24351,6 +24375,10 @@ msgstr ""
 msgid "You manage this call"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Heard: {heard}"
+msgstr ""
+
 #: src/components/calendar/CalendarShell.tsx
 msgid "12h"
 msgstr ""
@@ -24759,6 +24787,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "No — it is the record of your answer"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles show here when someone speaks."
 msgstr ""
 
 #: src/components/documents/DocumentsPanel.tsx
@@ -28415,6 +28447,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Welcome to Events"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Someone wants to read what you say. Unmute so they can."
 msgstr ""
 
 #: src/components/venue/room/RoomSections.tsx
