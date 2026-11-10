@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRight } from 'lucide-react'
-import { focalFor, heroImageFor, gradientFor } from '../../lib/hero-images'
+import { focalFor, cardImageFor, gradientFor } from '../../lib/hero-images'
 import { ResponsiveImage } from './ResponsiveImage'
 import { cn } from '../../lib/utils'
 import type { UploadVariantOptions } from '../../hooks/useUploadVariant'
@@ -75,7 +75,7 @@ export function BentoCard({
 }: BentoCardProps) {
   const visibleTags = tags?.slice(0, MAX_CARD_TAGS) ?? []
   const overflowTags = Math.max((tags?.length ?? 0) - MAX_CARD_TAGS, 0)
-  const src = image || heroImageFor(imageSeed)
+  const src = cardImageFor(image, imageSeed)
 
   return (
     <Link

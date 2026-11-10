@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { emailFrom, resendKey, siteOrigin } from '../_lib/email'
 import { emailAllowed } from '../_lib/email-prefs'
+import { requireVerified } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -88,6 +89,10 @@ export default async function handler(request: Request) {
     data: { user: caller },
   } = await callerClient.auth.getUser()
   if (!caller) return json({ error: 'Unauthorized' }, 401)
+
+  // 205: an unverified account cannot register, so it has nothing to announce.
+  const unverified = await requireVerified(callerClient)
+  if (unverified) return unverified
 
   let body: any
   try {

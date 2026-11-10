@@ -1,4 +1,4 @@
-import { authenticate, adminClientOrNull } from './_lib/require-permission'
+import { authenticate, adminClientOrNull, requireVerified } from './_lib/require-permission'
 import { clientIp } from './_lib/client-ip'
 
 export const config = { runtime: 'edge' }
@@ -90,6 +90,10 @@ export default async function handler(request: Request) {
   const guard = await authenticate(request)
   if (!guard.ok) return guard.response
   const { callerId } = guard
+
+  // 205: an unverified account browses; it does not spend the AI budget.
+  const unverified = await requireVerified(guard.callerClient)
+  if (unverified) return unverified
 
   // The rate-limit RPC is the one thing RLS deliberately blocks, so it needs the
   // elevated client. Fail closed: a deployment without the key has no throttle,

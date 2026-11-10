@@ -24,9 +24,11 @@ import {
   RESOURCE_TYPE_COLORS,
   RESOURCE_CATEGORY_LABELS,
 } from '../../lib/constants'
-import { formatDate, truncate } from '../../lib/utils'
+import { formatDate } from '../../lib/utils'
 import { PageHero } from '../../components/layout/PageHero'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { cardImageFor } from '../../lib/hero-images'
+import { useResourceTrail } from '../../hooks/useCategoryTrail'
 
 export default function ResourceDetailPage() {
   const { t } = useLingui()
@@ -35,6 +37,7 @@ export default function ResourceDetailPage() {
 
   const auth = useAuth()
   const { resource, loading } = useResource(params.id)
+  const breadcrumb = useResourceTrail(resource)
   useCanonicalSlug(params.id, resource)
   useRecordView('resource', resource?.id)
 
@@ -120,13 +123,9 @@ export default function ResourceDetailPage() {
       <PageHero
         eyebrow={t`Resource Detail`}
         title={resource.title}
-        image={resource.thumbnail_url}
+        image={cardImageFor(resource.thumbnail_url, resource.id)}
         imageSeed={resource.id}
-        breadcrumb={[
-          { label: t`Home`, href: '/' },
-          { label: t`Resources`, href: '/resources' },
-          { label: truncate(resource.title, 30) },
-        ]}
+        breadcrumb={breadcrumb}
       >
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={RESOURCE_TYPE_COLORS[resource.resource_type] || ''}>

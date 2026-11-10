@@ -1,6 +1,18 @@
 import { msg } from '@lingui/core/macro'
 
 /**
+ * A funding call's focus area: grants.grant_type (003). The labels the Funding
+ * list groups and filters by, shared with the breadcrumb on a call's own page.
+ */
+export const GRANT_FOCUS_AREAS = [
+  { value: 'startup', label: msg`Startup Funding` },
+  { value: 'research', label: msg`Research Grants` },
+  { value: 'innovation', label: msg`Innovation Awards` },
+  { value: 'development', label: msg`Development Funds` },
+  { value: 'education', label: msg`Education Grants` },
+]
+
+/**
  * The instrument a funding call offers.
  *
  * Migration 137. Distinct from grant_type (003), which is the focus area --

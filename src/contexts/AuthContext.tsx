@@ -16,6 +16,7 @@ import { keys } from '../queries/keys'
 import {
   defaultPermissionsFor,
   expandRoles,
+  STAFF_ROLE_SLUGS,
   VERIFICATION_GATED_PERMISSIONS,
 } from '../lib/permissions'
 import { forgetDeviceToken, readDeviceToken } from '../lib/mfa'
@@ -597,13 +598,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const accountStatus: AccountStatus = profile?.account_status ?? 'active'
   const purgeAfter = profile?.purge_after ?? null
 
-  // Migration 139. Admin seats read verified so the review queue is never
-  // blocked by itself — is_verified_member() makes the same exception.
-  const verified =
-    roles.includes('oecs') ||
-    roles.includes('admin') ||
-    roles.includes('super_admin') ||
-    !!profile?.is_verified
+  // Migration 139, widened in 205. Every admin-tier seat reads verified so the
+  // review queue is never blocked by itself and no supervisor loses their own
+  // tools — is_verified_member() makes the same exception.
+  const verified = roles.some((r) => STAFF_ROLE_SLUGS.includes(r)) || !!profile?.is_verified
 
   // Migration 145. New signups are verified by the auth trigger the moment
   // their address is confirmed; this is the safety net for everyone else — an

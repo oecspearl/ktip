@@ -14,7 +14,7 @@ export const eventDetailTutorialSteps: TutorialStep[] = [
     target: '[data-spy="Key details"]',
     title: 'The essentials first',
     description:
-      'Date, time, location or virtual link, event type, and whether it has already happened. Cancelled and past events keep their page — they just say so.\n\nEverything below expands on this; this block is the part worth screenshotting.',
+      'Dates, start time, where it happens, and how many places are taken. Cancelled and past events keep their page and say so in the card beside it.\n\nEverything below expands on this row.',
     position: 'bottom',
     scrollMode: 'top',
   },
@@ -29,8 +29,8 @@ export const eventDetailTutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="event-venue-door"]',
     title: 'The live venue',
     description:
-      'Some events run a virtual venue: rooms you can walk between, open audio, and a live list of who is in each one.\n\nRegistered attendees go straight in. The door only appears on events that have one, and it sits above the brief on purpose — during a live event it is the only thing anyone is looking for.',
-    position: 'bottom',
+      'Some events run a virtual venue: rooms you can walk between, open audio, and a live list of who is in each one.\n\nRegistered attendees go straight in. The button only appears on events that have a venue, and it stays in this card as you scroll, so you never have to hunt for the way in.',
+    position: 'left',
   },
   {
     target: '[data-spy="About"]',

@@ -119,7 +119,21 @@ function edgeApiPlugin(apiKey: string | undefined): Plugin {
           const response: Response = await handler(request)
           res.statusCode = response.status
           response.headers.forEach((value, key) => res.setHeader(key, value))
-          res.end(Buffer.from(await response.arrayBuffer()))
+          if (!response.body) {
+            res.end()
+            return
+          }
+          // Pass chunks through as they come, as Vercel does, so streamed
+          // replies (api/share.ts) arrive piece by piece in dev too. A closed
+          // tab cancels the handler's stream instead of running it to the end.
+          const reader = response.body.getReader()
+          req.on('close', () => reader.cancel().catch(() => {}))
+          for (;;) {
+            const { done, value } = await reader.read()
+            if (done) break
+            res.write(Buffer.from(value))
+          }
+          res.end()
         } catch (err) {
           console.error(`[edge-api-dev] ${pathname} failed:`, err)
           res.statusCode = 500

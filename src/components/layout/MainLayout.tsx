@@ -41,6 +41,9 @@ import { useOrientationTransition } from '../../hooks/useOrientationTransition'
 import { useModerationRules } from '../../hooks/useModerationRules'
 import { shellKey } from '../../lib/routeTransitions'
 import { suspensionRedirect } from '../../lib/suspension'
+import { useWallPublicForUnverified } from '../../hooks/useUnverifiedRule'
+import { VerificationWall } from '../verification/VerificationWall'
+import { UnverifiedBanner } from '../verification/UnverifiedBanner'
 
 /**
  * The three overlay panels, each mounted only once its own trigger has fired.
@@ -81,6 +84,7 @@ export function MainLayout() {
   const auth = useAuth()
   const location = useLocation()
   const { pathname } = location
+  const wallPublic = useWallPublicForUnverified()
 
   // The venue floorplan is a full-viewport map; a footer below it would make
   // the page scrollable, so wheel-over-map would scroll the page instead of
@@ -160,9 +164,18 @@ export function MainLayout() {
           and the member has not snoozed it. Non-blocking on purpose — see the
           component. */}
       {auth.user && <ReconsentBanner />}
+      {/* Unverified accounts are read-only (205). Renders nothing otherwise. */}
+      <UnverifiedBanner />
       <main id="main-content" className="flex-1">
         <div key={shell} className="contents page-reveal">
-          <Outlet />
+          {/* Public lists a guest can read (projects, resources, directory…)
+              are marked UNVERIFIED_NO in App.tsx: a signed-in account that is
+              not verified yet sees the wall there instead (205). */}
+          {wallPublic && auth.user && auth.profile && !auth.profileLoading && !auth.verified ? (
+            <VerificationWall />
+          ) : (
+            <Outlet />
+          )}
         </div>
       </main>
       {/* Page-scroll affordance: builds itself from the current page's

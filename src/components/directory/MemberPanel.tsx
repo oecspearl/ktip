@@ -74,6 +74,9 @@ export function MemberPanel() {
   // Nothing is fetched at all for a signed-out visitor — the drawer shows the
   // sign-in gate instead (083).
   const signedIn = !!auth.user
+  // 205: an unverified account gets the lock as well, pointing at verification
+  // instead of sign-in, and nothing is fetched for it either.
+  const unverified = signedIn && !auth.verified
 
   // Exit animation: closeMember() nulls memberId immediately, but an instant
   // vanish reads as a glitch next to the slide-in. So the drawer stays mounted
@@ -104,7 +107,7 @@ export function MemberPanel() {
   )
   const { view: rawProfile, canView, isPrivate, loading: viewLoading } = useProfileView(
     resolvedId,
-    signedIn
+    signedIn && !unverified
   )
   const loading = resolvingId || viewLoading
   // get_profile_view() has a fixed return signature with no username in it, so
@@ -248,7 +251,7 @@ export function MemberPanel() {
     events?.length
   )
   // The pinned footer only makes sense once there is a member behind it.
-  const showFooter = signedIn && !!profile && !loading
+  const showFooter = signedIn && !unverified && !!profile && !loading
   const shown = (badges ?? []).slice(0, SHELF_MAX)
   const overflow = (badges?.length ?? 0) - shown.length
 
@@ -357,6 +360,23 @@ export function MemberPanel() {
                     <Link to="/signup" state={{ from: { pathname, search: window.location.search } }}>
                       <Button variant="outline" size="sm">
                         <Trans>Create an account</Trans>
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : unverified ? (
+                <div className="pf-card pf-lock">
+                  <Lock size={22} aria-hidden="true" />
+                  <h2>
+                    <Trans>Verify your account to view members</Trans>
+                  </h2>
+                  <p>
+                    <Trans>Member profiles open once your account is verified. A work or school email does it straight away.</Trans>
+                  </p>
+                  <div className="mt-2 flex flex-wrap justify-center gap-2">
+                    <Link to="/dashboard/verification">
+                      <Button size="sm">
+                        <Trans>Get verified</Trans>
                       </Button>
                     </Link>
                   </div>

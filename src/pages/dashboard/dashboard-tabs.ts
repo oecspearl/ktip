@@ -48,18 +48,25 @@ export interface DashboardTab {
    * telling you that a list of your things is a list of your things.
    */
   group?: MessageDescriptor
+  /**
+   * Open to an unverified account (205): the profile and the account, nothing
+   * else. Must match the UNVERIFIED_OK marks on the routes in App.tsx, or the
+   * rail offers a tab that opens a wall.
+   */
+  unverified?: true
 }
 
 export const DASHBOARD_TABS: DashboardTab[] = [
   // Ordered by how often a member actually opens them, not by how the panels
   // were built: the day-to-day four sit above the fold, and the two you consult
   // rather than use — Progress and Achievements — close the personal group.
-  { to: '', label: msg`Overview`, icon: LayoutDashboard, description: msg`Network, submissions, calendar` },
+  { to: '', label: msg`Overview`, icon: LayoutDashboard, description: msg`Network, submissions, calendar`, unverified: true },
   // The member's public face: the profile editor (shared with Settings) plus
   // the profile lock (083). 'profile' was already taken by the CV tab below,
   // hence the longer slug.
   {
     to: 'my-profile',
+    unverified: true,
     label: msg`My Profile`,
     icon: UserPen,
     description: msg`What others see, and who can see it`,
@@ -71,7 +78,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // Sits next to Submissions because it is the same kind of thing — your copy
   // of something you sent — and because a reply nobody finds is a reply that
   // was not sent. Settings keeps its Feedback tab; this is a second door.
-  { to: 'feedback', label: msg`Feedback`, icon: MessageCircle, description: msg`Replies to what you sent us` },
+  { to: 'feedback', label: msg`Feedback`, icon: MessageCircle, description: msg`Replies to what you sent us`, unverified: true },
   { to: 'progress', label: msg`Progress`, icon: TrendingUp, description: msg`Your activity timeline` },
   // A real panel, not a link out. The gallery renders in embedded mode (see
   // AchievementsTab); the old /achievements address redirects here.
@@ -93,6 +100,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: FileText,
     description: msg`Your résumé, ready to send`,
     roles: [...INDIVIDUAL_ROLES, ...ADMIN_TIER_ROLES],
+    unverified: true,
   },
 
   // Role-gated. Panels are stubs for now — the gating is what's wired up.
@@ -103,7 +111,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // Every organisation role, not just SMEs: an investor or an educational
   // partner has a profile and a body of work to show for exactly the same
   // reason a business does.
-  { to: 'business', label: msg`Business profile`, icon: Building2, description: msg`Your organisation and its portfolio`, roles: ORGANIZATION_ROLES },
+  { to: 'business', label: msg`Business profile`, icon: Building2, description: msg`Your organisation and its portfolio`, roles: ORGANIZATION_ROLES, unverified: true },
   // Migration 111 gave employer_members a readable policy and a backfilled
   // owner row, which is what finally made a roster screen possible. The
   // engagement switch lives here rather than on the Business tab, directly
@@ -121,11 +129,11 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   // Below the role-gated block on purpose: these are consulted, not used, and
   // the tabs somebody actually opens all day should not move down the rail to
   // make room for them.
-  { to: 'security', label: msg`Security`, icon: KeyRound, description: msg`Password, two-step and your addresses`, group: msg`Account` },
-  { to: 'preferences', label: msg`Preferences`, icon: Bell, description: msg`Notifications, privacy and display` },
-  { to: 'personalization', label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see` },
-  { to: 'verification', label: msg`Verification`, icon: BadgeCheck, description: msg`Your identity, and your business if you have one` },
-  { to: 'legal', label: msg`Legal & Consent`, icon: ScrollText, description: msg`What you agreed to` },
+  { to: 'security', label: msg`Security`, icon: KeyRound, description: msg`Password, two-step and your addresses`, group: msg`Account`, unverified: true },
+  { to: 'preferences', label: msg`Preferences`, icon: Bell, description: msg`Notifications, privacy and display`, unverified: true },
+  { to: 'personalization', label: msg`Personalization`, icon: Sparkles, description: msg`Tune what you see`, unverified: true },
+  { to: 'verification', label: msg`Verification`, icon: BadgeCheck, description: msg`Your identity, and your business if you have one`, unverified: true },
+  { to: 'legal', label: msg`Legal & Consent`, icon: ScrollText, description: msg`What you agreed to`, unverified: true },
 
   { to: '/admin', label: msg`Admin`, icon: Shield, description: msg`Platform administration`, roles: ['oecs', 'super_admin', 'admin', 'safety_admin'], external: true, group: msg`Administration` },
 ]
@@ -140,12 +148,17 @@ export const DASHBOARD_TABS: DashboardTab[] = [
  */
 export function visibleDashboardTabs(
   roles: UserRole[] | undefined,
-  activeRole?: UserRole | null
+  activeRole?: UserRole | null,
+  /** False for an unverified account, which keeps only the tabs marked `unverified` (205). */
+  verified = true
 ): DashboardTab[] {
   // Aliases resolved and the context narrowed by the one shared rule, so this
   // rail can never disagree with the navbar about which roles are in play. The
   // Admin entry below still names 'oecs' explicitly for the same reason 063 kept
   // the slug alive, but new entries need not.
   const effective = effectiveRoles(roles, activeRole)
-  return DASHBOARD_TABS.filter((tab) => !tab.roles || tab.roles.some((r) => effective.includes(r)))
+  return DASHBOARD_TABS.filter(
+    (tab) =>
+      (!tab.roles || tab.roles.some((r) => effective.includes(r))) && (verified || tab.unverified)
+  )
 }

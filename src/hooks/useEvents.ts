@@ -385,6 +385,11 @@ export function useRSVP() {
         .select()
         .single()
 
+      // 205: an unverified account is refused by RLS (42501). Say why, rather
+      // than surfacing a bare permission error.
+      if (error?.code === '42501') {
+        throw new Error(i18n._(msg`Verify your account to register for events.`))
+      }
       if (error) throw error
 
       announceRegistration({

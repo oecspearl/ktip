@@ -22,6 +22,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AccountRoute } from './components/AccountRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { PermissionRoute } from './components/PermissionRoute'
+import { UNVERIFIED_NO, UNVERIFIED_OK } from './lib/unverified-access'
 import type { AgreementRoute as AgreementRouteType } from './components/legal/AgreementRoute'
 import { AppErrorBoundary } from './components/ErrorBoundary'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
@@ -292,7 +293,7 @@ const router = createBrowserRouter([
         children: [
           // Public browse routes
           { path: '/', lazy: lazyPage(() => import('./pages/discover/DiscoverPage')) },
-          { path: '/projects', lazy: lazyPage(() => import('./pages/projects/ProjectsPage')) },
+          { path: '/projects', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/projects/ProjectsPage')) },
           { path: '/events', lazy: lazyPage(() => import('./pages/events/EventsPage')) },
           { path: '/grants', lazy: lazyPage(() => import('./pages/grants/GrantsPage')) },
           // Pathless layout (171): the community notice once per member, and
@@ -309,16 +310,16 @@ const router = createBrowserRouter([
           // and it is how a signed-out visitor decides the platform is worth
           // joining. The member behind a card is not: /user/:id and the drawer
           // both require a session (083).
-          { path: '/directory', lazy: lazyPage(() => import('./pages/directory/DirectoryPage')) },
+          { path: '/directory', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/directory/DirectoryPage')) },
           // Public on purpose. A rank is only worth chasing if it can be
           // shown to someone. Excludes students, members who opted out, and
           // suspended accounts — enforced in SQL, not here.
-          { path: '/leaderboard', lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
+          { path: '/leaderboard', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/leaderboard/LeaderboardPage')) },
           // Public on purpose, unlike /user/:id — a CV only a signed-in member
           // can open is not one you can send to an employer. public_resume()
           // returns nothing unless the owner published it and their profile is
           // public, so the page 404s itself rather than relying on this route.
-          { path: '/user/:id/cv', lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
+          { path: '/user/:id/cv', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/cv/PublicCvPage')) },
           // The member page and CV lived at /u/:id until the URLs were made
           // readable. Both spellings are in bookmarks and chat logs.
           { path: '/u/:id/cv', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
@@ -326,8 +327,8 @@ const router = createBrowserRouter([
           // reason. public_employer() returns nothing unless the business is
           // Chamber-verified, so an unverified registration cannot masquerade
           // as a credential by having a page at all.
-          { path: '/org/:slug', lazy: lazyPage(() => import('./pages/sme/OrgProfilePage')) },
-          { path: '/resources', lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
+          { path: '/org/:slug', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/sme/OrgProfilePage')) },
+          { path: '/resources', handle: UNVERIFIED_NO, lazy: lazyPage(() => import('./pages/resources/ResourcesPage')) },
           { path: '/help', lazy: lazyPage(() => import('./pages/help/HelpCenterPage')) },
           { path: '/accessibility', lazy: lazyPage(() => import('./pages/AccessibilityStatementPage')) },
           { path: '/help/faq', lazy: lazyPage(() => import('./pages/help/FAQPage')) },
@@ -341,8 +342,8 @@ const router = createBrowserRouter([
           {
             Component: AccountRoute,
             children: [
-              { path: '/grants/:id', lazy: lazyPage(() => import('./pages/grants/GrantDetailPage')) },
-              { path: '/events/:id', lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
+              { path: '/grants/:id', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/grants/GrantDetailPage')) },
+              { path: '/events/:id', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/events/EventDetailPage')) },
               { path: '/resources/:id', lazy: lazyPage(() => import('./pages/resources/ResourceDetailPage')) },
               { path: '/courses/:id', lazy: lazyPage(() => import('./pages/courses/CourseDetailPage')) },
               { path: '/integrations/:id', lazy: lazyPage(() => import('./pages/integrations/IntegrationDetailPage')) },
@@ -402,13 +403,13 @@ const router = createBrowserRouter([
                 // Absolute child paths — legal because they extend the parent,
                 // and site-search.test.ts matches route paths literally.
                 children: [
-                  { index: true, lazy: lazyPage(() => import('./pages/dashboard/tabs/OverviewTab')) },
-                  { path: '/dashboard/my-profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/MyProfileTab')) },
-                  { path: '/dashboard/profile', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProfileTab')) },
+                  { index: true, handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/OverviewTab')) },
+                  { path: '/dashboard/my-profile', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/MyProfileTab')) },
+                  { path: '/dashboard/profile', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/ProfileTab')) },
                   // Editing is a mode of the CV tab, not a departure from it:
                   // same shell, only the pane swaps. /cv/edit still resolves
                   // and redirects here for old links.
-                  { path: '/dashboard/profile/edit', lazy: lazyPage(() => import('./pages/dashboard/tabs/CvEditTab')) },
+                  { path: '/dashboard/profile/edit', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/CvEditTab')) },
                   { path: '/dashboard/progress', lazy: lazyPage(() => import('./pages/dashboard/tabs/ProgressTab')) },
                   { path: '/dashboard/achievements', lazy: lazyPage(() => import('./pages/dashboard/tabs/AchievementsTab')) },
                   // Reached from the Achievements tab's Leaderboard button;
@@ -421,9 +422,9 @@ const router = createBrowserRouter([
                   // The reporter's end of the feedback loop (127). Renders the
                   // same panel as /settings?tab=feedback, which still resolves —
                   // every reply notification ever sent links to that address.
-                  { path: '/dashboard/feedback', lazy: lazyPage(() => import('./pages/dashboard/tabs/FeedbackTab')) },
+                  { path: '/dashboard/feedback', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/FeedbackTab')) },
                   // Organisation-tier counterpart to the profile (CV) tab.
-                  { path: '/dashboard/business', lazy: lazyPage(() => import('./pages/dashboard/tabs/BusinessTab')) },
+                  { path: '/dashboard/business', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/BusinessTab')) },
                   { path: '/dashboard/team', lazy: lazyPage(() => import('./pages/dashboard/tabs/TeamTab')) },
                   // Role-gated; each stub bounces to /dashboard without the role.
                   { path: '/dashboard/funding', lazy: lazyPage(() => import('./pages/dashboard/tabs/FundingTab')) },
@@ -432,11 +433,11 @@ const router = createBrowserRouter([
                   // The account, in from /settings. That page is gone; its
                   // address survives as SettingsRedirect below, which maps
                   // ?tab= onto these five slugs.
-                  { path: '/dashboard/security', lazy: lazyPage(() => import('./pages/dashboard/tabs/SecurityTab')) },
-                  { path: '/dashboard/preferences', lazy: lazyPage(() => import('./pages/dashboard/tabs/PreferencesTab')) },
-                  { path: '/dashboard/personalization', lazy: lazyPage(() => import('./pages/dashboard/tabs/PersonalizationTab')) },
-                  { path: '/dashboard/verification', lazy: lazyPage(() => import('./pages/dashboard/tabs/VerificationTab')) },
-                  { path: '/dashboard/legal', lazy: lazyPage(() => import('./pages/dashboard/tabs/LegalTab')) },
+                  { path: '/dashboard/security', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/SecurityTab')) },
+                  { path: '/dashboard/preferences', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/PreferencesTab')) },
+                  { path: '/dashboard/personalization', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/PersonalizationTab')) },
+                  { path: '/dashboard/verification', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/VerificationTab')) },
+                  { path: '/dashboard/legal', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/dashboard/tabs/LegalTab')) },
                 ],
               },
               // Full-page receipt, deliberately outside the tab shell
@@ -464,9 +465,14 @@ const router = createBrowserRouter([
                 ],
               },
               {
-                element: <AgreementRoute bundle="publishing" context="project" leaveTo="/projects" />,
+                element: <PermissionRoute require={['project:manage', 'project:manage_all']} />,
                 children: [
-                  { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="project" leaveTo="/projects" />,
+                    children: [
+                      { path: '/projects/:id/edit', lazy: lazyPage(() => import('./pages/projects/EditProjectPage')) },
+                    ],
+                  },
                 ],
               },
               // Same treatment as /projects/new: migration 090 put an
@@ -521,7 +527,7 @@ const router = createBrowserRouter([
               // site-search.test.ts matches route paths literally, and only
               // /hackathons is reachable from site-map.ts because a site-map
               // href can never contain a :param.
-              { path: '/hackathons', lazy: lazyPage(() => import('./pages/hackathons/HackathonsPage')) },
+              { path: '/hackathons', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/hackathons/HackathonsPage')) },
               // Readable venue URLs. The slug is derived from the event title
               // (src/lib/event-slug.ts) and the room segment is venue_rooms.key,
               // so a venue link reads as a place rather than as two uuids.
@@ -580,13 +586,18 @@ const router = createBrowserRouter([
                 path: '/events/:id/venue/room/:roomId',
                 lazy: lazyPage(() => import('./pages/events/VenueRedirectPage')),
               },
-              { path: '/grants/my-applications', lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
+              { path: '/grants/my-applications', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/grants/MyApplicationsPage')) },
               // The application bundle, not publishing: what an applicant agrees
               // to is confidentiality and that applying licenses nothing.
               {
-                element: <AgreementRoute bundle="application" context="grant_application" leaveTo="/grants" />,
+                element: <PermissionRoute require="grant:apply" />,
                 children: [
-                  { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
+                  {
+                    element: <AgreementRoute bundle="application" context="grant_application" leaveTo="/grants" />,
+                    children: [
+                      { path: '/grants/:id/apply', lazy: lazyPage(() => import('./pages/grants/GrantApplicationPage')) },
+                    ],
+                  },
                 ],
               },
               // The funder's half of /grants. grant:post has been on the grants
@@ -622,9 +633,14 @@ const router = createBrowserRouter([
                 ],
               },
               {
-                element: <AgreementRoute bundle="publishing" context="forum_post" leaveTo="/forums" />,
+                element: <PermissionRoute require="forum:post" />,
                 children: [
-                  { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
+                  {
+                    element: <AgreementRoute bundle="publishing" context="forum_post" leaveTo="/forums" />,
+                    children: [
+                      { path: '/forums/:slug/new', lazy: lazyPage(() => import('./pages/forums/CreatePostPage')) },
+                    ],
+                  },
                 ],
               },
               // Boards, unlike posts, are permission-gated: migration 129 put a
@@ -661,8 +677,8 @@ const router = createBrowserRouter([
               { path: '/achievements', element: <Navigate to="/dashboard/achievements" replace /> },
               // The CV lives in the dashboard now (ProfileTab); the old page
               // address keeps resolving for bookmarks and stored links.
-              { path: '/cv', element: <Navigate to="/dashboard/profile" replace /> },
-              { path: '/cv/edit', element: <Navigate to="/dashboard/profile/edit" replace /> },
+              { path: '/cv', handle: UNVERIFIED_OK, element: <Navigate to="/dashboard/profile" replace /> },
+              { path: '/cv/edit', handle: UNVERIFIED_OK, element: <Navigate to="/dashboard/profile/edit" replace /> },
               // Member pages came back at /user/:id (066). The drawer over
               // /directory is still the in-app default; the page exists so a
               // profile can be shared outside the app. /profile/* stays as a
@@ -673,13 +689,13 @@ const router = createBrowserRouter([
               // and ProtectedRoute carries `state.from` so a shared /u/ link
               // still lands on the profile once you have signed in.
               { path: '/user/:id', lazy: lazyPage(() => import('./pages/profile/PublicProfilePage')) },
-              { path: '/profile/me', element: <Navigate to="/dashboard" replace /> },
+              { path: '/profile/me', handle: UNVERIFIED_OK, element: <Navigate to="/dashboard" replace /> },
               { path: '/profile/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
               { path: '/u/:id', lazy: lazyPage(() => import('./pages/MemberRedirect')) },
-              { path: '/messages', lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
-              { path: '/settings', element: <SettingsRedirect /> },
-              { path: '/grievances/report/:userId', lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },
-              { path: '/grievances/my-reports', lazy: lazyPage(() => import('./pages/grievances/MyGrievancesPage')) },
+              { path: '/messages', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/messages/MessagesRedirect')) },
+              { path: '/settings', handle: UNVERIFIED_OK, element: <SettingsRedirect /> },
+              { path: '/grievances/report/:userId', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/grievances/ReportUserPage')) },
+              { path: '/grievances/my-reports', handle: UNVERIFIED_OK, lazy: lazyPage(() => import('./pages/grievances/MyGrievancesPage')) },
               { path: '/collaborate', lazy: lazyPage(() => import('./pages/collaborate/CollaborateHubPage')) },
               { path: '/collaborate/whiteboards', lazy: lazyPage(() => import('./pages/collaborate/WhiteboardsListPage')) },
               { path: '/collaborate/whiteboard/new', lazy: lazyPage(() => import('./pages/collaborate/WhiteboardPage')) },
@@ -696,7 +712,7 @@ const router = createBrowserRouter([
               { path: '/invitations', lazy: lazyPage(() => import('./pages/InvitationsPage')) },
               // Business verification is a section of the Verification tab
               // now, beside identity. Notifications written before 186 link here.
-              { path: '/sme/verification', element: <Navigate to="/dashboard/verification" replace /> },
+              { path: '/sme/verification', handle: UNVERIFIED_OK, element: <Navigate to="/dashboard/verification" replace /> },
               // The business association's queue. Outside AdminRoute on
               // purpose: sme:verify is not a console key, so an association
               // account could never open /admin/chamber.
@@ -708,7 +724,7 @@ const router = createBrowserRouter([
               },
               // The business profile lives in the dashboard now (BusinessTab);
               // the old page address keeps resolving for bookmarks.
-              { path: '/org/edit', element: <Navigate to="/dashboard/business" replace /> },
+              { path: '/org/edit', handle: UNVERIFIED_OK, element: <Navigate to="/dashboard/business" replace /> },
               { path: '/org/members', element: <Navigate to="/dashboard/team" replace /> },
             ],
           },

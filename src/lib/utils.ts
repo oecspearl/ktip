@@ -204,16 +204,48 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 /**
- * Copy text to clipboard
+ * Copy text to the clipboard. Resolves true only when the text landed.
+ *
+ * The async Clipboard API is missing outside a secure context (a dev server on
+ * a LAN address over http) and is refused in some embedded views, so a failed
+ * or absent call falls back to the selection-based copy command.
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch (error) {
-    console.error('Failed to copy to clipboard:', error)
-    return false
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      // Fall through to the legacy path.
+    }
   }
+  return legacyCopy(text)
+}
+
+function legacyCopy(text: string): boolean {
+  if (typeof document === 'undefined') return false
+  const area = document.createElement('textarea')
+  area.value = text
+  area.setAttribute('readonly', '')
+  // Off-screen but still selectable; display:none would make it unselectable.
+  area.style.position = 'fixed'
+  area.style.top = '0'
+  area.style.left = '-9999px'
+  area.style.opacity = '0'
+  document.body.appendChild(area)
+  const previous = document.activeElement as HTMLElement | null
+  area.select()
+  area.setSelectionRange(0, text.length)
+  let ok = false
+  try {
+    ok = document.execCommand('copy')
+  } catch {
+    ok = false
+  }
+  area.remove()
+  previous?.focus?.()
+  if (!ok) console.error('Failed to copy to clipboard')
+  return ok
 }
 
 /**

@@ -2,6 +2,8 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../contexts/AuthContext'
 import { rememberReturnTo } from '../lib/return-to'
 import { RouteSplash } from './RouteSplash'
+import { useWallForUnverified } from '../hooks/useUnverifiedRule'
+import { VerificationWall } from './verification/VerificationWall'
 
 /**
  * Detail pages that need an account but were browsable before.
@@ -22,6 +24,7 @@ import { RouteSplash } from './RouteSplash'
 export const AccountRoute = () => {
   const auth = useAuth()
   const location = useLocation()
+  const wallUnverified = useWallForUnverified()
 
   if (auth.loading) {
     return <RouteSplash />
@@ -32,6 +35,17 @@ export const AccountRoute = () => {
     // same value again from `state.from` when it mounts.
     rememberReturnTo(location)
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  // Verification (205) is the one exception to "repeats none of
+  // ProtectedRoute's checks": grant and event pages are marked open to an
+  // unverified account in App.tsx; resources, courses, integrations and
+  // projects are not. Waits for the profile, because `verified` reads it.
+  if (auth.profileLoading) {
+    return <RouteSplash />
+  }
+  if (!auth.verified && wallUnverified) {
+    return <VerificationWall />
   }
 
   return <Outlet />

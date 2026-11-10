@@ -593,9 +593,9 @@ This is for password accounts. If you only ever sign in with Google or Microsoft
   msg`Date of birth`,
   msg`Date of birth and minors`,
   msg`Date of birth, password, email address unless you publish it yourself, private messages, verification evidence, grant applications, grievance and moderation records, and analytics rows.`,
-  msg`Date, time, location or virtual link, event type, and whether it has already happened. Cancelled and past events keep their page — they just say so.
+  msg`Dates, start time, where it happens, and how many places are taken. Cancelled and past events keep their page and say so in the card beside it.
 
-Everything below expands on this; this block is the part worth screenshotting.`,
+Everything below expands on this row.`,
   msg`Deciding for an association`,
   msg`Declaration`,
   msg`Declare a conflict of interest and step aside — including where they are working on something competing.`,
@@ -2310,7 +2310,7 @@ Permission change history records who changed what and when. Reset returns the m
   msg`Some content is quarantined automatically when several members report it, before a moderator has looked at it. That is a holding action, not a finding, and it is reversed if the review clears the content.`,
   msg`Some events run a virtual venue: rooms you can walk between, open audio, and a live list of who is in each one.
 
-Registered attendees go straight in. The door only appears on events that have one, and it sits above the brief on purpose — during a live event it is the only thing anyone is looking for.`,
+Registered attendees go straight in. The button only appears on events that have a venue, and it stays in this card as you scroll, so you never have to hunt for the way in.`,
   msg`Some grants are applied for here, some send you to the funder’s own site — this panel shows whichever applies.
 
 When it is an in-app application, it saves as a draft the moment you start, so the button turns into Continue Application if you leave and come back. Once submitted you can follow it under My Applications.

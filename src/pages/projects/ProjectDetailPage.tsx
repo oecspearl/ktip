@@ -24,7 +24,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import {
-  Share2,
   Edit,
   User,
   Search,
@@ -37,7 +36,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { PHASE_LABELS, PHASE_COLORS, PROJECT_CATEGORIES } from '../../lib/constants'
-import { formatDate, formatRelativeTime, copyToClipboard, truncate } from '../../lib/utils'
+import { formatDate, formatRelativeTime } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { useRecordView } from '../../hooks/useRecordView'
@@ -47,6 +46,12 @@ import { entityPath, memberPath } from '../../lib/slug'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 import { VideoLinkButton } from '../../components/shared/VideoViewer'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
+import { FactStrip } from '../../components/detail/FactStrip'
+import { Button } from '../../components/ui/Button'
+import { DetailActionCard } from '../../components/detail/DetailActionCard'
+import { projectTarget } from '../../lib/share/targets'
+import { cardImageFor } from '../../lib/hero-images'
+import { useProjectTrail } from '../../hooks/useCategoryTrail'
 
 export default function ProjectDetailPage() {
     const { t } = useLingui()
@@ -58,6 +63,7 @@ export default function ProjectDetailPage() {
   const { openMember } = useMemberPanel()
 
   const { project, loading: projectLoading } = useProject(params.id)
+  const breadcrumb = useProjectTrail(project)
   useCanonicalSlug(params.id, project)
   useRecordView('project', project?.id)
   const { projects: recentProjects } = useRecentProjects(3)
@@ -128,8 +134,6 @@ export default function ProjectDetailPage() {
     return cat ? cat.label : category
   }
 
-  const CategoryIcon = projectCategoryIcon(project?.category)
-
   // Sidebar search
   const [sidebarSearch, setSidebarSearch] = useState('')
 
@@ -163,58 +167,68 @@ export default function ProjectDetailPage() {
   // through formatDate is a separate pass across the whole app.
   const createdAt = formatDate(project.created_at, 'MMMM dd, yyyy')
 
+  // Public and not taken down: the same rule api/share.ts applies.
+  const shareTarget =
+    project.is_public && (project.status ?? 'active') === 'active'
+      ? projectTarget(
+          // The preview card shows the same picture as the hero (and the listing card).
+          { ...project, image_url: cardImageFor(project.image_url, project.id) },
+          `${window.location.origin}${entityPath('project', project)}`
+        )
+      : null
+
+  // Feature, Edit and Delete sit at the top of the action card, as an event's
+  // host tools do, rather than in the hero.
+  const ownerTools =
+    isAdmin || canEdit || isOwner ? (
+      <>
+        {isAdmin && (
+          <button
+            onClick={toggleFeatured}
+            disabled={togglingFeatured}
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+              project.is_featured
+                // Yellow takes ink, never white (1.6:1); the unfeatured
+                // state uses the sand scale so it inverts with the theme
+                ? 'bg-ktip-sun-500 text-ktip-ink hover:bg-ktip-sun-600'
+                : 'bg-ktip-sand-100 text-ktip-sand-700 hover:bg-ktip-sand-200'
+            } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
+            {project.is_featured ? t`Featured` : t`Feature`}
+          </button>
+        )}
+        {canEdit && (
+          <Link to={`/projects/${params.id}/edit`}>
+            <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
+              <Edit size={14} />
+              <Trans>Edit</Trans>
+            </button>
+          </Link>
+        )}
+        {isOwner && (
+          <DeleteEntityControl
+            noun="project"
+            title={project.title}
+            impact={describeProjectDeletion({
+              isPublic: project.is_public,
+              memberCount: collaboratorCount,
+            })}
+            onDelete={() => deleteProject(project.id)}
+            redirectTo="/projects"
+          />
+        )}
+      </>
+    ) : undefined
+
   return (
     <>
       <PageHero
         eyebrow={t`Project Detail`}
         title={project.title}
-        image={project.image_url}
+        image={cardImageFor(project.image_url, project.id)}
         imageSeed={project.id}
-        breadcrumb={[
-          { label: t`Home`, href: '/' },
-          { label: t`Projects`, href: '/projects' },
-          { label: truncate(project.title, 30) },
-        ]}
-        actions={
-          <>
-            {isAdmin && (
-              <button
-                onClick={toggleFeatured}
-                disabled={togglingFeatured}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
-                  project.is_featured
-                    // Yellow takes ink, never white (1.6:1); the unfeatured
-                    // state uses the sand scale so it inverts with the theme
-                    ? 'bg-ktip-sun-500 text-ktip-ink hover:bg-ktip-sun-600'
-                    : 'bg-ktip-sand-100 text-ktip-sand-700 hover:bg-ktip-sand-200'
-                } ${togglingFeatured ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <Star size={14} className={project.is_featured ? 'fill-current' : ''} />
-                {project.is_featured ? t`Featured` : t`Feature`}
-              </button>
-            )}
-            {canEdit && (
-              <Link to={`/projects/${params.id}/edit`}>
-                <button className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5">
-                  <Edit size={14} />
-                  <Trans>Edit</Trans>
-                </button>
-              </Link>
-            )}
-            {isOwner && (
-              <DeleteEntityControl
-                noun="project"
-                title={project.title}
-                impact={describeProjectDeletion({
-                  isPublic: project.is_public,
-                  memberCount: collaboratorCount,
-                })}
-                onDelete={() => deleteProject(project.id)}
-                redirectTo="/projects"
-              />
-            )}
-          </>
-        }
+        breadcrumb={breadcrumb}
       >
         <div className="flex flex-wrap items-center gap-2">
           {project.is_innovation && (
@@ -239,7 +253,7 @@ export default function ProjectDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
-          <div className="lg:col-span-2">
+          <div className="min-w-0 lg:col-span-2">
             {/* Innovation banner (172). The owner's own declaration, and the
                 copy says so: nothing on the platform vets the claim. */}
             {project.is_innovation && (
@@ -256,41 +270,34 @@ export default function ProjectDetailPage() {
               </aside>
             )}
 
-            {/* Post title repeat */}
-            <h2
-              id="overview"
-              data-spy="Overview"
-              className="scroll-mt-24 text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2"
-            >
-              {project.title}
-            </h2>
-
-            {/* Date line */}
-            <p className="text-sm text-gray-400 text-center mb-6">
-              <Trans>Date: {createdAt}</Trans>
-            </p>
-
-            {/* Project image */}
-            {/* Eager for the reason given on EventDetailPage's cover: the
-                PageHero above already requests this URL eagerly, and a 640
-                sibling srcset here would be a second download, not a smaller
-                first one. */}
-            {project.image_url ? (
-              <img
-                src={project.image_url}
-                alt={project.title}
-                className="w-full max-h-96 object-cover rounded mb-6"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                width={800}
-                height={384}
-              />
-            ) : (
-              <div className="w-full max-h-96 h-64 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center mb-6">
-                <CategoryIcon size={64} className="text-ktip-ocean-500" />
-              </div>
-            )}
+            {/* Key facts, as on an event page. The hero already carries the
+                title, so the body opens on stage, category, team and age. */}
+            <FactStrip
+              facts={[
+                {
+                  key: 'stage',
+                  label: <Trans>Stage</Trans>,
+                  value: PHASE_LABELS[project.phase],
+                },
+                {
+                  key: 'category',
+                  label: <Trans>Category</Trans>,
+                  value: project.category ? getCategoryLabel(project.category) : t`Uncategorised`,
+                },
+                {
+                  key: 'team',
+                  label: <Trans>Team</Trans>,
+                  value: teamCount,
+                  sub: <Plural value={teamCount} one="member" other="members" />,
+                },
+                {
+                  key: 'started',
+                  label: <Trans>Started</Trans>,
+                  value: formatDate(project.created_at, 'MMM d, yyyy'),
+                  sub: <Trans>Updated {formatRelativeTime(project.updated_at)}</Trans>,
+                },
+              ]}
+            />
 
             {/* Project video — plays in a pop-up, so the page keeps its place */}
             {project.video_url && (
@@ -339,61 +346,6 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {/* Engagement row */}
-            <div
-              data-tutorial="project-engagement"
-              className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 flex-wrap"
-            >
-              <LikeButton projectId={params.id!} />
-              <FollowButton projectId={params.id!} />
-              <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                <Eye size={16} />
-                <Plural value={project.view_count ?? 0} one="# view" other="# views" />
-              </span>
-              <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                <Users size={16} />
-                <Plural value={teamCount} one="# team member" other="# team members" />
-              </span>
-              <button
-                className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-                onClick={async () => {
-                  const ok = await copyToClipboard(window.location.href)
-                  toast[ok ? 'success' : 'error'](
-                    ok ? t`Link copied to clipboard!` : t`Failed to copy link`
-                  )
-                }}
-              >
-                <Share2 size={16} />
-                <Trans>Share</Trans>
-              </button>
-
-              {/* Until 079 there was no way to ask — membership was owner-push
-                  only, and the RLS policy refused a self-inserted row. */}
-              {canRequestToCollaborate &&
-                (myJoinRequest ? (
-                  <span className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 px-3 py-1.5 text-sm text-ktip-sand-600">
-                    <Clock size={16} />
-                    <Trans>Request pending</Trans>
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => setRequestOpen(true)}
-                    className="ml-auto flex items-center gap-1.5 rounded-lg border border-ktip-ocean-600 px-3 py-1.5 text-sm font-bold text-ktip-ocean-600 transition-colors hover:bg-ktip-ocean-50"
-                  >
-                    <UserPlus size={16} />
-                    <Trans>Request to collaborate</Trans>
-                  </button>
-                ))}
-            </div>
-
-            {/* Not an owner or a member, and the switch is the reason there is
-                no button — say which organisation, and why. */}
-            {!gate.allowed && !!auth.user && !!project && !isOwner && !myMembership && (
-              <div className="mt-4">
-                <EngagementNotice verdict={gate} />
-              </div>
-            )}
-
             {project && (
               <RequestCollaborationModal
                 open={requestOpen}
@@ -425,154 +377,206 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {/* === Sidebar === */}
-          <div className="lg:col-span-1">
-            {/* Widget 1: Search */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Search</Trans></h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Find projects across the platform</Trans></p>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={t`Search projects...`}
-                    value={sidebarSearch}
-                    onChange={(e) => setSidebarSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && sidebarSearch.trim()) {
+          {/* === Sidebar ===
+              Same frame as the event page: the action card comes first on a
+              phone and the column is pinned beside the content from lg up. */}
+          <div className="contents lg:block lg:col-span-1">
+            <div className="contents lg:block lg:sticky lg:top-[calc(var(--nav-offset)+1rem)] lg:max-h-[calc(100dvh-var(--nav-offset)-2rem)] lg:overflow-y-auto lg:space-y-8 lg:pb-2">
+              {/* The anchor is written out here, not passed to the card: the
+                  tutorial registry test checks for the literal attribute. */}
+              <div className="order-first lg:order-none" data-tutorial="project-engagement">
+                <DetailActionCard
+                  ownerLabel={isOwner ? <Trans>Your project</Trans> : <Trans>Manage</Trans>}
+                  ownerTools={ownerTools}
+                  title={<Trans>{PHASE_LABELS[project.phase]} stage</Trans>}
+                  sub={<Trans>Started {createdAt}</Trans>}
+                  footer={
+                    <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <span className="flex items-center gap-1.5">
+                        <Eye className="size-4" aria-hidden="true" />
+                        <Plural value={project.view_count ?? 0} one="# view" other="# views" />
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Users className="size-4" aria-hidden="true" />
+                        <Plural value={teamCount} one="# team member" other="# team members" />
+                      </span>
+                    </span>
+                  }
+                  share={shareTarget}
+                >
+                  {/* Until 079 there was no way to ask: membership was owner-push
+                      only, and the RLS policy refused a self-inserted row. */}
+                  {canRequestToCollaborate &&
+                    (myJoinRequest ? (
+                      <span className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-ktip-sand-200 px-4 py-2.5 text-sm text-ktip-sand-600">
+                        <Clock className="size-4" aria-hidden="true" />
+                        <Trans>Request pending</Trans>
+                      </span>
+                    ) : (
+                      <Button fullWidth icon={<UserPlus size={16} />} onClick={() => setRequestOpen(true)}>
+                        <Trans>Request to collaborate</Trans>
+                      </Button>
+                    ))}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <LikeButton projectId={params.id!} />
+                    <FollowButton projectId={params.id!} />
+                  </div>
+
+                  {/* Not an owner or a member, and the switch is the reason there
+                      is no button: say which organisation, and why. */}
+                  {!gate.allowed && !!auth.user && !isOwner && !myMembership && <EngagementNotice verdict={gate} />}
+                </DetailActionCard>
+              </div>
+
+              {/* Widget 3: Project Owner */}
+              <div className="mb-10">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Owner</Trans></h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Created by</Trans></p>
+                <div className="flex items-center gap-3 mb-4">
+                  <DiamondAvatar
+                    src={project.owner?.avatar_url}
+                    name={project.owner?.display_name || 'Owner'}
+                    size={48}
+                  />
+                  <div>
+                    {/* A real link to /user/:id, not just the drawer — the name has
+                        to be shareable and open in a new tab like any profile. */}
+                    <Link
+                      to={memberPath(project.owner ?? { id: project.owner_id })}
+                      className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
+                    >
+                      {project.owner?.display_name || t`Unknown User`}
+                    </Link>
+                    {project.owner?.country && (
+                      <p className="text-sm text-gray-500">
+                        {project.owner.country}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => openMember(project.owner_id)}
+                  className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
+                >
+                  <User size={16} />
+                  <Trans>View Profile</Trans>
+                </button>
+              </div>
+
+              {/* Widget: Team */}
+              <TeamWidget projectId={project.id} projectTitle={project.title} isOwner={isOwner} />
+
+              {/* Widget 4: Project Details */}
+              <div className="mb-10">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Details</Trans></h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
+                <div className="text-sm divide-y divide-ktip-sand-100">
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500"><Trans>Created</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {formatDate(project.created_at, 'MMM dd, yyyy')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500"><Trans>Last Updated</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {formatRelativeTime(project.updated_at)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500"><Trans>Visibility</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {project.is_public ? t`Public` : t`Private`}
+                    </span>
+                  </div>
+                  {project.video_url && (
+                    <div className="flex items-center justify-between py-2.5">
+                      <span className="text-gray-500"><Trans>Video</Trans></span>
+                      <VideoLinkButton url={project.video_url} title={project.title} />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-gray-500"><Trans>Views</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {project.view_count ?? 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Widget 1: Search */}
+              <div className="mb-10">
+                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Search</Trans></h3>
+                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Find projects across the platform</Trans></p>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={t`Search projects...`}
+                      value={sidebarSearch}
+                      onChange={(e) => setSidebarSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && sidebarSearch.trim()) {
+                          navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
+                        }
+                      }}
+                      className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (sidebarSearch.trim()) {
                         navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
                       }
                     }}
-                    className="w-full pl-9 pr-3 py-2 border border-ktip-sand-300 bg-ktip-cream rounded-lg text-sm focus:border-ktip-ocean-500 focus:ring-2 focus:ring-ktip-ocean-500/20 focus:outline-hidden transition-colors"
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    if (sidebarSearch.trim()) {
-                      navigate(`/projects?search=${encodeURIComponent(sidebarSearch.trim())}`)
-                    }
-                  }}
-                  className="px-4 py-2 btn-brand text-xs font-bold uppercase tracking-wider rounded-lg shrink-0"
-                >
-                  <Trans>Search</Trans>
-                </button>
-              </div>
-            </div>
-
-            {/* Widget 2: Recent Projects */}
-            {recentProjects && recentProjects.length > 0 && (
-              <div className="mb-10">
-                <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Recent Projects</Trans></h3>
-                <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Explore the latest work</Trans></p>
-                <div className="space-y-4">
-                  {recentProjects.slice(0, 3).map((p) => (
-                    <Link key={p.id} to={entityPath('project', p)} className="flex gap-3 group">
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt={p.title}
-                          className="w-14 h-14 object-cover rounded shrink-0"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-14 h-14 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center shrink-0">
-                          {(() => {
-                            const Icon = projectCategoryIcon(p.category)
-                            return <Icon size={20} className="text-ktip-ocean-600" />
-                          })()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-xs text-gray-400 mb-0.5">
-                          {formatDate(p.created_at, 'MMM dd, yyyy')}
-                        </p>
-                        <p className="text-sm font-semibold text-ktip-sand-900 line-clamp-2 group-hover:text-ktip-ocean-600 transition-colors">
-                          {p.title}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Widget 3: Project Owner */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Owner</Trans></h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Created by</Trans></p>
-              <div className="flex items-center gap-3 mb-4">
-                <DiamondAvatar
-                  src={project.owner?.avatar_url}
-                  name={project.owner?.display_name || 'Owner'}
-                  size={48}
-                />
-                <div>
-                  {/* A real link to /user/:id, not just the drawer — the name has
-                      to be shareable and open in a new tab like any profile. */}
-                  <Link
-                    to={memberPath(project.owner ?? { id: project.owner_id })}
-                    className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
+                    className="px-4 py-2 btn-brand text-xs font-bold uppercase tracking-wider rounded-lg shrink-0"
                   >
-                    {project.owner?.display_name || t`Unknown User`}
-                  </Link>
-                  {project.owner?.country && (
-                    <p className="text-sm text-gray-500">
-                      {project.owner.country}
-                    </p>
-                  )}
+                    <Trans>Search</Trans>
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => openMember(project.owner_id)}
-                className="w-full px-4 py-2.5 btn-brand text-sm font-bold rounded-lg flex items-center justify-center gap-1.5"
-              >
-                <User size={16} />
-                <Trans>View Profile</Trans>
-              </button>
-            </div>
 
-            {/* Widget: Team */}
-            <TeamWidget projectId={project.id} projectTitle={project.title} isOwner={isOwner} />
-
-            {/* Widget 4: Project Details */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Project Details</Trans></h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
-              <div className="text-sm divide-y divide-ktip-sand-100">
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Created</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {formatDate(project.created_at, 'MMM dd, yyyy')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Last Updated</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {formatRelativeTime(project.updated_at)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Visibility</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {project.is_public ? t`Public` : t`Private`}
-                  </span>
-                </div>
-                {project.video_url && (
-                  <div className="flex items-center justify-between py-2.5">
-                    <span className="text-gray-500"><Trans>Video</Trans></span>
-                    <VideoLinkButton url={project.video_url} title={project.title} />
+              {/* Widget 2: Recent Projects */}
+              {recentProjects && recentProjects.length > 0 && (
+                <div className="mb-10">
+                  <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1"><Trans>Recent Projects</Trans></h3>
+                  <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Explore the latest work</Trans></p>
+                  <div className="space-y-4">
+                    {recentProjects.slice(0, 3).map((p) => (
+                      <Link key={p.id} to={entityPath('project', p)} className="flex gap-3 group">
+                        {p.image_url ? (
+                          <img
+                            src={p.image_url}
+                            alt={p.title}
+                            className="w-14 h-14 object-cover rounded shrink-0"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 bg-gradient-to-br from-ktip-ocean-100 to-ktip-tropical-100 rounded flex items-center justify-center shrink-0">
+                            {(() => {
+                              const Icon = projectCategoryIcon(p.category)
+                              return <Icon size={20} className="text-ktip-ocean-600" />
+                            })()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-400 mb-0.5">
+                            {formatDate(p.created_at, 'MMM dd, yyyy')}
+                          </p>
+                          <p className="text-sm font-semibold text-ktip-sand-900 line-clamp-2 group-hover:text-ktip-ocean-600 transition-colors">
+                            {p.title}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                )}
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Views</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {project.view_count ?? 0}
-                  </span>
                 </div>
-              </div>
-            </div>
+              )}
 
+              <ReportInfringementLink targetType="project" targetId={project.id} />
+            </div>
             <ReportInfringementLink targetType="project" targetId={project.id} />
           </div>
         </div>

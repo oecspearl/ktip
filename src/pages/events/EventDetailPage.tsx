@@ -34,13 +34,16 @@ import { DocumentsPanel } from '../../components/documents/DocumentsPanel'
 import { DeleteEntityControl } from '../../components/shared/DeleteEntityControl'
 import { describeEventDeletion } from '../../lib/delete-guard'
 import { eventManagePath, venuePath } from '../../lib/event-slug'
+import { eventEndMs, eventPhase } from '../../lib/event-timing'
+import { entityPath } from '../../lib/slug'
+import { FactStrip } from '../../components/detail/FactStrip'
+import { eventTarget } from '../../lib/share/targets'
+import { cardImageFor } from '../../lib/hero-images'
+import { EventActionCard } from '../../components/events/EventActionCard'
+import { VerificationNotice } from '../../components/verification/VerificationNotice'
+import { useMessagingPanel } from '../../contexts/MessagingPanelContext'
 import {
-  Calendar,
-  MapPin,
-  Video,
   Clock,
-  Users,
-  Share2,
   Edit,
   CheckCircle,
   XCircle,
@@ -48,8 +51,8 @@ import {
   FileText,
   CalendarX,
   Send,
-  Map as MapIcon,
   ArrowLeft,
+  MessageSquare,
 } from 'lucide-react'
 import { PageHero } from '../../components/layout/PageHero'
 import {
@@ -64,15 +67,15 @@ import {
 } from '../../lib/constants'
 import { blueprintFor } from '../../lib/event-blueprints'
 import type { AttendanceType, RSVPStatus } from '../../types'
-import { format, isPast, isSameDay } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { useRecordView } from '../../hooks/useRecordView'
 import { useTranslatedFields, isMachineTranslated } from '../../hooks/useTranslated'
 import { TranslatedMark } from '../../components/legal/TranslatedMark'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
-import { truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
+import { useEventTrail } from '../../hooks/useCategoryTrail'
 
 export default function EventDetailPage() {
     const { t, i18n } = useLingui()
@@ -81,6 +84,7 @@ export default function EventDetailPage() {
   const location = useLocation()
   const auth = useAuth()
   const { openMember } = useMemberPanel()
+  const { openPanel: openMessages } = useMessagingPanel()
   // The setup run's last step sends the host here to look at what they built,
   // and this is the only page in the flow that is not the console — so it has
   // to offer the way back itself.
@@ -100,6 +104,7 @@ export default function EventDetailPage() {
    * unpassable confirmation dialog respectively.
    */
   const translatedEvent = useTranslatedFields(event, ['title', 'summary', 'description', 'location'])
+  const breadcrumb = useEventTrail(event, translatedEvent?.title)
   usePageTitle(translatedEvent?.title)
   const toast = useToast()
   const { rsvp, cancelRSVP, checkRSVP, getRSVPCount, loading: rsvpLoading } = useRSVP()
@@ -147,8 +152,11 @@ export default function EventDetailPage() {
   const offersViewing = !!event && blueprintFor(event.event_type).allowViewers
 
   const isOrganizer = event?.organizer_id === auth.user?.id
-  // An event is only past once it has finished — multi-day events stay active until end_date
-  const isPastEvent = !!(event && isPast(new Date(event.end_date || event.start_date)))
+  // An event is only past once it has finished: multi-day events stay active
+  // until end_date, and one with no end date gets the same day-long window the
+  // Hackathons page uses to call it live.
+  const phase = event ? eventPhase(event) : 'upcoming'
+  const isPastEvent = phase === 'past'
   // Events are created as drafts, and a draft is invisible everywhere except to
   // its own organizer — so the organizer is the one who has to be told.
   const isDraft = event?.status === 'draft'
@@ -330,69 +338,85 @@ export default function EventDetailPage() {
   // free of optional chaining.
   const display = translatedEvent ?? event
 
+  // The canonical address, not window.location: the page may have been reached
+  // by uuid or with ?from=setup, and neither belongs in a link someone shares.
+  // Published (or finished) and not suspended is the same rule api/share.ts
+  // applies; title and summary in the reader's language, dates from the row.
+  const shareTarget =
+    (event.status === 'published' || event.status === 'completed') &&
+    (event.moderation_status ?? 'active') === 'active'
+      ? eventTarget(
+          {
+            ...event,
+            title: display.title,
+            summary: display.summary,
+            // The preview card shows the same picture as the hero (and the listing card).
+            image_url: cardImageFor(event.image_url, event.id),
+          },
+          `${window.location.origin}${entityPath('event', event)}`
+        )
+      : null
+
+  // Host tools live in the action card rather than the hero, so the hero keeps
+  // its text layout and the page has one place to act from.
+  const organizerTools = isOrganizer ? (
+    <>
+      {fromSetup && (
+        <Link to={eventManagePath(event, { tab: 'overview', setup: true })}>
+          <button className="px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors">
+            <ArrowLeft size={14} />
+            <Trans>Back to setup</Trans>
+          </button>
+        </Link>
+      )}
+      {isDraft && (
+        <button
+          onClick={handlePublish}
+          disabled={publishing}
+          className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <Send size={14} />
+          {publishing ? t`Publishing…` : t`Publish`}
+        </button>
+      )}
+      <Link to={`/events/${params.id}/manage`}>
+        {/* Publish takes the brand fill on a draft, so Edit steps back */}
+        <button
+          className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 ${
+            isDraft
+              ? 'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors'
+              : 'btn-brand'
+          }`}
+        >
+          <Edit size={14} />
+          <Trans>Edit</Trans>
+        </button>
+      </Link>
+      {/* `checking` still true means the RSVP count has not landed; the
+          guard reads null as "might not be zero" rather than as zero. */}
+      <DeleteEntityControl
+        noun="event"
+        title={event.title}
+        impact={describeEventDeletion({
+          status: event.status,
+          rsvpCount: checking ? null : rsvpCount,
+          hasVenue: !!event.has_venue,
+          hasChallenge: !!event.has_challenge,
+        })}
+        onDelete={() => deleteEvent(event.id)}
+        redirectTo="/events"
+      />
+    </>
+  ) : undefined
+
   return (
     <>
       <PageHero
         eyebrow={t`Event Detail`}
         title={display.title}
-        image={event.image_url}
+        image={cardImageFor(event.image_url, event.id)}
         imageSeed={event.id}
-        breadcrumb={[
-          { label: t`Home`, href: '/' },
-          { label: t`Events`, href: '/events' },
-          { label: truncate(display.title, 30) },
-        ]}
-        actions={
-          isOrganizer ? (
-            <>
-              {fromSetup && (
-                <Link to={eventManagePath(event, { tab: 'overview', setup: true })}>
-                  <button className="px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors">
-                    <ArrowLeft size={14} />
-                    <Trans>Back to setup</Trans>
-                  </button>
-                </Link>
-              )}
-              {isDraft && (
-                <button
-                  onClick={handlePublish}
-                  disabled={publishing}
-                  className="px-4 py-2 btn-brand text-sm font-semibold rounded-lg flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <Send size={14} />
-                  {publishing ? t`Publishing…` : t`Publish`}
-                </button>
-              )}
-              <Link to={`/events/${params.id}/manage`}>
-                {/* Publish takes the brand fill on a draft, so Edit steps back */}
-                <button
-                  className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-1.5 ${
-                    isDraft
-                      ? 'border border-ktip-sand-200 bg-ktip-cream text-ktip-sand-700 shadow-medium hover:bg-ktip-sand-50 transition-colors'
-                      : 'btn-brand'
-                  }`}
-                >
-                  <Edit size={14} />
-                  <Trans>Edit</Trans>
-                </button>
-              </Link>
-              {/* `checking` still true means the RSVP count has not landed; the
-                  guard reads null as "might not be zero" rather than as zero. */}
-              <DeleteEntityControl
-                noun="event"
-                title={event.title}
-                impact={describeEventDeletion({
-                  status: event.status,
-                  rsvpCount: checking ? null : rsvpCount,
-                  hasVenue: !!event.has_venue,
-                  hasChallenge: !!event.has_challenge,
-                })}
-                onDelete={() => deleteEvent(event.id)}
-                redirectTo="/events"
-              />
-            </>
-          ) : undefined
-        }
+        breadcrumb={breadcrumb}
       >
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={EVENT_TYPE_COLORS[event.event_type]}>
@@ -443,107 +467,49 @@ export default function EventDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
-          <div className="lg:col-span-2">
-            {/* Event title repeat */}
-            <h2 className="text-xl font-bold uppercase text-center text-ktip-sand-900 mb-2">
-              {display.title}
-            </h2>
-
-            {/* Date line */}
-            {startDate && (
-              <p className="text-sm text-gray-400 text-center mb-6">
-                <Trans>Date: {format(startDate, 'MMMM dd, yyyy')}</Trans>
-              </p>
-            )}
-
-            {/* Event Image */}
-            {/* Eager, not lazy: it is the same URL the PageHero above
-                requests eagerly at high priority, so this joins that request
-                instead of waiting for a scroll to ask the cache. No 640
-                sibling srcset here on purpose — a narrow DPR-1 screen would
-                pick the sibling and fetch it on top of the original the hero
-                has already downloaded. */}
-            {event.image_url && (
-              <img
-                src={event.image_url}
-                alt={event.title}
-                className="w-full max-h-96 object-cover rounded mb-6"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                width={800}
-                height={384}
-              />
-            )}
-
-            {/* Event Details Grid */}
-            <div
-              id="key-details"
-              data-spy="Key details"
-              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-6 p-4 bg-ktip-sand-50 rounded border border-ktip-sand-200"
-            >
-              {/* Date */}
-              <div className="flex items-start gap-3">
-                <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500"><Trans>Date</Trans></p>
-                  <p className="font-medium text-ktip-sand-900">
-                    {format(startDate!, 'EEEE, MMMM d, yyyy')}
-                    {!isSingleDay && (
-                      <>
-                        <br />
-                        <Trans>to {format(endDate!, 'EEEE, MMMM d, yyyy')}</Trans>
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Time */}
-              <div className="flex items-start gap-3">
-                <Clock size={20} className="text-ktip-ocean-600 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500"><Trans>Time</Trans></p>
-                  <p className="font-medium text-ktip-sand-900">
-                    {format(startDate!, 'h:mm a')}
-                    {endDate && (
-                      <> - {format(endDate, 'h:mm a')}</>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="flex items-start gap-3">
-                {event.is_virtual ? (
-                  <Video size={20} className="text-ktip-ocean-600 mt-1" />
-                ) : (
-                  <MapPin size={20} className="text-ktip-ocean-600 mt-1" />
-                )}
-                <div>
-                  <p className="text-sm text-gray-500"><Trans>Location</Trans></p>
-                  <p className="font-medium text-ktip-sand-900">
-                    {event.is_virtual ? t`Virtual Event` : event.location}
-                  </p>
-                </div>
-              </div>
-
-              {/* Capacity */}
-              {event.capacity && (
-                <div className="flex items-start gap-3">
-                  <Users size={20} className="text-ktip-ocean-600 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-500"><Trans>Capacity</Trans></p>
-                    <p className="font-medium text-ktip-sand-900">
-                      <Trans>{rsvpCount} / {event.capacity} attendees</Trans>
-                      {isFull && (
-                        <span className="text-red-600 ml-2"><Trans>(Full)</Trans></span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="min-w-0 lg:col-span-2">
+            {/* Key facts. The hero already carries the title and photo, so the
+                body opens on what a visitor checks first: when, where, room. */}
+            <FactStrip
+              facts={[
+                {
+                  key: 'dates',
+                  label: <Trans>Dates</Trans>,
+                  value: isSingleDay
+                    ? format(startDate!, 'MMM d, yyyy')
+                    : `${format(startDate!, 'MMM d')} – ${format(endDate!, 'MMM d, yyyy')}`,
+                  sub: isSingleDay
+                    ? format(startDate!, 'EEEE')
+                    : `${format(startDate!, 'EEE')} – ${format(endDate!, 'EEE')}`,
+                },
+                {
+                  key: 'time',
+                  label: <Trans>Time</Trans>,
+                  value: format(startDate!, 'h:mm a'),
+                  sub: endDate && isSingleDay ? <Trans>until {format(endDate, 'h:mm a')}</Trans> : undefined,
+                },
+                {
+                  key: 'where',
+                  label: <Trans>Where</Trans>,
+                  value: event.is_virtual ? t`Virtual` : display.location || t`In-Person`,
+                  sub: event.has_venue ? <Trans>Virtual venue</Trans> : undefined,
+                },
+                {
+                  key: 'places',
+                  label: <Trans>Places</Trans>,
+                  value: event.capacity ? `${rsvpCount} / ${event.capacity}` : rsvpCount,
+                  sub: isFull ? <span className="text-red-600"><Trans>Full</Trans></span> : <Trans>participants</Trans>,
+                  extra: event.capacity ? (
+                    <span aria-hidden="true" className="mt-1.5 block h-1 overflow-hidden rounded bg-ktip-sand-100">
+                      <span
+                        className="block h-full bg-ktip-tropical-500"
+                        style={{ width: `${Math.min(100, (rsvpCount / event.capacity) * 100)}%` }}
+                      />
+                    </span>
+                  ) : undefined,
+                },
+              ]}
+            />
 
             {/* Summary lede */}
             {event.summary && (
@@ -587,43 +553,6 @@ export default function EventDetailPage() {
                 </h3>
                 <p className="text-ktip-ocean-600 text-xs italic mb-3"><Trans>Key facts at a glance</Trans></p>
                 <DetailsList details={event.details} />
-              </div>
-            )}
-
-            {/* Engagement row */}
-            <div className="border-t border-ktip-sand-200 pt-4 mt-6 flex items-center gap-4 mb-6">
-              <button
-                className="flex items-center gap-1.5 text-sm text-ktip-ocean-600 hover:text-ktip-ocean-700 transition-colors"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href)
-                  toast.success(t`Link copied to clipboard!`)
-                }}
-              >
-                <Share2 size={16} />
-                <Trans>Share</Trans>
-              </button>
-            </div>
-
-            {/*
-              Venue door. Above the brief on purpose: during a live event the
-              one thing an attendee is looking for is the way in.
-            */}
-            {event.has_venue && (
-              <div
-                data-tutorial="event-venue-door"
-                className="mb-8 flex flex-col gap-3 rounded-2xl border border-ktip-ocean-200 bg-ktip-ocean-50 p-5 sm:flex-row sm:items-center"
-              >
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-lg font-bold text-ktip-ocean-800">
-                    <Trans>This event has a live virtual venue</Trans>
-                  </h2>
-                  <p className="mt-1 text-sm text-ktip-ocean-700">
-                    <Trans>Rooms, open audio and everyone who is online right now. Registered attendees can walk straight in.</Trans>
-                  </p>
-                </div>
-                <Link to={venuePath(event)} className="shrink-0">
-                  <Button icon={<MapIcon size={16} />}><Trans>Enter the venue</Trans></Button>
-                </Link>
               </div>
             )}
 
@@ -736,15 +665,29 @@ export default function EventDetailPage() {
             )}
           </div>
 
-          {/* === Sidebar === */}
-          <div className="lg:col-span-1">
-            {/* Widget 1: Event Registration */}
-            <div data-tutorial="event-registration" className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Event Registration</Trans>
-              </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>RSVP & sign up</Trans></p>
-
+          {/* === Sidebar ===
+              Wide screens: one column pinned beside the content, so the venue
+              door and registration stay in reach while reading. Phones: the
+              wrappers dissolve (display: contents) and the action card is
+              ordered above the content, with the organizer card after it. */}
+          <div className="contents lg:block lg:col-span-1">
+            <div className="contents lg:block lg:sticky lg:top-[calc(var(--nav-offset)+1rem)] lg:max-h-[calc(100dvh-var(--nav-offset)-2rem)] lg:overflow-y-auto lg:space-y-8 lg:pb-2">
+            <div className="order-first lg:order-none">
+            <EventActionCard
+              phase={phase}
+              cancelled={event.status === 'cancelled'}
+              start={startDate!}
+              end={endDate ?? new Date(eventEndMs(event))}
+              venueHref={event.has_venue ? venuePath(event) : null}
+              approved={hasRSVPd && !isPending}
+              isOrganizer={isOrganizer}
+              shareTarget={shareTarget}
+              organizerTools={organizerTools}
+              attendeeLine={
+                <Plural value={rsvpCount} one="# person attending" other="# people attending" />
+              }
+              registration={
+            <>
               {checking && (
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ktip-ocean-500 mx-auto"></div>
@@ -753,12 +696,6 @@ export default function EventDetailPage() {
 
               {!checking && (
                 <>
-                  {isOrganizer && (
-                    <div className="text-center py-4 text-gray-500">
-                      <p><Trans>You are the organizer of this event</Trans></p>
-                    </div>
-                  )}
-
                   {!isOrganizer && !isPastEvent && (
                     <>
                       {isPending && (
@@ -819,6 +756,14 @@ export default function EventDetailPage() {
                         </div>
                       )}
 
+                      {/* 205: an unverified account reads the event but cannot
+                          register, so it gets the reason instead of a button
+                          RLS would refuse. A registration made before 205 can
+                          still be withdrawn, so the button stays for that. */}
+                      {auth.user && !auth.verified && !myRsvp ? (
+                        <VerificationNotice action={t`register for events`} />
+                      ) : (
+                      <>
                       {/* The dialog asked before the form, not inside it: it
                           decides what you are registering as, which the form's
                           answers are then about. */}
@@ -862,42 +807,33 @@ export default function EventDetailPage() {
                                   : t`Request to attend`}
                         </Button>
                       )}
+                      </>
+                      )}
                     </>
-                  )}
-
-                  {isPastEvent && (
-                    <div className="text-center py-4 text-gray-500">
-                      <p><Trans>This event has already passed</Trans></p>
-                    </div>
                   )}
                 </>
               )}
-
-              {/* Attendee Count */}
-              <div className="mt-4 pt-4 border-t border-ktip-sand-200">
-                <p className="text-sm text-gray-500">
-                  <Plural value={rsvpCount} one="# person attending" other="# people attending" />
-                </p>
-              </div>
+            </>
+              }
+            />
             </div>
 
-            {/* Widget 2: Organizer */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
+            {/* Organizer */}
+            <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-5">
+              <h3 className="font-display font-bold text-ktip-sand-600 uppercase text-xs tracking-wider mb-3">
                 <Trans>Organized By</Trans>
               </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Event host</Trans></p>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3">
                 <DiamondAvatar
                   src={event.organizer?.avatar_url}
                   name={event.organizer?.display_name || t`Organizer`}
                   size={48}
                 />
-                <div>
+                <div className="min-w-0">
                   <button
                     type="button"
                     onClick={() => openMember(event.organizer_id)}
-                    className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors"
+                    className="font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 transition-colors text-left break-words"
                   >
                     {event.organizer?.display_name || t`Unknown User`}
                   </button>
@@ -908,65 +844,21 @@ export default function EventDetailPage() {
                   )}
                 </div>
               </div>
-              <Button variant="outline" fullWidth>
-                <Trans>Contact Organizer</Trans>
-              </Button>
-            </div>
-
-            {/* Widget 3: Event Details */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Event Details</Trans>
-              </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key information</Trans></p>
-              <div className="text-sm divide-y divide-ktip-sand-100">
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Type</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {EVENT_TYPE_LABELS[event.event_type]}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Date</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {format(startDate!, 'MMM dd, yyyy')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Time</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {format(startDate!, 'h:mm a')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Format</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {event.is_virtual ? t`Virtual` : t`In-Person`}
-                  </span>
-                </div>
-                {event.capacity && (
-                  <div className="flex items-center justify-between py-2.5">
-                    <span className="text-gray-500"><Trans>Capacity</Trans></span>
-                    <span className="font-medium text-ktip-sand-900">
-                      {event.capacity}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Widget 4: Share */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Share This Event</Trans>
-              </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Spread the word</Trans></p>
-              <Button variant="outline" fullWidth icon={<Share2 size={18} />}>
-                <Trans>Copy Link</Trans>
-              </Button>
+              {!isOrganizer && (
+                <Button
+                  variant="outline"
+                  fullWidth
+                  className="mt-4"
+                  icon={<MessageSquare size={16} />}
+                  onClick={() => openMessages({ userId: event.organizer_id })}
+                >
+                  <Trans>Contact Organizer</Trans>
+                </Button>
+              )}
             </div>
 
             <ReportInfringementLink targetType="event" targetId={event.id} />
+            </div>
           </div>
         </div>
       </div>

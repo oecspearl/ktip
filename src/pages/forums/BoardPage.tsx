@@ -8,6 +8,7 @@ import { PageHero } from '../../components/layout/PageHero'
 import { debounce } from '../../lib/utils'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { cardImageFor } from '../../lib/hero-images'
 
 export default function BoardPage() {
   const { t } = useLingui()
@@ -76,6 +77,7 @@ export default function BoardPage() {
         eyebrow={t`Forum Board`}
         title={board.name}
         subtitle={board.description || undefined}
+        image={cardImageFor(null, board.id)}
         imageSeed={board.id}
         breadcrumb={[
           { label: t`Home`, href: '/' },

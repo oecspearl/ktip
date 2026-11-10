@@ -35,6 +35,8 @@ import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import type { MessageDescriptor } from '@lingui/core'
 import { resolveCopy, type Copy } from '../../i18n/copy'
+import { useUrlFilter } from '../../hooks/useUrlFilter'
+import { listTrail, RESOURCE_CATEGORY_OPTIONS as RESOURCE_CATEGORIES } from '../../lib/category-crumbs'
 
 type Tab = 'resources' | 'integrations' | 'courses'
 
@@ -111,7 +113,14 @@ export default function ResourcesPage() {
         eyebrow={t`Knowledge Base`}
         title={t`Resources & Integrations`}
         imageSeed="resources"
-        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Resources` }]}
+        breadcrumb={listTrail({
+          home: t`Home`,
+          section: { label: t`Resources`, href: '/resources' },
+          param: 'category',
+          categories: RESOURCE_CATEGORIES,
+          // The category filter belongs to the Resources tab alone.
+          selected: tab === 'resources' ? searchParams.get('category') : null,
+        })}
       />
 
       {/* === Tabs === */}
@@ -157,7 +166,8 @@ function ResourcesTab() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
   const [typeFilter, setTypeFilter] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  // In the URL so a resource's breadcrumb can link straight to its category.
+  const [categoryFilter, setCategoryFilter] = useUrlFilter('category')
   const [tagFilter, setTagFilter] = useState<string[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
 

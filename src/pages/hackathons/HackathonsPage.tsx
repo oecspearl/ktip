@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button'
 import { EventCard } from '../../components/events/EventCard'
 import { formatDate } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
+import { eventPhase } from '../../lib/event-timing'
 import type { Event } from '../../types'
 import { entityPath } from '../../lib/slug'
 import { Plural, Trans, useLingui } from '@lingui/react/macro'
@@ -31,11 +32,7 @@ export default function HackathonsPage() {
     const now = Date.now()
     const all = events || []
 
-    const isLive = (e: Event) => {
-      const start = Date.parse(e.start_date)
-      const end = e.end_date ? Date.parse(e.end_date) : start + 24 * 60 * 60 * 1000
-      return e.status === 'published' && now >= start && now <= end
-    }
+    const isLive = (e: Event) => e.status === 'published' && eventPhase(e, now) === 'live'
 
     return {
       live: all.filter(isLive),

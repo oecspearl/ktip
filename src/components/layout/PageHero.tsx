@@ -1,23 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { HERO_WASH, focalFor, pageHeroFor } from '../../lib/hero-images'
 import { ResponsiveImage } from '../ui/ResponsiveImage'
 import { useMobileLite } from '../../hooks/useMediaQuery'
 import { Reveal } from '../ui/Reveal'
 import { useLingui } from '@lingui/react/macro'
-import { resolveCopy, type Copy } from '../../i18n/copy'
+import { resolveCopy } from '../../i18n/copy'
+import { BreadcrumbNav, type BreadcrumbItem } from './BreadcrumbNav'
 
-export interface BreadcrumbItem {
-  /**
-   * `Copy`, not `string`: most callers already resolve with `t\`…\`` before
-   * this ever sees the prop, but site-map-sourced crumbs arrive as harvested
-   * source strings. Resolved here rather than at every call site, same as
-   * SortSelect.
-   */
-  label: Copy
-  href?: string
-}
+export type { BreadcrumbItem }
 
 interface PageHeroProps {
   eyebrow: ReactNode
@@ -72,7 +64,7 @@ export function PageHero({
   neutralWash = false,
   spyLabel = 'Top',
 }: PageHeroProps) {
-    const { t, i18n } = useLingui()
+    const { i18n } = useLingui()
   /**
    * Phones and touch tablets get one photo layer instead of two, and an async
    * decode.
@@ -320,26 +312,7 @@ export function PageHero({
           <div className="flex flex-col items-start gap-4 shrink-0">
             {/* The nav is hidden below md, so the old `text-base md:text-lg`
                 pair only ever rendered at its md: step — one token, same size. */}
-            {breadcrumb && breadcrumb.length > 0 && (
-              <nav className="text-body-lg text-white/70 hidden md:block" aria-label={t`Breadcrumb`}>
-                {breadcrumb.map((item, i) => (
-                  <span key={i}>
-                    {i > 0 && (
-                      <span className="mx-1.5">
-                        <ChevronRight size={15} className="inline" />
-                      </span>
-                    )}
-                    {item.href ? (
-                      <Link to={item.href} className="hover:text-white transition-colors">
-                        {resolveCopy(i18n, item.label)}
-                      </Link>
-                    ) : (
-                      <span className="text-white">{resolveCopy(i18n, item.label)}</span>
-                    )}
-                  </span>
-                ))}
-              </nav>
-            )}
+            {breadcrumb && breadcrumb.length > 0 && <BreadcrumbNav items={breadcrumb} />}
             {/* neu-on-dark: the action row sits on hero photography, where the
                 light-mode soft-UI pair would ring each button in white. See
                 index.css. */}

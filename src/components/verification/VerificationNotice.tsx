@@ -15,7 +15,7 @@ interface VerificationNoticeProps {
  * Says why the create/apply control is missing.
  *
  * Migration 139 withholds the publishing and applying permissions until an
- * admin approves the account, and every CTA on the platform is already written
+ * admin approves the account (205 made the whole account read-only), and every CTA on the platform is already written
  * as `{auth.can('...') && <Button/>}` — so the gate takes effect with no page
  * changes at all. That is exactly the problem this component exists for: a
  * button that silently is not there reads as a broken page, not as a rule. The
@@ -70,19 +70,19 @@ export function VerificationNotice({ action, className }: VerificationNoticeProp
           <p className="mt-0.5 text-sm text-ktip-sand-600">
             {rejected ? (
               <Trans>
-                Read the reviewer's note, then send new documents. Everything on the platform stays
-                readable in the meantime.
+                Read the reviewer's note, then send new documents. Until then the grant and event
+                listings and the forums stay open to read.
               </Trans>
             ) : pending ? (
               <Trans>
-                You can keep browsing while it is checked. Posting, applying and messaging open as
-                soon as it is approved.
+                You can read the grant and event listings and the forums while it is checked. The
+                rest of the platform opens when it is approved.
               </Trans>
             ) : (
               <Trans>
-                Browsing is open to everyone. Publishing, applying for funding and messaging other
-                members need one identity check first. A work or school email, or a code from your
-                organisation, verifies you instantly.
+                Until your account is verified you can read the grant and event listings and the
+                forums. A work or school email, or a code from your organisation, verifies you
+                straight away.
               </Trans>
             )}
           </p>

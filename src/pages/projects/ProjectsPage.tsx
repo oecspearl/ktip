@@ -26,6 +26,8 @@ import { cn, debounce } from '../../lib/utils'
 import { Trans, useLingui, Plural } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import { resolveCopy, type Copy } from '../../i18n/copy'
+import { useUrlFilter } from '../../hooks/useUrlFilter'
+import { listTrail } from '../../lib/category-crumbs'
 
 // Two different translation mechanisms end up in one list, and the type has to
 // admit both: "All Categories" is ours (a msg descriptor), while the category
@@ -67,7 +69,8 @@ export default function ProjectsPage() {
   // permission the RLS insert check and the form would only end in a denial.
   const canCreateProject = !auth.user || auth.can('project:create')
   const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedCategory, setSelectedCategory] = useState<string>('')
+  // In the URL so a project's breadcrumb can link straight to its category.
+  const [selectedCategory, setSelectedCategory] = useUrlFilter('category')
   const [selectedPhase, setSelectedPhase] = useState<string>('')
   const initialSearch = searchParams.get('search') || ''
   const [searchQuery, setSearchQuery] = useState(initialSearch)
@@ -145,7 +148,13 @@ export default function ProjectsPage() {
         eyebrow={t`Project Archives`}
         title={t`Projects`}
         imageSeed="projects"
-        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Projects` }]}
+        breadcrumb={listTrail({
+          home: t`Home`,
+          section: { label: t`Projects`, href: '/projects' },
+          param: 'category',
+          categories: PROJECT_CATEGORIES,
+          selected: selectedCategory,
+        })}
       />
 
       {/* === Content Area — full width, no sidebar ===

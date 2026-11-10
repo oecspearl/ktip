@@ -7,6 +7,9 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useEmployerPortfolio, usePublicEmployer } from '../../hooks/useEmployerProfile'
 import { formatDate } from '../../lib/utils'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { ShareButton } from '../../components/share/ShareButton'
+import { orgTarget } from '../../lib/share/targets'
+import { pageHeroFor } from '../../lib/hero-images'
 
 /**
  * A business's public page — the organisation's answer to /user/:id.
@@ -48,6 +51,16 @@ export default function OrgProfilePage() {
 
   const name = employer.trading_name || employer.legal_name
   const isVerified = employer.verification_status === 'verified'
+  // The business can open its page while it waits for verification; only a
+  // verified page is public, so only a verified page is shareable.
+  const shareTarget = isVerified
+    ? orgTarget(
+        // A logo cropped to a wide card reads badly, so the preview takes the
+        // hero picture whenever the business has no banner of its own.
+        { ...employer, logo_url: pageHeroFor(employer.slug, t`Organisation`, name) },
+        `${window.location.origin}/org/${employer.slug}`
+      )
+    : null
 
   return (
     <>
@@ -63,6 +76,7 @@ export default function OrgProfilePage() {
           { label: t`Directory`, href: '/directory' },
           { label: name },
         ]}
+        actions={<ShareButton target={shareTarget} variant="hero" />}
       />
 
       {/* data-spy-off: one marked section besides the hero, so the rail would

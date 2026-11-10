@@ -10,8 +10,6 @@ import { useEngagementGate } from '../../hooks/useEngagement'
 import { useGrant, useApplyForGrant, useDraftApplication } from '../../hooks/useGrants'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-  DollarSign,
-  Calendar,
   Users,
   FileText,
   ExternalLink,
@@ -24,12 +22,17 @@ import {
 import { PageHero } from '../../components/layout/PageHero'
 import { grantImageFor } from '../../lib/hero-images'
 import { fundingTypeLabel } from '../../lib/funding-types'
-import { formatCurrency, formatDate, truncate } from '../../lib/utils'
-import { isPast } from 'date-fns'
+import { formatCurrency, formatDate } from '../../lib/utils'
+import { differenceInCalendarDays, isPast } from 'date-fns'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { useRecordView } from '../../hooks/useRecordView'
 import { Trans, Plural, useLingui } from '@lingui/react/macro'
+import { useGrantTrail } from '../../hooks/useCategoryTrail'
+import { FactStrip } from '../../components/detail/FactStrip'
+import { DetailActionCard } from '../../components/detail/DetailActionCard'
+import { grantTarget } from '../../lib/share/targets'
+import { entityPath } from '../../lib/slug'
 
 export default function GrantDetailPage() {
     const { t } = useLingui()
@@ -39,6 +42,7 @@ export default function GrantDetailPage() {
   const auth = useAuth()
 
   const { grant, loading: grantLoading } = useGrant(params.id)
+  const breadcrumb = useGrantTrail(grant)
   useCanonicalSlug(params.id, grant)
   useRecordView('grant', grant?.id)
   usePageTitle(grant?.title)
@@ -140,6 +144,26 @@ export default function GrantDetailPage() {
     )
   }
 
+  // Only a live, open call gets a Share button: an expired or suspended one
+  // would send people to something they can't apply to.
+  const shareTarget =
+    grant.is_active && !isSuspended && !isExpired
+      ? grantTarget(
+          { ...grant, image_url: grantImageFor(grant.id, grant.grant_type) },
+          `${window.location.origin}${entityPath('grant', grant)}`
+        )
+      : null
+
+  const daysLeft = grant.deadline ? differenceInCalendarDays(new Date(grant.deadline), new Date()) : null
+  const closesOn = grant.deadline ? formatDate(grant.deadline, 'EEE, MMM d') : ''
+  const cardStatus = isSuspended
+    ? { title: t`Suspended by KTIP`, sub: null }
+    : !grant.is_active
+      ? { title: t`Not taking applications`, sub: null }
+      : isExpired
+        ? { title: t`Applications closed`, sub: t`Closed ${closesOn}` }
+        : { title: t`Open for applications`, sub: grant.deadline ? t`Closes ${closesOn}` : t`No closing date` }
+
   return (
     <>
       <PageHero
@@ -147,11 +171,7 @@ export default function GrantDetailPage() {
         title={grant.title}
         image={grantImageFor(grant.id, grant.grant_type)}
         imageSeed={grant.id}
-        breadcrumb={[
-          { label: t`Home`, href: '/' },
-          { label: t`Grants`, href: '/grants' },
-          { label: truncate(grant.title, 30) },
-        ]}
+        breadcrumb={breadcrumb}
       >
         <div className="flex flex-wrap items-center gap-2">
           {grant.funding_type && (
@@ -181,35 +201,7 @@ export default function GrantDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-page-mid mx-auto px-4">
 
           {/* === Main Column === */}
-          <div className="lg:col-span-2">
-            {/* The funder's own strip. Only the poster and a grants
-                administrator see it, which is what RLS allows to write. */}
-            {canManageThisGrant && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-ktip-cream border border-ktip-sand-200 rounded-xl px-4 py-3">
-                <p className="text-sm text-ktip-sand-600">
-                  {ownsGrant ? (
-                    <Trans>You posted this funding call.</Trans>
-                  ) : (
-                    <Trans>You administer this funding call.</Trans>
-                  )}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link to={`/grants/${grant.slug || grant.id}/applications`}>
-                    <Button variant="outline" size="sm" icon={<Inbox size={14} />}>
-                      <Trans>Applications</Trans>
-                    </Button>
-                  </Link>
-                  {canEditThisGrant && (
-                    <Link to={`/grants/${grant.slug || grant.id}/edit`}>
-                      <Button variant="outline" size="sm" icon={<Pencil size={14} />}>
-                        <Trans>Edit Grant</Trans>
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )}
-
+          <div className="min-w-0 lg:col-span-2">
             {/* 181: why KTIP suspended the call. Poster and administrators only. */}
             {showSuspension && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -236,54 +228,48 @@ export default function GrantDetailPage() {
               </div>
             )}
 
-            {/* Status Banner */}
-            {isExpired && (
-              <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-red-700">
-                  <AlertCircle size={20} />
-                  <p className="font-medium"><Trans>This grant has expired</Trans></p>
-                </div>
-              </div>
+            {/* Key facts, as on an event page: what a visitor checks first. The
+                closed state lives in the action card's title, not a banner. */}
+            <FactStrip
+              facts={[
+                {
+                  key: 'amount',
+                  label: <Trans>Amount</Trans>,
+                  value: getAmountDisplay(),
+                  sub: grant.currency,
+                },
+                {
+                  key: 'deadline',
+                  label: <Trans>Deadline</Trans>,
+                  value: grant.deadline ? formatDate(grant.deadline, 'MMM d, yyyy') : t`None`,
+                  sub: isExpired ? (
+                    <span className="text-red-600"><Trans>Closed</Trans></span>
+                  ) : daysLeft !== null ? (
+                    <Plural value={daysLeft} one="# day left" other="# days left" />
+                  ) : (
+                    <Trans>Open until filled</Trans>
+                  ),
+                },
+                {
+                  key: 'applications',
+                  label: <Trans>Applications</Trans>,
+                  value: applicationCount,
+                  sub: <Trans>submitted</Trans>,
+                },
+                {
+                  key: 'type',
+                  label: <Trans>Type</Trans>,
+                  value: fundingTypeLabel(grant.funding_type) || t`Funding`,
+                  sub: grant.grant_type ? (
+                    <span className="capitalize">{grant.grant_type.replace(/_/g, ' ')}</span>
+                  ) : undefined,
+                },
+              ]}
+            />
+
+            {grant.summary && (
+              <p className="text-lg text-ktip-sand-800 font-medium leading-relaxed mb-6">{grant.summary}</p>
             )}
-
-            {/* Amount */}
-            <div className="flex items-center gap-3 text-ktip-ocean-600 mb-6">
-              <DollarSign size={32} />
-              <span className="text-3xl font-bold">{getAmountDisplay()}</span>
-            </div>
-
-            {/* Key Details */}
-            <div
-              id="key-details"
-              data-spy="Key details"
-              className="scroll-mt-24 grid md:grid-cols-2 gap-4 mb-8 p-4 bg-ktip-canvas rounded-xl"
-            >
-              {grant.deadline && (
-                <div className="flex items-start gap-3">
-                  <Calendar size={20} className="text-ktip-ocean-600 mt-1" />
-                  <div>
-                    <p className="text-sm text-ktip-sand-600"><Trans>Deadline</Trans></p>
-                    <p
-                      className={`font-medium ${
-                        isExpired ? 'text-red-600' : 'text-ktip-sand-900'
-                      }`}
-                    >
-                      {formatDate(grant.deadline)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-start gap-3">
-                <FileText size={20} className="text-ktip-ocean-600 mt-1" />
-                <div>
-                  <p className="text-sm text-ktip-sand-600"><Trans>Applications</Trans></p>
-                  <p className="font-medium text-ktip-sand-900">
-                    <Trans>{applicationCount} submitted</Trans>
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Description */}
             {grant.description && (
@@ -334,135 +320,134 @@ export default function GrantDetailPage() {
             </div>
           </div>
 
-          {/* === Sidebar === */}
-          <div className="lg:col-span-1">
-            {/* Widget 1: Apply for Grant */}
-            <div data-tutorial="grant-apply" className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Apply for Grant</Trans>
-              </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Submit your application</Trans></p>
-
-              {checking && (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ktip-ocean-500 mx-auto"></div>
-                </div>
-              )}
-
-              {!checking && (
-                <>
-                  {hasApplied && (
-                    <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl p-4 mb-4">
-                      <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
-                        <CheckCircle size={20} />
-                        <span className="font-medium"><Trans>Application Submitted!</Trans></span>
-                      </div>
-                      <p className="text-sm text-ktip-tropical-600">
-                        <Trans>Your application is under review.</Trans>
-                      </p>
+          {/* === Sidebar ===
+              Same frame as the event page: first on a phone, pinned beside
+              the content from lg up. */}
+          <div className="contents lg:block lg:col-span-1">
+            <div className="contents lg:block lg:sticky lg:top-[calc(var(--nav-offset)+1rem)] lg:max-h-[calc(100dvh-var(--nav-offset)-2rem)] lg:overflow-y-auto lg:space-y-8 lg:pb-2">
+              {/* The anchor is written out here, not passed to the card: the
+                  tutorial registry test checks for the literal attribute. */}
+              <div className="order-first lg:order-none" data-tutorial="grant-apply">
+                <DetailActionCard
+                  ownerLabel={ownsGrant ? <Trans>Your funding call</Trans> : <Trans>You manage this call</Trans>}
+                  ownerTools={
+                    canManageThisGrant ? (
+                      <>
+                        <Link to={`/grants/${grant.slug || grant.id}/applications`}>
+                          <Button variant="outline" size="sm" icon={<Inbox size={14} />} tabIndex={-1}>
+                            <Trans>Applications</Trans>
+                          </Button>
+                        </Link>
+                        {canEditThisGrant && (
+                          <Link to={`/grants/${grant.slug || grant.id}/edit`}>
+                            <Button variant="outline" size="sm" icon={<Pencil size={14} />} tabIndex={-1}>
+                              <Trans>Edit</Trans>
+                            </Button>
+                          </Link>
+                        )}
+                      </>
+                    ) : undefined
+                  }
+                  title={cardStatus.title}
+                  sub={cardStatus.sub}
+                  footer={
+                    <Plural
+                      value={applicationCount}
+                      one="# application submitted"
+                      other="# applications submitted"
+                    />
+                  }
+                  share={shareTarget}
+                >
+                  {checking ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ktip-ocean-500 mx-auto"></div>
                     </div>
+                  ) : (
+                    <>
+                      {hasApplied && (
+                        <div className="bg-ktip-tropical-50 border border-ktip-tropical-200 rounded-xl p-4">
+                          <div className="flex items-center gap-2 text-ktip-tropical-700 mb-2">
+                            <CheckCircle size={20} />
+                            <span className="font-medium"><Trans>Application Submitted!</Trans></span>
+                          </div>
+                          <p className="text-sm text-ktip-tropical-600">
+                            <Trans>Your application is under review.</Trans>
+                          </p>
+                        </div>
+                      )}
+
+                      {/* The switch reaches this button too, though only as far as
+                          hiding it: the link leaves KTIP, so no policy can enforce
+                          anything past this point. */}
+                      {grant.application_url && gate.allowed && !isExpired && grant.is_active && (
+                        <Button
+                          fullWidth
+                          icon={<ExternalLink size={20} />}
+                          onClick={() => window.open(grant.application_url!, '_blank')}
+                        >
+                          <Trans>Apply on External Site</Trans>
+                        </Button>
+                      )}
+
+                      {!gate.allowed && auth.user && <EngagementNotice verdict={gate} />}
+
+                      {!grant.application_url && canApply && (
+                        <Button
+                          fullWidth
+                          onClick={() => navigate(`/grants/${grant.slug || grant.id}/apply`)}
+                          icon={<FileText size={20} />}
+                        >
+                          {hasDraft ? t`Continue Application` : t`Apply Now`}
+                        </Button>
+                      )}
+
+                      {/* gate.allowed: the organisation reason is already printed
+                          above, and "your account has no permission" would be the
+                          wrong explanation on top of it. */}
+                      {!grant.application_url && !canApply && gate.allowed && !hasApplied && !isExpired && auth.user && (
+                        <p className="text-sm text-ktip-sand-600">
+                          <Trans>Your account does not have permission to apply for grants.</Trans>
+                        </p>
+                      )}
+
+                      {/* AccountRoute keeps signed-out visitors off this page, so
+                          this is a fallback for a session that ended while it was
+                          open: it used to show no way forward at all. */}
+                      {!auth.user && !isExpired && grant.is_active && (
+                        <Button
+                          fullWidth
+                          onClick={() => navigate('/login', { state: { from: location } })}
+                          icon={<FileText size={20} />}
+                        >
+                          <Trans>Sign in to apply</Trans>
+                        </Button>
+                      )}
+                    </>
                   )}
-
-                  {isExpired && !hasApplied && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-                      <p className="text-sm text-red-700">
-                        <Trans>This grant has expired and is no longer accepting applications.</Trans>
-                      </p>
-                    </div>
-                  )}
-
-                  {!grant.is_active && !hasApplied && (
-                    <div className="bg-ktip-sand-50 border border-ktip-sand-200 rounded-xl p-4 mb-4">
-                      <p className="text-sm text-gray-700">
-                        <Trans>This grant is currently inactive.</Trans>
-                      </p>
-                    </div>
-                  )}
-
-                  {/* The switch reaches this button too, though only as far as
-                      hiding it: the link leaves KTIP, so no policy can enforce
-                      anything past this point. */}
-                  {grant.application_url && gate.allowed && (
-                    <Button
-                      fullWidth
-                      icon={<ExternalLink size={20} />}
-                      onClick={() => window.open(grant.application_url!, '_blank')}
-                    >
-                      <Trans>Apply on External Site</Trans>
-                    </Button>
-                  )}
-
-                  {!gate.allowed && auth.user && <EngagementNotice verdict={gate} />}
-
-                  {!grant.application_url && canApply && (
-                    <Button
-                      fullWidth
-                      onClick={() => navigate(`/grants/${grant.slug || grant.id}/apply`)}
-                      icon={<FileText size={20} />}
-                    >
-                      {hasDraft ? t`Continue Application` : t`Apply Now`}
-                    </Button>
-                  )}
-
-                  {/* gate.allowed: the organisation reason is already printed
-                      above, and "your account has no permission" would be the
-                      wrong explanation on top of it. */}
-                  {!grant.application_url && !canApply && gate.allowed && !hasApplied && !isExpired && auth.user && (
-                    <p className="text-sm text-ktip-sand-600">
-                      <Trans>Your account does not have permission to apply for grants.</Trans>
-                    </p>
-                  )}
-
-                  {/* AccountRoute keeps signed-out visitors off this page, so
-                      this is a fallback for a session that ended while it was
-                      open: it used to show no way forward at all. */}
-                  {!auth.user && !isExpired && grant.is_active && (
-                    <Button
-                      fullWidth
-                      onClick={() => navigate('/login', { state: { from: location } })}
-                      icon={<FileText size={20} />}
-                    >
-                      <Trans>Sign in to apply</Trans>
-                    </Button>
-                  )}
-                </>
-              )}
-
-              <div className="mt-4 pt-4 border-t border-ktip-sand-100">
-                <p className="text-sm text-ktip-sand-600">
-                  <Plural
-                    value={applicationCount}
-                    one="# application submitted"
-                    other="# applications submitted"
-                  />
-                </p>
+                </DetailActionCard>
               </div>
-            </div>
 
-            {/* Widget 2: Grant Information */}
-            <div className="mb-10">
-              <h3 className="font-display font-bold text-ktip-sand-900 uppercase text-sm tracking-wider mb-1">
-                <Trans>Grant Information</Trans>
-              </h3>
-              <p className="text-ktip-ocean-600 text-xs italic mb-4"><Trans>Key details</Trans></p>
-              <div className="text-sm divide-y divide-ktip-sand-100">
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Currency</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {grant.currency}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Status</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {grant.is_active ? t`Active` : t`Inactive`}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-gray-500"><Trans>Posted</Trans></span>
-                  <span className="font-medium text-ktip-sand-900">
-                    {formatDate(grant.created_at)}
-                  </span>
+              {/* Funding details */}
+              <div className="rounded-2xl border border-ktip-sand-200 bg-ktip-cream p-5">
+                <h3 className="font-display font-bold text-ktip-sand-600 uppercase text-xs tracking-wider mb-2">
+                  <Trans>Funding details</Trans>
+                </h3>
+                <div className="text-sm divide-y divide-ktip-sand-100">
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-ktip-sand-600"><Trans>Currency</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">{grant.currency}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-ktip-sand-600"><Trans>Status</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">
+                      {grant.is_active ? t`Active` : t`Inactive`}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-ktip-sand-600"><Trans>Posted</Trans></span>
+                    <span className="font-medium text-ktip-sand-900">{formatDate(grant.created_at)}</span>
+                  </div>
                 </div>
               </div>
             </div>

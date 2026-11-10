@@ -173,6 +173,33 @@ export async function requirePermission(
 }
 
 /**
+ * The verification gate (139, widened in 205), asked after authenticate().
+ *
+ * For routes any signed-in member could call until 205: AI, invites, course
+ * enrolment. An unverified account may browse but not act, and these routes
+ * are actions, several of them on a paid API budget. Returns null when the
+ * caller is verified (or holds a staff seat), otherwise the 403 to send.
+ *
+ * Asked through the CALLER's client so auth.uid() is the caller. Fails closed:
+ * get_my_verification_state() has been live since 139, so an error here is a
+ * real fault, not a deploy running ahead of its migration.
+ */
+export async function requireVerified(callerClient: SupabaseClient): Promise<Response | null> {
+  const { data, error } = await callerClient.rpc('get_my_verification_state')
+  if (error) {
+    return json({ error: 'Could not check verification for this account' }, 500)
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  if (row?.verified !== true) {
+    return json(
+      { error: 'Verify your account to use this.', code: 'unverified' },
+      403
+    )
+  }
+  return null
+}
+
+/**
  * The Super Admin ceiling (migration 124), asked before a route acts ON an
  * account rather than merely as one.
  *

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { ktipApiKey, KtipEnrollError, loadKtipEnrollments } from '../_lib/ktip-catalog'
+import { requireVerified } from '../_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -38,6 +39,10 @@ export default async function handler(request: Request): Promise<Response> {
       error: authError,
     } = await callerClient.auth.getUser()
     if (authError || !caller?.email) return json({ error: 'Unauthorized' }, 401)
+
+    // 205: courses are walled for an unverified account.
+    const unverified = await requireVerified(callerClient)
+    if (unverified) return unverified
 
     try {
       const enrollments = await loadKtipEnrollments(caller.email)

@@ -33,7 +33,7 @@ export default function DashboardLayout() {
   const profile = auth.profile
   const dashBanner = parseBanner(profile?.banner)
   const displayName = profile?.display_name || t`Your dashboard`
-  const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role)
+  const tabs = visibleDashboardTabs(profile?.roles, profile?.active_role, auth.verified)
   // Chips follow the operating context the rail follows, and a legacy alias
   // pair collapses to one chip — the rail and the band must never disagree.
   const chipRoles = displayRoles(profile?.roles, profile?.active_role)

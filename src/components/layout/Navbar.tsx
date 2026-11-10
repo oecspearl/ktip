@@ -77,7 +77,7 @@ const StaggeredMobileMenu = lazyOverlay(
   'mobile-menu'
 )
 
-interface DropdownItem {
+export interface DropdownItem {
   name: MessageDescriptor
   href: string
   icon: ComponentType<{ size?: number; className?: string }>
@@ -88,9 +88,11 @@ interface DropdownItem {
    * that routes to login is doing its job.
    */
   requires?: PermissionKey
+  /** Shown to an unverified account (205). Absent means verified members only. */
+  unverified?: true
 }
 
-interface NavDropdown {
+export interface NavDropdown {
   id: string
   name: MessageDescriptor
   icon: ComponentType<{ size?: number; className?: string }>
@@ -104,8 +106,8 @@ const SHORTCUT_HINT =
     : 'Ctrl K'
 
 // Standalone links rendered before the dropdowns
-const leadingLinks = [
-  { name: msg`Home`, href: '/', icon: Home },
+export const leadingLinks = [
+  { name: msg`Home`, href: '/', icon: Home, unverified: true },
   { name: msg`Projects`, href: '/projects', icon: FolderKanban },
 ]
 
@@ -114,9 +116,9 @@ const leadingLinks = [
  * the mobile bento only — the desktop bar renders every one of these the same
  * way, but the mosaic needs a small tile in it or it is just rectangles.
  */
-const trailingLinks = [
+export const trailingLinks = [
   { name: msg`Resources & Integrations`, href: '/resources', icon: BookOpen, span: 'col-span-2' },
-  { name: msg`Help`, href: '/help', icon: HelpCircle, span: 'col-span-1', iconOnly: true },
+  { name: msg`Help`, href: '/help', icon: HelpCircle, span: 'col-span-1', iconOnly: true, unverified: true },
 ]
 
 /**
@@ -195,7 +197,7 @@ const EXPANDED_ROWS: Record<number, string> = {
 const BENTO_PINNED_QUERY = '(min-width: 40rem)'
 
 // Dropdown groups
-const navDropdowns: NavDropdown[] = [
+export const navDropdowns: NavDropdown[] = [
   {
     // Events moved out of leadingLinks when the virtual hackathon landed. A
     // dropdown trigger is a <button>, not a <Link>, so /events has to be the
@@ -204,7 +206,7 @@ const navDropdowns: NavDropdown[] = [
     name: msg`Events`,
     icon: Calendar,
     items: [
-      { name: msg`All Events`, href: '/events', icon: Calendar, description: msg`Hackathons, workshops, meetups and conferences` },
+      { name: msg`All Events`, href: '/events', icon: Calendar, description: msg`Hackathons, workshops, meetups and conferences`, unverified: true },
       { name: msg`My Events`, href: '/dashboard/events', icon: LayoutDashboard, description: msg`Events you organise or registered for` },
       { name: msg`Create an Event`, href: '/events/new', icon: CalendarPlus, description: msg`Publish an event and open registrations`, requires: 'event:create' },
     ],
@@ -214,7 +216,7 @@ const navDropdowns: NavDropdown[] = [
     name: msg`Funding`,
     icon: DollarSign,
     items: [
-      { name: msg`Funding Opportunities`, href: '/grants', icon: DollarSign, description: msg`Grants, seed funding, competitions and more` },
+      { name: msg`Funding Opportunities`, href: '/grants', icon: DollarSign, description: msg`Grants, seed funding, competitions and more`, unverified: true },
       // The funder's two entries. Only a grant:post holder sees them, which is
       // every organisation that funds — investor, government, IGO, diaspora,
       // the BSO since 129 — plus mentors running a fund of their own.
@@ -233,7 +235,7 @@ const navDropdowns: NavDropdown[] = [
     icon: Users,
     items: [
       { name: msg`Directory`, href: '/directory', icon: Users, description: msg`Browse the member directory` },
-      { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Start community discussions` },
+      { name: msg`Forums`, href: '/forums', icon: MessageSquare, description: msg`Start community discussions`, unverified: true },
       { name: msg`Collaborate`, href: '/collaborate', icon: Handshake, description: msg`Work together in real-time` },
       // Points at the dashboard tab rather than a new top-level page: the list
       // already exists there, is already in site-map.ts, and both strings are
@@ -470,7 +472,18 @@ export function Navbar() {
    * "Become a Contributor" button already used for project:create.
    */
   const visibleItems = (dropdown: NavDropdown) =>
-    dropdown.items.filter((item) => !item.requires || !auth.user || auth.can(item.requires))
+    dropdown.items.filter(
+      (item) =>
+        (!item.requires || !auth.user || auth.can(item.requires)) &&
+        (!unverifiedViewer || item.unverified)
+    )
+
+  // An unverified account browses grants, events and the forums (205). Only
+  // entries marked `unverified` are offered to it; the rest would open a wall.
+  // Waits for the profile, so a verified member never sees the bar shrink.
+  const unverifiedViewer = !!auth.user && !!auth.profile && !auth.profileLoading && !auth.verified
+  const shownLeadingLinks = leadingLinks.filter((item) => !unverifiedViewer || item.unverified)
+  const shownTrailingLinks = trailingLinks.filter((item) => !unverifiedViewer || item.unverified)
 
   // A group whose every entry was filtered out is a trigger that opens an empty
   // panel, so it does not get rendered at all.
@@ -946,7 +959,7 @@ export function Navbar() {
             )}
           >
             {/* Standalone links */}
-            {leadingLinks.map((item) => (
+            {shownLeadingLinks.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -1028,7 +1041,7 @@ export function Navbar() {
             ))}
 
             {/* Trailing standalone links */}
-            {trailingLinks.map((item) => (
+            {shownTrailingLinks.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -1586,7 +1599,7 @@ export function Navbar() {
 
     {/* The two destinations that are not a category — half-tiles, so the eye
         gets a size difference to read before it gets to any label. */}
-    {leadingLinks.map((item, index) => (
+    {shownLeadingLinks.map((item, index) => (
       <Link
         key={item.href}
         to={item.href}
@@ -1720,7 +1733,7 @@ export function Navbar() {
         sizes. The 1×1 squares are what stop the lower half from being a stack
         of identical rectangles — they carry the glyph alone, with the label on
         the accessible name rather than in the tile. */}
-    {trailingLinks.map((item) => (
+    {shownTrailingLinks.map((item) => (
       <Link
         key={item.href}
         to={item.href}

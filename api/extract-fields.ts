@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { FIELD_SPECS, describeFields, sanitizeFields } from '../src/lib/extracted-fields'
-import { adminClientOrNull } from './_lib/require-permission'
+import { adminClientOrNull, requireVerified } from './_lib/require-permission'
 
 export const config = { runtime: 'edge' }
 
@@ -91,6 +91,10 @@ export default async function handler(request: Request) {
   if (!caller) {
     return json({ error: 'Unauthorized' }, 401)
   }
+
+  // 205: an unverified account browses; it does not spend the AI budget.
+  const unverified = await requireVerified(callerClient)
+  if (unverified) return unverified
 
   // Authenticated is not the same as metered. Every other paid route consumes
   // a bucket before it parses; this one required a token and then let the

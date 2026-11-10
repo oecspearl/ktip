@@ -70,6 +70,12 @@ async function resolveViewer(request: Request): Promise<Viewer> {
   } = await callerClient.auth.getUser()
   if (!user) return guest
 
+  // 205: an unverified account is searched for as a guest, so the navigator
+  // never points it at pages it cannot open.
+  const { data: state } = await callerClient.rpc('get_my_verification_state')
+  const stateRow = Array.isArray(state) ? state[0] : state
+  if (stateRow?.verified !== true) return guest
+
   // The site map's 'oecs' access level means "admin console", resolved through
   // the same capability list the client's opensAdminConsole() uses.
   const { data: permissions } = await callerClient.rpc('get_my_permissions')

@@ -46,6 +46,7 @@ import { venuePath } from '../../../lib/event-slug'
 import type { EventStatus } from '../../../types'
 
 import { EventDetailsForm } from '../../../components/events/EventDetailsForm'
+import { cardImageFor } from '../../../lib/hero-images'
 
 // One chunk per tab, fetched when the tab is opened. Statically imported, every
 // visit to the workspace paid for all nine — the venue tab's floor-plan editor
@@ -256,7 +257,7 @@ export default function AdminEventDetailPage() {
         compact
         eyebrow="Event Management"
         title={event.title}
-        image={event.image_url}
+        image={cardImageFor(event.image_url, event.id)}
         imageSeed={event.id}
         actions={
           <>

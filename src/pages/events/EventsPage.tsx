@@ -44,6 +44,8 @@ import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
 import { resolveCopy } from '../../i18n/copy'
 import { prefersReducedMotionNow } from '../../a11y/store'
+import { useUrlFilter } from '../../hooks/useUrlFilter'
+import { EVENT_TYPE_OPTIONS, listTrail } from '../../lib/category-crumbs'
 
 type EventsView = 'calendar' | 'grid'
 
@@ -62,7 +64,8 @@ export default function EventsPage() {
     () => TYPE_OPTIONS.map((option) => ({ value: option.value, label: resolveCopy(i18n, option.label) })),
     [i18n]
   )
-  const [selectedType, setSelectedType] = useState('')
+  // In the URL so an event's breadcrumb can link straight to its type.
+  const [selectedType, setSelectedType] = useUrlFilter('type')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 300), [])
@@ -305,7 +308,13 @@ export default function EventsPage() {
           eyebrow={t`Event Archives`}
           title={t`Events`}
           imageSeed="events"
-          breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Events List` }]}
+          breadcrumb={listTrail({
+            home: t`Home`,
+            section: { label: t`Events`, href: '/events', currentLabel: t`Events List` },
+            param: 'type',
+            categories: EVENT_TYPE_OPTIONS,
+            selected: selectedType,
+          })}
         />
       </div>
 

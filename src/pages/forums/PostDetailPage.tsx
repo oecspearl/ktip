@@ -14,6 +14,7 @@ import {
   useDeleteForumReply,
 } from '../../hooks/useForums'
 import { useAuth } from '../../contexts/AuthContext'
+import { VerificationNotice } from '../../components/verification/VerificationNotice'
 import { useCanonicalSlug } from '../../hooks/useCanonicalSlug'
 import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { forumReplySchema } from '../../lib/validation'
@@ -258,7 +259,12 @@ export default function PostDetailPage() {
                 </div>
               )}
 
-              {/* Reply Form */}
+              {/* Reply Form. A signed-in account without forum:comment (an
+                  unverified one, 139/205) is told why instead of being handed
+                  a box that RLS refuses on submit. */}
+              {auth.user && !auth.can('forum:comment') ? (
+                <VerificationNotice action={t`reply to posts`} className="mt-4" />
+              ) : (
               <form onSubmit={handleSubmitReply} className="mt-4 pt-4 border-t border-ktip-sand-200">
                 <ModeratedTextarea
                   value={replyContent}
@@ -290,6 +296,7 @@ export default function PostDetailPage() {
                   </Button>
                 </div>
               </form>
+              )}
             </div>
           </div>
 

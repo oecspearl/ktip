@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MessageSquare, Plus, Search, Sparkles, Users } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useMyConnections } from '../../hooks/useConnections'
+import { useAuth } from '../../contexts/AuthContext'
 import type { Conversation, Profile } from '../../types'
 import {
   ASSISTANT_CONVERSATION_ID,
@@ -35,6 +36,9 @@ export function ChatSidebar({
   const [tab, setTab] = useState<'chats' | 'contacts'>('chats')
   const [search, setSearch] = useState('')
   const { connections } = useMyConnections(currentUserId)
+  // 205: an unverified account keeps the threads staff opened with it, and
+  // nothing else: no assistant (a paid API), no new chats or groups.
+  const { verified } = useAuth()
 
   const query = search.trim().toLowerCase()
 
@@ -181,7 +185,7 @@ export function ChatSidebar({
       <div className="flex-1 overflow-y-auto">
         {tab === 'chats' ? (
           <>
-            {assistantMatchesSearch && renderAssistantRow()}
+            {verified && assistantMatchesSearch && renderAssistantRow()}
             {groups.length > 0 && (
               <div>
                 {sectionHeader(t`Groups`)}
@@ -228,6 +232,7 @@ export function ChatSidebar({
       </div>
 
       {/* New chat / New group */}
+      {verified && (
       <div className="p-2 border-t border-ktip-sand-200 grid grid-cols-2 gap-2 shrink-0">
         <Button size="sm" variant="outline" icon={<Plus size={14} />} onClick={onNewChat} className="text-xs">
           <Trans>New chat</Trans>
@@ -236,6 +241,7 @@ export function ChatSidebar({
           <Trans>New group</Trans>
         </Button>
       </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   cn,
   truncate,
@@ -7,7 +7,41 @@ import {
   formatCurrency,
   parseHashtags,
   escapeIlike,
+  copyToClipboard,
 } from './utils'
+
+describe('copyToClipboard', () => {
+  const original = navigator.clipboard
+  afterEach(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: original, configurable: true })
+    vi.restoreAllMocks()
+  })
+
+  it('uses the Clipboard API when it works', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    await expect(copyToClipboard('https://example.test/e')).resolves.toBe(true)
+    expect(writeText).toHaveBeenCalledWith('https://example.test/e')
+  })
+
+  it('falls back to the copy command when the Clipboard API refuses', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('NotAllowedError'))
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    const exec = vi.fn().mockReturnValue(true)
+    Object.defineProperty(document, 'execCommand', { value: exec, configurable: true })
+    await expect(copyToClipboard('x')).resolves.toBe(true)
+    expect(exec).toHaveBeenCalledWith('copy')
+    expect(document.querySelector('textarea')).toBeNull()
+  })
+
+  it('falls back when there is no Clipboard API at all', async () => {
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true })
+    const exec = vi.fn().mockReturnValue(false)
+    Object.defineProperty(document, 'execCommand', { value: exec, configurable: true })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    await expect(copyToClipboard('x')).resolves.toBe(false)
+  })
+})
 
 describe('cn', () => {
   it('merges class names', () => {

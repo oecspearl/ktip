@@ -3,10 +3,13 @@ import { useAuth } from '../contexts/AuthContext'
 import { RouteSplash } from './RouteSplash'
 import { suspensionRedirect } from '../lib/suspension'
 import { useSecondaryEmailStatus } from '../hooks/useEmailAlias'
+import { useWallForUnverified } from '../hooks/useUnverifiedRule'
+import { VerificationWall } from './verification/VerificationWall'
 
 export const ProtectedRoute = () => {
   const auth = useAuth()
   const location = useLocation()
+  const wallUnverified = useWallForUnverified()
   // Called before any return, as hooks must be. Disabled until there is a user.
   const secondary = useSecondaryEmailStatus(auth.user?.id)
 
@@ -99,6 +102,15 @@ export const ProtectedRoute = () => {
   }
   if (secondary.status && secondary.status.compliant === false) {
     return <Navigate to="/security/backup-email" replace state={{ from: location }} />
+  }
+
+  // Verification (205), last: every gate above decides whether the account may
+  // be here at all, this one only which pages it may read yet. Default-deny —
+  // a route opens to an unverified account only when App.tsx marks it with
+  // UNVERIFIED_OK. A wall, not a redirect, so the page appears in place once
+  // the account is verified.
+  if (!auth.verified && wallUnverified) {
+    return <VerificationWall />
   }
 
   return <Outlet />

@@ -203,6 +203,8 @@ export function FloatingActionButton() {
       },
       badge: noteCount > 0,
       count: noteCount,
+      // 205: a tool, not part of the profile, so it waits for verification.
+      show: !auth.user || auth.verified,
     },
     {
       id: 'accessibility',

@@ -363,6 +363,9 @@ export function useCreateConversation() {
         if (started.ok && started.conversation_id) return started.conversation_id
         if (started.reason === 'student') throw new Error(studentMessage)
         if (started.reason === 'private') throw new Error(privateMessage)
+        // 205: only staff open a thread with an account that is not verified.
+        if (started.reason === 'unverified')
+          throw new Error(t`This member hasn't verified their account yet, so they can't receive messages.`)
         throw new Error(t`Could not start the conversation.`)
       }
 

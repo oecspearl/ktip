@@ -548,8 +548,9 @@ export const PERMISSION_DEFINITIONS: PermissionDefinition[] = [
 /**
  * Permissions withheld until an admin has verified the account (migration 139).
  *
- * Publishing and applying only. Reading, receiving and every administrative key
- * are deliberately absent: the gate exists to keep an unverified stranger from
+ * Publishing, applying and managing your own projects and funds (205 added the
+ * last two). Reading, receiving and every administrative key are deliberately
+ * absent: the gate exists to keep an unverified stranger from
  * reaching real members and real money, not to make the platform look empty to
  * somebody still deciding whether to finish signing up.
  *
@@ -570,7 +571,18 @@ export const VERIFICATION_GATED_PERMISSIONS: PermissionKey[] = [
   'resource:submit',
   'mentorship:offer',
   'dm:initiate',
+  'project:manage',
+  'grant:manage_funds',
 ]
+
+/**
+ * Roles that count as verified without the queue: every admin-tier seat. Mirrors
+ * is_verified_member() as widened in 205 — staff are granted their seat by an
+ * admin, never self-assign it, and must not be locked out of their own tools.
+ */
+export const STAFF_ROLE_SLUGS: string[] = ROLE_DEFINITIONS.filter((r) => r.tier === 'admin').map(
+  (r) => r.slug
+)
 
 export const PERMISSION_BY_KEY: Record<string, PermissionDefinition> = Object.fromEntries(
   PERMISSION_DEFINITIONS.map((p) => [p.key, p])

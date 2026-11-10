@@ -25,21 +25,18 @@ import { useGridColumns } from '../../hooks/useGridColumns'
 import { useTagVocabulary } from '../../hooks/useTagVocabulary'
 import { usePersonalizationActive } from '../../hooks/usePersonalization'
 import { grantTypeIcon } from '../../lib/category-icons'
-import { FUNDING_TYPES } from '../../lib/funding-types'
+import { FUNDING_TYPES, GRANT_FOCUS_AREAS } from '../../lib/funding-types'
 import { resolveSort, SORT_OPTIONS, type ContentSort } from '../../lib/personalization'
 import { cn, debounce } from '../../lib/utils'
 import { isOpenCall } from '../../lib/grant-metrics'
 import type { Grant } from '../../types'
 import { Trans, Plural, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { useUrlFilter } from '../../hooks/useUrlFilter'
+import { listTrail } from '../../lib/category-crumbs'
 
-const GRANT_TYPES = [
-  { value: 'startup', label: msg`Startup Funding` },
-  { value: 'research', label: msg`Research Grants` },
-  { value: 'innovation', label: msg`Innovation Awards` },
-  { value: 'development', label: msg`Development Funds` },
-  { value: 'education', label: msg`Education Grants` },
-]
+// Shared with the breadcrumb on a call's own page, so both say the same thing.
+const GRANT_TYPES = GRANT_FOCUS_AREAS
 
 const TYPE_OPTIONS = [{ value: '', label: msg`All Focus Areas` }, ...GRANT_TYPES]
 const OTHER_FUNDING = msg`Other Funding`
@@ -61,7 +58,8 @@ export default function GrantsPage() {
     () => FUNDING_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: i18n._(opt.label) })),
     [i18n]
   )
-  const [selectedType, setSelectedType] = useState<string>('')
+  // In the URL so a call's breadcrumb can link straight to its focus area.
+  const [selectedType, setSelectedType] = useUrlFilter('type')
   const [selectedFundingType, setSelectedFundingType] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -158,7 +156,13 @@ export default function GrantsPage() {
         title={t`Funding Opportunities`}
         image="/photos/team-3.webp"
         imageSeed="grants"
-        breadcrumb={[{ label: t`Home`, href: '/' }, { label: t`Grants` }]}
+        breadcrumb={listTrail({
+          home: t`Home`,
+          section: { label: t`Grants`, href: '/grants' },
+          param: 'type',
+          categories: GRANT_FOCUS_AREAS,
+          selected: selectedType,
+        })}
         actions={
           // Two sides of the same page, and which one you are on is the
           // permission you hold: a funder tracks the calls it posted, an
