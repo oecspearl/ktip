@@ -30117,7 +30117,7 @@ msgid "Explain why you believe the content was removed by mistake or misidentifi
 msgstr ""
 
 #: src/pages/grants/GrantDetailPage.tsx
-msgid "Sign up to apply"
+msgid "Sign in to apply"
 msgstr ""
 
 #: src/components/calendar/CalendarDayPanel.tsx

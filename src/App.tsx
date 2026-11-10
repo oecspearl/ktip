@@ -332,9 +332,10 @@ const router = createBrowserRouter([
           { path: '/integrations', element: <Navigate to="/resources?tab=integrations" replace /> },
 
           // Lists stay open; opening one item takes an account. Signed out,
-          // AccountRoute sends the visitor to /signup and parks the path
+          // AccountRoute sends the visitor to /login and parks the path
           // (src/lib/return-to.ts), so a shared link still lands on the item
-          // once the account exists. Signed in, these render as they always did.
+          // after logging in or signing up. Signed in, these render as they
+          // always did.
           {
             Component: AccountRoute,
             children: [
@@ -345,7 +346,7 @@ const router = createBrowserRouter([
               { path: '/integrations/:id', lazy: lazyPage(() => import('./pages/integrations/IntegrationDetailPage')) },
               // A project page also needs ProtectedRoute's onboarding and
               // two-step checks, which it had before. AccountRoute sits
-              // outside it so a signed-out visitor meets /signup, not /login.
+              // outside it so only this route pays for those checks.
               {
                 Component: ProtectedRoute,
                 children: [
@@ -439,7 +440,7 @@ const router = createBrowserRouter([
               // Full-page receipt, deliberately outside the tab shell
               { path: '/dashboard/submissions/:id', lazy: lazyPage(() => import('./pages/dashboard/SubmissionReceiptPage')) },
               // /projects/:id lives under AccountRoute above, with this guard
-              // nested inside it, so a signed-out visitor goes to /signup.
+              // nested inside it.
               // Creating a project needs project:create (migration 064 put that
               // check in the INSERT policy). Gated here so a role without it —
               // investor, say — gets told why instead of filling in the whole

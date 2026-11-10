@@ -205,7 +205,7 @@ export default function EventDetailPage() {
     // AccountRoute keeps signed-out visitors off this page; this covers a
     // session that ended while it was open, where the button used to do nothing.
     if (!auth.user) {
-      navigate('/signup', { state: { from: location } })
+      navigate('/login', { state: { from: location } })
       return
     }
     const entering =

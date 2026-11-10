@@ -7,11 +7,11 @@ import { RouteSplash } from './RouteSplash'
  * Detail pages that need an account but were browsable before.
  *
  * Lists stay open so a visitor can see what is on the platform; opening one
- * item takes an account. A signed-out visitor is sent to /signup rather than
- * /login, because most people who reach a shared grant or event link have no
- * account yet. The page they wanted is parked in the tab (return-to.ts) as
- * well as handed over in `state.from`, so the email OTP, an OAuth round trip
- * or a hop over to /login all land them back on it.
+ * item takes an account. A signed-out visitor is sent to /login, like every
+ * other gate; /login links to /signup for anyone without an account. The page
+ * they wanted is parked in the tab (return-to.ts) as well as handed over in
+ * `state.from`, so the email OTP, an OAuth round trip or a hop over to /signup
+ * all land them back on it.
  *
  * Signed in, this only renders the page. It deliberately repeats none of
  * ProtectedRoute's onboarding or two-step checks: these routes were public, and
@@ -28,10 +28,10 @@ export const AccountRoute = () => {
   }
 
   if (!auth.user) {
-    // Idempotent, so calling it during render is safe; SignupPage writes the
+    // Idempotent, so calling it during render is safe; LoginPage writes the
     // same value again from `state.from` when it mounts.
     rememberReturnTo(location)
-    return <Navigate to="/signup" replace state={{ from: location }} />
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return <Outlet />

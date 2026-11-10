@@ -419,10 +419,10 @@ export default function GrantDetailPage() {
                   {!auth.user && !isExpired && grant.is_active && (
                     <Button
                       fullWidth
-                      onClick={() => navigate('/signup', { state: { from: location } })}
+                      onClick={() => navigate('/login', { state: { from: location } })}
                       icon={<FileText size={20} />}
                     >
-                      <Trans>Sign up to apply</Trans>
+                      <Trans>Sign in to apply</Trans>
                     </Button>
                   )}
                 </>

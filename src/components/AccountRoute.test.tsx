@@ -18,9 +18,9 @@ afterEach(() => {
   sessionStorage.clear()
 })
 
-function SignupProbe() {
+function LoginProbe() {
   const from = (useLocation().state as { from?: { pathname: string; search: string } } | null)?.from
-  return <div>SIGNUP FROM {from ? `${from.pathname}${from.search}` : 'none'}</div>
+  return <div>LOGIN FROM {from ? `${from.pathname}${from.search}` : 'none'}</div>
 }
 
 function renderAt(path: string) {
@@ -30,24 +30,25 @@ function renderAt(path: string) {
         <Route element={<AccountRoute />}>
           <Route path="/grants/:id" element={<div>GRANT</div>} />
         </Route>
-        <Route path="/signup" element={<SignupProbe />} />
-        <Route path="/login" element={<div>LOGIN</div>} />
+        <Route path="/login" element={<LoginProbe />} />
+        <Route path="/signup" element={<div>SIGNUP</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
 describe('AccountRoute', () => {
-  it('sends a signed-out visitor to signup, carrying where they were going', () => {
+  it('sends a signed-out visitor to login, carrying where they were going', () => {
     mockAuth.mockReturnValue({ loading: false, user: null })
     renderAt('/grants/youth-fund?tab=apply')
-    expect(screen.getByText('SIGNUP FROM /grants/youth-fund?tab=apply')).toBeTruthy()
+    expect(screen.getByText('LOGIN FROM /grants/youth-fund?tab=apply')).toBeTruthy()
+    expect(screen.queryByText('SIGNUP')).toBeNull()
     expect(screen.queryByText('GRANT')).toBeNull()
   })
 
   // Router state does not survive the email OTP's navigation or an OAuth
   // round trip, so the path has to be parked in the tab as well.
-  it('parks the path for after sign-up', () => {
+  it('parks the path for after log-in or sign-up', () => {
     mockAuth.mockReturnValue({ loading: false, user: null })
     renderAt('/grants/youth-fund?tab=apply')
     expect(takeReturnTo()).toBe('/grants/youth-fund?tab=apply')

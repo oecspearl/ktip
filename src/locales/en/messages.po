@@ -31193,8 +31193,8 @@ msgid "Explain why you believe the content was removed by mistake or misidentifi
 msgstr "Explain why you believe the content was removed by mistake or misidentification."
 
 #: src/pages/grants/GrantDetailPage.tsx
-msgid "Sign up to apply"
-msgstr "Sign up to apply"
+msgid "Sign in to apply"
+msgstr "Sign in to apply"
 
 #: src/components/calendar/CalendarDayPanel.tsx
 #: src/i18n/harvested.ts
