@@ -133,7 +133,7 @@ export function AuthSplitShell({
               {/* ktip-logo.webp already has an alpha channel, so the separate
                   "nobg" file this used to point at was both redundant and
                   missing — it 404'd here since the originals were removed. */}
-              <img src="/ktip-logo-128.webp" alt="KTiP" className="h-9 w-auto drop-shadow" />
+              <img src="/ktip-logo-128.webp" alt="KTIP" className="h-9 w-auto drop-shadow" />
               <Link
                 to="/"
                 className="inline-flex items-center gap-1.5 rounded-full bg-brand-white/15 px-4 py-1.5 text-sm font-medium text-brand-white backdrop-blur-sm hover:bg-brand-white/25 transition-colors"

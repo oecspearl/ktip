@@ -96,7 +96,7 @@ export function Footer() {
           {/* Logo & Mission */}
           <div className="md:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
-              <img src="/ktip-logo-128.webp" alt="KTiP" loading="lazy" decoding="async" width={48} height={48} className="w-12 h-12 object-contain" />
+              <img src="/ktip-logo-128.webp" alt="KTIP" loading="lazy" decoding="async" width={48} height={48} className="w-12 h-12 object-contain" />
               <div>
                 <h3 className="text-xl font-display font-extrabold tracking-tight text-white">
                   {APP_NAME}

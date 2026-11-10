@@ -254,7 +254,7 @@ export function WelcomePanel() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/85 via-brand-navy/20 to-brand-navy/45" />
                 <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
-                  <img src="/ktip-logo-128.webp" alt="KTiP" className="h-9 w-auto drop-shadow" />
+                  <img src="/ktip-logo-128.webp" alt="KTIP" className="h-9 w-auto drop-shadow" />
                   <span className="font-display text-sm font-semibold tracking-[0.2em] text-brand-white/70">
                     {String(face + 1).padStart(2, '0')}
                     <span className="mx-1.5 text-brand-white/35">/</span>

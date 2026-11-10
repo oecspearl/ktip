@@ -28,7 +28,7 @@ export const AdminRoute = () => {
         <div className="text-center">
           <img
             src="/ktip-logo-128.webp"
-            alt="KTiP"
+            alt="KTIP"
             className="w-12 h-12 object-contain mx-auto animate-pulse-soft"
           />
           <p className="mt-4 text-ktip-sand-600"><Trans>Loading...</Trans></p>

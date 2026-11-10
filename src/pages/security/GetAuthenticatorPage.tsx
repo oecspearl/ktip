@@ -29,7 +29,7 @@ export default function GetAuthenticatorPage() {
     <div className="min-h-svh bg-ktip-cream px-4 py-8">
       <div className="mx-auto w-full max-w-md space-y-6">
         <header className="space-y-3">
-          <img src="/ktip-logo-128.webp" alt="KTiP" className="h-9 w-auto" />
+          <img src="/ktip-logo-128.webp" alt="KTIP" className="h-9 w-auto" />
           <div className="flex items-start gap-3">
             <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ktip-ocean-100 text-ktip-ocean-700">
               <ShieldCheck size={20} />

@@ -1,10 +1,12 @@
 /**
  * Where each share button goes, and what it can carry.
  *
- * Every app takes a link; only some take a message. WhatsApp and X accept a
- * pre-filled message. Facebook forbids it by policy and LinkedIn's share URL
- * ignores it, so the sheet copies the message for those two and says so.
- * Instagram has no web share URL at all.
+ * Every app takes a link; only some take a message. WhatsApp, X and LinkedIn
+ * open with the message filled in. LinkedIn's documented share URL takes only
+ * the link, so it goes to the composer (feed/?shareActive=true&text=) instead;
+ * that address is undocumented, so the sheet copies the message as well.
+ * Facebook forbids a pre-filled message by policy: the sheet copies it and says
+ * so. Instagram has no web share URL at all.
  */
 
 export type SharePlatform =
@@ -17,7 +19,7 @@ export type SharePlatform =
   | 'copy'
   | 'native'
 
-/** Platforms whose share URL drops the message; the sheet copies it first. */
+/** Platforms the sheet copies the message for, because their share URL drops it or may. */
 export const COPIES_MESSAGE: ReadonlySet<SharePlatform> = new Set(['linkedin', 'facebook', 'instagram'])
 
 /** X counts every link as this many characters, whatever its length. */
@@ -59,7 +61,9 @@ export function shareHref(
     case 'x':
       return `https://x.com/intent/post?text=${enc(text)}&url=${enc(url)}`
     case 'linkedin':
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`
+      // The link goes inside the text: LinkedIn builds the preview card from the
+      // first link in a post.
+      return `https://www.linkedin.com/feed/?shareActive=true&text=${enc(text ? `${text}\n\n${url}` : url)}`
     case 'facebook':
       return `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`
     case 'email':

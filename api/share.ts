@@ -5,6 +5,7 @@ import {
   requireVerified,
 } from './_lib/require-permission'
 import { clientIp } from './_lib/client-ip'
+import { OG_KINDS, cleanId, itemCard, loadShareable, ogHtml, siteCard, type OgKind } from './_lib/share-og'
 import {
   DRAFT_ANGLES,
   DRAFT_LANGS,
@@ -58,8 +59,11 @@ export const config = { runtime: 'edge' }
  * rules and wrote sharper hooks than GPT-4o, which kept slipping into stock
  * lines, and it costs less. OPENAI_SHARE_MODEL changes it without a deploy.
  *
- * Later steps add GET handling here for link-preview bots and the card image,
- * so the feature stays one function.
+ * GET /api/share?og=<kind>&id=<id or slug> is the other half: the page that
+ * link-preview crawlers read. vercel.json rewrites their requests for
+ * /projects/:id, /events/:id, /grants/:id and /org/:slug here (og=site for
+ * every other path), and the answer is Open Graph tags for the item, built in
+ * api/_lib/share-og.ts. No session, no AI, cached at the edge.
  */
 
 const BURST_LIMIT = 12
@@ -82,7 +86,34 @@ const json = (body: unknown, status: number) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
 
+/** Open Graph tags for a link-preview crawler. Never fails: anything wrong gives the plain KTIP card. */
+async function previewPage(request: Request): Promise<Response> {
+  // The host the crawler asked for, not SITE_URL: the card's picture and link
+  // must live on the address that was shared.
+  const { origin, searchParams: params } = new URL(request.url)
+  const kind = params.get('og') as OgKind
+  let card = siteCard(origin)
+  if ((OG_KINDS as readonly string[]).includes(kind)) {
+    const id = cleanId(kind, params.get('id'))
+    const admin = adminClientOrNull()
+    if (id && admin) {
+      const row = await loadShareable(admin, kind, id).catch(() => null)
+      if (row) card = itemCard(origin, kind, row)
+    }
+  }
+  return new Response(request.method === 'HEAD' ? null : ogHtml(card), {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      // Short, so an edited title or a project made private shows within minutes.
+      'Cache-Control': 'public, max-age=0, s-maxage=600, stale-while-revalidate=3600',
+      'X-Robots-Tag': 'noindex',
+    },
+  })
+}
+
 export default async function handler(request: Request) {
+  if (request.method === 'GET' || request.method === 'HEAD') return previewPage(request)
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
   const apiKey = process.env.OPENAI_API_KEY

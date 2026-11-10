@@ -76,7 +76,6 @@ export const MAX_TRANSLATABLE = 20_000
  */
 export const PROPER_NOUNS: ReadonlySet<string> = new Set([
   'KTIP',
-  'KTiP',
   'OECS',
   'OECS KTIP',
   'Virtual Campus',

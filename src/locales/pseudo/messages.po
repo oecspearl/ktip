@@ -345,10 +345,6 @@ msgstr ""
 msgid "A floor of sponsor booths around a central hall, with a demo stage and space to network between the aisles."
 msgstr ""
 
-#: src/components/share/share-apps.tsx
-msgid "{app} only takes the link, so we copy this text for you to paste above it."
-msgstr ""
-
 #: src/components/documents/DocumentsPanel.tsx
 #: src/components/events/EventSolutionsPanel.tsx
 #: src/components/venue/room/homebase/TeamFiles.tsx
@@ -11804,6 +11800,10 @@ msgstr ""
 msgid "Sign out"
 msgstr ""
 
+#: src/hooks/useInstitutions.ts
+msgid "No verified institution owns @{domain}. Ask your school to register on KTIP."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Direct messages, group chats and the KTIP Assistant."
 msgstr ""
@@ -15488,6 +15488,10 @@ msgstr ""
 msgid "Search members..."
 msgstr ""
 
+#: src/components/share/share-apps.tsx
+msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
+msgstr ""
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr ""
@@ -16229,6 +16233,10 @@ msgstr ""
 
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
+msgstr ""
+
+#: src/components/share/share-apps.tsx
+msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -24781,10 +24789,6 @@ msgstr ""
 msgid "Set up a virtual venue for your event"
 msgstr ""
 
-#: src/hooks/useInstitutions.ts
-msgid "No verified institution owns @{domain}. Ask your school to register on KTiP."
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "No — it is the record of your answer"
 msgstr ""
@@ -24883,6 +24887,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Community & Network"
+msgstr ""
+
+#: src/components/share/ShareSheet.tsx
+msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
 msgstr ""
 
 #: src/hooks/useMfa.ts

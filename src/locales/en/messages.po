@@ -359,10 +359,6 @@ msgstr "Reads an uploaded document and proposes values for form fields"
 msgid "A floor of sponsor booths around a central hall, with a demo stage and space to network between the aisles."
 msgstr "A floor of sponsor booths around a central hall, with a demo stage and space to network between the aisles."
 
-#: src/components/share/share-apps.tsx
-msgid "{app} only takes the link, so we copy this text for you to paste above it."
-msgstr "{app} only takes the link, so we copy this text for you to paste above it."
-
 #: src/components/documents/DocumentsPanel.tsx
 #: src/components/events/EventSolutionsPanel.tsx
 #: src/components/venue/room/homebase/TeamFiles.tsx
@@ -12223,6 +12219,10 @@ msgstr "Choose the topics, categories and content types you want ranked first"
 msgid "Sign out"
 msgstr "Sign out"
 
+#: src/hooks/useInstitutions.ts
+msgid "No verified institution owns @{domain}. Ask your school to register on KTIP."
+msgstr "No verified institution owns @{domain}. Ask your school to register on KTIP."
+
 #: src/i18n/harvested.ts
 msgid "Direct messages, group chats and the KTIP Assistant."
 msgstr "Direct messages, group chats and the KTIP Assistant."
@@ -16065,6 +16065,10 @@ msgstr "Accepted the first time you publish a project, event, post, CV or organi
 msgid "Search members..."
 msgstr "Search members..."
 
+#: src/components/share/share-apps.tsx
+msgid "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
+msgstr "Facebook doesn't let apps fill in a post for you. When you press Share, we copy your message so you can paste it above the link."
+
 #: src/pages/collaborate/VideoConferencePage.tsx
 msgid "Untitled call"
 msgstr "Untitled call"
@@ -16825,6 +16829,10 @@ msgstr "Who is in the room"
 #: src/lib/delete-guard.ts
 msgid "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
 msgstr "{applicationCount, plural, one {# application will be destroyed along with any drafts. Applicants will not be notified.} other {# applications will be destroyed along with any drafts. Applicants will not be notified.}}"
+
+#: src/components/share/share-apps.tsx
+msgid "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
+msgstr "Opens LinkedIn with this message and the link. We copy the message too, in case LinkedIn leaves the box empty."
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "Expired or no longer accepting applications"
@@ -25683,10 +25691,6 @@ msgstr "Direct messages with student accounts are not available. Use a supervise
 msgid "Set up a virtual venue for your event"
 msgstr "Set up a virtual venue for your event"
 
-#: src/hooks/useInstitutions.ts
-msgid "No verified institution owns @{domain}. Ask your school to register on KTiP."
-msgstr "No verified institution owns @{domain}. Ask your school to register on KTiP."
-
 #: src/i18n/harvested.ts
 msgid "No — it is the record of your answer"
 msgstr "No — it is the record of your answer"
@@ -25788,6 +25792,10 @@ msgstr "Save showcase"
 #: src/i18n/harvested.ts
 msgid "Community & Network"
 msgstr "Community & Network"
+
+#: src/components/share/ShareSheet.tsx
+msgid "Message copied too. If LinkedIn opens with an empty box, paste it in."
+msgstr "Message copied too. If LinkedIn opens with an empty box, paste it in."
 
 #: src/hooks/useMfa.ts
 msgid "This account uses an authenticator app. Enter the code from the app instead."

@@ -181,7 +181,7 @@
       "action": "auto"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/components/AdminRoute.tsx",
       "line": 23,
       "kind": "jsx-attr",
@@ -201,7 +201,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/components/auth/AuthSplitShell.tsx",
       "line": 189,
       "kind": "jsx-attr",
@@ -1010,7 +1010,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/components/layout/Footer.tsx",
       "line": 82,
       "kind": "jsx-attr",
@@ -1020,7 +1020,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/components/layout/Navbar.tsx",
       "line": 462,
       "kind": "jsx-attr",
@@ -1284,7 +1284,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/components/RouteSplash.tsx",
       "line": 13,
       "kind": "jsx-attr",
@@ -2028,7 +2028,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/pages/auth/AuthCallbackPage.tsx",
       "line": 190,
       "kind": "jsx-attr",
@@ -2038,7 +2038,7 @@
       "reason": "not-copy"
     },
     {
-      "text": "KTiP",
+      "text": "KTIP",
       "file": "src/pages/auth/VcLandingPage.tsx",
       "line": 109,
       "kind": "jsx-attr",

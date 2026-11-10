@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, ChevronLeft, Link2, RefreshCw, Share2, X as CloseIcon } from 'lucide-react'
+import { Check, ChevronLeft, Info, Link2, RefreshCw, Share2, X as CloseIcon } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useToast } from '../../contexts/ToastContext'
 import { useIsMobile } from '../../hooks/useMediaQuery'
@@ -301,9 +301,13 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
       const href = shareHref(id, { url, message, title: target.title })
       if (!href) return
       // Copy before opening: some browsers only allow the clipboard while the tap is still fresh.
+      // LinkedIn opens with the message filled in, through an address LinkedIn
+      // doesn't document; the copy is the fallback if that ever stops working.
       if ((id === 'linkedin' || id === 'facebook') && message) {
         copyText(message).then((ok) => {
-          if (ok) toast.info(t`Message copied. Paste it into ${appName} above the link.`)
+          if (!ok) return
+          if (id === 'linkedin') toast.info(t`Message copied too. If LinkedIn opens with an empty box, paste it in.`)
+          else toast.info(t`Message copied. Paste it into ${appName} above the link.`)
         })
       }
       if (id === 'email') window.location.href = href
@@ -667,7 +671,8 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
             </div>
 
             <p className="text-sm leading-snug text-ktip-sand-600">
-              {failure ? failureText[failure] : app.how} <Trans>Tap the text to edit it.</Trans>
+              {/* Facebook's line sits by the Share button instead, where it can't be scrolled past. */}
+              {failure ? failureText[failure] : active === 'facebook' ? null : app.how} <Trans>Tap the text to edit it.</Trans>
             </p>
             <button
               type="button"
@@ -689,32 +694,40 @@ export function ShareSheet({ target, onClose }: { target: ShareTarget; onClose: 
             <Trans>Done</Trans>
           </button>
         ) : (
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5">
-            <button
-              type="button"
-              onClick={copyLink}
-              className="flex min-h-12 items-center gap-2 rounded-xl border border-ktip-sand-200 px-4 text-sm font-bold text-ktip-sand-900 hover:bg-ktip-sand-100"
-            >
-              <Link2 className="size-4" aria-hidden="true" />
-              <Trans>Copy link</Trans>
-            </button>
-            <button
-              type="button"
-              onClick={shareNow}
-              // Wait for the message on screen: sharing the page's version a second
-              // before the AI's lands would send something the member never read.
-              disabled={pending}
-              className={cn(
-                'flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-xl px-4 text-base font-bold transition-[filter,background-color]',
-                pending ? 'cursor-default bg-ktip-sand-200 text-ktip-sand-500' : cn(app.tone, 'hover:brightness-110')
-              )}
-            >
-              <Share2 className="size-5 shrink-0" aria-hidden="true" />
-              <span className="truncate">
-                {shared[active] ? <Trans>Share to {appName} again</Trans> : <Trans>Share to {appName}</Trans>}
-              </span>
-            </button>
-          </div>
+          <>
+            {active === 'facebook' && (
+              <p className="mb-3 flex items-start gap-2 text-sm leading-snug text-ktip-sand-700">
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span className="min-w-0">{app.how}</span>
+              </p>
+            )}
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5">
+              <button
+                type="button"
+                onClick={copyLink}
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-ktip-sand-200 px-4 text-sm font-bold text-ktip-sand-900 hover:bg-ktip-sand-100"
+              >
+                <Link2 className="size-4" aria-hidden="true" />
+                <Trans>Copy link</Trans>
+              </button>
+              <button
+                type="button"
+                onClick={shareNow}
+                // Wait for the message on screen: sharing the page's version a second
+                // before the AI's lands would send something the member never read.
+                disabled={pending}
+                className={cn(
+                  'flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-xl px-4 text-base font-bold transition-[filter,background-color]',
+                  pending ? 'cursor-default bg-ktip-sand-200 text-ktip-sand-500' : cn(app.tone, 'hover:brightness-110')
+                )}
+              >
+                <Share2 className="size-5 shrink-0" aria-hidden="true" />
+                <span className="truncate">
+                  {shared[active] ? <Trans>Share to {appName} again</Trans> : <Trans>Share to {appName}</Trans>}
+                </span>
+              </button>
+            </div>
+          </>
         )}
       </div>
     </>

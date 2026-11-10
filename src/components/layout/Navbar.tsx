@@ -883,7 +883,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src="/ktip-logo-128.webp" alt="KTiP" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+              <img src="/ktip-logo-128.webp" alt="KTIP" width={56} height={56} decoding="async" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
               {/* The wordmark yields to the links in the one band where both
                   do not fit. Below lg the horizontal nav is not rendered at
                   all (the mobile menu is), so the wordmark has the bar to

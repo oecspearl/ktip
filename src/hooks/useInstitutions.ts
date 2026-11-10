@@ -261,7 +261,7 @@ export function useRequestStudentVerification() {
           unauthenticated: t`You must be signed in.`,
           no_email: t`No email address is attached to this account.`,
           email_unconfirmed: t`Confirm your email address first — open the link KTIP sent when you signed up.`,
-          domain_not_recognised: t`No verified institution owns @${domain}. Ask your school to register on KTiP.`,
+          domain_not_recognised: t`No verified institution owns @${domain}. Ask your school to register on KTIP.`,
         }
         throw new Error(messages[data.reason] || t`Verification request failed.`)
       }
