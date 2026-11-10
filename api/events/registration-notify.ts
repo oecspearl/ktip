@@ -45,7 +45,7 @@ function registrationEmailHtml(params: {
   reviewUrl: string
 }) {
   const { registrantName, eventTitle, attendanceType, reviewUrl } = params
-  const how = attendanceType === 'viewer' ? 'viewer' : 'participant'
+  const how = attendanceType === 'viewer' ? 'spectator' : 'participant'
 
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:24px;background:#F5F5F2;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#2B2B27;">

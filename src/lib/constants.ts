@@ -494,17 +494,13 @@ export const RSVP_RELATION_LABELS: Record<string, string> = {
 }
 
 /**
- * Competing or watching. The blurbs are what the registrant picks between, so
- * they describe what you get to do rather than what you are called.
+ * Competing or watching. The stored value stays 'viewer' (096's CHECK
+ * constraint); people are asked whether they want to take part or spectate,
+ * so that is the word they see. The blurbs live in AttendanceTypePicker.
  */
 export const ATTENDANCE_TYPE_LABELS: Record<string, string> = {
   participant: 'Participant',
-  viewer: 'Viewer',
-}
-
-export const ATTENDANCE_TYPE_BLURBS: Record<string, string> = {
-  participant: 'Join a team, build, and submit. Takes one of the participant places.',
-  viewer: 'Watch the rooms and follow along. No team, no submission.',
+  viewer: 'Spectator',
 }
 
 // Event Update Types

@@ -2893,7 +2893,6 @@ To report one post or message rather than a person, use the report control on th
   msg`Video`,
   msg`Video Conference`,
   msg`Video and audio collaboration, recording where enabled`,
-  msg`Viewer`,
   msg`Views, features, funnels and what they undercount.`,
   msg`Virtual Campus records and manual edits`,
   msg`Virtual Hackathon`,

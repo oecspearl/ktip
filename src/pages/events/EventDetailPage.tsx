@@ -24,7 +24,7 @@ import { useMemberPanel } from '../../contexts/MemberPanelContext'
 import { useToast } from '../../contexts/ToastContext'
 import { DetailsList } from '../../components/shared/DetailsList'
 import { EventRegistrationForm } from '../../components/events/EventRegistrationForm'
-import { AttendanceTypePicker } from '../../components/events/AttendanceTypePicker'
+import { AttendanceChoiceDialog } from '../../components/events/AttendanceChoiceDialog'
 import { EventPageSectionRenderer } from '../../components/events/EventPageSectionRenderer'
 import { EventScheduleTimeline } from '../../components/events/EventScheduleTimeline'
 import { EventSpeakerGrid } from '../../components/events/EventSpeakerGrid'
@@ -75,7 +75,7 @@ import { truncate } from '../../lib/utils'
 import { DiamondAvatar } from '../../components/ui/DiamondAvatar'
 
 export default function EventDetailPage() {
-    const { t } = useLingui()
+    const { t, i18n } = useLingui()
   const params = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -124,6 +124,7 @@ export default function EventDetailPage() {
   const [checking, setChecking] = useState(true)
   const [showRegForm, setShowRegForm] = useState(false)
   const [attendanceType, setAttendanceType] = useState<AttendanceType>('participant')
+  const [choiceOpen, setChoiceOpen] = useState(false)
   // Competition IP applies the first time a member enters a hackathon, not
   // only when they submit a solution. Registering to compete in an event with
   // a challenge is entering; registering to watch is not.
@@ -137,15 +138,13 @@ export default function EventDetailPage() {
   const hasRSVPd = !!myRsvp && myRsvp.status !== 'declined'
   const isPending = myRsvp?.status === 'pending'
 
-  // The choice is only offered where it means something: a type with an
-  // audience (blueprint), spectators switched on (event), and a venue for them
-  // to watch. The flag is left set when the venue goes off, so turning the
-  // venue back on restores the host's choice untouched.
-  const offersViewing =
-    !!event &&
-    blueprintFor(event.event_type).allowViewers &&
-    !!event.spectators_enabled &&
-    !!event.has_venue
+  // Asked on every type with an audience (blueprint), venue or not: an
+  // in-person demo day has spectators too. It used to also need a venue and
+  // spectators_enabled, so most registrants were filed as participants without
+  // being asked. A viewer RSVP becomes a venue spectator in join_venue() (096)
+  // whatever the flag says; the flag only decides whether members who never
+  // registered may drop in.
+  const offersViewing = !!event && blueprintFor(event.event_type).allowViewers
 
   const isOrganizer = event?.organizer_id === auth.user?.id
   // An event is only past once it has finished — multi-day events stay active until end_date
@@ -200,7 +199,9 @@ export default function EventDetailPage() {
 
   const registrantName = auth.profile?.display_name || t`Someone`
 
-  const handleRSVP = async () => {
+  // `chosen` comes from the attendance dialog. Without it, a new registration
+  // on a type with an audience opens the dialog instead of registering.
+  const handleRSVP = async (chosen?: AttendanceType) => {
     if (!event) return
     // AccountRoute keeps signed-out visitors off this page; this covers a
     // session that ended while it was open, where the button used to do nothing.
@@ -208,18 +209,25 @@ export default function EventDetailPage() {
       navigate('/login', { state: { from: location } })
       return
     }
-    const entering =
-      (!myRsvp || myRsvp.status === 'declined') &&
-      !!event.has_challenge &&
-      attendanceType === 'participant'
+    const asking = !myRsvp || myRsvp.status === 'declined'
+    if (asking && offersViewing && !chosen) {
+      setChoiceOpen(true)
+      return
+    }
+    setChoiceOpen(false)
+    // Passed down explicitly: the state update has not landed yet. Set anyway
+    // because the IP gate and the registration form read it later.
+    const type: AttendanceType = chosen ?? 'participant'
+    if (asking) setAttendanceType(type)
+    const entering = asking && !!event.has_challenge && type === 'participant'
     if (entering && entryGate.needsAgreement) {
       setEntryGateOpen(true)
       return
     }
-    await proceedRSVP()
+    await proceedRSVP(type)
   }
 
-  const proceedRSVP = async () => {
+  const proceedRSVP = async (attendanceType: AttendanceType) => {
     if (!auth.user || !event) return
     rsvpTouchedRef.current = true
 
@@ -281,7 +289,9 @@ export default function EventDetailPage() {
     if (isPastEvent) return false
     if (isOrganizer) return false
     if (!gate.allowed) return false
-    if (attendanceType === 'viewer') return true
+    // A full event with an audience still opens the dialog, where spectating
+    // is the one option left.
+    if (offersViewing) return true
     return !isFull
   })()
 
@@ -759,7 +769,7 @@ export default function EventDetailPage() {
                           </div>
                           <p className="text-sm text-ktip-sun-700">
                             <Trans>
-                              You asked to attend as a {ATTENDANCE_TYPE_LABELS[myRsvp!.attendance_type]}. You'll be
+                              You asked to attend as a {i18n._(ATTENDANCE_TYPE_LABELS[myRsvp!.attendance_type])}. You'll be
                               notified once it is approved.
                             </Trans>
                           </p>
@@ -796,7 +806,7 @@ export default function EventDetailPage() {
                         </div>
                       )}
 
-                      {isFull && !myRsvp && attendanceType === 'participant' && (
+                      {isFull && !myRsvp && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2 text-red-700 mb-2">
                             <XCircle size={20} />
@@ -804,20 +814,26 @@ export default function EventDetailPage() {
                           </div>
                           <p className="text-sm text-red-600">
                             <Trans>Every participant place has been taken.</Trans>
-                            {offersViewing && <Trans> You can still register as a viewer.</Trans>}
+                            {offersViewing && <Trans> You can still register as a spectator.</Trans>}
                           </p>
                         </div>
                       )}
 
-                      {/* Asked before the form, not inside it: it decides what
-                          you are registering as, which the form's answers are
-                          then about. */}
-                      {offersViewing && !myRsvp && (
-                        <AttendanceTypePicker
-                          value={attendanceType}
-                          onChange={setAttendanceType}
-                          disabled={rsvpLoading || regLoading}
-                        />
+                      {/* The dialog asked before the form, not inside it: it
+                          decides what you are registering as, which the form's
+                          answers are then about. */}
+                      {showRegForm && offersViewing && (
+                        <p className="mb-3 text-sm text-ktip-sand-600">
+                          <Trans>Registering as a {i18n._(ATTENDANCE_TYPE_LABELS[attendanceType])}.</Trans>{' '}
+                          <button
+                            type="button"
+                            onClick={() => setChoiceOpen(true)}
+                            disabled={regLoading}
+                            className="font-medium text-ktip-ocean-600 hover:underline"
+                          >
+                            <Trans>Change</Trans>
+                          </button>
+                        </p>
                       )}
 
                       {showRegForm ? (
@@ -831,7 +847,7 @@ export default function EventDetailPage() {
                         <Button
                           fullWidth
                           variant={myRsvp ? 'outline' : 'primary'}
-                          onClick={handleRSVP}
+                          onClick={() => handleRSVP()}
                           loading={rsvpLoading}
                           disabled={!canRSVP && !myRsvp}
                         >
@@ -963,8 +979,32 @@ export default function EventDetailPage() {
         onClose={() => setEntryGateOpen(false)}
         onAccepted={async () => {
           setEntryGateOpen(false)
-          await proceedRSVP()
+          await proceedRSVP(attendanceType)
         }}
+      />
+
+      <AttendanceChoiceDialog
+        open={choiceOpen}
+        onClose={() => setChoiceOpen(false)}
+        onConfirm={(type) => {
+          // "Change" from beside the open form only swaps the answer; the
+          // form is still the thing that registers. Unless the switch is to
+          // competing, which has to pass the IP gate first; handleRSVP runs
+          // it and reopens the form.
+          const needsGate =
+            type === 'participant' && !!event.has_challenge && entryGate.needsAgreement
+          if (showRegForm && !needsGate) {
+            setAttendanceType(type)
+            setChoiceOpen(false)
+            return
+          }
+          setShowRegForm(false)
+          void handleRSVP(type)
+        }}
+        participantFull={isFull}
+        hasChallenge={!!event.has_challenge}
+        initial={attendanceType}
+        loading={rsvpLoading}
       />
     </>
   )
