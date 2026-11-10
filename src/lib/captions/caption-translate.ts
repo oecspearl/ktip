@@ -1,7 +1,7 @@
 import { isUiLang, type UiLang } from '../i18n/protocol'
 
 /**
- * Translate one caption piece into every other language, through
+ * Translate one caption piece into the languages its listeners read, through
  * api/captions/translate.ts: one request, one provider call, nothing cached.
  *
  * Resolves with whatever languages came back, possibly none. Never rejects:
@@ -18,6 +18,8 @@ let backoffUntil = 0
 export interface CaptionTranslateRequest {
   text: string
   from: UiLang
+  /** Only the languages someone in the call reads (captions/followers.ts). */
+  targets: UiLang[]
   /** The speaker's previous piece, when it was recent. Helps a split sentence read as one. */
   context?: string
   /** The LiveKit room name, for the organiser's usage ledger. */
@@ -50,7 +52,7 @@ export function readVariants(raw: unknown, from: UiLang): Partial<Record<UiLang,
 export async function translateCaption(
   request: CaptionTranslateRequest
 ): Promise<Partial<Record<UiLang, string>>> {
-  if (Date.now() < backoffUntil) return {}
+  if (Date.now() < backoffUntil || request.targets.length === 0) return {}
   const token = await accessToken()
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { acquireMic } from '@a11y-kit'
 import { useDataChannel, useLocalParticipant, useRoomContext } from '@livekit/components-react'
-import { useContentLanguage } from '../i18n/useContentLanguage'
 import { segmentSeconds } from '../lib/speech-usage'
 import { useSpeechUsage } from './useSpeechUsage'
 import { shouldTranslate } from '../lib/i18n/should-translate'
@@ -19,44 +18,39 @@ import { createCaptionChunker } from '../lib/captions/chunker'
 import { translateCaption } from '../lib/captions/caption-translate'
 
 /**
- * Live translated captions for a venue room.
+ * Live captions in a call: my words out, everyone else's in.
  *
  * The shape, and why each half is where it is:
  *
  *   - Each speaker's own browser transcribes their OWN microphone. Clean audio,
  *     one known speaker, no diarisation, and the cost falls on the person
  *     talking rather than on every person listening.
- *   - The SPEAKER also pays for the translation, once, into the other two
- *     languages — then broadcasts all of them together. Translating on each
- *     listener instead would mean a room of twenty paying twenty times for the
- *     same sentence.
- *   - Transport is LiveKit's data channel rather than Supabase broadcast,
- *     because the call is already connected and the channel is already
- *     authorised by the same signed token. One fewer moving part, and captions
- *     cannot outlive the call they belong to.
+ *   - It does so only while somebody is following them (`transcribe`, worked
+ *     out in CallCaptions from captions/followers.ts). Nobody presses a button
+ *     to be captioned any more: the old "Caption my speech" toggle meant a
+ *     listener got nothing unless the speaker had found it.
+ *   - The SPEAKER pays for the translation, once, and only into the languages
+ *     those followers read (`targets`), then broadcasts them together.
+ *   - Transport is LiveKit's data channel, already authorised by the call's
+ *     own signed token. Captions cannot outlive the call they belong to.
  *
- * Two messages per piece, not one. The original goes out the instant it is
- * settled, so everyone sees *something* in about a second; the translations
- * follow when they land and swap in place. Waiting to send until the
- * translation returned would make every caption arrive late for everyone,
- * including the people who did not need it translated at all.
+ * Two messages per piece. The original goes out the instant it is settled, on
+ * the lossy channel: a late caption is worse than a missing one, and the people
+ * who share the speaker's language are done. The translations follow on the
+ * RELIABLE channel, because a dropped one used to leave a listener reading the
+ * original with no idea a translation had ever existed.
  *
- * A piece is a few words, not a sentence: the browser engine sends words once
- * they stop changing (captions/chunker.ts), and Whisper cuts a phrase every
- * few seconds (whisper-speech-core.ts). Each piece is translated with the one
- * before it as context, in one request for every language
- * (api/captions/translate.ts).
+ * My own lines are kept, marked `own`, for the record of what went out; they
+ * are never shown to me as subtitles and never read aloud to me.
  *
- * Nothing here is stored. Spoken words in a room are exactly the kind of text
- * migration 097's comment says must not outlive the request: the caption route
- * never touches the shared cache, and the buffer below is a ring that forgets.
+ * Nothing here is stored. Spoken words are exactly the kind of text migration
+ * 097 says must not outlive the request: the caption route never touches the
+ * shared cache, and the buffer below is a ring that forgets.
  */
 
 const TOPIC = 'ktip-captions'
-// Pieces of a few words now, not whole sentences, so more of them are kept.
 const MAX_CAPTIONS = 14
 const CAPTION_TTL_MS = 45_000
-/** Long enough to be a sentence worth translating, short enough to still be live. */
 const MIN_CAPTION_CHARS = 2
 /** A piece this recent is the same train of thought, and goes along as context. */
 const CONTEXT_MS = 10_000
@@ -68,58 +62,68 @@ interface CaptionWire {
   text?: string
   lang?: UiLang
   name?: string
-  /** Present on the follow-up: the same utterance in every other language. */
+  /** Present on the follow-up: the same piece in the languages its listeners read. */
   variants?: Partial<Record<UiLang, string>>
 }
 
 export interface Caption {
   id: string
+  /** The speaker's participant identity: who to turn down while their translation plays. */
+  identity: string
   name: string
   lang: UiLang
   text: string
   variants: Partial<Record<UiLang, string>>
   at: number
+  /** Mine. Never shown to me as a subtitle, never read aloud to me. */
+  own: boolean
+}
+
+export interface ResolvedCaption extends Caption {
+  /** What to show: the reader's language when there is one, else the original. */
+  display: string
+  translated: boolean
 }
 
 export interface LiveCaptions {
   /** Newest last, already resolved into the reader's language. */
-  captions: (Caption & { display: string; translated: boolean })[]
-  /** The speaker's own in-progress text. Local only — never broadcast. */
-  interim: string
-  captioning: boolean
-  toggleCaptioning: () => void
+  captions: ResolvedCaption[]
+  /** My recogniser is running. */
+  transcribing: boolean
   supported: boolean
-  /** browser: instant, free and unlimited. whisper: Firefox, or a browser whose own service is out of reach; a phrase late, a shared daily allowance (203). */
+  /** browser: instant, free and unlimited. whisper: Firefox, or a browser whose own service is out of reach. */
   engine: CaptionEngine | null
   error: string | null
 }
 
-/**
- * @param readerLang  Read captions in this language instead of the site's.
- *                    A listener in an English site can follow a keynote in
- *                    French without switching the whole site over. It never
- *                    changes the language the local speaker is captioned in.
- */
-export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCaptions {
-  const { lang: contentLang } = useContentLanguage()
-  const readLang: UiLang = readerLang ?? contentLang
+export function useLiveCaptions({
+  transcribe,
+  speaks,
+  targets,
+  reads,
+}: {
+  /** Run my recogniser: someone follows me, my microphone is on, I have not paused. */
+  transcribe: boolean
+  speaks: UiLang
+  /** Languages to translate my words into. Empty: originals only. */
+  targets: UiLang[]
+  /** The language I read everyone else in. */
+  reads: UiLang
+}): LiveCaptions {
   const { localParticipant } = useLocalParticipant()
   const [captions, setCaptions] = useState<Caption[]>([])
-  const [interim, setInterim] = useState('')
-  const [captioning, setCaptioning] = useState(false)
+  const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // What the browser can do, decided once. The only change is one way: a
-  // browser whose own speech service is out of reach moves to Whisper for the
-  // rest of the visit.
+  // browser whose own speech service is out of reach moves to Whisper.
   const [engine, setEngine] = useState<CaptionEngine | null>(() => captionEngine())
   const supported = engine !== null
 
-  const merge = useCallback((incoming: CaptionWire) => {
+  const merge = useCallback((incoming: CaptionWire, identity: string, own: boolean) => {
     setCaptions((current) => {
       const at = Date.now()
       const existing = current.find((caption) => caption.id === incoming.id)
-
       const next: Caption = existing
         ? {
             ...existing,
@@ -130,17 +134,16 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
           }
         : {
             id: incoming.id,
+            identity,
             name: incoming.name ?? '',
             lang: isUiLang(incoming.lang) ? incoming.lang : 'en',
             text: incoming.text ?? '',
             variants: incoming.variants ?? {},
             at,
+            own,
           }
-
       const others = current.filter((caption) => caption.id !== incoming.id)
-      return [...others, next]
-        .filter((caption) => at - caption.at < CAPTION_TTL_MS)
-        .slice(-MAX_CAPTIONS)
+      return [...others, next].filter((caption) => at - caption.at < CAPTION_TTL_MS).slice(-MAX_CAPTIONS)
     })
   }, [])
 
@@ -148,7 +151,7 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
     try {
       const parsed = JSON.parse(new TextDecoder().decode(message.payload)) as CaptionWire
       if (parsed?.v !== 1 || typeof parsed.id !== 'string') return
-      merge(parsed)
+      merge(parsed, message.from?.identity ?? '', false)
     } catch {
       // Someone else's topic, or a future version of this one. Ignoring an
       // unreadable caption is always right; there is nothing to recover.
@@ -156,76 +159,74 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   })
 
   const publish = useCallback(
-    (payload: CaptionWire) => {
-      void send(new TextEncoder().encode(JSON.stringify(payload)), {
-        // Captions are worth dropping under congestion. A late caption is worse
-        // than a missing one, and the audio is the thing that must not stutter.
-        reliable: false,
-        topic: TOPIC,
-      })
+    (payload: CaptionWire, reliable: boolean) => {
+      try {
+        void send(new TextEncoder().encode(JSON.stringify(payload)), { reliable, topic: TOPIC }).catch(() => {})
+      } catch {
+        // Disconnected mid-sentence. The words were never going to arrive.
+      }
     },
     [send]
   )
 
-  // Kept in a ref so the recogniser's callback never closes over a stale
-  // language or a stale `send` — it is created once and lives for minutes.
+  // Refs, so the recogniser's callback (created once, alive for minutes) never
+  // closes over a stale language, audience or `send`.
   const publishRef = useRef(publish)
   publishRef.current = publish
-  const langRef = useRef<UiLang>(contentLang)
-  langRef.current = contentLang
+  const speaksRef = useRef<UiLang>(speaks)
+  speaksRef.current = speaks
+  const targetsRef = useRef<UiLang[]>(targets)
+  targetsRef.current = targets
   const nameRef = useRef('')
   nameRef.current = localParticipant?.name || ''
-  // The LiveKit room name is the venue room id (api/venue/room-token.ts), which
-  // is what the organiser's usage ledger bills caption translation to.
+  const identityRef = useRef('')
+  identityRef.current = localParticipant?.identity || ''
+  // The LiveKit room name is the venue room id (api/venue/room-token.ts): what
+  // the usage ledger bills to, and what the translate route checks the
+  // organiser's switch against.
   const room = useRoomContext()
   const roomIdRef = useRef('')
   roomIdRef.current = room?.name || ''
-  // Seconds of speech captioned, for the organiser's usage panel (199).
-  // Whisper captions are metered by the server instead (203), from the
-  // duration Groq reports, so they are left out here.
-  const meterSpeech = useSpeechUsage(
-    engine === 'browser' ? room?.name || undefined : undefined,
-    'caption_speech_seconds'
-  )
+  // Seconds of speech captioned, for the organiser's usage panel (199). Whisper
+  // is metered by the server instead (203), from the duration Groq reports.
+  const meterSpeech = useSpeechUsage(engine === 'browser' ? room?.name || undefined : undefined, 'caption_speech_seconds')
   const segmentStart = useRef<number | null>(null)
-  // The speaker's last piece, sent along with the next one so a sentence cut
-  // in two still translates as one.
   const lastPiece = useRef<{ text: string; at: number } | null>(null)
 
-  const onFinal = useCallback((text: string) => {
-    const spoken = langRef.current
-    const id = `${Math.trunc(performance.now())}-${Math.trunc(Math.random() * 1e6)}`
-    const now = Date.now()
-    const previous = lastPiece.current
-    const context = previous && now - previous.at < CONTEXT_MS ? previous.text : undefined
-    lastPiece.current = { text, at: now }
+  const onFinal = useCallback(
+    (text: string) => {
+      const spoken = speaksRef.current
+      const id = `${Math.trunc(performance.now())}-${Math.trunc(Math.random() * 1e6)}`
+      const now = Date.now()
+      const previous = lastPiece.current
+      const context = previous && now - previous.at < CONTEXT_MS ? previous.text : undefined
+      lastPiece.current = { text, at: now }
 
-    // Out immediately, untranslated. Everyone sees the words about a second
-    // after they were said; the people who share the speaker's language are done.
-    publishRef.current({ v: 1, id, text, lang: spoken, name: nameRef.current })
-    // The speaker also sees their own line, because a data message does not
-    // echo back to its sender.
-    merge({ v: 1, id, text, lang: spoken, name: nameRef.current })
+      const original: CaptionWire = { v: 1, id, text, lang: spoken, name: nameRef.current }
+      publishRef.current(original, false)
+      merge(original, identityRef.current, true)
 
-    if (!shouldTranslate(text)) return
+      const to = targetsRef.current.filter((lang) => lang !== spoken)
+      if (to.length === 0 || !shouldTranslate(text)) return
 
-    // One request for every other language, and nothing is stored: spoken
-    // words leave no trace in the shared cache (migration 097).
-    void translateCaption({ text, from: spoken, context, roomId: roomIdRef.current || undefined }).then(
-      (variants) => {
-        // A language that did not come back is left out, so its readers keep
-        // the original rather than being told it is the translation.
-        if (Object.keys(variants).length === 0) return
-        publishRef.current({ v: 1, id, variants })
-        merge({ v: 1, id, variants })
-      }
-    )
-  }, [merge])
+      void translateCaption({ text, from: spoken, targets: to, context, roomId: roomIdRef.current || undefined }).then(
+        (variants) => {
+          // A language that did not come back is left out, so its readers keep
+          // the original rather than being told it is the translation.
+          if (Object.keys(variants).length === 0) return
+          const follow: CaptionWire = { v: 1, id, variants }
+          publishRef.current(follow, true)
+          merge(follow, identityRef.current, true)
+        }
+      )
+    },
+    [merge]
+  )
 
   const recognizerRef = useRef<SpeechRecognizer | null>(null)
 
   useEffect(() => {
-    if (!captioning || !enabled || !engine) return
+    if (!transcribe || !engine) return
 
     // Browser recognisers wait for a pause to call anything final, so settled
     // words go out in pieces while the speaker is still talking. Whisper
@@ -238,44 +239,36 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
         if (chunker) {
           const piece = chunker.interim(text, Date.now())
           if (piece && piece.length >= MIN_CAPTION_CHARS) onFinal(piece)
-          setInterim(chunker.unsent(text))
-        } else {
-          setInterim(text)
         }
         return
       }
-      // Browser captions meter speech time here; Whisper's server meters its own.
       if (engine === 'browser') meterSpeech(segmentSeconds(segmentStart.current, Date.now()))
       segmentStart.current = null
-      setInterim('')
       const rest = chunker ? chunker.final(text) : text
       if (rest.length >= MIN_CAPTION_CHARS) onFinal(rest)
     }
 
-    const roomName = roomIdRef.current
     const recognizer =
       engine === 'whisper'
         ? createWhisperRecognizer({
-            lang: langRef.current,
-            roomId: roomName,
+            lang: speaksRef.current,
+            roomId: roomIdRef.current,
             onSegment,
             // A fatal stop (allowance used up, not allowed here, no microphone)
-            // turns the button off, so it says so. "Busy" only shows.
+            // ends this run; "busy" only shows.
             onError: (reason, fatal) => {
               setError(reason)
-              if (fatal) setCaptioning(false)
+              if (fatal) setRunning(false)
             },
           })
         : createSpeechRecognizer({
-            lang: langRef.current,
+            lang: speaksRef.current,
             onSegment,
             onError: (_reason, failure) => {
               if (failure === 'unreachable' && canCaptionWithWhisper()) {
                 // The browser's own speech service cannot be reached (Brave,
                 // Opera, a blocked network). Whisper works from any browser
-                // that can record, so captioning carries on there, a phrase
-                // late. Changing the engine restarts this effect.
-                setInterim('')
+                // that can record. Changing the engine restarts this effect.
                 setEngine('whisper')
                 return
               }
@@ -284,11 +277,11 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
                 return
               }
               setError(failure === 'no-mic' ? 'speech-no-mic' : 'speech-browser-unreachable')
-              setCaptioning(false)
+              setRunning(false)
             },
           })
     setError(null)
-
+    setRunning(true)
     recognizerRef.current = recognizer
     // Captions outrank voice commands for the microphone: Chrome allows one
     // recognition session per page, and a second start would silently end
@@ -300,15 +293,14 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
       recognizer.stop()
       releaseMic?.()
       recognizerRef.current = null
-      setInterim('')
+      setRunning(false)
     }
-    // `contentLang` is a dependency on purpose: switching your own language
-    // mid-call has to restart the recogniser, or you carry on being transcribed
-    // as the language you are no longer speaking.
-  }, [captioning, enabled, engine, onFinal, contentLang, meterSpeech])
+    // `speaks` is a dependency on purpose: changing the language you speak
+    // mid-call restarts the recogniser, or you carry on being transcribed as
+    // the language you no longer speak.
+  }, [transcribe, engine, onFinal, speaks, meterSpeech])
 
-  // Sweep expired lines even when nobody is talking, so the strip empties
-  // instead of freezing on the last thing anyone said.
+  // Sweep expired lines even when nobody is talking.
   useEffect(() => {
     if (captions.length === 0) return
     const timer = setInterval(() => {
@@ -321,20 +313,12 @@ export function useLiveCaptions(enabled: boolean, readerLang?: UiLang): LiveCapt
   const resolved = useMemo(
     () =>
       captions.map((caption) => {
-        const translation = caption.variants[readLang]
-        const display = caption.lang === readLang ? caption.text : translation ?? caption.text
-        return { ...caption, display, translated: Boolean(translation) && caption.lang !== readLang }
+        const translation = caption.variants[reads]
+        const display = caption.lang === reads ? caption.text : translation ?? caption.text
+        return { ...caption, display, translated: Boolean(translation) && caption.lang !== reads }
       }),
-    [captions, readLang]
+    [captions, reads]
   )
 
-  return {
-    captions: resolved,
-    interim,
-    captioning,
-    toggleCaptioning: useCallback(() => setCaptioning((value) => !value), []),
-    supported,
-    engine,
-    error,
-  }
+  return { captions: resolved, transcribing: running, supported, engine, error }
 }

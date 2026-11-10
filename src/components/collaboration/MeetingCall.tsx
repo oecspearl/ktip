@@ -7,7 +7,12 @@ import {
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { useLingui } from '@lingui/react/macro'
-import { CaptionStrip } from '../venue/room/CaptionStrip'
+import {
+  CallCaptionsProvider,
+  CallTranslateBar,
+  CaptionOverlay,
+  TranslationOffer,
+} from '../venue/room/CallCaptions'
 import { LIVEKIT_ROOM_OPTIONS } from '../../lib/livekit-options'
 import { LIVEKIT_URL } from '../../hooks/useVenueRoomToken'
 
@@ -44,7 +49,8 @@ export function MeetingPreJoin({
 
 /**
  * The live call: LiveKit's VideoConference layout (grid, focus on a screen
- * share, chat, device settings, leave) plus the caption strip the venue uses.
+ * share, chat, device settings, leave) plus the venue's subtitles, laid on the
+ * picture, and its language bar underneath.
  *
  * The token is the permission. This component only connects with it and
  * publishes what the person chose in the pre-join check.
@@ -81,13 +87,19 @@ export function MeetingCall({
       data-lk-theme="default"
       className="flex flex-col gap-2 overflow-hidden rounded-2xl"
     >
-      {/* VideoConference renders its own RoomAudioRenderer. A second one
-          would play every voice twice. */}
-      <div className="h-[70svh] min-h-80">
-        <VideoConference />
-      </div>
-      {/* Captions ride the room's data channel, authorised by the same token. */}
-      <CaptionStrip enabled />
+      {/* Subtitles and language state ride the room's data channel,
+          authorised by the same token. */}
+      <CallCaptionsProvider>
+        {/* VideoConference renders its own RoomAudioRenderer. A second one
+            would play every voice twice. */}
+        <div className="relative h-[70svh] min-h-80 @container">
+          <VideoConference />
+          {/* Lifted clear of VideoConference's own control bar along the bottom. */}
+          <CaptionOverlay className="bottom-20" />
+          <TranslationOffer />
+        </div>
+        <CallTranslateBar />
+      </CallCaptionsProvider>
     </LiveKitRoom>
   )
 }

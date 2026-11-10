@@ -152,6 +152,7 @@ export function AvStage({
               token={token}
               grant={grant}
               fill={fill}
+              translationAllowed={room.live_translation !== false}
               onRecordingControl={
                 canRecord ? (
                   <RecordButton

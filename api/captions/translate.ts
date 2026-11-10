@@ -31,10 +31,18 @@ export const config = { runtime: 'edge' }
  *   - the previous fragment rides along as context, so a sentence cut in two
  *     still translates as one
  *
- * Request: { text, from: en|fr|es, context?, roomId? }. Answers 200
+ * Request: { text, from: en|fr|es, targets?, context?, roomId? }. Answers 200
  * { variants: { fr?: '…', es?: '…' }, degraded?, retryAfter? }; like
  * /api/translate, a provider or budget problem is `degraded` inside a 200,
  * because the speaker's original is already on everyone's screen.
+ *
+ * `targets` is the languages somebody in the call actually reads. The speaker's
+ * browser knows (src/lib/captions/followers.ts), and translating into a
+ * language nobody follows was most of what this route used to spend. Absent
+ * means every other language, which is what older clients still send.
+ *
+ * A venue room whose organiser switched live translation off (207) gets an
+ * empty answer, checked here rather than trusted to the client.
  */
 
 const TIMEOUT_MS = 6_000
@@ -47,6 +55,17 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
+
+/**
+ * The languages to translate into: the ones the caller asked for, if it named
+ * any valid ones, otherwise every language but the speaker's.
+ */
+export function targetLanguages(raw: unknown, from: string): string[] {
+  const all = UI_LANGS.filter((lang) => lang !== from)
+  if (!Array.isArray(raw)) return [...all]
+  const asked = new Set(raw.filter((lang): lang is string => isUiLang(lang) && lang !== from))
+  return all.filter((lang) => asked.has(lang))
+}
 
 /** One call when the provider can, otherwise one per language, in parallel. */
 async function translateAll(
@@ -67,7 +86,7 @@ async function translateAll(
 export default async function handler(request: Request, context?: EdgeContext): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
-  let body: { text?: unknown; from?: unknown; context?: unknown; roomId?: unknown }
+  let body: { text?: unknown; from?: unknown; targets?: unknown; context?: unknown; roomId?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -84,8 +103,8 @@ export default async function handler(request: Request, context?: EdgeContext): 
       : undefined
   const roomId = typeof body.roomId === 'string' && UUID.test(body.roomId) ? body.roomId : null
 
-  const to = UI_LANGS.filter((lang) => lang !== from)
-  if (!shouldTranslate(text)) return json({ variants: {} })
+  const to = targetLanguages(body.targets, from)
+  if (to.length === 0 || !shouldTranslate(text)) return json({ variants: {} })
 
   const provider = getProvider()
   if (!provider) return json({ variants: {}, degraded: 'no_key' })
@@ -95,16 +114,29 @@ export default async function handler(request: Request, context?: EdgeContext): 
   const chars = text.length * to.length
   const ipHash = await contentHash(`${process.env.TRANSLATION_IP_SALT ?? ''}${clientIp(request)}`, 'text')
   const cap = Number(process.env.TRANSLATION_MONTHLY_CHAR_CAP ?? 1_800_000)
+  // The room switch (207) is read while the session is checked and the budget
+  // claimed, so a room with translation on pays no extra round trip. A room id
+  // that is not a venue room (a coffee table, a link call) finds no row and
+  // stays allowed. Promise.resolve starts the query now rather than at await.
+  const roomSwitchQuery = roomId
+    ? Promise.resolve(db.from('venue_rooms').select('live_translation').eq('id', roomId).maybeSingle())
+    : Promise.resolve({ data: null })
   // A valid session buys the larger bucket, not a header anyone can write.
   const authenticated = request.headers.get('authorization')
     ? (await authenticate(request)).ok
     : false
-  const { data: claim, error: claimError } = await db.rpc('claim_translation_budget', {
-    p_ip_hash: ipHash,
-    p_chars: chars,
-    p_cap: Number.isFinite(cap) ? cap : 1_800_000,
-    p_authenticated: authenticated,
-  })
+  const [{ data: claim, error: claimError }, roomSwitch] = await Promise.all([
+    db.rpc('claim_translation_budget', {
+      p_ip_hash: ipHash,
+      p_chars: chars,
+      p_cap: Number.isFinite(cap) ? cap : 1_800_000,
+      p_authenticated: authenticated,
+    }),
+    roomSwitchQuery,
+  ])
+  if ((roomSwitch.data as { live_translation?: boolean } | null)?.live_translation === false) {
+    return json({ variants: {}, degraded: 'room_off' })
+  }
   if (claimError) return json({ variants: {}, degraded: 'provider_error' })
   const verdict = (claim ?? { allowed: false, reason: 'over_budget' }) as {
     allowed: boolean

@@ -790,6 +790,11 @@ export interface VenueRoom {
   audio_mode: VenueAudioMode
   max_publishers: number
   recording_enabled: boolean
+  /**
+   * Organiser switch (207): false stops call captions here being translated.
+   * Absent on a database without 207, which reads as on.
+   */
+  live_translation?: boolean
   is_open: boolean
   sponsor_name: string | null
   sponsor_logo_url: string | null

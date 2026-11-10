@@ -9,7 +9,13 @@ import {
 } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import '@livekit/components-styles'
-import { CaptionStrip } from './CaptionStrip'
+import {
+  CallCaptionsProvider,
+  CallTranslateBar,
+  CaptionOverlay,
+  SubtitleBand,
+  TranslationOffer,
+} from './CallCaptions'
 import { cn } from '../../../lib/utils'
 import { LIVEKIT_ROOM_OPTIONS } from '../../../lib/livekit-options'
 import { LIVEKIT_URL, type VenueRoomGrant } from '../../../hooks/useVenueRoomToken'
@@ -35,6 +41,7 @@ export function VenueCall({
   grant,
   fill,
   className,
+  translationAllowed = true,
   onRecordingControl,
 }: {
   mode: RoomCameraMode
@@ -42,6 +49,8 @@ export function VenueCall({
   grant: VenueRoomGrant
   fill?: boolean
   className?: string
+  /** The organiser's per-room switch (207). Same-language subtitles stay on either way. */
+  translationAllowed?: boolean
   /**
    * The host's record button, passed in rather than rendered here.
    *
@@ -76,11 +85,16 @@ export function VenueCall({
       {/* Without this nobody hears anybody. It renders no UI. */}
       <RoomAudioRenderer />
 
-      {wantsVideo && <CallStage mode={mode} fill={fill} />}
-
-      {/* Inside LiveKitRoom on purpose: captions ride the room's own data
-          channel, already authorised by the same signed token as the media. */}
-      <CaptionStrip enabled />
+      {/* Inside LiveKitRoom on purpose: subtitles and language state ride the
+          room's own data channel, authorised by the same signed token. */}
+      <CallCaptionsProvider translationAllowed={translationAllowed} canPublish={grant.can_publish}>
+        {wantsVideo ? (
+          <CallStage mode={mode} fill={fill} overlay={<SubtitleLayer />} />
+        ) : (
+          <SubtitleBand />
+        )}
+        <CallTranslateBar />
+      </CallCaptionsProvider>
       {onRecordingControl}
 
       {grant.can_publish && (
@@ -107,12 +121,25 @@ export function VenueCall({
   )
 }
 
+/** Subtitles and the translation offer, laid over whichever frame holds the main picture. */
+function SubtitleLayer() {
+  return (
+    <>
+      <CaptionOverlay />
+      <TranslationOffer />
+    </>
+  )
+}
+
 /**
  * The video layouts. Must be a child of LiveKitRoom — `useTracks` reads the room
  * off context, so calling it a level up returns nothing and renders an empty
  * grid, which looks exactly like "nobody has a camera on".
+ *
+ * `overlay` is drawn inside the main frame (the grid, or the spotlight's big
+ * tile), so subtitles sit on the picture rather than over the thumbnails.
  */
-function CallStage({ mode, fill }: { mode: RoomCameraMode; fill?: boolean }) {
+function CallStage({ mode, fill, overlay }: { mode: RoomCameraMode; fill?: boolean; overlay?: React.ReactNode }) {
   const tracks = useTracks(
     [
       // `withPlaceholder` keeps a tile for someone who is in the call with their
@@ -124,14 +151,18 @@ function CallStage({ mode, fill }: { mode: RoomCameraMode; fill?: boolean }) {
     { onlySubscribed: false }
   )
 
-  if (tracks.length === 0) return null
+  // No tracks yet (still connecting): keep the subtitle band so an early line
+  // or the offer still has somewhere to appear.
+  if (tracks.length === 0) return <SubtitleBand />
+
 
   if (mode === 'grid') {
     return (
-      <div className={cn('min-h-0', fill ? 'flex-1' : 'h-[22rem]')}>
+      <div className={cn('relative min-h-0 @container', fill ? 'flex-1' : 'h-[22rem]')}>
         <GridLayout tracks={tracks}>
           <ParticipantTile />
         </GridLayout>
+        {overlay}
       </div>
     )
   }
@@ -144,8 +175,9 @@ function CallStage({ mode, fill }: { mode: RoomCameraMode; fill?: boolean }) {
 
   return (
     <div className={cn('flex min-h-0 flex-col gap-2', fill && 'flex-1')}>
-      <div className={cn('min-h-0 overflow-hidden rounded-xl', fill ? 'flex-1' : 'h-[18rem]')}>
+      <div className={cn('relative min-h-0 overflow-hidden rounded-xl @container', fill ? 'flex-1' : 'h-[18rem]')}>
         <FocusLayout trackRef={focus} />
+        {overlay}
       </div>
       {rest.length > 0 && (
         <div className="grid shrink-0 grid-cols-4 gap-2">

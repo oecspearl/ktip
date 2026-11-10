@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, Megaphone, ScreenShare, Square, Unlock } from 'lucide-react'
+import { Languages, Lock, Megaphone, ScreenShare, Square, Unlock } from 'lucide-react'
 import { formatRelativeTime } from '../../../lib/utils'
 import { useToast } from '../../../contexts/ToastContext'
 import { useVenueRoomMessages } from '../../../hooks/useVenueRoomMessages'
@@ -46,6 +46,21 @@ export function HostControlsPanel({
         updates: { is_open: !room.is_open },
       })
       toast.success(room.is_open ? t`Room closed` : t`Room open`)
+    } catch (err: any) {
+      toast.error(err?.message || t`Could not change the room`)
+    }
+  }
+
+  // Absent on a database without migration 207, which reads as on.
+  const translating = room.live_translation !== false
+  const toggleTranslation = async () => {
+    try {
+      await updateRoom({
+        roomId: room.id,
+        eventId: room.event_id,
+        updates: { live_translation: !translating },
+      })
+      toast.success(translating ? t`Translation is off in this room` : t`Translation is on in this room`)
     } catch (err: any) {
       toast.error(err?.message || t`Could not change the room`)
     }
@@ -101,6 +116,22 @@ export function HostControlsPanel({
             <Unlock size={13} aria-hidden="true" />
           )}
           {room.is_open ? t`Close this room` : t`Reopen this room`}
+        </button>
+
+        {/*
+          Translation in this room's call (207). Off stops translation only:
+          people can still turn on subtitles in the language being spoken.
+        */}
+        <button
+          type="button"
+          onClick={toggleTranslation}
+          disabled={saving}
+          aria-pressed={translating}
+          title={t`Subtitles in the spoken language stay available either way`}
+          className="flex items-center gap-1.5 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-2.5 py-1.5 text-xs font-semibold text-ktip-sand-700 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700 disabled:opacity-50"
+        >
+          <Languages size={13} aria-hidden="true" />
+          {translating ? t`Turn translation off` : t`Turn translation on`}
         </button>
 
         {/*

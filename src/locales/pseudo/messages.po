@@ -313,10 +313,6 @@ msgstr ""
 msgid "Only a Super Admin can review an administrator's account."
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Caption my speech"
-msgstr ""
-
 #: src/i18n/harvested.ts
 msgid "No advertising cookies, and no advertising network."
 msgstr ""
@@ -741,6 +737,10 @@ msgstr ""
 msgid "Email address, message content"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "On the video, in your language"
+msgstr ""
+
 #: src/pages/events/EventVenuePage.tsx
 msgid "This event has no virtual venue"
 msgstr ""
@@ -1104,6 +1104,11 @@ msgstr ""
 
 #: src/components/venue/room/RoomSignalPanels.tsx
 msgid "Reconnecting…"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgctxt "language name inside a sentence"
+msgid "French"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -1579,6 +1584,10 @@ msgstr ""
 msgid "{0, plural, one {Delete # saved?} other {Delete # saved?}}"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Show the original"
+msgstr ""
+
 #: src/lib/validation.ts
 msgid "You must be at least {minimumAge} to use KTIP"
 msgstr ""
@@ -1919,6 +1928,10 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "In this browser your subtitles appear a few seconds after each phrase."
+msgstr ""
+
 #: src/components/grants/application/ApplicationDocumentsField.tsx
 msgid "Your draft is saved automatically the first time you upload."
 msgstr ""
@@ -2118,10 +2131,6 @@ msgstr ""
 msgid "The row at the top picks the month, quarter, year or a custom range, and optionally one OECS state. Every tab reads the same choice, so the same month is never two different windows on two pages.\n"
 "\n"
 "Tiles report the selected period; the trend charts look back further, so the shape is visible around the number."
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "You have used today's hour of captions in this browser. Chrome, Edge or Safari can still caption you."
 msgstr ""
 
 #: src/components/venue/map/VenueTemplatePicker.tsx
@@ -2489,6 +2498,10 @@ msgstr ""
 msgid "Contact phone"
 msgstr ""
 
+#: src/components/venue/room/RoomOpsPanels.tsx
+msgid "Translation is on in this room"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "How to report content that infringes your rights, how the member who posted it can respond, and what happens to accounts that infringe repeatedly."
 msgstr ""
@@ -2592,10 +2605,6 @@ msgstr ""
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 #: src/pages/grants/MyApplicationsPage.tsx
 msgid "Browse Grants"
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captions need your microphone. Allow it in the browser and try again."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -3113,6 +3122,10 @@ msgstr ""
 msgid "The default if you say nothing. Readable, not reusable."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "My language"
+msgstr ""
+
 #: src/components/ui/ImageUpload.tsx
 msgid "Image uploaded"
 msgstr ""
@@ -3324,6 +3337,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "How do I use the application wizard?"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your subtitles are paused"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -4104,6 +4121,11 @@ msgstr ""
 msgid "How do I add a secondary email?"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgctxt "language name inside a sentence"
+msgid "Spanish"
+msgstr ""
+
 #: src/components/layout/RoleSwitcher.tsx
 msgid "Acting as"
 msgstr ""
@@ -4437,6 +4459,10 @@ msgstr ""
 
 #: src/pages/events/CreateEventPage.tsx
 msgid "New Event"
+msgstr ""
+
+#: src/components/venue/room/RoomOpsPanels.tsx
+msgid "Turn translation off"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -5436,6 +5462,10 @@ msgstr ""
 msgid "Badges, points, streaks, showcase and rankings."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles are not open to you in this room."
+msgstr ""
+
 #: src/components/messages/ChatWindow.tsx
 msgid "Start the conversation!"
 msgstr ""
@@ -5612,6 +5642,10 @@ msgstr ""
 
 #: src/components/share/ShareSheet.tsx
 msgid "Share somewhere else"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Nothing anyone says is stored. Subtitles disappear after a few seconds."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -6307,7 +6341,6 @@ msgid "The floor"
 msgstr ""
 
 #: src/components/legal/TranslatedMark.tsx
-#: src/components/venue/room/CaptionStrip.tsx
 msgid "Translated"
 msgstr ""
 
@@ -7082,10 +7115,6 @@ msgstr ""
 
 #: src/components/messages/NewConversationModal.tsx
 msgid "Group name..."
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captioning needs Chrome, Edge or Safari"
 msgstr ""
 
 #: src/components/resume/ResumeOutline.tsx
@@ -8171,10 +8200,6 @@ msgstr ""
 msgid "Not permitted"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captions are not open to you in this room."
-msgstr ""
-
 #: src/a11y/messages.ts
 msgid "Previous paragraph"
 msgstr ""
@@ -8775,6 +8800,10 @@ msgstr ""
 msgid "Requests {0}"
 msgstr ""
 
+#: src/components/venue/room/RoomOpsPanels.tsx
+msgid "Translation is off in this room"
+msgstr ""
+
 #: src/pages/auth/ResetPasswordPage.tsx
 msgid "Failed to reset password. Please try again."
 msgstr ""
@@ -8972,6 +9001,10 @@ msgstr ""
 msgid "The Build plan allows 100 people in calls at the same time, across every room. It also caps video sent out at 50 GB a month, which only the LiveKit dashboard can show."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitle me for others"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Declaring a false date of birth — in particular one that presents a minor as an adult — is grounds for immediate suspension. It is also the single thing most likely to put a young member in a situation the safeguards were built to prevent."
 msgstr ""
@@ -9091,6 +9124,10 @@ msgstr ""
 msgid "No snippets yet"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "A phrase could not be subtitled. Subtitles carry on."
+msgstr ""
+
 #: src/pages/events/CreateEventPage.tsx
 msgid "Event Status"
 msgstr ""
@@ -9150,6 +9187,10 @@ msgid "Search by name, then stack any of the filters beside it:\n"
 "• Badge — members who have earned a particular achievement\n"
 "\n"
 "Clear all filters appears underneath once anything is set."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Follow along in {mine}? Read what they say as subtitles, and hear it read aloud if you like."
 msgstr ""
 
 #: src/lib/permissions.ts
@@ -13130,6 +13171,10 @@ msgstr ""
 msgid "Uploading..."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Language and subtitles"
+msgstr ""
+
 #: src/components/collaboration/editor/EditorMenuBar.tsx
 msgid "Link..."
 msgstr ""
@@ -13386,10 +13431,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Host and store"
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "A phrase could not be captioned. Captions carry on."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -13931,6 +13972,10 @@ msgstr ""
 msgid "Track the status of your funding applications"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles are not available in this browser yet. Try Chrome, Edge or Safari."
+msgstr ""
+
 #: src/components/layout/Navbar.tsx
 msgid "View all invitations"
 msgstr ""
@@ -14204,6 +14249,10 @@ msgstr ""
 
 #: src/pages/discover/DiscoverPage.tsx
 msgid "Communication"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles only"
 msgstr ""
 
 #: src/components/calendar/CalendarNoteComposer.tsx
@@ -14604,6 +14653,10 @@ msgstr ""
 msgid "Edit work"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles need your microphone. Allow it in the browser and try again."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Grants, Resources, Integrations, Forums and Achievements each have an admin page for creating and curating what members see.\n"
 "\n"
@@ -14649,6 +14702,7 @@ msgid "A public board where teams post what they offer and what they need. Shows
 msgstr ""
 
 #: src/a11y/messages.ts
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Pause"
 msgstr ""
@@ -15207,10 +15261,6 @@ msgstr ""
 msgid "Help article — Collaboration Tools"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Read aloud a few seconds behind. The room is turned down while it plays."
-msgstr ""
-
 #: src/lib/forum-board-icons.ts
 msgid "Ideas"
 msgstr ""
@@ -15663,6 +15713,10 @@ msgstr ""
 msgid "Failed to upload image"
 msgstr ""
 
+#: src/components/venue/room/RoomOpsPanels.tsx
+msgid "Subtitles in the spoken language stay available either way"
+msgstr ""
+
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "No team matches that search."
 msgstr ""
@@ -15673,6 +15727,10 @@ msgstr ""
 
 #: src/pages/cv/CvEditPage.tsx
 msgid "The Virtual Campus holds no employment record, so this section starts empty."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The organiser has turned translation off in this room. Subtitles still show what is said."
 msgstr ""
 
 #: src/pages/auth/VcLandingPage.tsx
@@ -15986,10 +16044,6 @@ msgstr ""
 msgid "Switch from the list view to the calendar view using the toggle at the top."
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captions in this browser have used today's free allowance. Chrome, Edge or Safari can still caption you."
-msgstr ""
-
 #: src/hooks/useAIAssistant.ts
 #: src/lib/permissions.ts
 msgid "Post-Secondary Institution"
@@ -16254,6 +16308,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/MyProfileTab.tsx
 msgid "The parts you keep for connections are left out. This is what a member who has not connected with you sees."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "I speak and read"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -17226,6 +17284,10 @@ msgstr ""
 msgid "Live with your team"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your words go out in {audienceText}"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Safety Admin"
 msgstr ""
@@ -17775,10 +17837,6 @@ msgstr ""
 msgid "Judging"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Show original"
-msgstr ""
-
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Published for reference — nothing to accept"
 msgstr ""
@@ -18197,6 +18255,11 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Awaiting approval"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgctxt "language name inside a sentence"
+msgid "English"
 msgstr ""
 
 #. placeholder {0}: roleLabel(outcome.role ?? 'student')
@@ -19310,7 +19373,7 @@ msgstr ""
 msgid "A new or emerging business developing its products, services, and business operations."
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
+#: src/components/venue/room/CallCaptions.tsx
 msgid "Hear translations"
 msgstr ""
 
@@ -19353,6 +19416,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Optional, first-party, and nothing is written unless you allow it."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The speaker’s own voice drops while it plays"
 msgstr ""
 
 #: src/pages/legal/LegalIndexPage.tsx
@@ -19711,6 +19778,10 @@ msgstr ""
 msgid "Click Save. You keep earning points and can still see your own rank — nobody else can."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles and voice"
+msgstr ""
+
 #: src/lib/delete-guard.ts
 msgid "The project page and everything on it"
 msgstr ""
@@ -19817,6 +19888,10 @@ msgstr ""
 msgid "Attach a file or give a link to where the resource lives."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Translation is off in this room."
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Declaring"
 msgstr ""
@@ -19853,6 +19928,10 @@ msgstr ""
 msgid "Name the board for the subject, not for a single question — threads go inside it."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "This covers everyone who speaks another language. Change it with the language button under the call."
+msgstr ""
+
 #: src/components/legal/AgreementGate.tsx
 msgid "Two documents cover everything you publish on KTIP. They open each time you start or edit something here."
 msgstr ""
@@ -19875,10 +19954,6 @@ msgstr ""
 
 #: src/pages/legal/CopyrightReportPage.tsx
 msgid "Your affirmations"
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captioning my speech"
 msgstr ""
 
 #: src/pages/collaborate/CodeEditorPage.tsx
@@ -21398,10 +21473,6 @@ msgstr ""
 msgid "Receive messages"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Everyone reads you in their own language"
-msgstr ""
-
 #: src/pages/legal/LegalIndexPage.tsx
 msgid "If work you own has been published on KTIP without your permission, tell us. You do not need an account to file a notice."
 msgstr ""
@@ -21469,6 +21540,7 @@ msgstr ""
 #: src/a11y/messages.ts
 #: src/components/legal/AgreementGate.tsx
 #: src/components/legal/ReconsentBanner.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/pages/collaborate/SnippetsListPage.tsx
 msgid "Not now"
 msgstr ""
@@ -22425,6 +22497,10 @@ msgstr ""
 msgid "Can I preview my application before submitting?"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Runs only while someone is reading your subtitles"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Real-time workspace: whiteboards, documents, code and video"
 msgstr ""
@@ -22457,6 +22533,10 @@ msgstr ""
 msgid "Conducts and publishes research, collaborates on projects."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Only while someone is reading your subtitles. Nothing is stored."
+msgstr ""
+
 #: src/pages/auth/VcLandingPage.tsx
 msgid "That sign-in link is incomplete. Please try again from the Virtual Campus."
 msgstr ""
@@ -22487,6 +22567,10 @@ msgstr ""
 #. placeholder {0}: board.name
 #: src/pages/forums/CreatePostPage.tsx
 msgid "Starting a discussion in <0>{0}</0>"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles in this browser have used today's free allowance. Chrome, Edge or Safari can still subtitle you."
 msgstr ""
 
 #: src/components/profile/SectionPrivacy.tsx
@@ -22571,6 +22655,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Required?"
+msgstr ""
+
+#: src/components/venue/room/RoomOpsPanels.tsx
+msgid "Turn translation on"
 msgstr ""
 
 #: src/components/settings/SecuritySettingsTab.tsx
@@ -23424,10 +23512,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "This is the opposite of the default for projects and events. Publishing a project is a deliberate act with its own agreement; submitting an application is not publishing."
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "In this browser your captions appear a few seconds after each phrase."
 msgstr ""
 
 #: src/components/share/ShareSheet.tsx
@@ -24955,6 +25039,10 @@ msgstr ""
 msgid "Related reading"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "{name} is speaking {theirs}"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "What it receives"
 msgstr ""
@@ -25324,6 +25412,10 @@ msgstr ""
 #. placeholder {0}: bundle.unavailable.length
 #: src/components/settings/SecuritySettingsTab.tsx
 msgid "Your data was downloaded. {0} section(s) could not be read — see \"unavailable\" in the file."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Subtitles"
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26198,10 +26290,6 @@ msgstr ""
 msgid "Thanks for your feedback!"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "The caption service is busy, so a phrase was skipped. Captions carry on."
-msgstr ""
-
 #: src/components/association/AssociationReviewQueue.tsx
 #: src/pages/grants/GrantDetailPage.tsx
 msgid "Status"
@@ -26320,6 +26408,10 @@ msgstr ""
 
 #: src/pages/leaderboard/LeaderboardPage.tsx
 msgid "My role"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "You have used today's hour of subtitles in this browser. Chrome, Edge or Safari can still subtitle you."
 msgstr ""
 
 #: src/i18n/harvested.ts
@@ -26680,6 +26772,7 @@ msgstr ""
 #: src/components/calendar/CalendarNoteComposer.tsx
 #: src/components/documents/DocumentCard.tsx
 #: src/components/feedback/FeedbackModal.tsx
+#: src/components/layout/NavbarSearchPanel.tsx
 #: src/components/profile/ProfileCanvas.tsx
 #: src/pages/courses/CourseDetailPage.tsx
 #: src/pages/cv/CvEditPage.tsx
@@ -26918,6 +27011,7 @@ msgstr ""
 msgid "Message {ASSISTANT_NAME}"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/FocusTimerPanel.tsx
 msgid "Resume"
 msgstr ""
@@ -27246,10 +27340,6 @@ msgstr ""
 msgid "You're attending!"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Read captions in"
-msgstr ""
-
 #: src/pages/events/EventsPage.tsx
 msgid "All Event Types"
 msgstr ""
@@ -27284,10 +27374,6 @@ msgstr ""
 
 #: src/components/settings/LegalSettingsTab.tsx
 msgid "Hidden notes"
-msgstr ""
-
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Captions are not available in this browser yet. Try Chrome, Edge or Safari."
 msgstr ""
 
 #: src/components/venue/room/HomebaseLookPanel.tsx
@@ -28901,6 +28987,7 @@ msgstr ""
 
 #: src/a11y/messages.ts
 #: src/components/tutorial/TutorialOverlay.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/OrganiserOpsPanel.tsx
 msgid "Read aloud"
 msgstr ""
@@ -29443,7 +29530,7 @@ msgstr ""
 msgid "All Discussions"
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
+#: src/components/venue/room/CallCaptions.tsx
 msgid "This browser cannot reach its speech service. Try Chrome or Edge, or turn off your VPN."
 msgstr ""
 
@@ -29647,10 +29734,6 @@ msgstr ""
 msgid "If there is no licence and you want to use the work, ask the author. Most say yes, and now you have it in writing."
 msgstr ""
 
-#: src/components/venue/room/CaptionStrip.tsx
-msgid "Hearing translations"
-msgstr ""
-
 #: src/pages/help/HelpCenterPage.tsx
 msgid "Browse the FAQ →"
 msgstr ""
@@ -29806,6 +29889,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "KTIP is a collaboration platform, so some data is deliberately public."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "The subtitle service is busy, so a phrase was skipped. Subtitles carry on."
 msgstr ""
 
 #: src/components/help/HelpArticleCard.tsx
@@ -30152,6 +30239,10 @@ msgstr ""
 
 #: src/pages/grants/GrantFormPage.tsx
 msgid "Additional details"
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Under each translated line"
 msgstr ""
 
 #: src/pages/resources/ResourceDetailPage.tsx
