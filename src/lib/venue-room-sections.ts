@@ -69,6 +69,10 @@ export type RoomSectionId =
   | 'run_of_show'
   | 'qa'
   | 'help_queue'
+  | 'kit'
+  | 'booking_slots'
+  | 'library'
+  | 'announce_all'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -454,6 +458,40 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['main_hall', 'help_desk'],
     order: 80,
+  },
+  // Migration 212. Opt-in until it is live everywhere.
+  {
+    id: 'kit',
+    label: msg`Kit`,
+    blurb: msg`Hardware to borrow, how many are left, and one button to reserve one.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 33,
+  },
+  {
+    id: 'booking_slots',
+    label: msg`Book 15 minutes`,
+    blurb: msg`Short times with a sponsor or a mentor that people book themselves.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 35,
+  },
+  {
+    id: 'library',
+    label: msg`Library`,
+    blurb: msg`Datasets, APIs, starter kits and guides for this event, searchable.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 37,
+  },
+  {
+    id: 'announce_all',
+    label: msg`Announce to every room`,
+    blurb: msg`One message from an organiser into the chat of every open room.`,
+    slot: 'aside',
+    roles: ['organizer'],
+    defaultFor: [],
+    order: 38,
   },
   {
     id: 'help_queue',

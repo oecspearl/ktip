@@ -54,11 +54,11 @@ const TOOL: Record<VenueRoomKind, RoomSectionId[]> = {
   stage: ['showcase_gallery', 'peoples_choice', 'results_board'],
   workshop: ['objectives', 'challenge_brief', 'resources'],
   judging: ['judging_console', 'results_board'],
-  sponsor_booth: ['resources', 'faq'],
+  sponsor_booth: ['booking_slots', 'resources', 'faq'],
   networking: ['coffee_tables', 'team_finder', 'collab_commons'],
   help_desk: ['help_queue', 'help_nudge', 'submission_desk', 'faq'],
   team: ['team_workspace', 'submission_desk'],
-  breakout: ['organiser_ops', 'caption_test', 'quest_board', 'collab_commons', 'focus_timer', 'objectives'],
+  breakout: ['organiser_ops', 'caption_test', 'quest_board', 'collab_commons', 'kit', 'library', 'booking_slots', 'focus_timer', 'objectives'],
 }
 
 /**

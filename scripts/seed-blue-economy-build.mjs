@@ -192,7 +192,7 @@ const ROOMS = [
     description: 'Ask about the tides API and the Tidewater prize. Tide and swell forecasts for every OECS harbour, through one API. Free for this hackathon. Tidewater prize: US$5,000 for the best tool for fishers.',
     sponsor_name: 'Tidewater Labs',
     sponsor_url: 'https://example.org/tidewater',
-    sections: sec('sponsor_hero', 'host_controls', call('Ana Lucía answers questions'), 'chat', 'occupants', {
+    sections: sec('sponsor_hero', 'host_controls', call('Ana Lucía answers questions'), { id: 'booking_slots', config: { title: 'Talk to Ana Lucía, 15 minutes' } }, 'chat', 'occupants', {
       id: 'sponsor_links',
       config: {
         links: [
@@ -251,7 +251,7 @@ const ROOMS = [
     description: 'Borrow kit, book bench time, ask the bench crew.',
     sections: sec(
       call('Bench crew'),
-      body('objectives', 'Kit, collect from the bench crew. ESP32 boards: 6 of 20. LoRa modules: 2 of 8. Temperature probes: 11 of 24. Solar charge kits: 0 of 5 (out).'),
+      'kit',
       body('rules', 'Bench rules. Batteries stay on the mat: lithium cells charge on the fire-safe mat only. Two hours per booking; extend if nobody is waiting.'),
       'chat',
       tab('occupants', 'Bench crew')
@@ -260,14 +260,14 @@ const ROOMS = [
   R(12, 2, 'resource-library', 'Resource Library', 'breakout', 'library', [7, 5], '#7AB000', 1.2, {
     description: 'Datasets, APIs and starter kits for this challenge.',
     sections: sec(
-      body('objectives', 'Buoy sea temperature, Oct 2026 (CSV, hourly, 14 buoys, cleaned, EN). Tidewater tides API (sandbox key in the Sponsor booth, EN · ES). Landings by island, 2020–2025 (CSV, OECS fisheries statistics, EN · FR). SMS alert starter (ZIP, Twilio, Node, 40 lines, EN). Interviewing fishers: a field guide (PDF, 12 pages, EN · FR · ES).'),
+      'library',
       tab('chat', 'Ask a librarian'),
       'occupants'
     ),
   }),
   R(13, 2, 'mentor-lounge', 'Mentor Lounge', 'breakout', 'lounge', [6, 5], '#7AB000', 1, {
     description: 'Book a mentor for 15 minutes, in a language you share.',
-    sections: sec(call('Lounge'), 'mentors_on_duty', 'chat', 'occupants'),
+    sections: sec(call('Lounge'), { id: 'booking_slots', config: { title: 'Book a mentor, 15 minutes' } }, 'mentors_on_duty', 'chat', 'occupants'),
   }),
 
   // ---- Level 3 · Demos
@@ -291,7 +291,7 @@ const ROOMS = [
   R(17, 4, 'organiser-hq', 'Organiser HQ', 'breakout', 'ops', [8, 6], '#041E42', 1.2, {
     description: 'Headcount, help requests and free-tier usage, live.',
     allowed_roles: ['organizer'],
-    sections: sec('host_controls', call('Ops call'), 'organiser_ops', tab('chat', 'Ops chat'), 'occupants'),
+    sections: sec('host_controls', call('Ops call'), 'organiser_ops', 'announce_all', tab('chat', 'Ops chat'), 'occupants'),
   }),
   R(18, 4, 'green-room', 'Green Room', 'breakout', 'lounge', [7, 5], '#041E42', 1, {
     description: 'Speakers check their setup before going on stage.',
@@ -585,6 +585,31 @@ const CHAT = [
   [18, 'kemar', '18:50', 'Nadia, you are on after Mangrove. Test your screen share now.'],
 ]
 
+// Hardware Bench stock (212): name, how many, how many already reserved.
+const KIT = [
+  ['ESP32 boards', 20, 14],
+  ['LoRa modules', 8, 6],
+  ['Temperature probes', 24, 13],
+  ['Solar charge kits', 5, 5],
+]
+
+// Event library (212): title, detail, kind, format, languages.
+const LIBRARY = [
+  ['Buoy sea temperature, Oct 2026', 'Hourly · 14 buoys · cleaned', 'dataset', 'CSV', ['en']],
+  ['Tidewater tides API', 'Sandbox key in the Sponsor booth', 'api', 'API', ['en', 'es']],
+  ['Landings by island, 2020–2025', 'OECS fisheries statistics', 'dataset', 'CSV', ['en', 'fr']],
+  ['SMS alert starter (Twilio)', 'Node, 40 lines', 'starter', 'ZIP', ['en']],
+  ['Interviewing fishers: a field guide', '12 pages', 'guide', 'PDF', ['en', 'fr', 'es']],
+]
+
+// Bookable 15-minute slots (212): room, host, times, which are taken (by whom).
+const SLOTS = [
+  [5, 'ana', ['14:30', '14:45', '15:00', '15:15', '15:30'], { '14:45': 'tanisha', '15:30': 'shem' }],
+  [13, 'keisha', ['16:00', '16:15', '16:30'], { '16:15': 'lucia' }],
+  [13, 'marie', ['16:00', '16:15', '16:30'], {}],
+  [13, 'devon', ['16:30', '16:45'], { '16:30': 'jaden' }],
+]
+
 // The Help Desk line, in order (211): who, what they asked, tags, who is helping.
 const HELP = [
   ['luc', 'Build fails on Vercel', [], 'devon'],
@@ -606,10 +631,8 @@ const QUESTIONS = [
 const NOT_SEEDED = [
   'Q&A vote counts of 18 / 12 / 9 and 11 / 7: 16 people, so the order is kept as 6 / 4 / 3 and 5 / 3 (needs migration 210)',
   'Help Desk wait estimate: the design says "About 6 minutes" for third in line; the room works it out as 3 minutes per person ahead (needs migration 211)',
-  'Sponsor booking slots and the US$5,000 prize panel: no table (the prize is in the room description)',
-  'Hardware Bench kit stock and reservations, bench bookings: no table (stock is written as room text)',
-  'Resource Library items for this event, with language tags: no table (items are written as room text)',
-  'Mentor booking slots: no table',
+  'The US$5,000 prize panel: no field (the prize is in the room description)',
+  'Kit reservations are one per person per item, so the taken counts are made up of the cast (needs migration 212)',
   'Showcase lineup order and the "3 of 12" call title, Live pill: no field',
   'Green Room "you are on next" slot: no table',
   'Focus timer goal and minutes left: the timer lives only in the browser',
@@ -992,6 +1015,54 @@ async function main() {
       }))
     )
     say('chat', error, `${CHAT.length} chat lines across ${new Set(CHAT.map((c) => c[0])).size} rooms`)
+  }
+
+  // ---- Kit, library and booking slots (212), when the tables exist
+  {
+    await admin.from('venue_kit_items').delete().eq('event_id', EVENT_ID)
+    const { error } = await admin.from('venue_kit_items').insert(
+      KIT.map(([name, total], i) => ({ id: uid(9, i + 1), event_id: EVENT_ID, room_id: roomId(11), name, total, sort_order: (i + 1) * 10 }))
+    )
+    if (error) say('kit', error)
+    else {
+      // Taken counts come from the cast, one each, never from you.
+      const cast = Object.keys(PEOPLE).filter((k) => k !== 'you')
+      const rows = KIT.flatMap(([, , taken], i) =>
+        cast.slice(0, taken).map((k) => ({ item_id: uid(9, i + 1), event_id: EVENT_ID, user_id: ids[k] }))
+      )
+      const { error: rErr } = await admin.from('venue_kit_reservations').insert(rows)
+      say('kit reservations', rErr, `${KIT.length} kit items, ${rows.length} reserved`)
+    }
+
+    await admin.from('venue_library_items').delete().eq('event_id', EVENT_ID)
+    const { error: libErr } = await admin.from('venue_library_items').insert(
+      LIBRARY.map(([title, detail, kind, format, languages], i) => ({
+        event_id: EVENT_ID,
+        title,
+        detail,
+        kind,
+        format,
+        languages,
+        url: `https://example.org/library/${i + 1}`,
+        sort_order: (i + 1) * 10,
+      }))
+    )
+    say('library', libErr, `${LIBRARY.length} library items`)
+
+    await admin.from('venue_booking_slots').delete().eq('event_id', EVENT_ID)
+    const slotRows = SLOTS.flatMap(([room, host, times, taken]) =>
+      times.map((time) => ({
+        event_id: EVENT_ID,
+        room_id: roomId(room),
+        host_id: ids[host],
+        starts_at: at(time),
+        minutes: 15,
+        booked_by: taken[time] ? ids[taken[time]] : null,
+        booked_at: taken[time] ? at('12:00') : null,
+      }))
+    )
+    const { error: slotErr } = await admin.from('venue_booking_slots').insert(slotRows)
+    say('booking slots', slotErr, `${slotRows.length} bookable slots`)
   }
 
   // ---- Help Desk line (211), when the table exists

@@ -47,6 +47,7 @@ import { TeamShelf } from './homebase/TeamShelf'
 import { RunOfShowPanel } from './RunOfShowPanel'
 import { RoomQuestionsPanel } from './RoomQuestionsPanel'
 import { HelpQueuePanel } from './HelpQueuePanel'
+import { AnnounceAllPanel, BookingSlotsPanel, KitPanel, LibraryPanel } from './RoomToolPanels'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -552,6 +553,25 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'kit':
+      return <KitPanel room={room} isHost={isHost} canPost={canPost} />
+
+    case 'booking_slots':
+      return (
+        <BookingSlotsPanel
+          room={room}
+          isHost={isHost}
+          canPost={canPost}
+          title={typeof section.config.title === 'string' ? section.config.title.trim().slice(0, 40) || undefined : undefined}
+        />
+      )
+
+    case 'library':
+      return <LibraryPanel eventId={event.id} isHost={isHost} />
+
+    case 'announce_all':
+      return <AnnounceAllPanel eventId={event.id} openRooms={(rooms ?? []).filter((r) => r.is_open).length} />
 
     case 'help_queue':
       return <HelpQueuePanel room={room} viewerRole={viewerRole} isHost={isHost} canPost={canPost} occupants={occupants} />
