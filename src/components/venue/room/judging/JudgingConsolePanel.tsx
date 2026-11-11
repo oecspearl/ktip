@@ -34,7 +34,7 @@ const blindKey = (eventId: string) => `ktip.judging.blind.${eventId}`
 
 function readBlind(eventId: string): boolean {
   try {
-    return window.localStorage.getItem(blindKey(eventId)) === '1'
+    return window.localStorage.getItem(blindKey(eventId)) !== '0'
   } catch {
     return false
   }
@@ -42,8 +42,7 @@ function readBlind(eventId: string): boolean {
 
 function writeBlind(eventId: string, on: boolean) {
   try {
-    if (on) window.localStorage.setItem(blindKey(eventId), '1')
-    else window.localStorage.removeItem(blindKey(eventId))
+    window.localStorage.setItem(blindKey(eventId), on ? '1' : '0')
   } catch {
     // A preference, not data. It still applies for this visit.
   }
@@ -371,7 +370,8 @@ function EntryScorer({
 
   const live = useMemo(() => weightedTotal(state.criteria, scores), [state.criteria, scores])
   const complete = isComplete(state.criteria, scores)
-  const totalText = formatScore(live)
+  const totalText = live === null ? formatScore(live) : (live * 10).toFixed(1)
+  const weightSum = state.criteria.reduce((sum, c) => sum + Math.max(0, c.weight ?? 1), 0)
 
   const onSave = () => {
     const payload: Record<string, number | null> = {}
@@ -473,13 +473,13 @@ function EntryScorer({
 
       <div className="flex flex-col gap-3">
         {state.criteria.map((c) => {
-          const weight = c.weight ?? 1
+          const share = weightSum > 0 ? Math.round((Math.max(0, c.weight ?? 1) / weightSum) * 100) : 0
           return (
             <fieldset key={c.id} disabled={readOnly}>
               <legend className="text-sm font-semibold text-ktip-sand-900">
                 {c.title}
                 <span className="ml-2 text-xs font-normal text-ktip-sand-500">
-                  <Trans>weight {weight}</Trans>
+                  {share}%
                 </span>
               </legend>
               {c.description && <p className="text-xs text-ktip-sand-500">{c.description}</p>}
@@ -524,7 +524,7 @@ function EntryScorer({
         <p className="text-sm text-ktip-sand-700" aria-live="polite">
           <Trans>Weighted total</Trans>{' '}
           <span className="font-display text-xl font-bold text-ktip-sand-900">{totalText}</span>
-          <span className="text-ktip-sand-500"> / 10</span>
+          <span className="text-ktip-sand-500"> / 100</span>
           {!complete && live !== null && (
             <span className="ml-2 text-xs text-ktip-sand-500">
               <Trans>so far</Trans>

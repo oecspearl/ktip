@@ -40,9 +40,9 @@ export function QuestBoardPanel({ eventId, isHost }: Props) {
   if (loading) return <div className="h-64 animate-pulse-soft rounded-2xl bg-ktip-sand-100" />
 
   return (
-    <section className="grid gap-4 rounded-2xl border border-ktip-sand-200 bg-white p-4 lg:grid-cols-2" aria-label={t`Quest Board`}>
-      {/* ---- leaderboard ---- */}
-      <div className="space-y-3">
+    <section className="flex flex-col gap-6 rounded-2xl border border-ktip-sand-200 bg-white p-4" aria-label={t`Quest Board`}>
+      {/* ---- leaderboard: after the quests on the page, first in the source ---- */}
+      <div className="order-2 space-y-3 border-t border-ktip-sand-100 pt-4">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 font-display text-lg font-bold text-ktip-sand-900">
             <Trophy size={18} aria-hidden="true" />
@@ -84,7 +84,7 @@ export function QuestBoardPanel({ eventId, isHost }: Props) {
       </div>
 
       {/* ---- quests ---- */}
-      <div className="space-y-3">
+      <div className="order-1 space-y-3">
         <h3 className="font-display text-lg font-bold text-ktip-sand-900">
           <Trans>Side quests</Trans>
         </h3>
@@ -93,7 +93,7 @@ export function QuestBoardPanel({ eventId, isHost }: Props) {
             <Trans>No quests yet. Organisers add them here.</Trans>
           </p>
         )}
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {quests
             .filter((q) => q.is_active)
             .map((q) => {
