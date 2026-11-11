@@ -28,8 +28,9 @@ import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { InstallPrompt } from './components/InstallPrompt'
 import { MainLayout } from './components/layout/MainLayout'
 import { RouteSplash } from './components/RouteSplash'
-import { RouteLoadFailed, ReloadOnMount } from './components/RouteLoadFailed'
-import { claimAutoReload } from './lib/route-reload'
+import { RouteLoadFailed, ReloadOnMount, ResetWorkerOnMount } from './components/RouteLoadFailed'
+import { chooseRouteLoadRecovery } from './lib/route-reload'
+import { isControlledByServiceWorker } from './lib/service-worker'
 import { AppError } from './lib/app-error'
 import { captureException } from './lib/monitoring'
 import { enableCardShuffle } from './lib/routeTransitions'
@@ -192,8 +193,9 @@ function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
       // After a deploy this is how a stale chunk reference presents: the tab
       // asks for a hashed file the new build no longer has. Only a full reload
       // fixes it (React Router keeps this resolution for the life of the page),
-      // so the first failure reloads by itself and a repeat inside the guard
-      // window shows a screen that offers one. See src/lib/route-reload.ts.
+      // so the first failure reloads by itself, a repeat removes the service
+      // worker and reloads, and only a third failure or a lost connection
+      // shows a screen. See src/lib/route-reload.ts.
       captureException(
         new AppError({
           code: 'ROUTE_IMPORT_FAILED',
@@ -202,7 +204,14 @@ function lazyPage(importer: () => Promise<{ default: React.ComponentType }>) {
           cause: error,
         })
       )
-      return { default: claimAutoReload() ? ReloadOnMount : RouteLoadFailed }
+      const recovery = chooseRouteLoadRecovery({
+        online: navigator.onLine !== false,
+        controlled: isControlledByServiceWorker(),
+      })
+      return {
+        default:
+          recovery === 'reload' ? ReloadOnMount : recovery === 'reset-worker' ? ResetWorkerOnMount : RouteLoadFailed,
+      }
     })
     return { Component: mod.default }
   }

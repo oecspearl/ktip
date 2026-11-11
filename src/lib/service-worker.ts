@@ -1,61 +1,51 @@
 /**
- * Service-worker takeover handling.
+ * Service-worker housekeeping.
  *
- * `registerType: 'autoUpdate'` builds a worker that calls skipWaiting() and
- * clientsClaim(), so a new worker installs and seizes control of pages that are
- * already open. What it does NOT do is reload those pages, which leaves the tab
- * running the previous build's JavaScript against the new worker's precache.
- * Two things go wrong in that state:
- *
- *  1. cleanupOutdatedCaches() has already dropped the old asset revisions, so
- *     any route the user has not visited yet fails its lazy import.
- *  2. A routing bug shipped in an old worker keeps deciding what the tab sees
- *     until the tab is reloaded. That is what stranded OAuth sign-in: a stale
- *     worker precached `auth/callback.html` (a dead file from the pre-React
- *     app), Workbox's precache route resolves `/auth/callback` to it via its
- *     default `cleanURLs` behaviour, and that file redirects to `/` — which
- *     discards the `#access_token=…` fragment before detectSessionInUrl can
- *     read it, so the user lands back on the home page signed out.
- *
- * Reloading the moment a new worker takes over fixes both without anyone
- * having to unregister a worker by hand in DevTools.
+ * There used to be a reload here on every `controllerchange`. It existed
+ * because the worker answered page loads from its precache, so a tab could be
+ * running a build older than the worker that had just taken over. Page loads
+ * now always go to the network (the navigation rule in vite.config.ts), so a
+ * freshly opened page is already the live build and that reload only flashed
+ * it a few seconds in, after every deploy. A tab left open across a deploy is
+ * handled where it actually breaks: lazyPage in App.tsx, on the first chunk
+ * that fails to load.
  */
-export function watchForServiceWorkerTakeover() {
-  if (!('serviceWorker' in navigator)) return
 
-  // A null controller means no worker is driving this page yet — the very first
-  // install. Claiming an uncontrolled page changes nothing about what it was
-  // served, so reloading there would be a pointless flash on a first visit.
-  if (!navigator.serviceWorker.controller) return
-
-  let reloading = false
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return
-    // Never reload out from under an OAuth handoff. A PKCE code is single-use
-    // and its verifier is deleted the moment the exchange runs, so a reload
-    // landing mid-exchange replays a spent code against a missing verifier and
-    // the sign-in fails permanently — the user is bounced to /login with no way
-    // to retry except clearing storage. autoUpdate claims on a fresh
-    // navigation, and returning from Google is exactly that, so this is the
-    // likeliest moment for the race rather than the rarest.
-    //
-    // Skipping the reload here is safe now that navigateFallbackDenylist sends
-    // every /auth/ navigation to the network: the callback page is already
-    // guaranteed to be the current build, which is the only thing the reload
-    // was protecting.
-    if (isOAuthHandoff()) return
-    reloading = true
-    window.location.reload()
-  })
+/**
+ * Whether a service worker is driving this page. A route that keeps failing
+ * on such a page may be getting a stale shell from it; on an uncontrolled page
+ * there is no worker to reset.
+ */
+export function isControlledByServiceWorker(): boolean {
+  try {
+    return 'serviceWorker' in navigator && navigator.serviceWorker.controller !== null
+  } catch {
+    return false
+  }
 }
 
-/** True when this document is part of an in-flight OAuth sign-in. */
-function isOAuthHandoff(): boolean {
-  return (
-    window.location.pathname.startsWith('/auth/') ||
-    window.location.search.includes('code=') ||
-    window.location.hash.includes('access_token=')
-  )
+/**
+ * Last resort when a route still fails after a plain reload: remove this
+ * site's service worker and load the page again straight from the network.
+ *
+ * A plain reload normally fetches the live build, since page loads skip the
+ * worker's cache. This covers whatever that misses: a worker installed by an
+ * older build that still answers page loads from its precache, or one stuck
+ * mid-update. unregister() takes the worker off the site's scope at once, so
+ * the reload that follows is not routed through it, and registerSW.js installs
+ * a current one on that load. Nothing is lost but the offline shell, for the
+ * seconds until the new worker has precached it again.
+ */
+export async function resetServiceWorkerAndReload(): Promise<void> {
+  try {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(registrations.map((registration) => registration.unregister()))
+    }
+  } catch {
+    /* No access to the registrations: a plain reload is still the best next step */
+  }
+  window.location.reload()
 }
 
 /**

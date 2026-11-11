@@ -556,8 +556,13 @@ export default defineConfig(({ mode }) => {
        * Naming it here means it is bundled before the first request instead of
        * during one. Dev-only concern; the production build resolves it
        * statically either way.
+       *
+       * zod: same trap. Only lib/validation.ts and lib/kpi-report-schema.ts
+       * import it, and the initial scan has missed it, so the first visit to /login triggered a mid-session
+       * re-optimize and left the server handing out `zod.js?v=<hash>` URLs that
+       * answer 504 Outdated Optimize Dep until a restart.
        */
-      include: ['@mediapipe/tasks-vision'],
+      include: ['@mediapipe/tasks-vision', 'zod'],
     },
     build: {
       sourcemap: uploadSentrySourceMaps ? ('hidden' as const) : false,
@@ -726,25 +731,55 @@ export default defineConfig(({ mode }) => {
           // chunks are written but before sw.js is generated, leaving a dist/
           // that looks complete and has registerSW.js pointing at a 404.
           globIgnores: ['**/node_modules/**/*', '**/auth/**', 'stats.html', 'perf/**'],
-          // vercel.json rewrites /auth/vc/* to Edge Functions rather than to
-          // the SPA. Those are reached by a top-level navigation, so the
-          // navigation fallback would answer them with index.html and the
-          // Virtual Campus handoff would never touch the server.
-          //
-          // /auth/ is denied wholesale rather than just /auth/vc/, because the
-          // OAuth return from Google is this app's only routine top-level
-          // navigation — every other route change is client-side and issues no
-          // navigation request at all. That makes /auth/callback the one URL
-          // the navigation fallback can answer out of a precache belonging to
-          // an older build, handing back an index.html whose hashed chunks
-          // cleanupOutdatedCaches has already deleted. The sign-in then
-          // dead-ends on a blank page or a stuck spinner. Going to the network
-          // here costs one request and guarantees the current build.
-          //
-          // /test-creds is a standalone page in public/, not an SPA route. The
-          // fallback would answer it with index.html and the router's 404.
-          navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/test-creds/],
+          /**
+           * No cache-first navigation fallback.
+           *
+           * vite-plugin-pwa's default answers every page load with the
+           * index.html in the worker's precache. After a deploy that copy is
+           * the previous build, and the worker keeps serving it until the new
+           * worker has finished downloading its own precache and taken over.
+           * The stale page asks for route chunks Vercel no longer has (old
+           * deployments' assets are gone the moment a new one is promoted),
+           * the route fails, lazyPage's one automatic reload lands on the
+           * same stale page, and the reader gets "This page didn't load"
+           * until the new worker claims the tab and reloads it. With a deploy
+           * every hour or two, that was most visits. See the navigation rule
+           * at the top of runtimeCaching for what replaces it.
+           */
+          navigateFallback: null,
           runtimeCaching: [
+            {
+              /**
+               * Page loads: the network, always; the precached shell only
+               * when the network fails (offline).
+               *
+               * index.html is a few kB, served `no-cache` from Vercel's edge,
+               * so asking for it every time costs one short request and
+               * guarantees the page and its chunk names belong to the build
+               * that is live. No networkTimeoutSeconds on purpose: a timeout
+               * would hand a slow connection the stale shell, which is the bug
+               * this rule exists to remove. NetworkOnly rather than
+               * NetworkFirst for the same reason: a per-URL page cache would
+               * go stale exactly like the precache did.
+               *
+               * Not matched, so they go straight to the network untouched:
+               * - /api/ — Edge and serverless functions.
+               * - /auth/ — vercel.json rewrites /auth/vc/* to Edge Functions,
+               *   and the OAuth return lands on /auth/callback. Neither must
+               *   ever get the offline shell instead of the real response.
+               * - /test-creds — a standalone page in public/, not an SPA
+               *   route; the shell would show the router's 404.
+               *
+               * The function is serialized into sw.js by toString(), so it
+               * must not reference anything outside itself.
+               */
+              urlPattern: ({ request, url }) =>
+                request.mode === 'navigate' && !/^\/(?:api\/|auth\/|test-creds)/.test(url.pathname),
+              handler: 'NetworkOnly',
+              options: {
+                precacheFallback: { fallbackURL: 'index.html' },
+              },
+            },
             {
               /**
                * Every chunk that is no longer precached — route code, the

@@ -4,6 +4,7 @@ import { RefreshCw, Home } from 'lucide-react'
 import { useLingui } from '@lingui/react/macro'
 import { Button } from './ui/Button'
 import { RouteSplash } from './RouteSplash'
+import { resetServiceWorkerAndReload } from '../lib/service-worker'
 
 /**
  * What a route renders when its code could not be downloaded.
@@ -18,6 +19,15 @@ import { RouteSplash } from './RouteSplash'
 export function RouteLoadFailed() {
   const { t } = useLingui()
   const { pathname } = useLocation()
+
+  // Shown when offline, or after a reload and a service-worker reset both
+  // failed. A dropped connection is the usual cause, so its return reloads
+  // without waiting for the button.
+  useEffect(() => {
+    const reload = () => window.location.reload()
+    window.addEventListener('online', reload)
+    return () => window.removeEventListener('online', reload)
+  }, [])
 
   return (
     <div className="flex flex-col items-center justify-center py-24 px-4 gap-4 text-center">
@@ -49,6 +59,18 @@ export function RouteLoadFailed() {
 export function ReloadOnMount() {
   useEffect(() => {
     window.location.reload()
+  }, [])
+  return <RouteSplash />
+}
+
+/**
+ * The second failure's answer, on a page a service worker controls: remove the
+ * worker and reload from the network, still looking like the loading state.
+ * See resetServiceWorkerAndReload.
+ */
+export function ResetWorkerOnMount() {
+  useEffect(() => {
+    void resetServiceWorkerAndReload()
   }, [])
   return <RouteSplash />
 }

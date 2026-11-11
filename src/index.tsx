@@ -11,12 +11,7 @@ import '@a11y-kit/css/ui.css'
 import './a11y/a11y.css'
 import App from './App.tsx'
 import type { ErrorCode } from './lib/app-error'
-import { watchForServiceWorkerTakeover, purgeSupabaseResponseCache } from './lib/service-worker'
-
-// Must run before anything can navigate: a tab still driven by an older
-// service worker gets the build it was served, routing bugs included. Sits below
-// the './instrument' import so a failure in here is itself reported.
-watchForServiceWorkerTakeover()
+import { purgeSupabaseResponseCache } from './lib/service-worker'
 
 // Fire-and-forget: drops the cross-account response cache an older build left
 // behind. Not awaited — nothing in the first paint depends on it, and the
