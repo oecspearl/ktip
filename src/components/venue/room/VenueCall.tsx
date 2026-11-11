@@ -35,6 +35,8 @@ import type { FloatingReaction } from '../../../hooks/useRoomSignals'
  *     presenter's camera sits in its bottom-right corner, and everyone else is a
  *     column down the right. In every room with a call, huddles included.
  *   - Spotlight: whoever spoke last is big, everyone else in the same column.
+ *     A huddle takes this shape too: as a row of small tiles the call was a
+ *     short strip, and the language menu above the dock was cut off by it.
  *   - Grid: equal tiles, for a judging panel.
  *
  * A workshop host can share a board instead of a screen (CallBoard.tsx). It
@@ -262,7 +264,6 @@ function CallBody({
         boardCanvas={screen.participant.isLocal && sharer?.board ? board.canvas : null}
       />
     )
-  else if (mode === 'huddle') stage = <HuddleStrip cameras={cameras} />
   else if (cameras.length === 0) stage = <SubtitleBand />
   else if (mode === 'grid') stage = <GridStage cameras={cameras} fill={fill} />
   else stage = <SpotlightLayout cameras={cameras} fill={fill} />
@@ -357,24 +358,6 @@ function PresentLayout({
         </div>
         {showColumn && <SideColumn tracks={others} />}
       </div>
-    </div>
-  )
-}
-
-/**
- * A huddle: everyone in the call as a small tile, in a row that scrolls, and
- * the subtitle band under it. A camera that is off shows the person's photo.
- */
-function HuddleStrip({ cameras }: { cameras: TrackReferenceOrPlaceholder[] }) {
-  const { t } = useLingui()
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2.5 overflow-x-auto pb-0.5" aria-label={t`Everyone in the call`}>
-        {cameras.map((track) => (
-          <CallTile key={tileKey(track)} trackRef={track} avatarSize={52} className="aspect-[4/3] w-36 shrink-0 sm:w-42" />
-        ))}
-      </div>
-      <SubtitleBand />
     </div>
   )
 }
