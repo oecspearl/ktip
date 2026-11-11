@@ -48,6 +48,15 @@ const BOTTOM_SLACK = 48
 const PIN_CLEARANCE = 64
 const FLASH_MS = 1_600
 
+/** "08:40" for a message from today, "3 days ago" for an older one. */
+function messageTime(iso: string): string {
+  const at = new Date(iso)
+  const now = new Date()
+  const sameDay =
+    at.getFullYear() === now.getFullYear() && at.getMonth() === now.getMonth() && at.getDate() === now.getDate()
+  return sameDay ? at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : formatRelativeTime(iso)
+}
+
 /** A small ocean tag, as in the room design. */
 function HostBadge() {
   return (
@@ -138,7 +147,7 @@ function RoomChatMessage({
           </button>
           {host && <HostBadge />}
           <span className="shrink-0 text-[10px] text-ktip-sand-400">
-            {formatRelativeTime(message.created_at)}
+            {messageTime(message.created_at)}
           </span>
         </div>
         {/* aria-busy plus a slight fade while the translation is in flight —

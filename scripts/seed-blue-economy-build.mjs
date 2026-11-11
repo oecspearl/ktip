@@ -72,6 +72,17 @@ const at = (hhmm) => {
   return new Date(DEADLINE + ((h - 18) * 60 + m) * 60_000).toISOString()
 }
 const iso = (ms) => new Date(ms).toISOString()
+/**
+ * A prototype time as that time TODAY on this machine's clock, for what the
+ * rooms print as a time of day: the schedule and chat. "09:00 Doors open"
+ * then reads 09:00 whenever the seed runs.
+ */
+const wall = (hhmm) => {
+  const [h, m] = hhmm.split(':').map(Number)
+  const d = new Date()
+  d.setHours(h, m, 0, 0)
+  return d.toISOString()
+}
 
 // ---------------------------------------------------------------- people
 // key → name, venue role, language, where they are from, the room they stand
@@ -168,9 +179,8 @@ const ROOMS = [
     description: 'Check in, set your language and find your team before you head in.',
     sections: sec(
       'check_in',
-      'run_of_show',
-      body('rules', 'House rules. Be kind, credit what you borrow, and keep keys and passwords out of chat. Submissions close at 18:00 AST and late entries cannot be judged.'),
-      'wayfinding',
+      { id: 'run_of_show', config: { title: 'Key times' } },
+      { id: 'wayfinding', config: { compact: true } },
       tab('chat', 'Desk chat'),
       tab('occupants', 'Desk team')
     ),
@@ -887,8 +897,8 @@ async function main() {
       SCHEDULE.map(([start, title, room, type, mins], i) => ({
         event_id: EVENT_ID,
         title,
-        start_time: at(start),
-        end_time: iso(new Date(at(start)).getTime() + mins * 60_000),
+        start_time: wall(start),
+        end_time: iso(new Date(wall(start)).getTime() + mins * 60_000),
         location: ROOMS.find((r) => r.id === roomId(room)).name,
         room_id: roomId(room),
         schedule_type: type,
@@ -1040,7 +1050,7 @@ async function main() {
         body: text,
         kind: 'chat',
         lang: lang ?? 'en',
-        created_at: at(time),
+        created_at: wall(time),
       }))
     )
     say('chat', error, `${CHAT.length} chat lines across ${new Set(CHAT.map((c) => c[0])).size} rooms`)

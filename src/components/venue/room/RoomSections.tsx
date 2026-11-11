@@ -19,7 +19,7 @@ import { CaptionTestPanel } from './CaptionTestPanel'
 import { LookingForTeamPanel } from './LookingForTeamPanel'
 import { RoleRosterPanel } from './RoleRosterPanel'
 import { RoomAnnouncements } from './RoomAnnouncements'
-import { CheckInCard, OnboardingChecklist } from './RoomArrivalPanels'
+import { OnboardingChecklist } from './RoomArrivalPanels'
 import { RoomFaqPanel, RoomResourcesPanel, RoomTextSection } from './RoomContentPanels'
 import { ActivityLogPanel, HostControlsPanel } from './RoomOpsPanels'
 import { HelpNudgePanel, SkillFinderPanel } from './RoomPeoplePanels'
@@ -50,6 +50,8 @@ import { HelpQueuePanel } from './HelpQueuePanel'
 import { AnnounceAllPanel, BookingSlotsPanel, KitPanel, LibraryPanel } from './RoomToolPanels'
 import { LineupPanel, OnNextPanel } from './StageLineupPanels'
 import { OpsAlertsPanel } from './OpsAlertsPanel'
+import { CheckInTool } from './CheckInTool'
+import { WhereToGoPanel } from './WhereToGoPanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -278,6 +280,7 @@ const WIDE_ON_SHELF = new Set<RoomSectionId>([
   'judging_console',
   'submission_desk',
   'challenge_brief',
+  'check_in',
   'team_workspace',
   'reactions',
 ])
@@ -338,7 +341,7 @@ function RoomSection({
       return <SponsorHero room={room} />
 
     case 'check_in':
-      return <CheckInCard event={event} />
+      return <CheckInTool event={event} membership={membership} rooms={rooms} floors={floors} />
 
     case 'host_controls':
       return <HostControlsPanel room={room} signals={signals} />
@@ -545,7 +548,10 @@ function RoomSection({
       return <OnboardingChecklist event={event} membership={membership} />
 
     case 'wayfinding':
-      return (
+      // The short form, as the Registration Desk has it: one line per floor.
+      return section.config.compact === true ? (
+        <WhereToGoPanel event={event} rooms={rooms} floors={floors} />
+      ) : (
         <WayfindingPanel
           event={event}
           rooms={rooms}
@@ -591,7 +597,12 @@ function RoomSection({
       return <RoomQuestionsPanel room={room} canPost={canPost} isHost={isHost} fill={fill} />
 
     case 'run_of_show':
-      return <RunOfShowPanel eventId={event.id} />
+      return (
+        <RunOfShowPanel
+          eventId={event.id}
+          title={typeof section.config.title === 'string' ? section.config.title.trim().slice(0, 40) || undefined : undefined}
+        />
+      )
 
     case 'venue_headcount':
       return <VenueHeadcountPanel occupants={occupants} />

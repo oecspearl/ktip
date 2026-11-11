@@ -36,7 +36,7 @@ export function FocusTimerPanel() {
       setNote(null)
       return
     }
-    const time = i18n.date(new Date(until), { hour: '2-digit', minute: '2-digit' })
+    const time = i18n.date(new Date(until), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
     setNote(t`Heads down until ${time}`)
   }, [until, setNote, t, i18n])
   useEffect(() => () => setNote(null), [setNote])

@@ -30,7 +30,7 @@ export interface RoomShellPlan {
   dock: RoomSectionId[]
 }
 
-const BAND: RoomSectionId[] = ['sponsor_hero', 'check_in', 'on_next', 'host_controls']
+const BAND: RoomSectionId[] = ['sponsor_hero', 'on_next', 'host_controls']
 const DOCK_BASE: RoomSectionId[] = ['chat', 'occupants']
 
 /** The one dock tab each kind of room adds, first visible one wins. */
@@ -56,7 +56,7 @@ const TOOL: Record<VenueRoomKind, RoomSectionId[]> = {
   judging: ['judging_console', 'results_board'],
   sponsor_booth: ['booking_slots', 'resources', 'faq'],
   networking: ['coffee_tables', 'team_finder', 'collab_commons'],
-  help_desk: ['help_queue', 'help_nudge', 'submission_desk', 'faq'],
+  help_desk: ['check_in', 'help_queue', 'help_nudge', 'submission_desk', 'faq'],
   team: ['team_workspace', 'submission_desk'],
   breakout: ['organiser_ops', 'caption_test', 'quest_board', 'collab_commons', 'kit', 'library', 'booking_slots', 'focus_timer', 'objectives'],
 }

@@ -42,7 +42,7 @@ export function LineupPanel({ event, room, isHost }: { event: Event; room: Venue
           {mine.map((item) => (
             <li key={item.id} className={cn('flex items-center gap-3 px-4 py-2.5', item.status === 'done' && 'opacity-60')}>
               <time dateTime={item.starts_at} className="w-14 shrink-0 text-xs font-bold tabular-nums text-ktip-sand-600">
-                {i18n.date(new Date(item.starts_at), { hour: '2-digit', minute: '2-digit' })}
+                {i18n.date(new Date(item.starts_at), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}
               </time>
               <span className="min-w-0 flex-1">
                 <span className="block break-words text-sm font-bold text-ktip-sand-900">{teamName(item.team_id) || item.title}</span>

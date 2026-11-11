@@ -116,7 +116,7 @@ export function OpsAlertsPanel({ eventId, occupants }: { eventId: string; occupa
         </ul>
       )}
       <p className="border-t border-ktip-sand-100 px-4 py-2.5 text-xs text-ktip-sand-500">
-        <Trans>Checked at {i18n.date(new Date(now), { hour: '2-digit', minute: '2-digit' })}</Trans>
+        <Trans>Checked at {i18n.date(new Date(now), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}</Trans>
       </p>
     </RoomPanel>
   )

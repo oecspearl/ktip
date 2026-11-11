@@ -194,7 +194,7 @@ export function BookingSlotsPanel({
                     const mine = slot.booked_by === me
                     const taken = !!slot.booked_by && !mine
                     const own = slot.host_id === me
-                    const time = i18n.date(new Date(slot.starts_at), { hour: '2-digit', minute: '2-digit' })
+                    const time = i18n.date(new Date(slot.starts_at), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
                     return (
                       <span key={slot.id} className="inline-flex items-center gap-1">
                         <button

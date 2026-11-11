@@ -11,7 +11,7 @@ import { RoomPanel } from './RoomPanel'
  * Reads the event's own schedule, the same rows the event page shows, so an
  * organiser keeps one agenda. Renders nothing for an event with no schedule.
  */
-export function RunOfShowPanel({ eventId }: { eventId: string }) {
+export function RunOfShowPanel({ eventId, title }: { eventId: string; title?: string }) {
   const { t, i18n } = useLingui()
   const { schedule } = useEventSchedule(eventId)
   const [now, setNow] = useState(() => Date.now())
@@ -24,7 +24,7 @@ export function RunOfShowPanel({ eventId }: { eventId: string }) {
   if (!schedule?.length) return null
 
   return (
-    <RoomPanel title={t`Run of show`}>
+    <RoomPanel title={title || t`Run of show`}>
       <ul className="divide-y divide-ktip-sand-100">
         {schedule.map((item, index) => {
           const start = Date.parse(item.start_time)
@@ -36,9 +36,9 @@ export function RunOfShowPanel({ eventId }: { eventId: string }) {
           const where = (item as { room?: { name?: string } | null }).room?.name || item.location
 
           return (
-            <li key={item.id} className={cn('flex items-start gap-3 px-4 py-2.5', past && 'opacity-60')}>
+            <li key={item.id} className={cn('flex items-start gap-3 px-4 py-2.5', past && 'opacity-60', current && 'bg-ktip-tropical-50')}>
               <time dateTime={item.start_time} className="w-14 shrink-0 pt-0.5 text-xs font-bold tabular-nums text-ktip-sand-600">
-                {i18n.date(new Date(start), { hour: '2-digit', minute: '2-digit' })}
+                {i18n.date(new Date(start), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}
               </time>
               <div className="min-w-0 flex-1">
                 <p className="break-words text-sm font-bold text-ktip-sand-900">{item.title}</p>
