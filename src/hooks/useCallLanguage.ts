@@ -186,7 +186,13 @@ export function useCallLanguage(
   const heardFrom = useRef(new Set<string>())
   const answerRef = useRef<(identity: string) => void>(() => {})
 
-  const { send } = useDataChannel(LANG_TOPIC, (message) => {
+  // Sent straight through the room, and received through a handler that
+  // never changes. useDataChannel builds a new sender every time its handler
+  // changes, and that sender throws until an effect has run for it. With an
+  // inline handler that was every render: a line sent in the gap was dropped,
+  // and the error was swallowed. A language hello lost that way left a speaker not
+  // knowing anyone wanted their words (2026-11-10).
+  const onData = useCallback((message: { payload: Uint8Array; from?: { identity: string } }) => {
     const identity = message.from?.identity
     const state = decodeLangState(message.payload)
     if (!identity || !state) return
@@ -199,7 +205,8 @@ export function useCallLanguage(
       next.set(identity, state)
       return next
     })
-  })
+  }, [])
+  useDataChannel(LANG_TOPIC, onData)
 
   const mine = useMemo<CallLangState>(
     () => ({
@@ -215,13 +222,13 @@ export function useCallLanguage(
   )
   const mineRef = useRef(mine)
   mineRef.current = mine
-  const sendRef = useRef(send)
-  sendRef.current = send
+  const roomRef = useRef(room)
+  roomRef.current = room
 
   const announce = useCallback((to?: string[]) => {
     try {
-      void sendRef
-        .current(encodeLangState(mineRef.current), {
+      void roomRef.current?.localParticipant
+        .publishData(encodeLangState(mineRef.current) as Uint8Array<ArrayBuffer>, {
           reliable: true,
           topic: LANG_TOPIC,
           ...(to ? { destinationIdentities: to } : {}),

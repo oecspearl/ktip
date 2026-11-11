@@ -174,26 +174,39 @@ export function useLiveCaptions({
     })
   }, [])
 
-  const { send } = useDataChannel(TOPIC, (message) => {
-    try {
-      const parsed = JSON.parse(new TextDecoder().decode(message.payload)) as CaptionWire
-      if (parsed?.v !== 1 || typeof parsed.id !== 'string') return
-      merge(parsed, message.from?.identity ?? '', false)
-    } catch {
-      // Someone else's topic, or a future version of this one. Ignoring an
-      // unreadable caption is always right; there is nothing to recover.
-    }
-  })
+  // Sent straight through the room, and received through a handler that
+  // never changes. useDataChannel builds a new sender every time its handler
+  // changes, and that sender throws until an effect has run for it. With an
+  // inline handler that was every render: a line sent in the gap was dropped,
+  // and the error was swallowed. Subtitles showed for the speaker and never
+  // reached anyone else (2026-11-10).
+  const room = useRoomContext()
+  const onData = useCallback(
+    (message: { payload: Uint8Array; from?: { identity: string } }) => {
+      try {
+        const parsed = JSON.parse(new TextDecoder().decode(message.payload)) as CaptionWire
+        if (parsed?.v !== 1 || typeof parsed.id !== 'string') return
+        merge(parsed, message.from?.identity ?? '', false)
+      } catch {
+        // Someone else's topic, or a future version of this one. Ignoring an
+        // unreadable caption is always right; there is nothing to recover.
+      }
+    },
+    [merge]
+  )
+  useDataChannel(TOPIC, onData)
 
   const publish = useCallback(
     (payload: CaptionWire, reliable: boolean) => {
       try {
-        void send(new TextEncoder().encode(JSON.stringify(payload)), { reliable, topic: TOPIC }).catch(() => {})
+        void room?.localParticipant
+          .publishData(new TextEncoder().encode(JSON.stringify(payload)), { reliable, topic: TOPIC })
+          .catch(() => {})
       } catch {
         // Disconnected mid-sentence. The words were never going to arrive.
       }
     },
-    [send]
+    [room]
   )
 
   // Refs, so the recogniser's callback (created once, alive for minutes) never
@@ -211,7 +224,6 @@ export function useLiveCaptions({
   // The LiveKit room name is the venue room id (api/venue/room-token.ts): what
   // the usage ledger bills to, and what the translate route checks the
   // organiser's switch against.
-  const room = useRoomContext()
   const roomIdRef = useRef('')
   roomIdRef.current = room?.name || ''
   // Seconds of speech captioned, for the organiser's usage panel (199). Whisper
