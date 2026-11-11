@@ -44,6 +44,8 @@ interface UseVenuePresenceArgs {
         avatar_url: string | null
         role: VenuePresencePayload['role']
         team_id: string | null
+        /** The site language this person reads, shown beside their name. */
+        lang?: string | null
       }
     | null
   /** The room this client is currently inside, or null for the floorplan. */
@@ -301,11 +303,12 @@ export function useVenuePresence({ eventId, me, roomId, roster }: UseVenuePresen
       // The coarse position, so someone who joins mid-session paints everyone
       // in the right place before the first movement packet arrives.
       pos: posRef.current,
+      lang: me.lang ?? null,
       v: 1,
     }
     payloadRef.current = payload
 
-    const fingerprint = `${availability}|${statusNote ?? ''}|${roomId ?? ''}`
+    const fingerprint = `${availability}|${statusNote ?? ''}|${roomId ?? ''}|${me.lang ?? ''}`
     const changed = fingerprint !== lastSentRef.current
     if (!changed) return
     lastSentRef.current = fingerprint

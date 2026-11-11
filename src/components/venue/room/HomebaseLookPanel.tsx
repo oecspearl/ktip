@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImagePlus, Palette, Trash2 } from 'lucide-react'
@@ -47,6 +48,11 @@ const PREVIEW_H = 320
 
 interface Props {
   room: VenueRoom
+  /**
+   * Where the room header keeps its buttons. While the panel is closed it is
+   * only a "Customise" button there, as in the room design.
+   */
+  actionsSlot?: HTMLElement | null
 }
 
 /**
@@ -58,7 +64,7 @@ interface Props {
  * room is shifted to the origin of a small private grid for the preview; its
  * cells on the real map are untouched.
  */
-export function HomebaseLookPanel({ room }: Props) {
+export function HomebaseLookPanel({ room, actionsSlot }: Props) {
   const { t, i18n } = useLingui()
   const { user } = useAuth()
   const toast = useToast()
@@ -149,6 +155,17 @@ export function HomebaseLookPanel({ room }: Props) {
   }
 
   if (!canEdit) return null
+
+  if (!open && actionsSlot !== undefined) {
+    return actionsSlot
+      ? createPortal(
+          <Button variant="secondary" size="sm" icon={<Palette size={15} aria-hidden="true" />} onClick={() => setOpen(true)}>
+            <Trans>Customise</Trans>
+          </Button>,
+          actionsSlot
+        )
+      : null
+  }
 
   if (!open) {
     return (

@@ -76,9 +76,12 @@ export function planRoomShell(kind: VenueRoomKind, visible: RoomSectionId[]): Ro
 
   const band = BAND.map(take).filter((id): id is RoomSectionId => !!id)
   const call = take('av_placeholder')
+  // Chat, then the room's own tab, then People: the order of the design.
+  const [chat, people] = DOCK_BASE.map(take)
   const dock = [
-    ...DOCK_BASE.map(take),
+    chat,
     take((ROOM_TAB[kind] ?? []).find((id) => shown.has(id) && !taken.has(id))),
+    people,
   ].filter((id): id is RoomSectionId => !!id)
   const tool = take((TOOL[kind] ?? []).find((id) => shown.has(id) && !taken.has(id)))
   const shelf = visible.filter((id) => !taken.has(id))

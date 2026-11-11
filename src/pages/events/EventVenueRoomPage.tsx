@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { Lock } from 'lucide-react'
+import { Hand, Lock } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
@@ -52,6 +52,13 @@ const KIND_TONE: Record<string, { tile: string; eyebrow: string }> = {
   breakout: { tile: 'bg-ktip-sand-100 text-ktip-sand-700', eyebrow: 'text-ktip-sand-600' },
 }
 
+/** Two letters for a team's tile: "Team Coralline" reads TC. */
+function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean)
+  const letters = words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? '').slice(0, 2)
+  return letters.toUpperCase()
+}
+
 /**
  * Inside one room.
  *
@@ -101,6 +108,10 @@ export default function EventVenueRoomPage() {
     () => (room ? roomViewerRole(membership?.role, roomRoles, room, auth.user?.id) : membership?.role ?? null),
     [room, roomRoles, membership?.role, auth.user?.id]
   )
+
+  // The room header's buttons. A panel below the header (the Homebase look)
+  // puts its own button here, so the header stays the one place for actions.
+  const [actionsSlot, setActionsSlot] = useState<HTMLElement | null>(null)
 
   const venueFallbackTitle = t`Venue`
   usePageTitle(room ? t`${room.name} | ${event?.title ?? venueFallbackTitle}` : t`Venue room`)
@@ -244,6 +255,29 @@ export default function EventVenueRoomPage() {
     signals,
   }
 
+  // Whose Homebase this is, for the tile: the team's initials on its colour.
+  const roomTeam = room.kind === 'team' ? teams.find((x) => x.homebase_room_id === room.id) ?? null : null
+  const teamColor = (room as { decor?: { color?: string } }).decor?.color || room.color || null
+
+  // Who may come in, said in the header so nobody wonders why a room is quiet.
+  const allowed = new Set<string>(room.allowed_roles ?? [])
+  const accessNote =
+    allowed.size === 0
+      ? null
+      : allowed.has('speaker')
+        ? t`Speakers only`
+        : allowed.has('judge')
+          ? t`Judges and organisers only`
+          : allowed.has('mentor')
+            ? t`Mentors and organisers only`
+            : allowed.size === 1 && allowed.has('organizer')
+              ? t`Organisers only`
+              : null
+
+  // A hand in the header, where a talk or a class is happening.
+  const handKind = room.kind === 'workshop' || room.kind === 'main_hall' || room.kind === 'stage'
+  const canRaiseHand = handKind && room.is_open && signals.connected && membership.role !== 'spectator'
+
   const floorName = mapConfig.floors.length > 1
     ? mapConfig.floors[room.floor]?.name || floorLabel(room.floor)
     : null
@@ -271,14 +305,24 @@ export default function EventVenueRoomPage() {
             tone, the kind and level above a large name, and who is here. */}
         <div className="mb-5 flex flex-wrap items-end gap-x-6 gap-y-4 pt-2">
           <div className="flex min-w-0 flex-[1_1_26rem] items-start gap-4">
-            <span
-              className={cn(
-                'flex h-13 w-13 shrink-0 items-center justify-center rounded-control',
-                KIND_TONE[room.kind]?.tile ?? KIND_TONE.main_hall.tile
-              )}
-            >
-              <Icon size={26} aria-hidden="true" />
-            </span>
+            {roomTeam && teamColor ? (
+              <span
+                aria-hidden="true"
+                className="flex h-13 w-13 shrink-0 items-center justify-center rounded-control font-display text-2xl font-bold text-white"
+                style={{ backgroundColor: teamColor }}
+              >
+                {initialsOf(roomTeam.name)}
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  'flex h-13 w-13 shrink-0 items-center justify-center rounded-control',
+                  KIND_TONE[room.kind]?.tile ?? KIND_TONE.main_hall.tile
+                )}
+              >
+                <Icon size={26} aria-hidden="true" />
+              </span>
+            )}
             <div className="flex min-w-0 flex-col gap-1">
               <p
                 className={cn(
@@ -289,6 +333,12 @@ export default function EventVenueRoomPage() {
                 {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
                 {/* Which level, on a venue that has more than one. */}
                 {floorName && <span className="text-ktip-sand-400">· {floorName}</span>}
+                {signals.presenter && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-2 py-0.5 text-white">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white motion-safe:animate-pulse" aria-hidden="true" />
+                    <Trans>Live</Trans>
+                  </span>
+                )}
               </p>
               <h1 className="text-balance font-display text-3xl font-bold leading-none text-ktip-sand-900 sm:text-4xl">
                 {room.name}
@@ -311,6 +361,30 @@ export default function EventVenueRoomPage() {
                 <Lock size={12} aria-hidden="true" /> <Trans>Closed</Trans>
               </span>
             )}
+            {accessNote && (
+              <span className="rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-2.5 py-0.5 text-micro font-extrabold text-ktip-sand-700">
+                {accessNote}
+              </span>
+            )}
+            {canRaiseHand && (
+              <Button
+                variant="secondary"
+                size="sm"
+                aria-pressed={signals.myHandUp}
+                icon={<Hand size={15} aria-hidden="true" />}
+                onClick={() => signals.setHand(!signals.myHandUp)}
+              >
+                {signals.myHandUp ? (
+                  <Trans>Lower hand</Trans>
+                ) : room.kind === 'workshop' ? (
+                  <Trans>Raise hand</Trans>
+                ) : (
+                  <Trans>Ask a question</Trans>
+                )}
+              </Button>
+            )}
+            {/* Buttons that belong to a panel below (the Homebase's Customise). */}
+            <span ref={setActionsSlot} className="contents" />
           </div>
         </div>
 
@@ -321,7 +395,7 @@ export default function EventVenueRoomPage() {
           is a registry entry plus a case in RoomSections — never a branch here.
         */}
         {/* A team's own room: its members (and hosts) can restyle it (188). */}
-        {room.kind === 'team' && <HomebaseLookPanel room={room} />}
+        {room.kind === 'team' && <HomebaseLookPanel room={room} actionsSlot={actionsSlot} />}
         <RoomSections context={sectionContext} />
       </div>
     </div>

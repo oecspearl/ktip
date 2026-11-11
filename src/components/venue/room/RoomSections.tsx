@@ -168,14 +168,38 @@ export function RoomSections({
     </div>
   )
 
+  // Short names in the dock, as in the design. A host can rename a tab for one
+  // room ("Desk team", "Stage crew") with `label` on that section's config.
+  const dockLabel = (id: RoomSectionId): string => {
+    const own = byId.get(id)?.config.label
+    if (typeof own === 'string' && own.trim()) return own.trim().slice(0, 24)
+    switch (id) {
+      case 'chat':
+        return room.kind === 'team' ? t`Team chat` : room.kind === 'judging' ? t`Judges’ chat` : t`Chat`
+      case 'occupants':
+        return room.kind === 'team' ? t`Members` : t`People`
+      case 'hand_queue':
+        return t`Hands`
+      case 'mentors_on_duty':
+        return t`Mentors`
+      case 'sponsor_links':
+        return t`Links`
+      case 'announcements':
+        return t`News`
+      default:
+        return i18n._(byId.get(id)!.def.label)
+    }
+  }
+  const dockCount = (id: RoomSectionId): number | undefined =>
+    id === 'occupants'
+      ? context.inRoom.length
+      : id === 'hand_queue'
+        ? context.signals.hands.length
+        : undefined
   const dockTabs: DockTab[] = plan.dock.map((id) => ({
     id,
-    label:
-      id === 'chat'
-        ? t`Chat`
-        : id === 'occupants'
-          ? t`People`
-          : i18n._(byId.get(id)!.def.label),
+    label: dockLabel(id),
+    count: dockCount(id),
     node: render(id, true),
   }))
   const hasDock = dockTabs.length > 0
@@ -318,6 +342,7 @@ function RoomSection({
           fill={fill}
           signals={signals}
           onShareChange={onShareChange}
+          title={typeof section.config.title === 'string' ? section.config.title.trim().slice(0, 60) || undefined : undefined}
         />
       )
 
@@ -427,6 +452,8 @@ function RoomSection({
             title={t`In this room`}
             emptyLabel={t`You are the first one here.`}
             fill={fill}
+            dense
+            handsUp={signals.hands.map((h) => h.userId)}
           />
         </div>
       )

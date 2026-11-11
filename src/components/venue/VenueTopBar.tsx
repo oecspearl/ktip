@@ -191,6 +191,8 @@ export function VenueTopBar({
           trusted. Live is the default state, so it earns only a dot — the
           chip changes voice only when the socket drops for real, which is the
           news. During the grace window it renders nothing at all. */}
+      {submissionDeadline && <SubmissionCountdown deadline={submissionDeadline} />}
+
       {(connected || outage) && (
         <span
           className={cn(
@@ -209,8 +211,6 @@ export function VenueTopBar({
           {connected ? <Trans>{headcount} in the venue</Trans> : t`Reconnecting`}
         </span>
       )}
-
-      {submissionDeadline && <SubmissionCountdown deadline={submissionDeadline} />}
 
       {trailing}
 

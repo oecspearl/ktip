@@ -33,8 +33,8 @@ describe('planRoomShell', () => {
   it('adds one room tab: mentors at the help desk, judges in judging', () => {
     expect(planRoomShell('help_desk', ['chat', 'occupants', 'mentors_on_duty', 'faq']).dock).toEqual([
       'chat',
-      'occupants',
       'mentors_on_duty',
+      'occupants',
     ])
     expect(planRoomShell('judging', ['av_placeholder', 'judges_present', 'judging_console']).dock).toEqual(['judges_present'])
   })

@@ -114,6 +114,7 @@ export function presenceToOccupants(state: RawPresenceState): VenueOccupant[] {
           team_id: raw.team_id ?? null,
           pos: normalizePos(raw.pos),
           is_live: true,
+          lang: typeof raw.lang === 'string' ? raw.lang : null,
         })
         continue
       }

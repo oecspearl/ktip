@@ -67,6 +67,12 @@ export function CallDock({
     <div className="grid grid-cols-1 items-center gap-x-3 gap-y-2.5 border-t border-white/12 pt-3 @3xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
       <div className="flex min-w-0 flex-wrap items-center gap-2 @max-3xl:justify-center">
         <SpeakerStatus />
+        {!canPublish && signals && (
+          <span className="inline-flex min-w-0 items-center gap-2 text-micro font-bold text-white/70">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-white/50" aria-hidden="true" />
+            <Trans>Raise your hand to speak</Trans>
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2">

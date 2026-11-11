@@ -1,5 +1,5 @@
 import { Suspense, lazy, useMemo, useState } from 'react'
-import { VideoOff } from 'lucide-react'
+import { Eye, VideoOff } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import type { RoomCameraMode } from '../../../lib/venue-room-layout'
 import { isVenueVideoConfigured, useVenueRoomToken } from '../../../hooks/useVenueRoomToken'
@@ -49,9 +49,12 @@ export function AvStage({
   fill,
   signals,
   onShareChange,
+  title,
 }: {
   room: VenueRoom
   mode: RoomCameraMode
+  /** What this call is, set by the host for this room ("Team call", "Day two opening"). */
+  title?: string
   /** Everyone in this room, for seeding the tiles. */
   occupants: VenueOccupant[]
   /** Whoever is presenting right now, if anyone. */
@@ -133,7 +136,7 @@ export function AvStage({
       : !connected
         ? { text: t`Connecting…`, warn: false }
         : !grant?.can_publish
-          ? { text: t`You are listening`, warn: false }
+          ? { text: t`You are listening`, warn: false, listening: true }
           : null
 
   const chip =
@@ -149,8 +152,14 @@ export function AvStage({
       )}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/12 px-4 py-3">
+        {presenter && (
+          <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-red-600 px-2.5 text-micro font-extrabold uppercase tracking-[0.08em] text-white">
+            <span className="h-1.5 w-1.5 rounded-full bg-white motion-safe:animate-pulse" aria-hidden="true" />
+            <Trans>Live</Trans>
+          </span>
+        )}
         <span className="min-w-0 truncate text-sm font-extrabold">
-          {presenter ? t`${presenter.name} is presenting` : t`Room call`}
+          {presenter ? t`${presenter.name} is presenting` : title || t`Room call`}
         </span>
         {/* "3 in the call", filled in by the call once it is connected. */}
         <span ref={setCountSlot} className="text-xs font-semibold text-white/52 empty:hidden" />
@@ -158,6 +167,7 @@ export function AvStage({
           <span ref={setChipSlot} className="contents" />
           {status && (
             <span className={cn(chip, status.warn && 'border-ktip-sun-400/40 text-ktip-sun-200')} role="status">
+              {'listening' in status && <Eye size={12} aria-hidden="true" />}
               {status.text}
             </span>
           )}

@@ -897,6 +897,8 @@ export interface VenuePresencePayload {
   room_id: string | null
   team_id: string | null
   pos: VenuePosition | null
+  /** The site language this person reads (en, fr, es). Absent from older tabs. */
+  lang?: string | null
   v: 1
 }
 
@@ -914,6 +916,8 @@ export interface VenueOccupant {
   pos: VenuePosition | null
   /** False when derived from the DB mirror rather than a live presence entry. */
   is_live: boolean
+  /** The site language they read, when their tab has said so. */
+  lang?: string | null
 }
 
 export interface Grant extends Ranked {

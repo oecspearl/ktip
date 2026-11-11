@@ -6,6 +6,8 @@ import { cn } from '../../../lib/utils'
 export interface DockTab {
   id: string
   label: string
+  /** How many are in the tab (people, raised hands), shown after the label. */
+  count?: number
   node: ReactNode
 }
 
@@ -119,9 +121,12 @@ export function RoomDock({
               aria-selected={tab.id === active}
               aria-controls={`dock-panel-${tab.id}`}
               onClick={() => choose(tab.id)}
-              className="min-w-0 flex-1 truncate rounded-control px-2 py-1.5 text-micro font-bold text-ktip-sand-600 transition-colors hover:text-ktip-sand-900 aria-selected:bg-ktip-cream aria-selected:text-ktip-sand-900 aria-selected:shadow-card"
+              className="flex h-8.5 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-control px-2 text-micro font-extrabold text-ktip-sand-600 transition-colors hover:text-ktip-sand-900 aria-selected:bg-ktip-cream aria-selected:text-ktip-sand-900 aria-selected:shadow-card"
             >
-              {tab.label}
+              <span className="min-w-0 truncate">{tab.label}</span>
+              {tab.count !== undefined && (
+                <span className="shrink-0 font-semibold tabular-nums text-ktip-sand-400">{tab.count}</span>
+              )}
             </button>
           ))}
           <button
@@ -141,7 +146,9 @@ export function RoomDock({
             id={`dock-panel-${tab.id}`}
             aria-labelledby={`dock-tab-${tab.id}`}
             hidden={tab.id !== active}
-            className="min-h-0 flex-1 overflow-hidden [&>*]:h-full [&>*]:rounded-none [&>*]:border-0 [&>*]:shadow-none [&_[data-panel-head]]:hidden"
+            // Chat and People arrive inside a tutorial wrapper, so the card to
+            // flatten is one level further down for those two.
+            className="min-h-0 flex-1 overflow-hidden [&>*]:h-full [&>*]:rounded-none [&>*]:border-0 [&>*]:shadow-none [&>[data-tutorial]>*]:h-full [&>[data-tutorial]>*]:rounded-none [&>[data-tutorial]>*]:border-0 [&>[data-tutorial]>*]:shadow-none [&_[data-panel-head]]:hidden"
           >
             {tab.node}
           </div>

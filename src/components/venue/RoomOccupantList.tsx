@@ -1,4 +1,4 @@
-import { ChevronUp, MessageSquare, UserRound } from 'lucide-react'
+import { ChevronUp, Hand, MessageSquare, UserRound } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { VENUE_ROLE_LABELS } from '../../lib/constants'
 import { canDirectMessage } from '../../lib/venue-actions'
@@ -9,6 +9,8 @@ import { AvailabilityDot } from './AvailabilityDot'
 import type { VenueOccupant } from '../../types'
 import { DiamondAvatar } from '../ui/DiamondAvatar'
 import { Trans, useLingui } from '@lingui/react/macro'
+import { useLanguage } from '../../i18n/LanguageContext'
+import { LANGUAGE_NAMES } from '../../i18n/language'
 
 interface RoomOccupantListProps {
   occupants: VenueOccupant[]
@@ -19,6 +21,10 @@ interface RoomOccupantListProps {
   fill?: boolean
   /** Set when the list can fold away (the floorplan overlay); adds the control. */
   onCollapse?: () => void
+  /** The room dock's rows: smaller faces, bold names, your own row tinted. */
+  dense?: boolean
+  /** Who has a hand up, by user id. Each gets a chip beside their name. */
+  handsUp?: string[]
 }
 
 /**
@@ -37,6 +43,8 @@ export function RoomOccupantList({
   className,
   fill,
   onCollapse,
+  dense,
+  handsUp,
 }: RoomOccupantListProps) {
   const { t } = useLingui()
   const heading = title ?? t`In this room`
@@ -46,6 +54,7 @@ export function RoomOccupantList({
   const { openPanel } = useMessagingPanel()
 
   const canInitiateDm = auth.can('dm:initiate')
+  const { uiLang } = useLanguage()
 
   return (
     <div
@@ -55,7 +64,7 @@ export function RoomOccupantList({
         className
       )}
     >
-      <div className="flex items-center justify-between border-b border-ktip-sand-100 px-4 py-3">
+      <div data-panel-head className="flex items-center justify-between border-b border-ktip-sand-100 px-4 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           {heading}
         </h2>
@@ -94,9 +103,12 @@ export function RoomOccupantList({
             })
 
             return (
-              <li key={o.user_id} className="flex items-center gap-3 px-4 py-2.5">
+              <li
+                key={o.user_id}
+                className={cn('flex items-center gap-3 px-4 py-2.5', dense && isSelf && 'bg-ktip-ocean-50')}
+              >
                 <span className="relative shrink-0">
-                  <DiamondAvatar src={o.avatar_url} name={name} size={36} />
+                  <DiamondAvatar src={o.avatar_url} name={name} size={dense ? 28 : 36} />
                 </span>
 
                 <span className="min-w-0 flex-1">
@@ -104,11 +116,33 @@ export function RoomOccupantList({
                     <button
                       type="button"
                       onClick={() => openMember(o.user_id)}
-                      className="truncate text-sm font-medium text-ktip-sand-900 hover:text-ktip-ocean-600 hover:underline"
+                      className={cn(
+                        'truncate text-sm text-ktip-sand-900 hover:text-ktip-ocean-600 hover:underline',
+                        dense ? 'font-bold' : 'font-medium'
+                      )}
                     >
                       {name}
                     </button>
                     {isSelf && <span className="text-[10px] text-ktip-sand-400"><Trans>(you)</Trans></span>}
+                    {dense && o.lang && (
+                      <span
+                        title={LANGUAGE_NAMES[o.lang as keyof typeof LANGUAGE_NAMES] ?? o.lang}
+                        className={cn(
+                          'shrink-0 rounded-sm border px-1 text-[10px] font-extrabold uppercase tracking-[0.04em]',
+                          o.lang !== uiLang
+                            ? 'border-transparent bg-ktip-ocean-50 text-ktip-ocean-700'
+                            : 'border-ktip-sand-200 bg-ktip-sand-50 text-ktip-sand-600'
+                        )}
+                      >
+                        {o.lang}
+                      </span>
+                    )}
+                    {handsUp?.includes(o.user_id) && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ktip-sun-50 px-2 py-0.5 text-micro font-extrabold text-ktip-sun-800">
+                        <Hand size={11} aria-hidden="true" />
+                        <Trans>Hand up</Trans>
+                      </span>
+                    )}
                   </span>
                   <span className="flex items-center gap-2">
                     <AvailabilityDot availability={o.availability} size="sm" withLabel />
@@ -118,6 +152,11 @@ export function RoomOccupantList({
                       </span>
                     )}
                   </span>
+                  {dense && !isSelf && o.lang && o.lang !== uiLang && LANGUAGE_NAMES[o.lang as keyof typeof LANGUAGE_NAMES] && (
+                    <span className="block truncate text-xs text-ktip-sand-500">
+                      <Trans>Reads you in {LANGUAGE_NAMES[o.lang as keyof typeof LANGUAGE_NAMES]}</Trans>
+                    </span>
+                  )}
                   {o.status_note && (
                     <span className="block truncate text-xs italic text-ktip-sand-500">
                       “{o.status_note}”

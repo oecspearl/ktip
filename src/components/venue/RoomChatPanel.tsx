@@ -48,10 +48,10 @@ const BOTTOM_SLACK = 48
 const PIN_CLEARANCE = 64
 const FLASH_MS = 1_600
 
-/** Fixed navy/green in both themes, flipped at night like the send button. */
+/** A small ocean tag, as in the room design. */
 function HostBadge() {
   return (
-    <span className="shrink-0 rounded-full bg-brand-navy px-1.5 py-px text-[10px] font-bold uppercase tracking-wider text-brand-green dark:bg-brand-green dark:text-brand-navy">
+    <span className="shrink-0 rounded-sm bg-ktip-ocean-600 px-1.5 py-px text-[10px] font-extrabold uppercase tracking-[0.08em] text-white">
       <Trans>Host</Trans>
     </span>
   )
@@ -116,10 +116,9 @@ function RoomChatMessage({
     <div
       className={cn(
         'group flex items-start gap-2.5',
-        // A tinted card with a green rule: findable at a glance in a busy
-        // room, and the tokens flip with the theme so it reads in both.
-        host &&
-          '-mx-2 rounded-xl border-l-3 border-ktip-tropical-500 bg-ktip-tropical-50 p-2 transition-shadow duration-500',
+        // An ocean-tinted row: findable at a glance in a busy room, and the
+        // tokens flip with the theme so it reads in both.
+        host && '-mx-2 rounded-control bg-ktip-ocean-50 p-2 transition-shadow duration-500',
         flash && 'ring-2 ring-ktip-sun-400'
       )}
     >
@@ -131,7 +130,7 @@ function RoomChatMessage({
             type="button"
             onClick={() => message.author_id && onOpenMember(message.author_id)}
             className={cn(
-              'min-w-0 truncate text-xs font-semibold hover:text-ktip-ocean-600 hover:underline',
+              'min-w-0 truncate text-xs font-bold hover:text-ktip-ocean-600 hover:underline',
               host ? 'text-ktip-sand-900' : 'text-ktip-sand-800'
             )}
           >
@@ -152,31 +151,33 @@ function RoomChatMessage({
             'whitespace-pre-wrap break-words text-sm text-ktip-sand-700 transition-opacity',
             pending && 'opacity-60'
           )}
-          // So a screen reader pronounces a French message with a French voice
-          // rather than reading it as mangled English.
-          lang={showSource ? from : undefined}
         >
-          <LinkedText
-            text={showSource ? source : text}
-            linkClassName="text-ktip-ocean-600"
-          />
+          <LinkedText text={text} linkClassName="text-ktip-ocean-600" />
         </p>
 
         {translated && (
           <button
             type="button"
             onClick={() => setShowSource((value) => !value)}
-            className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-ktip-sand-400 hover:text-ktip-ocean-600 hover:underline"
+            aria-expanded={showSource}
+            className="mt-0.5 inline-flex items-center gap-1 text-left text-micro font-bold text-ktip-sand-500 hover:text-ktip-ocean-600"
           >
-            <Languages size={11} aria-hidden="true" />
+            <Languages size={12} className="shrink-0" aria-hidden="true" />
+            {/* The endonym, not "French": it is the one label a reader who
+                cannot read the surrounding language will still recognise. */}
             {showSource ? (
-              <Trans>Show translation</Trans>
+              <Trans>Translated from {LANGUAGE_NAMES[from]} · Hide original</Trans>
             ) : (
-              // The endonym, not "French": it is the one label a reader who
-              // cannot read the surrounding language will still recognise.
               <Trans>Translated from {LANGUAGE_NAMES[from]} · Show original</Trans>
             )}
           </button>
+        )}
+        {translated && showSource && (
+          // The translation stays; what was typed sits under it. lang: so a
+          // screen reader reads a French message with a French voice.
+          <p lang={from} className="whitespace-pre-wrap break-words text-xs italic text-ktip-sand-500">
+            {source}
+          </p>
         )}
       </div>
 
@@ -216,32 +217,25 @@ function PinnedHostMessage({
   const name = message.author?.display_name || t`Host`
 
   return (
-    <div className="absolute inset-x-2 top-2 z-raised flex items-center rounded-xl border border-ktip-tropical-200 border-l-3 border-l-ktip-tropical-500 bg-ktip-tropical-50 shadow-card">
+    <div className="mx-3 mt-3 flex shrink-0 items-start rounded-control bg-ktip-ocean-50">
       <button
         type="button"
         onClick={onJump}
         title={t`Go to this message`}
-        className="flex min-w-0 flex-1 items-center gap-2 rounded-l-xl py-2 pl-3 pr-1 text-left"
+        className="flex min-w-0 flex-1 flex-col gap-1 rounded-control px-3 py-2.5 text-left"
       >
-        <Pin size={13} className="shrink-0 text-ktip-tropical-700" aria-hidden="true" />
-        <span className="sr-only">
-          <Trans>Pinned host message.</Trans>
+        <span className="flex items-center gap-1.5 text-micro font-extrabold uppercase tracking-[0.08em] text-ktip-ocean-700">
+          <Pin size={12} className="shrink-0" aria-hidden="true" />
+          <Trans>Pinned by {name}</Trans>
         </span>
-        <span className="max-w-[40%] shrink-0 truncate text-xs font-semibold text-ktip-sand-900">
-          {name}
-        </span>
-        <HostBadge />
-        <span className="min-w-0 flex-1 truncate text-xs text-ktip-sand-700">{text}</span>
-        <span className="shrink-0 text-[10px] text-ktip-sand-500">
-          {formatRelativeTime(message.created_at)}
-        </span>
+        <span className="line-clamp-3 break-words text-sm text-ktip-sand-900">{text}</span>
       </button>
       <button
         type="button"
         onClick={onDismiss}
         aria-label={t`Hide pinned message`}
         title={t`Hide`}
-        className="icon-hit mr-1 shrink-0 rounded-lg p-1 text-ktip-sand-500 hover:bg-ktip-tropical-100 hover:text-ktip-sand-900"
+        className="icon-hit mr-1 mt-1 shrink-0 rounded-lg p-1 text-ktip-sand-500 hover:bg-ktip-ocean-100 hover:text-ktip-sand-900"
       >
         <X size={13} aria-hidden="true" />
       </button>
@@ -424,7 +418,7 @@ export function RoomChatPanel({
         </h2>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {pinned && (
           <PinnedHostMessage
             message={pinned}
@@ -476,7 +470,7 @@ export function RoomChatPanel({
           className="flex items-center gap-2 border-t border-ktip-sand-100 px-3 py-2.5"
         >
           <label htmlFor={`room-chat-${room.id}`} className="sr-only">
-            <Trans>Message {room.name}</Trans>
+            <Trans>Message the room</Trans>
           </label>
           <EmojiPickerButton
             className="shrink-0"
@@ -487,7 +481,7 @@ export function RoomChatPanel({
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={t`Message ${room.name}…`}
+            placeholder={t`Message the room`}
             maxLength={4000}
             // 16px on touch: iOS zooms the page into any smaller field on focus.
             className="flex-1 rounded-lg border border-ktip-sand-200 bg-ktip-cream px-3 py-2 text-sm pointer-coarse:text-body text-ktip-sand-900 placeholder:text-ktip-sand-400 focus:border-ktip-ocean-400 focus:outline-hidden focus:ring-2 focus:ring-ktip-ocean-200"
@@ -501,6 +495,12 @@ export function RoomChatPanel({
             <Send size={16} aria-hidden="true" />
           </button>
         </form>
+      ) : null}
+      {canPost ? (
+        <p className="flex items-center gap-1.5 border-t border-ktip-sand-100 px-3.5 py-2.5 text-xs text-ktip-sand-500">
+          <Languages size={14} className="shrink-0" aria-hidden="true" />
+          <Trans>Messages show in your language. Tap a translated one to see the original.</Trans>
+        </p>
       ) : (
         <p className="border-t border-ktip-sand-100 px-4 py-3 text-xs text-ktip-sand-500">
           <Trans>You are watching this room. Spectators can read chat but not post.</Trans>

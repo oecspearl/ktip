@@ -6,6 +6,7 @@ import { useVenueRoster, useVenueSession } from '../hooks/useVenue'
 import { useVenueRooms } from '../hooks/useVenueRooms'
 import { useVenuePresence } from '../hooks/useVenuePresence'
 import type { EventVenueMember } from '../types'
+import { useLanguage } from '../i18n/LanguageContext'
 
 /**
  * One presence channel per venue *visit*, not per page.
@@ -61,6 +62,7 @@ export function VenuePresenceProvider({ children }: { children: ReactNode }) {
     return rooms?.find((r) => r.key === key)?.id ?? null
   }, [roomMatch?.params.roomKey, rooms])
 
+  const { uiLang } = useLanguage()
   const me = useMemo(
     () =>
       membership && auth.user
@@ -70,9 +72,10 @@ export function VenuePresenceProvider({ children }: { children: ReactNode }) {
             avatar_url: auth.profile?.avatar_url ?? null,
             role: membership.role,
             team_id: null,
+            lang: uiLang,
           }
         : null,
-    [membership, auth.user, auth.profile]
+    [membership, auth.user, auth.profile, uiLang]
   )
 
   const presence = useVenuePresence({ eventId, me, roomId, roster })

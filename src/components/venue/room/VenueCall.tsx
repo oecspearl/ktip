@@ -10,7 +10,7 @@ import {
   type TrackReference,
   type TrackReferenceOrPlaceholder,
 } from '@livekit/components-react'
-import { Track } from 'livekit-client'
+import { Track, type LocalParticipant } from 'livekit-client'
 import '@livekit/components-styles'
 import { PhoneCall, Presentation, ScreenShare } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
@@ -324,8 +324,25 @@ function PresentLayout({
   const showColumn = !columnHidden && others.length > 0
   const name = screen.participant.isLocal ? t`You` : screen.participant.name || screen.participant.identity
 
+  const mine = screen.participant.isLocal && !isBoard
+
   return (
     <div className={cn('@container', fill && 'flex min-h-0 flex-1 flex-col')}>
+      {mine && (
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-control bg-ktip-tropical-400/12 px-3.5 py-2.5 text-micro font-bold text-white">
+          <ScreenShare size={14} className="shrink-0 text-ktip-tropical-300" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <Trans>Everyone sees your screen large. Your camera sits in the corner so they can still see you.</Trans>
+          </span>
+          <button
+            type="button"
+            onClick={() => void (screen.participant as LocalParticipant).setScreenShareEnabled(false)}
+            className="shrink-0 rounded-control bg-red-600 px-2.5 py-1 font-extrabold text-white hover:bg-red-700"
+          >
+            <Trans>Stop sharing</Trans>
+          </button>
+        </div>
+      )}
       <div className={cn('grid gap-2', showColumn && '@2xl:grid-cols-[minmax(0,1fr)_10.5rem]', fill && 'min-h-0 flex-1')}>
         <div
           className={cn(
@@ -351,6 +368,10 @@ function PresentLayout({
           {presenter && (
             <div className="absolute bottom-3 right-3 z-raised aspect-[4/3] w-[24%] max-w-56 overflow-hidden rounded-control shadow-card ring-2 ring-white/90 @max-2xl:bottom-auto @max-2xl:right-2 @max-2xl:top-2 @max-2xl:w-[30%]">
               <CallTile trackRef={presenter} avatarSize={36} className="h-full w-full" />
+              <span className="pointer-events-none absolute right-1.5 top-1.5 inline-flex h-5 items-center gap-1 rounded-sm bg-brand-green px-1.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-brand-navy">
+                <ScreenShare size={10} aria-hidden="true" />
+                <Trans>Presenting</Trans>
+              </span>
             </div>
           )}
           <CaptionOverlay className="@2xl:left-3 @2xl:right-[calc(min(24%,14rem)+1.5rem)]" />
@@ -400,12 +421,15 @@ function SpotlightLayout({ cameras, fill }: { cameras: TrackReferenceOrPlacehold
  * Everyone but the main picture. Beside it on a wide call, matching its height
  * and scrolling inside; under it as a strip on a narrow one.
  */
+/** Faces beside the main picture before the rest fold into a "+N". */
+const SIDE_COLUMN_MAX = 6
+
 function SideColumn({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
   const { t } = useLingui()
   return (
     <div className="relative h-24 @2xl:h-auto" aria-label={t`Everyone else in the call`}>
       <div className="absolute inset-0 flex gap-2 overflow-auto @2xl:flex-col">
-        {tracks.map((track) => (
+        {tracks.slice(0, SIDE_COLUMN_MAX).map((track) => (
           <CallTile
             key={tileKey(track)}
             trackRef={track}
@@ -413,6 +437,11 @@ function SideColumn({ tracks }: { tracks: TrackReferenceOrPlaceholder[] }) {
             className="aspect-video h-full shrink-0 @2xl:h-auto @2xl:w-full"
           />
         ))}
+        {tracks.length > SIDE_COLUMN_MAX && (
+          <div className="flex aspect-video h-full shrink-0 items-center justify-center rounded-control border border-dashed border-white/12 bg-white/6 text-sm font-extrabold text-white/74 @2xl:h-auto @2xl:w-full">
+            +{tracks.length - SIDE_COLUMN_MAX}
+          </div>
+        )}
       </div>
     </div>
   )
