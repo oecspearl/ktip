@@ -65,6 +65,12 @@ const LANG_NAME: Record<UiLang, MessageDescriptor> = {
 const HOLD_MS = 7_000
 /** About two lines of subtitle. Older words scroll off the front. */
 const MAX_SUBTITLE_CHARS = 160
+/**
+ * How long a line in another language is held back for its translation. Shown
+ * at once, it flashed up in the speaker's language and then flipped. After
+ * this it shows as spoken, so a failed translation never hides the words.
+ */
+const TRANSLATION_WAIT_MS = 2_500
 
 interface CallCaptionsValue {
   language: CallLanguage
@@ -321,18 +327,28 @@ export function CaptionOverlay({
   band?: boolean
 }) {
   const { t } = useLingui()
-  const { live, subs, voiceOn, language, micOn, micProblem, canPublish } = useCallCaptions()
+  const { live, subs, voiceOn, language, micOn, micProblem, canPublish, translationAllowed } = useCallCaptions()
   const { reads, foreign, along, own } = language
   // My own words when I have them on. Someone in my language only when I
   // asked to read along; someone in another one unless I chose their original.
-  const lines = useMemo(
+  const wanted = useMemo(
     () =>
       live.captions.filter((caption) =>
         caption.own ? own : showsLine(caption.lang, reads, foreign, along)
       ),
     [live.captions, reads, foreign, along, own]
   )
-  const now = useNow(subs && lines.length > 0)
+  const now = useNow(subs && wanted.length > 0)
+  // Someone else's line in another language waits for its translation.
+  const lines = wanted.filter(
+    (caption) =>
+      caption.own ||
+      caption.lang === reads ||
+      caption.translated ||
+      caption.plain ||
+      !translationAllowed ||
+      Date.now() - caption.at >= TRANSLATION_WAIT_MS
+  )
   const notice = useSubtitleNotice(subs, band)
 
   if (!subs) return null
@@ -783,6 +799,9 @@ export function CallDebug() {
   const theirs = live.captions.filter((caption) => !caption.own)
   const from = [...new Set(theirs.map((caption) => caption.name || caption.identity.slice(0, 8)))].join(', ')
   const lastTheirs = theirs[theirs.length - 1]
+  const synth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null
+  const voiceCount = synth ? synth.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(language.reads)).length : 0
+  const speakingNow = synth ? synth.speaking : false
   const sentTo = lastMine ? Object.keys(lastMine.variants).join(', ') : ''
   const roster = [...language.roster.entries()]
   const volumes = [...mix.entries()]
@@ -792,6 +811,7 @@ export function CallDebug() {
         `STEP 1 my own subtitles ${language.own ? 'on' : 'off'}: mic ${micOn}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, error ${live.error ?? 'none'}, heard ${lastMine ? `"${lastMine.text.slice(0, 60)}"` : 'nothing yet'}`,
         `STEP 2 lines in the last 45 s: sent ${live.captions.length - theirs.length} to ${audience.total} following me, received ${theirs.length}${from ? ` from ${from}` : ''}`,
         `STEP 3 translation: mine go out in [${audience.targets.join(', ') || 'no other language'}], last one translated into [${sentTo || 'none'}], problem ${live.translationIssue ?? 'none'}; theirs: ${lastTheirs ? `last was ${lastTheirs.lang}${lastTheirs.translated ? `, shown in ${language.reads}` : lastTheirs.lang === language.reads ? ', my language' : ', NOT translated'}` : 'none yet'}`,
+        `STEP 4 voice ${value.voiceOn ? 'on' : 'off'}: this device has ${voiceCount} ${language.reads} voice(s), speaking now ${speakingNow}`,
         `me: speaks ${language.speaks}, reads ${language.reads}, foreign ${language.foreign}, along ${language.along}, subs ${subs}, paused ${language.paused}, mic ${micOn}${micProblem ? ` (${micProblem})` : ''}`,
         `room translation ${translationAllowed ? 'on' : 'off'}; notice ${language.notice ? `${language.notice.name} (${language.notice.speaks})` : 'none'}`,
         `their voices: ${volumes.map(([id, entry]) => `${id.slice(0, 8)} vol ${entry.volume} ${entry.reason}`).join(' | ') || 'nobody'}`,
