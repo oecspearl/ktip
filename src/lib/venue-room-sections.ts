@@ -75,6 +75,7 @@ export type RoomSectionId =
   | 'announce_all'
   | 'lineup'
   | 'on_next'
+  | 'ops_alerts'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -496,6 +497,15 @@ export const SECTIONS: RoomSectionDef[] = [
     order: 38,
   },
   // Migration 213. Opt-in until it is live everywhere.
+  {
+    id: 'ops_alerts',
+    label: msg`Alerts`,
+    blurb: msg`For organisers: a long help line, kit run out, a stage running late.`,
+    slot: 'aside',
+    roles: ['organizer'],
+    defaultFor: [],
+    order: 39,
+  },
   {
     id: 'lineup',
     label: msg`Lineup`,

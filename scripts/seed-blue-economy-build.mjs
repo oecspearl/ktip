@@ -223,6 +223,7 @@ const ROOMS = [
     description: 'A small room for one team. This one belongs to Team Mangrove.',
     sections: sec(
       call('Pod call'),
+      'focus_timer',
       body('objectives', 'Goal for this session: co-op database connected.\n\nToday: sign-up works on phones. Next: connect the co-op database and test with someone from the Help Desk before five.\n\nQuestions for the mentor: do we need consent text in Spanish and English?'),
       'chat',
       'occupants'
@@ -291,7 +292,7 @@ const ROOMS = [
   R(17, 4, 'organiser-hq', 'Organiser HQ', 'breakout', 'ops', [8, 6], '#041E42', 1.2, {
     description: 'Headcount, help requests and free-tier usage, live.',
     allowed_roles: ['organizer'],
-    sections: sec('host_controls', call('Ops call'), 'organiser_ops', 'announce_all', tab('chat', 'Ops chat'), 'occupants'),
+    sections: sec('host_controls', call('Ops call'), 'organiser_ops', 'announce_all', tab('chat', 'Ops chat'), 'ops_alerts', 'occupants'),
   }),
   R(18, 4, 'green-room', 'Green Room', 'breakout', 'lounge', [7, 5], '#041E42', 1, {
     description: 'Speakers check their setup before going on stage.',
@@ -392,10 +393,10 @@ const TEAMS = [
 
 // Coralline's Homebase, tab by tab.
 const TASKS = [
-  ['French SMS template', 'todo', 'luc', 'Due today'],
-  ['Record backup demo video', 'todo', 'jaden', 'Due 17:30'],
-  ['Map legend and colours', 'doing', 'tanisha', 'Due 16:00'],
-  ['Buoy CSV parser', 'doing', 'you', 'Due 16:30'],
+  ['French SMS template', 'todo', 'luc', '17:59'],
+  ['Record backup demo video', 'todo', 'jaden', '17:30'],
+  ['Map legend and colours', 'doing', 'tanisha', '16:00'],
+  ['Buoy CSV parser', 'doing', 'you', '16:30'],
   ['Twilio sandbox number', 'done', 'jaden', null],
   ['Heat map', 'done', 'tanisha', null],
 ]
@@ -485,11 +486,13 @@ const COMMONS = [
 // Coffee tables. The prototype names each table's topic; the database has no
 // topic, so the tables come out as Table 1 to 4.
 const TABLES = [
-  ['jaden', 'luc', 'lucia', 'you'], // Ocean data
-  ['shem', 'aaliyah'], // Payments for co-ops
-  ['omari', 'keisha', 'devon'], // Hardware and sensors
-  ['tanisha'], // First hackathon
+  ['jaden', 'luc', 'lucia', 'you'],
+  ['shem', 'aaliyah'],
+  ['omari', 'keisha', 'devon'],
+  ['tanisha'],
 ]
+// What each table talks about (214).
+const TABLE_TOPICS = ['Ocean data', 'Payments for co-ops', 'Hardware and sensors', 'First hackathon']
 
 // ---------------------------------------------------------------- entries
 // In running order on the Showcase Stage, so ReefWatch is entry 3.
@@ -646,8 +649,7 @@ const NOT_SEEDED = [
   'The US$5,000 prize panel: no field (the prize is in the room description)',
   'Kit reservations are one per person per item, so the taken counts are made up of the cast (needs migration 212)',
   'Showcase: 6 slots, not 12; the call title is set by hand per room (needs migration 213 for the lineup)',
-  'Focus timer goal and minutes left: the timer lives only in the browser',
-  'Coffee table topics: no column (tables are Table 1 to 4)',
+  'Focus timer goal: the timer lives in the browser; "Heads down until" shows only for people with the timer running',
   'Pinned chat message: the room pins the newest host message itself; the pinned text is seeded as a host message',
   'Homebase whiteboard notes, pitch doc and the three files: need a tldraw snapshot, a Yjs document and Storage uploads',
   'Homebase Links tab: coralline/reefwatch is not a real GitHub repository, so no commits show',
@@ -821,8 +823,17 @@ async function main() {
     const T = teamId(1)
     await admin.from('team_tasks').delete().eq('team_id', T)
     const { error: taskErr } = await admin.from('team_tasks').insert(
-      TASKS.map(([title, status, who, notes], i) => ({ team_id: T, title, status, assignee_id: ids[who], notes, position: i + 1, created_by: ids.jaden }))
+      TASKS.map(([title, status, who], i) => ({ team_id: T, title, status, assignee_id: ids[who], position: i + 1, created_by: ids.jaden }))
     )
+    // Due times (214), when the column exists.
+    for (const [i, [, , , due]] of TASKS.entries()) {
+      if (!due) continue
+      const { error } = await admin.from('team_tasks').update({ due_at: at(due) }).eq('team_id', T).eq('position', i + 1)
+      if (error) {
+        say('task due times', error)
+        break
+      }
+    }
     say('tasks', taskErr, `${TASKS.length} board tasks`)
 
     await admin.from('team_milestones').delete().eq('team_id', T)
@@ -967,6 +978,13 @@ async function main() {
         TABLES.flatMap((seats, i) => seats.map((k) => ({ table_id: tableId(i + 1), event_id: EVENT_ID, user_id: ids[k] })))
       )
       say('coffee seats', sErr, `${TABLES.length} coffee tables, ${TABLES.flat().length} seats`)
+      for (const [i, topic] of TABLE_TOPICS.entries()) {
+        const { error: tErr } = await admin.from('venue_coffee_tables').update({ topic }).eq('id', tableId(i + 1))
+        if (tErr) {
+          say('table topics', tErr)
+          break
+        }
+      }
     }
   }
 

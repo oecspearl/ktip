@@ -49,6 +49,7 @@ import { RoomQuestionsPanel } from './RoomQuestionsPanel'
 import { HelpQueuePanel } from './HelpQueuePanel'
 import { AnnounceAllPanel, BookingSlotsPanel, KitPanel, LibraryPanel } from './RoomToolPanels'
 import { LineupPanel, OnNextPanel } from './StageLineupPanels'
+import { OpsAlertsPanel } from './OpsAlertsPanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -554,6 +555,9 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'ops_alerts':
+      return <OpsAlertsPanel eventId={event.id} occupants={occupants} />
 
     case 'lineup':
       return <LineupPanel event={event} room={room} isHost={isHost} />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { useVenuePresenceContext } from '../../../contexts/VenuePresenceContext'
 
 const LENGTHS = [
   { label: msg`25 min`, ms: 25 * 60 * 1000 },
@@ -25,6 +26,20 @@ export function FocusTimerPanel() {
   const [paused, setPaused] = useState<number | null>(null)
   const [, tick] = useState(0)
   const doneRef = useRef(false)
+  // Your status line says when you are back, so the room's people list shows
+  // how long everyone has left. Cleared when the timer stops.
+  const { presence } = useVenuePresenceContext()
+  const setNote = presence.setStatusNote
+  const until = endsAt !== null && paused === null ? endsAt : null
+  useEffect(() => {
+    if (until === null) {
+      setNote(null)
+      return
+    }
+    const time = i18n.date(new Date(until), { hour: '2-digit', minute: '2-digit' })
+    setNote(t`Heads down until ${time}`)
+  }, [until, setNote, t, i18n])
+  useEffect(() => () => setNote(null), [setNote])
 
   useEffect(() => {
     if (endsAt === null || paused !== null) return

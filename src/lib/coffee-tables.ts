@@ -15,6 +15,8 @@ export interface CoffeePerson {
 export interface CoffeeTable {
   id: string
   ends_at: string
+  /** What the table is talking about, set by an organiser (214). */
+  topic: string | null
   people: CoffeePerson[]
 }
 
@@ -58,6 +60,7 @@ export function parseCoffeeState(raw: unknown): CoffeeState {
         .map((t) => ({
           id: t.id as string,
           ends_at: typeof t.ends_at === 'string' ? t.ends_at : '',
+          topic: typeof t.topic === 'string' && t.topic.trim() ? t.topic.trim() : null,
           people: asPeople(t.people),
         }))
     : []

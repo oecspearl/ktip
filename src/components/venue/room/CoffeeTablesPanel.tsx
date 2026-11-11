@@ -170,7 +170,7 @@ function TableCard({
         mine ? 'border-ktip-tropical-700 ring-1 ring-ktip-tropical-700' : 'border-ktip-sand-200'
       )}
     >
-      <span className="text-sm font-extrabold text-ktip-sand-900">{t`Table ${number}`}</span>
+      <span className="max-w-full break-words text-sm font-extrabold text-ktip-sand-900">{table.topic || t`Table ${number}`}</span>
       <div className="relative h-30 w-30 max-w-full" role="img" aria-label={seated}>
         {SEAT_ANGLES.map((angle, i) => {
           const person = table.people[i]

@@ -45,7 +45,7 @@ const ROOM_TAB: Record<VenueRoomKind, RoomSectionId[]> = {
   networking: [],
   help_desk: ['mentors_on_duty'],
   team: ['announcements'],
-  breakout: ['announcements'],
+  breakout: ['ops_alerts', 'announcements'],
 }
 
 /** What this kind of room is for, first visible one wins. */

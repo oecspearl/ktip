@@ -20,6 +20,8 @@ interface Task {
   status: Status
   assignee_id: string | null
   position: number
+  /** When it is due (214). Absent before the migration. */
+  due_at?: string | null
 }
 
 const COLUMNS: Array<{ id: Status; label: MessageDescriptor }> = [
@@ -58,7 +60,7 @@ export function TeamTaskBoard({ team, ping }: Props) {
     queryFn: async (): Promise<Task[]> => {
       const { data, error } = await (supabase as any)
         .from('team_tasks')
-        .select('id, team_id, title, status, assignee_id, position')
+        .select('*') // * so due_at (214) comes when it exists and nothing breaks before
         .eq('team_id', team.id)
         .order('position', { ascending: true })
       if (error) throw error
@@ -171,6 +173,11 @@ export function TeamTaskBoard({ team, ping }: Props) {
                 }`}
               >
                 <p className="text-sm font-semibold text-ktip-sand-900">{task.title}</p>
+                {task.due_at && (
+                  <p className="text-xs font-bold text-ktip-sand-500">
+                    <Trans>Due {i18n.date(new Date(task.due_at), { weekday: 'short', hour: '2-digit', minute: '2-digit' })}</Trans>
+                  </p>
+                )}
                 <div className="flex items-center gap-1.5">
                   <select
                     aria-label={t`Assign ${task.title}`}
