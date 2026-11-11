@@ -46,6 +46,7 @@ import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 import { TeamShelf } from './homebase/TeamShelf'
 import { RunOfShowPanel } from './RunOfShowPanel'
 import { RoomQuestionsPanel } from './RoomQuestionsPanel'
+import { HelpQueuePanel } from './HelpQueuePanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -551,6 +552,9 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'help_queue':
+      return <HelpQueuePanel room={room} viewerRole={viewerRole} isHost={isHost} canPost={canPost} occupants={occupants} />
 
     case 'qa':
       return <RoomQuestionsPanel room={room} canPost={canPost} isHost={isHost} fill={fill} />

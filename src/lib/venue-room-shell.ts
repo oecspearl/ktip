@@ -56,7 +56,7 @@ const TOOL: Record<VenueRoomKind, RoomSectionId[]> = {
   judging: ['judging_console', 'results_board'],
   sponsor_booth: ['resources', 'faq'],
   networking: ['coffee_tables', 'team_finder', 'collab_commons'],
-  help_desk: ['help_nudge', 'submission_desk', 'faq'],
+  help_desk: ['help_queue', 'help_nudge', 'submission_desk', 'faq'],
   team: ['team_workspace', 'submission_desk'],
   breakout: ['organiser_ops', 'caption_test', 'quest_board', 'collab_commons', 'focus_timer', 'objectives'],
 }

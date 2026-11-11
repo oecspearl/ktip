@@ -68,6 +68,7 @@ export type RoomSectionId =
   | 'venue_headcount'
   | 'run_of_show'
   | 'qa'
+  | 'help_queue'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -453,6 +454,15 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['main_hall', 'help_desk'],
     order: 80,
+  },
+  {
+    id: 'help_queue',
+    label: msg`Help line`,
+    blurb: msg`People say what they need and wait in line. Mentors pick them up.`,
+    slot: 'main',
+    // Opt-in until migration 211 is live everywhere, then the help desk default.
+    defaultFor: [],
+    order: 34,
   },
   {
     id: 'qa',
