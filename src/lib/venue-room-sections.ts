@@ -67,6 +67,7 @@ export type RoomSectionId =
   | 'wayfinding'
   | 'venue_headcount'
   | 'run_of_show'
+  | 'qa'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -452,6 +453,15 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['main_hall', 'help_desk'],
     order: 80,
+  },
+  {
+    id: 'qa',
+    label: msg`Q&A`,
+    blurb: msg`Questions for the speaker. Everyone upvotes; a host marks them answered.`,
+    slot: 'aside',
+    // Opt-in until migration 210 is live everywhere, then a hall and stage default.
+    defaultFor: [],
+    order: 36,
   },
   {
     id: 'run_of_show',

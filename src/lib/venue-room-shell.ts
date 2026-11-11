@@ -35,8 +35,8 @@ const DOCK_BASE: RoomSectionId[] = ['chat', 'occupants']
 
 /** The one dock tab each kind of room adds, first visible one wins. */
 const ROOM_TAB: Record<VenueRoomKind, RoomSectionId[]> = {
-  main_hall: ['hand_queue', 'announcements'],
-  stage: ['hand_queue', 'announcements'],
+  main_hall: ['qa', 'hand_queue', 'announcements'],
+  stage: ['qa', 'hand_queue', 'announcements'],
   workshop: ['hand_queue', 'resources'],
   judging: ['judges_present'],
   sponsor_booth: ['sponsor_links'],

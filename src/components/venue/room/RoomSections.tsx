@@ -45,6 +45,7 @@ import { useLingui } from '@lingui/react/macro'
 import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
 import { TeamShelf } from './homebase/TeamShelf'
 import { RunOfShowPanel } from './RunOfShowPanel'
+import { RoomQuestionsPanel } from './RoomQuestionsPanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -180,6 +181,8 @@ export function RoomSections({
         return room.kind === 'team' ? t`Team chat` : room.kind === 'judging' ? t`Judges’ chat` : t`Chat`
       case 'occupants':
         return room.kind === 'team' ? t`Members` : t`People`
+      case 'qa':
+        return t`Q&A`
       case 'hand_queue':
         return t`Hands`
       case 'mentors_on_duty':
@@ -548,6 +551,9 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'qa':
+      return <RoomQuestionsPanel room={room} canPost={canPost} isHost={isHost} fill={fill} />
 
     case 'run_of_show':
       return <RunOfShowPanel eventId={event.id} />

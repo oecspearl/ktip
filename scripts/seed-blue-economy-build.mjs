@@ -179,7 +179,7 @@ const ROOMS = [
   R(2, 0, 'main-hall', 'Main Hall', 'main_hall', 'theatre', [9, 8], '#2A5788', 1.75, {
     description: 'Opening talks, announcements and the closing ceremony.',
     audio_mode: 'moderated',
-    sections: sec('host_controls', call('Day two opening'), 'run_of_show', 'challenge_brief', 'countdown', 'wayfinding', 'chat', 'occupants', 'announcements'),
+    sections: sec('host_controls', call('Day two opening'), 'run_of_show', 'challenge_brief', 'countdown', 'wayfinding', 'chat', 'qa', 'occupants', 'announcements'),
   }),
   R(3, 0, 'networking-lounge', 'Networking Lounge', 'networking', 'cafe', [8, 6], '#E6AC09', 1.25, {
     description: 'Sit at a table, meet people, find teammates.',
@@ -276,7 +276,7 @@ const ROOMS = [
     description: 'Every team demos for five minutes. Vote for People’s Choice.',
     audio_mode: 'listen_only',
     max_publishers: 6,
-    sections: sec('host_controls', call('Team Coralline · 3 of 5'), 'peoples_choice', 'showcase_gallery', 'chat', 'hand_queue', 'occupants'),
+    sections: sec('host_controls', call('Team Coralline · 3 of 5'), 'peoples_choice', 'showcase_gallery', 'chat', 'qa', 'hand_queue', 'occupants'),
   }),
   R(15, 3, 'quest-board', 'Quest Board', 'breakout', 'podium', [6, 5], '#E6AC09', 1.2, {
     description: 'Small challenges for points. Points count toward the Spirit award.',
@@ -539,9 +539,18 @@ const CHAT = [
   [18, 'kemar', '18:50', 'Nadia, you are on after Mangrove. Test your screen share now.'],
 ]
 
+// Q&A, as the design has it: question, who asked, upvotes, answered (210).
+const QUESTIONS = [
+  [2, 'Can teams of two enter?', 'lucia', 6, true],
+  [2, 'Will the buoy data stay online after the event?', 'luc', 4, false],
+  [2, 'Do judges see our code or only the demo?', 'jaden', 3, false],
+  [14, 'Does it work without mobile data?', 'aaliyah', 5, false],
+  [14, 'Who pays for the SMS?', 'omari', 3, false],
+]
+
 // What the prototype shows and the database cannot hold today.
 const NOT_SEEDED = [
-  'Q&A questions and upvotes (Main Hall, Showcase Stage): no table',
+  'Q&A vote counts of 18 / 12 / 9 and 11 / 7: 16 people, so the order is kept as 6 / 4 / 3 and 5 / 3 (needs migration 210)',
   'Help Desk queue: position, request text, tags, mentor assignment (only "needs help" status lines are seeded)',
   'Sponsor booking slots and the US$5,000 prize panel: no table (the prize is in the room description)',
   'Hardware Bench kit stock and reservations, bench bookings: no table (stock is written as room text)',
@@ -929,6 +938,32 @@ async function main() {
       }))
     )
     say('chat', error, `${CHAT.length} chat lines across ${new Set(CHAT.map((c) => c[0])).size} rooms`)
+  }
+
+  // ---- Q&A (210), when the tables exist
+  {
+    await admin.from('venue_room_questions').delete().eq('event_id', EVENT_ID)
+    const everyone = Object.keys(PEOPLE)
+    const rows = QUESTIONS.map(([room, text, who, , answered], i) => ({
+      id: uid(7, i + 1),
+      room_id: roomId(room),
+      event_id: EVENT_ID,
+      author_id: ids[who],
+      body: text,
+      lang: PEOPLE[who].lang,
+      answered_at: answered ? at('09:40') : null,
+      answered_by: answered ? ids.renee : null,
+      created_at: iso(new Date(at(room === 2 ? '09:32' : '19:14')).getTime() + i * 60_000),
+    }))
+    const { error } = await admin.from('venue_room_questions').insert(rows)
+    if (error) say('Q&A', error)
+    else {
+      const votes = QUESTIONS.flatMap(([, , who, n], i) =>
+        everyone.filter((k) => k !== who).slice(0, n).map((k) => ({ question_id: uid(7, i + 1), user_id: ids[k] }))
+      )
+      const { error: vErr } = await admin.from('venue_room_question_votes').insert(votes)
+      say('Q&A votes', vErr, `${QUESTIONS.length} questions, ${votes.length} upvotes`)
+    }
   }
 
   const { data: ev } = await admin.from('events').select('slug').eq('id', EVENT_ID).single()
