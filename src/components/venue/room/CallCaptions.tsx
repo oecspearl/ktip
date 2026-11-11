@@ -782,6 +782,8 @@ export function CallDebug() {
   const lastMine = [...live.captions].reverse().find((caption) => caption.own)
   const theirs = live.captions.filter((caption) => !caption.own)
   const from = [...new Set(theirs.map((caption) => caption.name || caption.identity.slice(0, 8)))].join(', ')
+  const lastTheirs = theirs[theirs.length - 1]
+  const sentTo = lastMine ? Object.keys(lastMine.variants).join(', ') : ''
   const roster = [...language.roster.entries()]
   const volumes = [...mix.entries()]
   return (
@@ -789,6 +791,7 @@ export function CallDebug() {
       {[
         `STEP 1 my own subtitles ${language.own ? 'on' : 'off'}: mic ${micOn}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, error ${live.error ?? 'none'}, heard ${lastMine ? `"${lastMine.text.slice(0, 60)}"` : 'nothing yet'}`,
         `STEP 2 lines in the last 45 s: sent ${live.captions.length - theirs.length} to ${audience.total} following me, received ${theirs.length}${from ? ` from ${from}` : ''}`,
+        `STEP 3 translation: mine go out in [${audience.targets.join(', ') || 'no other language'}], last one translated into [${sentTo || 'none'}], problem ${live.translationIssue ?? 'none'}; theirs: ${lastTheirs ? `last was ${lastTheirs.lang}${lastTheirs.translated ? `, shown in ${language.reads}` : lastTheirs.lang === language.reads ? ', my language' : ', NOT translated'}` : 'none yet'}`,
         `me: speaks ${language.speaks}, reads ${language.reads}, foreign ${language.foreign}, along ${language.along}, subs ${subs}, paused ${language.paused}, mic ${micOn}${micProblem ? ` (${micProblem})` : ''}`,
         `room translation ${translationAllowed ? 'on' : 'off'}; notice ${language.notice ? `${language.notice.name} (${language.notice.speaks})` : 'none'}`,
         `their voices: ${volumes.map(([id, entry]) => `${id.slice(0, 8)} vol ${entry.volume} ${entry.reason}`).join(' | ') || 'nobody'}`,
