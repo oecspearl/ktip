@@ -238,7 +238,10 @@ export function useLiveCaptions({
         name: nameRef.current,
         ...(translatable ? {} : { plain: true }),
       }
-      publishRef.current(original, false)
+      // Reliable, like the language hello on the same call. The lossy channel
+      // delivered nothing between two devices on 2026-11-10 while reliable
+      // messages on the same call arrived; a subtitle a moment late beats none.
+      publishRef.current(original, true)
       merge(original, identityRef.current, true)
 
       const to = targetsRef.current.filter((lang) => lang !== spoken)
