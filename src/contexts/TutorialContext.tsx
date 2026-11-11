@@ -4,7 +4,6 @@ import {
   lazy,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -35,13 +34,6 @@ interface TutorialContextValue {
   startTutorial: (id: string) => void
   stopTutorial: () => void
   isTutorialCompleted: (id: string) => boolean
-  /**
-   * The tour the mounted page asked for, when one route shows different pages
-   * (a venue room by kind, the verification tab for a person or an
-   * organisation). The FAB prefers it over the route's own tour.
-   */
-  pageTourId: string | null
-  setPageTourId: (update: (current: string | null) => string | null) => void
 }
 
 const TutorialContext = createContext<TutorialContextValue | null>(null)
@@ -52,11 +44,6 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   // render time (and a frame where the overlay has an id but no steps).
   const [active, setActive] = useState<Tutorial | null>(null)
   const [completed, setCompleted] = useState<string[]>(() => getCompletedTutorials())
-  const [pageTourId, setPageTourIdState] = useState<string | null>(null)
-  const setPageTourId = useCallback(
-    (update: (current: string | null) => string | null) => setPageTourIdState(update),
-    []
-  )
 
   const startTutorial = useCallback((id: string) => {
     void import('../data/tutorials').then(({ getTutorialById }) => {
@@ -83,15 +70,8 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const activeTutorialId = active?.id ?? null
 
   const value = useMemo(
-    () => ({
-      activeTutorialId,
-      startTutorial,
-      stopTutorial,
-      isTutorialCompleted,
-      pageTourId,
-      setPageTourId,
-    }),
-    [activeTutorialId, startTutorial, stopTutorial, isTutorialCompleted, pageTourId, setPageTourId]
+    () => ({ activeTutorialId, startTutorial, stopTutorial, isTutorialCompleted }),
+    [activeTutorialId, startTutorial, stopTutorial, isTutorialCompleted]
   )
 
   return (
@@ -119,20 +99,4 @@ export function useTutorials(): TutorialContextValue {
   const ctx = useContext(TutorialContext)
   if (!ctx) throw new Error('useTutorials must be used within a TutorialProvider')
   return ctx
-}
-
-/**
- * Pick this page's tour while it is mounted, overriding the one its route maps
- * to. Pass null while the page does not know yet (data still loading) and the
- * route's own tour stands. The id must be registered in src/data/tutorials,
- * usually as a variant.
- */
-export function usePageTour(id: string | null | undefined): void {
-  const { setPageTourId } = useTutorials()
-  useEffect(() => {
-    if (!id) return
-    setPageTourId(() => id)
-    // Only clear our own claim: the next page may already have set its own
-    return () => setPageTourId((current) => (current === id ? null : current))
-  }, [id, setPageTourId])
 }

@@ -742,22 +742,7 @@ const REGISTRY: RegisteredTutorial[] = [
   },
 ]
 
-/**
- * Tours with no route of their own: variants a page picks with usePageTour
- * when one route renders different pages (a venue room by its kind, the
- * verification tab for a person or for an organisation).
- */
-const VARIANTS: Array<Tutorial & { id: TutorialId }> = []
-
-/**
- * Real routes with no tour. Without this list they would resolve to a
- * neighbour's tour, because `:param` takes anything: '/grants/new' matches
- * '/grants/:id'. tutorials.test.ts fails for any App.tsx route that lands on
- * another route's tour, so a new literal route goes here or gets a tour.
- */
-export const ROUTES_WITHOUT_TOUR: string[] = []
-
-export const tutorials = [...REGISTRY, ...VARIANTS].reduce(
+export const tutorials = REGISTRY.reduce(
   (acc, tutorial) => {
     acc[tutorial.id] = tutorial
     return acc
@@ -777,29 +762,10 @@ function matchesPattern(pattern: string, pathname: string): boolean {
   return p.every((seg, i) => (seg.startsWith(':') ? a[i].length > 0 : seg === a[i]))
 }
 
-/** How many segments of a pattern are literal: '/grants/new' 2, '/grants/:id' 1 */
-const literalSegments = (pattern: string) =>
-  pattern.split('/').filter((seg) => seg && !seg.startsWith(':')).length
-
-/**
- * The most specific matching pattern wins, so '/grants/new' beats
- * '/grants/:id' whatever their order. On a tie the earlier registry entry
- * wins, and a tour wins over a no-tour entry.
- */
 export function tutorialIdForPath(pathname: string): TutorialId | null {
   const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
-  let best: { id: TutorialId | null; score: number } | null = null
-  for (const t of REGISTRY) {
-    if (!matchesPattern(t.route, normalized)) continue
-    const score = literalSegments(t.route)
-    if (!best || score > best.score) best = { id: t.id, score }
-  }
-  for (const route of ROUTES_WITHOUT_TOUR) {
-    if (!matchesPattern(route, normalized)) continue
-    const score = literalSegments(route)
-    if (!best || score > best.score) best = { id: null, score }
-  }
-  return best?.id ?? null
+  const hit = REGISTRY.find((t) => matchesPattern(t.route, normalized))
+  return hit ? hit.id : null
 }
 
 /** Exported for the registry test, which checks specific-before-general ordering. */

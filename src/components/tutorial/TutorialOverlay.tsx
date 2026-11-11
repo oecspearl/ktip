@@ -34,8 +34,6 @@ const GAP = 24
 const MARGIN = 20
 /** A target still missing after this long is treated as stranded */
 const STRANDED_MS = 1500
-/** An optional step's target gets only this long: it may legitimately be absent */
-const OPTIONAL_MS = 300
 /** Comfort margin when scrolling a target into view */
 const COMFORT = 96
 
@@ -312,20 +310,14 @@ export function TutorialOverlay({ steps, onComplete, onExit }: TutorialOverlayPr
   // Stranded-step safety net — never leave the user on a black screen
   useEffect(() => {
     if (!step) return
-    const timer = window.setTimeout(
-      () => {
-        if (!findVisible(step.target)) {
-          // An optional step being absent is expected, so it skips quietly
-          if (!step.optional) {
-            console.warn(
-              `[tutorial] step ${index + 1}/${steps.length} target not found, skipping: ${step.target}`
-            )
-          }
-          advance()
-        }
-      },
-      step.optional ? OPTIONAL_MS : STRANDED_MS
-    )
+    const timer = window.setTimeout(() => {
+      if (!findVisible(step.target)) {
+        console.warn(
+          `[tutorial] step ${index + 1}/${steps.length} target not found, skipping: ${step.target}`
+        )
+        advance()
+      }
+    }, STRANDED_MS)
     return () => window.clearTimeout(timer)
   }, [step, index, steps.length, advance])
 
