@@ -668,7 +668,9 @@ async function main() {
       skills: PEOPLE[k].skills,
       looking_for_team: !!PEOPLE[k].lft,
       is_discoverable: true,
-      last_seen_at: new Date().toISOString(),
+      // The cast never comes online, and a row unseen for two minutes reads as
+      // offline. Dated to the venue closing, so they stay in their rooms.
+      last_seen_at: iso(DEADLINE + 21 * 24 * 3600_000),
     }))
     if (organiserId && !Object.values(ids).includes(organiserId)) {
       members.push({
