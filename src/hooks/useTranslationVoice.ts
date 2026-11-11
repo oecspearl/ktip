@@ -90,6 +90,11 @@ export function useTranslationVoice({
   const queue = useRef<QueuedLine[]>([])
   const busy = useRef(false)
   const slow = useRef<Set<string>>(loadSlow())
+  // One voice per language for the whole call. Picking afresh for every line
+  // let the voice change mid-call: a network voice measured slow on one line
+  // was swapped for a local one on the next, a woman's voice for a man's
+  // (2026-11-10). A slow voice is still remembered, for the next call.
+  const chosen = useRef(new Map<string, string>())
   // Whose translated line is playing, for the mixer. Null once the voice is quiet.
   const [reading, setReading] = useState<string | null>(null)
   const restoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -125,8 +130,13 @@ export function useTranslationVoice({
     const speakLang = langRef.current
     const utterance = new SpeechSynthesisUtterance(current.text)
     utterance.lang = speakLang
-    const voice = pickVoice(window.speechSynthesis.getVoices(), speakLang, slow.current)
-    if (voice) utterance.voice = voice
+    const voices = window.speechSynthesis.getVoices()
+    const kept = voices.find((candidate) => candidate.name === chosen.current.get(speakLang))
+    const voice = kept ?? pickVoice(voices, speakLang, slow.current)
+    if (voice) {
+      utterance.voice = voice
+      chosen.current.set(speakLang, voice.name)
+    }
     utterance.rate = 1.05
 
     const queuedAt = performance.now()
