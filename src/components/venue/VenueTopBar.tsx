@@ -1,9 +1,9 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { ArrowLeft, ChevronRight, Map as MapIcon, WifiOff } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronRight, Map as MapIcon, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { venuePath } from '../../lib/event-slug'
-import { IrisLink } from '../ui/IrisTransition'
+import { venuePath, venueRoomPath } from '../../lib/event-slug'
+import { IrisLink, useIrisTransition } from '../ui/IrisTransition'
 import { AvailabilityPicker } from './AvailabilityPicker'
 import { AvatarCluster } from './AvatarCluster'
 import { clockLeft, useNowUntil } from './room/judging/judging-time'
@@ -33,7 +33,15 @@ interface VenueTopBarProps {
    * Inside a room: the trail "Venue map / Event / Floor › Room" replaces the
    * plain back link (the room revamp's design, 2026-11-10).
    */
-  crumbs?: { floor: string | null; room: string }
+  crumbs?: {
+    floor: string | null
+    room: string
+    /** With the venue's rooms, the last crumb opens a list to change room from. */
+    roomKey?: string
+    rooms?: CrumbRoom[]
+    /** Floor names by level, for the list's headings. */
+    floors?: string[]
+  }
   /** Extra chrome (e.g. the organizer's "Edit the map" button), before the picker. */
   trailing?: ReactNode
   /** The floorplan page has no other h1; the room page keeps the default. */
@@ -52,6 +60,153 @@ interface VenueTopBarProps {
  * page. Someone who opened the room from a link has nowhere to go back to, so
  * for them it goes to the map.
  */
+interface CrumbRoom {
+  key: string
+  name: string
+  floor: number
+  sort: number
+  open: boolean
+}
+
+/**
+ * The last crumb, as a way to change room: "Ground › Networking Lounge" opens
+ * the venue's rooms by floor, and picking one goes there through the iris.
+ */
+function RoomSwitcher({
+  floor,
+  room,
+  roomKey,
+  rooms,
+  floors,
+  pathFor,
+}: {
+  floor: string | null
+  room: string
+  roomKey: string
+  rooms: CrumbRoom[]
+  floors: string[]
+  pathFor: (key: string) => string
+}) {
+  const { t } = useLingui()
+  const iris = useIrisTransition()
+  const menuId = useId()
+  const [open, setOpen] = useState(false)
+  const shell = useRef<HTMLDivElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: PointerEvent) => {
+      if (!shell.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      button.current?.focus()
+    }
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('keydown', onKey)
+    // Start on the room you are in, so the arrow keys move from there.
+    shell.current?.querySelector<HTMLElement>('[aria-current="page"]')?.focus()
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const levels = [...new Set(rooms.map((r) => r.floor))].sort((a, b) => a - b)
+  const go = (key: string) => {
+    setOpen(false)
+    if (key !== roomKey) void iris.navigate(pathFor(key))
+  }
+  // Up and down walk the list; Home and End jump to its ends.
+  const onMenuKey = (e: ReactKeyboardEvent) => {
+    const items = [...(shell.current?.querySelectorAll<HTMLElement>('[data-room-item]') ?? [])]
+    const at = items.indexOf(document.activeElement as HTMLElement)
+    const next =
+      e.key === 'ArrowDown' ? items[(at + 1) % items.length]
+      : e.key === 'ArrowUp' ? items[(at - 1 + items.length) % items.length]
+      : e.key === 'Home' ? items[0]
+      : e.key === 'End' ? items[items.length - 1]
+      : null
+    if (!next) return
+    e.preventDefault()
+    next.focus()
+  }
+
+  return (
+    <div ref={shell} className="relative min-w-0">
+      <button
+        ref={button}
+        type="button"
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={t`Change room. You are in ${room}`}
+        onClick={() => setOpen((on) => !on)}
+        className="inline-flex min-h-9 max-w-full items-center gap-1 rounded-control px-2 font-semibold text-ktip-sand-600 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-sand-900 aria-expanded:bg-ktip-sand-100 aria-expanded:text-ktip-sand-900"
+      >
+        {floor && (
+          <>
+            <span className="hidden truncate sm:inline">{floor}</span>
+            <ChevronRight size={13} className="hidden shrink-0 sm:inline" aria-hidden="true" />
+          </>
+        )}
+        <span className="truncate text-ktip-sand-900">{room}</span>
+        <ChevronDown size={14} className={cn('shrink-0 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="group"
+          aria-label={t`Rooms`}
+          onKeyDown={onMenuKey}
+          className="absolute left-0 top-full z-dropdown mt-1.5 max-h-[min(70svh,32rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-surface border border-ktip-sand-200 bg-ktip-cream py-1.5 shadow-card"
+        >
+          {levels.map((level) => (
+            <div key={level}>
+              {levels.length > 1 && (
+                <p className="px-3 pb-1 pt-2.5 text-micro font-extrabold uppercase tracking-[0.08em] text-ktip-sand-500">
+                  {floors[level] || t`Level ${level}`}
+                </p>
+              )}
+              <ul>
+                {rooms
+                  .filter((r) => r.floor === level)
+                  .sort((a, b) => a.sort - b.sort)
+                  .map((r) => {
+                    const here = r.key === roomKey
+                    return (
+                      <li key={r.key}>
+                        <button
+                          type="button"
+                          data-room-item
+                          aria-current={here ? 'page' : undefined}
+                          onClick={() => go(r.key)}
+                          className={cn(
+                            'flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm hover:bg-ktip-sand-100 focus-visible:bg-ktip-sand-100',
+                            here ? 'font-extrabold text-ktip-ocean-700' : 'font-medium text-ktip-sand-800'
+                          )}
+                        >
+                          <span className="min-w-0 flex-1 break-words">{r.name}</span>
+                          {!r.open && (
+                            <span className="shrink-0 text-xs font-medium text-ktip-sand-500">
+                              <Trans>Closed</Trans>
+                            </span>
+                          )}
+                          {here && <Check size={15} className="shrink-0" aria-hidden="true" />}
+                        </button>
+                      </li>
+                    )
+                  })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function RoomBackButton({ fallback }: { fallback: string }) {
   const { t } = useLingui()
   const navigate = useNavigate()
@@ -185,16 +340,34 @@ export function VenueTopBar({
             <li className="min-w-0">
               <TitleTag className="truncate font-bold text-ktip-sand-900">{eventTitle}</TitleTag>
             </li>
-            <li aria-hidden="true" className="hidden text-ktip-sand-400 sm:block">/</li>
-            <li className="hidden min-w-0 items-center gap-1 font-semibold text-ktip-sand-500 sm:flex" aria-current="page">
-              {crumbs.floor && (
-                <>
-                  <span className="truncate">{crumbs.floor}</span>
-                  <ChevronRight size={13} className="shrink-0" aria-hidden="true" />
-                </>
-              )}
-              <span className="truncate">{crumbs.room}</span>
-            </li>
+            {crumbs.roomKey && crumbs.rooms && crumbs.rooms.length > 1 ? (
+              <>
+                <li aria-hidden="true" className="text-ktip-sand-400">/</li>
+                <li className="min-w-0">
+                  <RoomSwitcher
+                    floor={crumbs.floor}
+                    room={crumbs.room}
+                    roomKey={crumbs.roomKey}
+                    rooms={crumbs.rooms}
+                    floors={crumbs.floors ?? []}
+                    pathFor={(key) => venueRoomPath({ id: eventId, slug: eventSlug, event_type: eventType }, key)}
+                  />
+                </li>
+              </>
+            ) : (
+              <>
+                <li aria-hidden="true" className="hidden text-ktip-sand-400 sm:block">/</li>
+                <li className="hidden min-w-0 items-center gap-1 font-semibold text-ktip-sand-500 sm:flex" aria-current="page">
+                  {crumbs.floor && (
+                    <>
+                      <span className="truncate">{crumbs.floor}</span>
+                      <ChevronRight size={13} className="shrink-0" aria-hidden="true" />
+                    </>
+                  )}
+                  <span className="truncate">{crumbs.room}</span>
+                </li>
+              </>
+            )}
           </ol>
         </nav>
       ) : (

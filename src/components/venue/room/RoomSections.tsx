@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Info } from 'lucide-react'
+import { Info, Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { isVenueVideoConfigured } from '../../../hooks/useVenueRoomToken'
 import { sectionsForRoom } from '../../../lib/venue-room-sections'
@@ -125,6 +125,7 @@ export function RoomSections({
   const { event, room, viewerRole } = context
   const [dockCollapsed, setDockCollapsed] = useDockCollapsed()
   const [sharer, setSharer] = useState<CallSharer | null>(null)
+  const [mainId, setMainId] = useMainCard(room.id)
 
   const resolved = useMemo(
     () => sectionsForRoom(room, viewerRole, event.event_type),
@@ -174,11 +175,43 @@ export function RoomSections({
         ? t`You are sharing, so the call grew to fill the room. ${toolName} is just below.`
         : t`${sharerName} started sharing, so the call grew to fill the room. ${toolName} is just below.`
       : null
-  const cell = (id: RoomSectionId, extra?: string) => (
-    <div key={id} data-room-section={id} className={cn('min-w-0 scroll-mt-[calc(var(--nav-h)+5rem)] [&:has(>div:empty)]:hidden', extra)}>
-      <div>{render(id)}</div>
-    </div>
-  )
+  // Any card of the room can be made the main one: it moves to the top of the
+  // room at full width, and stays there on this device until it is put back.
+  // The choice only counts while that card is one this room is showing.
+  const movable = new Set<RoomSectionId>([...(plan.call ? [plan.call] : []), ...(plan.tool ? [plan.tool] : []), ...plan.shelf])
+  const main = mainId && movable.has(mainId as RoomSectionId) ? (mainId as RoomSectionId) : null
+  const cell = (id: RoomSectionId, extra?: string, canExpand = true) => {
+    const isMain = id === main
+    const name = i18n._(byId.get(id)!.def.label)
+    return (
+      <div
+        key={id}
+        data-room-section={id}
+        className={cn('relative min-w-0 scroll-mt-[calc(var(--nav-h)+5rem)] [&:has(>div:empty)]:hidden', extra)}
+      >
+        <div>{render(id)}</div>
+        {canExpand && movable.size > 1 && (
+          // On the card's top right corner, half outside it, so it never sits
+          // on a header's own chips or buttons.
+          <button
+            type="button"
+            aria-pressed={isMain}
+            aria-label={isMain ? t`Put ${name} back in its place` : t`Make ${name} the main card`}
+            title={isMain ? t`Put back` : t`Make this the main card`}
+            onClick={() => setMainId(isMain ? null : id)}
+            className={cn(
+              'absolute -right-2 -top-2.5 z-raised grid h-8 w-8 place-items-center pointer-coarse:h-11 pointer-coarse:w-11 rounded-full border shadow-card transition-colors',
+              isMain
+                ? 'border-ktip-ocean-600 bg-ktip-ocean-600 text-white hover:bg-ktip-ocean-700'
+                : 'border-ktip-sand-200 bg-ktip-cream text-ktip-sand-600 hover:border-ktip-ocean-400 hover:text-ktip-ocean-700'
+            )}
+          >
+            {isMain ? <Minimize2 size={13} aria-hidden="true" /> : <Maximize2 size={13} aria-hidden="true" />}
+          </button>
+        )}
+      </div>
+    )
+  }
 
   // Short names in the dock, as in the design. A host can rename a tab for one
   // room ("Desk team", "Stage crew") with `label` on that section's config.
@@ -220,7 +253,7 @@ export function RoomSections({
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      {plan.band.map((id) => cell(id))}
+      {plan.band.map((id) => cell(id, undefined, false))}
 
       <div
         className={cn(
@@ -229,7 +262,8 @@ export function RoomSections({
         )}
       >
         <div className="flex min-w-0 flex-col gap-4">
-          {plan.call && cell(plan.call)}
+          {main && cell(main)}
+          {plan.call && plan.call !== main && cell(plan.call)}
           {grewNote && (
             <p
               role="status"
@@ -239,7 +273,7 @@ export function RoomSections({
               {grewNote}
             </p>
           )}
-          {plan.tool && cell(plan.tool)}
+          {plan.tool && plan.tool !== main && cell(plan.tool)}
         </div>
 
         {/* After the call and tool in the page order, so on a phone chat sits
@@ -255,9 +289,9 @@ export function RoomSections({
           </div>
         )}
 
-        {plan.shelf.length > 0 && (
+        {plan.shelf.some((id) => id !== main) && (
           <div className="grid min-w-0 grid-cols-1 content-start gap-4 md:grid-cols-2 lg:col-start-1">
-            {plan.shelf.map((id) =>
+            {plan.shelf.filter((id) => id !== main).map((id) =>
               cell(
                 id,
                 WIDE_ON_SHELF.has(id) || (id === 'countdown' && room.kind === 'team') ? 'md:col-span-2' : undefined
@@ -289,6 +323,35 @@ const WIDE_ON_SHELF = new Set<RoomSectionId>([
   'team_workspace',
   'reactions',
 ])
+
+const mainKey = (roomId: string) => `ktip.room.main.${roomId}`
+
+/** Which card this person made the main one in this room, kept on this device. */
+function useMainCard(roomId: string): [string | null, (id: string | null) => void] {
+  const read = () => {
+    try {
+      return localStorage.getItem(mainKey(roomId))
+    } catch {
+      return null
+    }
+  }
+  const [state, setState] = useState<{ roomId: string; id: string | null }>(() => ({ roomId, id: read() }))
+  // Another room: read that room's own choice.
+  const id = state.roomId === roomId ? state.id : read()
+  const update = useCallback(
+    (next: string | null) => {
+      setState({ roomId, id: next })
+      try {
+        if (next) localStorage.setItem(mainKey(roomId), next)
+        else localStorage.removeItem(mainKey(roomId))
+      } catch {
+        // Blocked storage: the choice lasts for this visit.
+      }
+    },
+    [roomId]
+  )
+  return [id, update]
+}
 
 const DOCK_COLLAPSED_KEY = 'ktip.room.dock.collapsed'
 

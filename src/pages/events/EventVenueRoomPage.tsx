@@ -6,7 +6,7 @@ import { useEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
 import { venuePath, venueRoomPath } from '../../lib/event-slug'
 import { rememberVenueRoom } from '../../lib/venue-last-room'
-import { IrisLink } from '../../components/ui/IrisTransition'
+import { IrisLink, useIrisHold } from '../../components/ui/IrisTransition'
 import { useVenuePresenceContext } from '../../contexts/VenuePresenceContext'
 import { useRoomSignals } from '../../hooks/useRoomSignals'
 import { useAuth } from '../../contexts/AuthContext'
@@ -175,6 +175,9 @@ export default function EventVenueRoomPage() {
       (roomUsesSignals(room, viewerRole, event?.event_type) ||
         roomUsesStage(room, viewerRole)),
   })
+
+  // The iris that brought us here stays shut until the room can be drawn.
+  useIrisHold(eventLoading || roomLoading || joining)
 
   if (eventLoading || roomLoading || joining) {
     return (
@@ -353,7 +356,13 @@ export default function EventVenueRoomPage() {
         onAvailabilityChange={presence.setAvailability}
         submissionDeadline={event.submission_deadline}
         backToMap
-        crumbs={{ floor: floorName, room: room.name }}
+        crumbs={{
+          floor: floorName,
+          room: room.name,
+          roomKey: room.key,
+          rooms: (rooms ?? []).map((r) => ({ key: r.key, name: r.name, floor: Number(r.floor) || 0, sort: r.sort_order, open: r.is_open })),
+          floors: mapConfig.floors.map((floor, index) => floor.name || floorLabel(index)),
+        }}
       />
 
       <div className="mx-auto max-w-[1640px] px-3 py-6 sm:px-4">

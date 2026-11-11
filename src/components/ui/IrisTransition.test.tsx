@@ -60,7 +60,7 @@ describe('IrisTransitionProvider', () => {
     expect(view.getByText('room')).toBeTruthy()
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(600)
+      await vi.advanceTimersByTimeAsync(800)
     })
     expect(overlay()).toBeNull()
   })
@@ -72,7 +72,39 @@ describe('IrisTransitionProvider', () => {
       await vi.advanceTimersByTimeAsync(400)
       await shut
       api!.open()
-      await vi.advanceTimersByTimeAsync(600)
+      await vi.advanceTimersByTimeAsync(800)
+    })
+    expect(overlay()).toBeNull()
+  })
+
+  it('stays shut while a page holds it, and opens when the page lets go', async () => {
+    mount()
+    let release = () => {}
+    await act(async () => {
+      const shut = api!.close()
+      await vi.advanceTimersByTimeAsync(400)
+      await shut
+      release = api!.hold()
+      api!.open()
+      await vi.advanceTimersByTimeAsync(800)
+    })
+    expect(overlay()?.getAttribute('data-phase')).toBe('closed')
+    await act(async () => {
+      release()
+      await vi.advanceTimersByTimeAsync(800)
+    })
+    expect(overlay()).toBeNull()
+  })
+
+  it('opens after four seconds even if a page never lets go', async () => {
+    mount()
+    await act(async () => {
+      const shut = api!.close()
+      await vi.advanceTimersByTimeAsync(400)
+      await shut
+      api!.hold()
+      api!.open()
+      await vi.advanceTimersByTimeAsync(5000)
     })
     expect(overlay()).toBeNull()
   })

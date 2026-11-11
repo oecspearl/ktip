@@ -24,7 +24,7 @@ import { autoLayout, isPlaced } from '../../lib/venue-map'
 import type { VenueRoom } from '../../types'
 import { entityPath } from '../../lib/slug'
 import { forgetVenueRoom, lastVenueRoom } from '../../lib/venue-last-room'
-import { useIrisTransition, type IrisOrigin } from '../../components/ui/IrisTransition'
+import { useIrisHold, useIrisTransition, type IrisOrigin } from '../../components/ui/IrisTransition'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 /**
@@ -174,6 +174,9 @@ export default function EventVenuePage() {
       iris.open()
     }
   }
+
+  // Coming back from a room: the iris stays shut until the map can be drawn.
+  useIrisHold(eventLoading || joining)
 
   if (eventLoading || joining) {
     return (

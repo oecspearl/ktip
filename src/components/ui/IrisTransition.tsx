@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -20,11 +21,17 @@ import { useReducedMotion } from '../../hooks/useReducedMotion'
  *
  * The provider sits above the routes it moves between, so the ring that closed
  * on one page is the same element that opens on the next.
+ *
+ * A page that is still loading can hold the iris shut (useIrisHold), so the
+ * hole opens on the page and not on its skeleton. While it waits, the KTIP
+ * logo pulses on the closed screen; when the page is ready the logo fades and
+ * the hole opens.
  */
 
 /** Matches the CSS animations, plus a frame of slack. */
 const CLOSE_MS = 380
-const OPEN_MS = 460
+/** The logo's fade (140ms) and then the hole (460ms): see .iris-cutout in index.css. */
+const OPEN_MS = 600
 /**
  * However the work in between goes, the screen opens again after this. A
  * stalled request must never leave someone staring at a blank ground.
@@ -41,8 +48,13 @@ export interface IrisOrigin {
 interface IrisApi {
   /** Shut the iris on a point (the viewport centre by default). Resolves once it is closed. */
   close: (origin?: IrisOrigin | null) => Promise<void>
-  /** Open it again. Safe to call when it never closed. */
+  /** Open it again. Safe to call when it never closed. Waits for any page holding it shut. */
   open: () => void
+  /**
+   * Keep the iris shut until the returned function is called. A page that is
+   * still loading holds it; the watchdog opens it regardless.
+   */
+  hold: () => () => void
   /** close, navigate, open: the whole move in one call. */
   navigate: (to: To, options?: NavigateOptions & { origin?: IrisOrigin | null }) => Promise<void>
 }
@@ -86,18 +98,43 @@ export function IrisTransitionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => clearTimers, [clearTimers])
 
+  // Pages still loading behind the closed iris, and whether an open is owed
+  // to them once the last one lets go.
+  const holds = useRef(new Set<symbol>())
+  const openOwed = useRef(false)
+
+  const openNow = useCallback(() => {
+    if (phaseRef.current === 'idle' || phaseRef.current === 'opening') return
+    openOwed.current = false
+    clearTimers()
+    set('opening')
+    later(() => set('idle'), OPEN_MS)
+  }, [clearTimers, later, set])
+
   const open = useCallback(() => {
     if (phaseRef.current === 'idle' || phaseRef.current === 'opening') return
-    clearTimers()
     // Two frames: the first lets the new route commit, the second lets it
     // paint, so the hole opens on the page and not on the old one's last frame.
+    // By then a page that is still loading has said so.
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
-        set('opening')
-        later(() => set('idle'), OPEN_MS)
+        if (holds.current.size > 0) {
+          openOwed.current = true
+          return
+        }
+        openNow()
       })
     )
-  }, [clearTimers, later, set])
+  }, [openNow])
+
+  const hold = useCallback(() => {
+    const id = Symbol('iris-hold')
+    holds.current.add(id)
+    return () => {
+      if (!holds.current.delete(id)) return
+      if (holds.current.size === 0 && openOwed.current) open()
+    }
+  }, [open])
 
   const close = useCallback(
     async (at?: IrisOrigin | null) => {
@@ -110,10 +147,11 @@ export function IrisTransitionProvider({ children }: { children: ReactNode }) {
       setOrigin(at ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 })
       set('closing')
       later(() => set('closed'), CLOSE_MS)
-      later(() => open(), WATCHDOG_MS)
+      // The watchdog does not wait for anybody.
+      later(() => openNow(), WATCHDOG_MS)
       await wait(CLOSE_MS)
     },
-    [clearTimers, later, open, set]
+    [clearTimers, later, openNow, set]
   )
 
   const navigate = useCallback<IrisApi['navigate']>(
@@ -129,7 +167,7 @@ export function IrisTransitionProvider({ children }: { children: ReactNode }) {
     [close, open, routerNavigate]
   )
 
-  const api = useMemo<IrisApi>(() => ({ close, open, navigate }), [close, open, navigate])
+  const api = useMemo<IrisApi>(() => ({ close, open, hold, navigate }), [close, open, hold, navigate])
 
   const diameter = phase === 'idle' ? 0 : coverDiameter(origin)
 
@@ -150,6 +188,9 @@ export function IrisTransitionProvider({ children }: { children: ReactNode }) {
           }
         >
           <div className="iris-cutout-hole" />
+          {/* Only seen when the page behind takes a moment: it fades in after a
+              beat, pulses while the page loads, and fades before the hole opens. */}
+          <img src="/ktip-logo-128.webp" alt="" className="iris-cutout-logo" />
         </div>
       )}
     </IrisContext.Provider>
@@ -168,6 +209,7 @@ export function useIrisTransition(): IrisApi {
       ctx ?? {
         close: async () => {},
         open: () => {},
+        hold: () => () => {},
         navigate: async (to, options) => {
           const { origin: _origin, ...navOptions } = options ?? {}
           await routerNavigate(to, navOptions)
@@ -175,6 +217,21 @@ export function useIrisTransition(): IrisApi {
       },
     [ctx, routerNavigate]
   )
+}
+
+/**
+ * Keep the iris shut while `pending` is true: a page calls this with its own
+ * loading state, so the hole opens on the page, not its skeleton. Does nothing
+ * when the iris is not closed, and the watchdog still opens it after 4 seconds.
+ */
+export function useIrisHold(pending: boolean) {
+  const ctx = useContext(IrisContext)
+  const hold = ctx?.hold
+  // Layout effect: registered at commit, before the frame in which open() looks.
+  useLayoutEffect(() => {
+    if (!pending || !hold) return
+    return hold()
+  }, [pending, hold])
 }
 
 /**
