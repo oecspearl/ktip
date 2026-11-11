@@ -50,7 +50,12 @@ import {
 // v3 when translation became the default (2026-11-10). A v2 "keep the
 // original", often tapped before anyone knew what it did, is not carried over:
 // everyone starts from the new default.
-const PREF_KEY = 'ktip.call.language.v3'
+//
+// v4 when subtitles for my own language became the default too (2026-11-10):
+// two people in one language saw nothing of each other, and a v3 "off" was
+// never a choice, only the old default written back.
+const PREF_KEY = 'ktip.call.language.v4'
+const V3_KEY = 'ktip.call.language.v3'
 const V2_KEY = 'ktip.call.language.v2'
 /** How often my language state is re-sent to the call. */
 const REANNOUNCE_MS = 10_000
@@ -73,9 +78,18 @@ function readPrefs(): Prefs {
     if (raw && typeof raw === 'object') {
       return {
         foreign: isForeignMode(raw.foreign) ? raw.foreign : undefined,
-        along: raw.along === true,
+        along: typeof raw.along === 'boolean' ? raw.along : undefined,
         original: raw.original === true,
         own: raw.own === false ? false : undefined,
+      }
+    }
+    // v3: everything but an "off" for same-language subtitles carries over.
+    const v3 = JSON.parse(localStorage.getItem(V3_KEY) || 'null')
+    if (v3 && typeof v3 === 'object') {
+      return {
+        foreign: isForeignMode(v3.foreign) ? v3.foreign : undefined,
+        original: v3.original === true,
+        own: v3.own === false ? false : undefined,
       }
     }
     // v2 answers that still mean something: subtitles-only keeps reading
@@ -152,7 +166,7 @@ export function useCallLanguage(
   const reads = uiLang
   const speaks = speakOverride ?? uiLang
   const foreign = prefs.foreign ?? DEFAULT_FOREIGN
-  const along = prefs.along === true
+  const along = prefs.along !== false
 
   const update = useCallback((patch: Prefs) => {
     setPrefs((current) => {

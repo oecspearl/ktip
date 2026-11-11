@@ -157,9 +157,12 @@ describe('subtitleNotice', () => {
     expect(subtitleNotice([p('Kemar', 'paused', true)], false)).toEqual({ kind: 'paused', name: 'Kemar' })
   })
 
-  it('keeps the video clear of everything else', () => {
-    expect(subtitleNotice([p('Delon', 'muted')], false)).toBeNull()
+  it('over video, says whose microphone is off but not that it is waiting', () => {
+    expect(subtitleNotice([p('Delon', 'muted')], false)).toEqual({ kind: 'muted', name: 'Delon' })
+    expect(subtitleNotice([p('Delon', 'muted'), p('Ana', 'muted')], false)).toEqual({ kind: 'all-muted' })
+    expect(subtitleNotice([p('Delon', 'cannot')], false)).toEqual({ kind: 'cannot', name: 'Delon' })
     expect(subtitleNotice([p('Delon', 'live')], false)).toBeNull()
+    expect(subtitleNotice([p('Delon', 'live'), p('Ana', 'muted')], false)).toBeNull()
   })
 
   it('in a band, waits while anyone is live', () => {

@@ -109,15 +109,15 @@ export type SubtitleNotice =
 /**
  * What a listener's subtitle area says while no subtitle is showing.
  *
- * Someone talking who cannot be subtitled is worth saying anywhere, video
- * included. The rest (waiting, microphones off) only where there is a band
- * with room for it, never over somebody's face.
+ * Whose microphone is off, and who cannot be subtitled, is said anywhere,
+ * video included: with nothing there, an empty picture looked exactly like
+ * subtitles not working (2026-11-10). Only "waiting" keeps to a band, where
+ * there is room for it; over video, live and silent needs no words.
  */
 export function subtitleNotice(people: readonly NoticePerson[], band: boolean): SubtitleNotice | null {
   const talking = people.find((p) => p.speaking && (p.cap === 'cannot' || p.cap === 'paused'))
   if (talking?.cap === 'cannot' || talking?.cap === 'paused') return { kind: talking.cap, name: talking.name }
-  if (!band) return null
-  if (people.some((p) => p.cap === 'live')) return { kind: 'waiting' }
+  if (people.some((p) => p.cap === 'live')) return band ? { kind: 'waiting' } : null
   const muted = people.filter((p) => p.cap === 'muted')
   if (muted.length === 1) return { kind: 'muted', name: muted[0].name }
   if (muted.length > 1) return { kind: 'all-muted' }
