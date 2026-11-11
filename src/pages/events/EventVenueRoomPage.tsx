@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { Hand, Lock } from 'lucide-react'
+import { CalendarClock, Hand, Lock, MessageSquare, Plus, Star, UserPlus, Users } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useEvent } from '../../hooks/useEvents'
 import { useVenueRooms } from '../../hooks/useVenueRooms'
-import { venuePath } from '../../lib/event-slug'
+import { venuePath, venueRoomPath } from '../../lib/event-slug'
 import { rememberVenueRoom } from '../../lib/venue-last-room'
 import { IrisLink } from '../../components/ui/IrisTransition'
 import { useVenuePresenceContext } from '../../contexts/VenuePresenceContext'
@@ -14,6 +14,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { VenueTopBar } from '../../components/venue/VenueTopBar'
 import { AvatarCluster } from '../../components/venue/AvatarCluster'
 import { RoomSections } from '../../components/venue/room/RoomSections'
+import { focusRoomSection } from '../../components/venue/room/RoomDock'
 import { HomebaseLookPanel } from '../../components/venue/room/HomebaseLookPanel'
 import { homebaseAccess, useEventTeams } from '../../hooks/useEventTeams'
 import { guestOf, useBridges } from '../../hooks/useBridges'
@@ -301,6 +302,37 @@ export default function EventVenueRoomPage() {
                     ? t`Between teams`
                     : null
 
+  // The one thing most people came to this room to do, as a button in the
+  // header. It takes them to the panel that does it.
+  const headerAction = shown.has('help_queue')
+    ? { label: t`Ask for help`, icon: Hand, section: 'help_queue', primary: true }
+    : shown.has('coffee_tables') && (shown.has('looking_for_team') || shown.has('team_finder'))
+      ? { label: t`Find a teammate`, icon: Users, section: shown.has('looking_for_team') ? 'looking_for_team' : 'team_finder', primary: false }
+      : shown.has('collab_commons')
+        ? { label: t`Open a bridge`, icon: Plus, section: 'collab_commons', primary: true }
+        : shown.has('peoples_choice')
+          ? { label: t`Vote`, icon: Star, section: 'peoples_choice', primary: false }
+          : shown.has('booking_slots')
+            ? { label: shown.has('kit') ? t`Book bench time` : t`Book 15 minutes`, icon: CalendarClock, section: 'booking_slots', primary: false }
+            : shown.has('check_in') && shown.has('chat')
+              ? { label: t`Ask the desk`, icon: MessageSquare, section: 'chat', primary: false }
+              : null
+  const HeaderActionIcon = headerAction?.icon
+  // A room with neither a call nor chat says so, so the silence reads as meant.
+  const quietNote = !shown.has('av_placeholder') && !shown.has('chat') && shown.has('focus_timer')
+  // From your own Homebase, "Invite" goes to where people without a team are.
+  const inviteRoom =
+    roomTeam && myTeam?.id === roomTeam.id
+      ? (rooms ?? []).find(
+          (r) =>
+            r.id !== room.id &&
+            r.is_open &&
+            sectionsForRoom(r, viewerRole ?? membership.role, event.event_type).some(
+              (s) => s.def.id === 'looking_for_team' || s.def.id === 'team_finder'
+            )
+        ) ?? null
+      : null
+
   const floorName = mapConfig.floors.length > 1
     ? mapConfig.floors[room.floor]?.name || floorLabel(room.floor)
     : null
@@ -389,6 +421,28 @@ export default function EventVenueRoomPage() {
               <span className="rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-2.5 py-0.5 text-micro font-extrabold text-ktip-sand-700">
                 {accessNote}
               </span>
+            )}
+            {quietNote && (
+              <span className="rounded-full border border-ktip-sand-200 bg-ktip-sand-100 px-2.5 py-0.5 text-micro font-extrabold text-ktip-sand-700">
+                <Trans>No call · chat off</Trans>
+              </span>
+            )}
+            {headerAction && HeaderActionIcon && (
+              <Button
+                variant={headerAction.primary ? 'primary' : 'secondary'}
+                size="sm"
+                icon={<HeaderActionIcon size={15} aria-hidden="true" />}
+                onClick={() => focusRoomSection(headerAction.section)}
+              >
+                {headerAction.label}
+              </Button>
+            )}
+            {inviteRoom && (
+              <IrisLink to={venueRoomPath(event, inviteRoom.key)}>
+                <Button variant="secondary" size="sm" icon={<UserPlus size={15} aria-hidden="true" />}>
+                  <Trans>Invite</Trans>
+                </Button>
+              </IrisLink>
             )}
             {canRaiseHand && (
               <Button

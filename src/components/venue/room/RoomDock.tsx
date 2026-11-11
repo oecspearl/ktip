@@ -14,6 +14,28 @@ export interface DockTab {
 const iconFor = (id: string) =>
   id === 'chat' ? MessageSquare : id === 'occupants' ? Users : LayoutList
 
+/**
+ * Take the reader to one panel of the room: show its dock tab if it lives in
+ * the dock, scroll to it, and put the cursor in its first field.
+ */
+export const ROOM_FOCUS_EVENT = 'ktip:room-focus'
+export function focusRoomSection(section: string) {
+  window.dispatchEvent(new CustomEvent(ROOM_FOCUS_EVENT, { detail: { section } }))
+  // After the dock has had a frame to switch tabs.
+  window.setTimeout(() => {
+    const host =
+      document.getElementById(`dock-panel-${section}`) ??
+      document.querySelector<HTMLElement>(`[data-room-section="${section}"]`)
+    if (!host) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    host.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: host.id ? 'nearest' : 'start' })
+    const field =
+      host.querySelector<HTMLElement>('textarea:not([disabled]), input:not([type=hidden]):not([disabled])') ??
+      host.querySelector<HTMLElement>('button:not([disabled]), a[href]')
+    field?.focus({ preventScroll: true })
+  }, 60)
+}
+
 const tabKey = (roomId: string) => `ktip.room.dock.${roomId}`
 
 function readTab(roomId: string): string | null {
@@ -64,6 +86,20 @@ export function RoomDock({
       // Blocked storage: the choice lasts for this visit.
     }
   }
+
+  // A button in the room's header ("Ask the desk") can ask for one of these
+  // tabs: open the dock if it is folded and show that tab.
+  const ids = tabs.map((tab) => tab.id).join('|')
+  useEffect(() => {
+    const onFocus = (e: Event) => {
+      const id = (e as CustomEvent<{ section?: string }>).detail?.section
+      if (!id || !ids.split('|').includes(id)) return
+      setCurrent(id)
+      onCollapsedChange(false)
+    }
+    window.addEventListener(ROOM_FOCUS_EVENT, onFocus)
+    return () => window.removeEventListener(ROOM_FOCUS_EVENT, onFocus)
+  }, [ids, onCollapsedChange])
 
   if (tabs.length === 0) return null
 

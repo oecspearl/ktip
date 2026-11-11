@@ -1,14 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Info } from 'lucide-react'
 import { cn } from '../../../lib/utils'
-import { useEventCriteria } from '../../../hooks/useEventCriteria'
 import { isVenueVideoConfigured } from '../../../hooks/useVenueRoomToken'
 import { sectionsForRoom } from '../../../lib/venue-room-sections'
 import type { ResolvedRoomSection, RoomSectionId } from '../../../lib/venue-room-sections'
 import { cameraModeFor, orderSectionIds } from '../../../lib/venue-room-layout'
 import { planRoomShell } from '../../../lib/venue-room-shell'
+import { parseBoardAgenda } from '../../../lib/call-board'
 import { RoomDock, type DockTab } from './RoomDock'
-import { EventChallengeBrief } from '../../events/EventChallengeBrief'
 import { EventSolutionsPanel } from '../../events/EventSolutionsPanel'
 import { RoomChatPanel } from '../RoomChatPanel'
 import { RoomOccupantList } from '../RoomOccupantList'
@@ -51,6 +50,10 @@ import { AnnounceAllPanel, BookingSlotsPanel, KitPanel, LibraryPanel } from './R
 import { LineupPanel, OnNextPanel } from './StageLineupPanels'
 import { OpsAlertsPanel } from './OpsAlertsPanel'
 import { CheckInTool } from './CheckInTool'
+import { RoomChallengeCard } from './RoomChallengeCard'
+import { RoomNotesPanel } from './RoomNotesPanel'
+import { MentorCardsPanel } from './MentorCardsPanel'
+import { SetupChecksPanel } from './SetupChecksPanel'
 import { WhereToGoPanel } from './WhereToGoPanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
@@ -279,8 +282,10 @@ const WIDE_ON_SHELF = new Set<RoomSectionId>([
   'coffee_tables',
   'judging_console',
   'submission_desk',
-  'challenge_brief',
   'check_in',
+  'sponsor_hero',
+  'room_notes',
+  'booking_slots',
   'team_workspace',
   'reactions',
 ])
@@ -338,7 +343,7 @@ function RoomSection({
 
   switch (section.def.id) {
     case 'sponsor_hero':
-      return <SponsorHero room={room} />
+      return <SponsorHero room={room} config={section.config} />
 
     case 'check_in':
       return <CheckInTool event={event} membership={membership} rooms={rooms} floors={floors} />
@@ -360,6 +365,7 @@ function RoomSection({
           signals={signals}
           onShareChange={onShareChange}
           title={typeof section.config.title === 'string' ? section.config.title.trim().slice(0, 60) || undefined : undefined}
+          boardAgenda={parseBoardAgenda(section.config.board)}
         />
       )
 
@@ -370,7 +376,14 @@ function RoomSection({
       return <FocusTimerPanel />
 
     case 'caption_test':
-      return <CaptionTestPanel room={room} />
+      // Backstage: camera, microphone and screen share first, then how you
+      // will read in other languages.
+      return (
+        <div className="flex flex-col gap-4">
+          <SetupChecksPanel />
+          <CaptionTestPanel room={room} />
+        </div>
+      )
 
     case 'objectives':
       return <RoomTextSection variant="objectives" config={section.config} room={room} />
@@ -385,7 +398,7 @@ function RoomSection({
       return <RoomFaqPanel eventId={event.id} />
 
     case 'challenge_brief':
-      return <ChallengeBriefSection event={event} />
+      return <RoomChallengeCard event={event} />
 
     case 'showcase_gallery':
       return (
@@ -574,8 +587,23 @@ function RoomSection({
     case 'kit':
       return <KitPanel room={room} isHost={isHost} canPost={canPost} />
 
+    case 'room_notes':
+      return <RoomNotesPanel room={room} canPost={canPost} />
+
     case 'booking_slots':
-      return (
+      // `cards` draws the same slots one card per person, as a mentor lounge
+      // wants them; organisers keep the plain list under it to offer times.
+      return section.config.cards === true ? (
+        <div className="flex flex-col gap-4">
+          <MentorCardsPanel
+            room={room}
+            canPost={canPost}
+            occupants={occupants}
+            title={typeof section.config.title === 'string' ? section.config.title.trim().slice(0, 40) || undefined : undefined}
+          />
+          {isHost && <BookingSlotsPanel room={room} isHost={isHost} canPost={canPost} title={t`Times on offer`} />}
+        </div>
+      ) : (
         <BookingSlotsPanel
           room={room}
           isHost={isHost}
@@ -610,21 +638,4 @@ function RoomSection({
     default:
       return null
   }
-}
-
-/**
- * The brief is the one reused component that needs its own query, and it
- * already returns null when the event has no criteria — so the fetch is kept
- * here rather than in the page's context bundle, where it would run for every
- * room whether or not the brief is switched on.
- */
-function ChallengeBriefSection({ event }: { event: Event }) {
-  const { criteria } = useEventCriteria(event.id)
-  if (!criteria?.length) return null
-  return (
-    <EventChallengeBrief
-      criteria={criteria}
-      submissionDeadline={event.submission_deadline ?? null}
-    />
-  )
 }

@@ -26,6 +26,7 @@ import {
   type ScoreMap,
 } from '../../../../lib/judging-math'
 import { formatDuration, isHttpUrl } from '../../../../lib/submission-checklist'
+import { DemoThumb } from './DemoThumb'
 import type { Event } from '../../../../types'
 
 const SCORES = Array.from({ length: MAX_SCORE - MIN_SCORE + 1 }, (_, i) => MIN_SCORE + i)
@@ -396,6 +397,16 @@ function EntryScorer({
         {entry.summary && <p className="mt-1 whitespace-pre-wrap text-sm text-ktip-sand-700">{entry.summary}</p>}
       </header>
 
+      {entry.demo_video_url && (
+        <DemoThumb
+          index={0}
+          href={entry.demo_video_url}
+          seconds={entry.demo_video_seconds}
+          title={entry.title}
+          className="max-w-md rounded-surface"
+        />
+      )}
+
       <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
         {entry.repo_url && (
           <li>
@@ -483,27 +494,48 @@ function EntryScorer({
                 </span>
               </legend>
               {c.description && <p className="text-xs text-ktip-sand-500">{c.description}</p>}
-              <div role="radiogroup" aria-label={c.title} className="mt-1.5 flex flex-wrap gap-1">
-                {SCORES.map((n) => {
-                  const on = scores[c.id] === n
-                  return (
-                    <button
-                      key={n}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      onClick={() => setScores((s) => ({ ...s, [c.id]: on ? null : n }))}
-                      className={cn(
-                        'h-8 w-8 rounded-md border text-sm font-semibold transition-colors',
-                        on
-                          ? 'border-ktip-ocean-600 bg-ktip-ocean-600 text-white'
-                          : 'border-ktip-sand-200 bg-white text-ktip-sand-700 hover:border-ktip-ocean-400'
-                      )}
-                    >
-                      {n}
-                    </button>
-                  )
-                })}
+              {/* A slider, as in the design. Until it is moved the criterion
+                  has no score, and the number beside it says so with a dash. */}
+              <div className="mt-1.5 flex items-center gap-3">
+                <output
+                  htmlFor={`score-${entry.id}-${c.id}`}
+                  className={cn(
+                    'w-8 shrink-0 text-center font-display text-2xl font-bold tabular-nums',
+                    isValidScore(scores[c.id]) ? 'text-ktip-sand-900' : 'text-ktip-sand-400'
+                  )}
+                >
+                  {isValidScore(scores[c.id]) ? scores[c.id] : '–'}
+                </output>
+                <input
+                  id={`score-${entry.id}-${c.id}`}
+                  type="range"
+                  min={SCORES[0]}
+                  max={SCORES[SCORES.length - 1]}
+                  step={1}
+                  value={isValidScore(scores[c.id]) ? (scores[c.id] as number) : SCORES[0]}
+                  aria-label={c.title}
+                  aria-valuetext={isValidScore(scores[c.id]) ? String(scores[c.id]) : t`Not scored`}
+                  onChange={(e) => setScores((s) => ({ ...s, [c.id]: Number(e.target.value) }))}
+                  // A press on an unscored slider at its resting place moves nothing,
+                  // so it would not count. Take the press itself as the first score.
+                  onPointerUp={(e) => {
+                    const value = Number((e.target as HTMLInputElement).value)
+                    setScores((s) => (isValidScore(s[c.id]) ? s : { ...s, [c.id]: value }))
+                  }}
+                  className={cn(
+                    'h-11 min-w-0 flex-1 cursor-pointer accent-ktip-ocean-600 disabled:cursor-not-allowed',
+                    !isValidScore(scores[c.id]) && 'opacity-60'
+                  )}
+                />
+                {isValidScore(scores[c.id]) && !readOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setScores((s) => ({ ...s, [c.id]: null }))}
+                    className="min-h-8 shrink-0 rounded-control px-2 text-xs font-bold text-ktip-sand-500 hover:text-ktip-sand-900"
+                  >
+                    <Trans>Clear</Trans>
+                  </button>
+                )}
               </div>
             </fieldset>
           )

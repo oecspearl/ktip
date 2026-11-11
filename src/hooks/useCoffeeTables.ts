@@ -38,6 +38,15 @@ export function useCoffeeTables(roomId: string | undefined) {
     onSettled: refresh,
   })
 
+  /** Take a free seat at one table (215), instead of waiting for the roulette. */
+  const sit = useMutation({
+    mutationFn: async (tableId: string) => {
+      const { error } = await (supabase as any).rpc('sit_at_coffee_table', { p_table_id: tableId })
+      if (error) throw error
+    },
+    onSettled: refresh,
+  })
+
   const leave = useMutation({
     mutationFn: async () => {
       const { error } = await (supabase as any).rpc('leave_coffee', { p_room_id: roomId })
@@ -66,6 +75,7 @@ export function useCoffeeTables(roomId: string | undefined) {
     loading: query.isPending,
     error: query.error as Error | null,
     join,
+    sit,
     leave,
   }
 }

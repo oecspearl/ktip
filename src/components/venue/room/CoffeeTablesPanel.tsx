@@ -25,7 +25,7 @@ export function CoffeeTablesPanel({ room }: { room: VenueRoom }) {
   const { t } = useLingui()
   const toast = useToast()
   const now = useNow(15_000)
-  const { state, loading, error, join, leave } = useCoffeeTables(room.id)
+  const { state, loading, error, join, sit, leave } = useCoffeeTables(room.id)
   // An organiser looking in on a table they are not seated at.
   const [visiting, setVisiting] = useState<string | null>(null)
 
@@ -35,6 +35,8 @@ export function CoffeeTablesPanel({ room }: { room: VenueRoom }) {
 
   const onJoin = () =>
     join.mutate(undefined, { onError: (err: any) => toast.error(err?.message || t`Could not join the queue`) })
+  const onSit = (tableId: string) =>
+    sit.mutate(tableId, { onError: (err: any) => toast.error(err?.message || t`Could not sit at that table`) })
   const onLeave = () => {
     if (visiting && !myTable) {
       setVisiting(null)
@@ -81,6 +83,9 @@ export function CoffeeTablesPanel({ room }: { room: VenueRoom }) {
                     onDropIn={
                       state.isHost && !myTable && table.id !== callTable?.id ? () => setVisiting(table.id) : undefined
                     }
+                    // A seat is offered to someone who could sit and is not seated.
+                    onSit={state.canJoin && !myTable ? () => onSit(table.id) : undefined}
+                    sitting={sit.isPending && sit.variables === table.id}
                   />
                 ))}
               </ul>
@@ -154,12 +159,16 @@ function TableCard({
   mine,
   now,
   onDropIn,
+  onSit,
+  sitting,
 }: {
   table: CoffeeTable
   number: number
   mine: boolean
   now: number
   onDropIn?: () => void
+  onSit?: () => void
+  sitting?: boolean
 }) {
   const { t } = useLingui()
   const seated = table.people.map((p) => p.name ?? '').join(', ')
@@ -201,6 +210,12 @@ function TableCard({
         <span className="text-xs text-ktip-sand-500">
           <Trans>{minutesLeft(table.ends_at, now)} min left</Trans>
         </span>
+      )}
+      {/* Four seats, and never a table of two: a lone person cannot be joined. */}
+      {!mine && onSit && table.people.length >= 2 && (
+        <Button size="sm" variant="secondary" onClick={onSit} loading={sitting} disabled={table.people.length >= 4}>
+          {table.people.length >= 4 ? <Trans>Full</Trans> : <Trans>Sit here</Trans>}
+        </Button>
       )}
       {onDropIn && (
         <Button size="sm" variant="secondary" onClick={onDropIn} icon={<Eye size={14} aria-hidden="true" />}>

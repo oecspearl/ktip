@@ -139,7 +139,6 @@ const FLOORS = [
 ]
 
 const sec = (...ids) => ids.map((s) => (typeof s === 'string' ? { id: s } : s))
-const body = (id, text) => ({ id, config: { body: text } })
 /** The call: what it is called in this room, and its shape when not the kind's own. */
 const call = (title, mode) => ({ id: 'av_placeholder', config: { title, ...(mode ? { mode } : {}) } })
 /** A dock tab under this room's own name ("Desk team", "Stage crew"). */
@@ -188,21 +187,31 @@ const ROOMS = [
   R(2, 0, 'main-hall', 'Main Hall', 'main_hall', 'theatre', [9, 8], '#2A5788', 1.75, {
     description: 'Opening talks, announcements and the closing ceremony.',
     audio_mode: 'moderated',
-    sections: sec('host_controls', call('Day two opening'), 'run_of_show', 'challenge_brief', 'countdown', 'wayfinding', 'chat', 'qa', 'occupants', 'announcements'),
+    sections: sec('host_controls', call('Day two opening'), 'run_of_show', 'challenge_brief', 'chat', 'qa', 'occupants'),
   }),
   R(3, 0, 'networking-lounge', 'Networking Lounge', 'networking', 'cafe', [8, 6], '#E6AC09', 1.25, {
     description: 'Sit at a table, meet people, find teammates.',
-    sections: sec('host_controls', call('Table 1'), 'coffee_tables', 'looking_for_team', 'skill_finder', 'team_finder', 'chat', 'occupants'),
+    sections: sec('host_controls', call('Lounge call'), 'coffee_tables', 'looking_for_team', 'skill_finder', 'chat', 'occupants'),
   }),
   R(4, 0, 'help-desk', 'Help Desk', 'help_desk', 'counter', [6, 5], '#E6AC09', 1.1, {
     description: 'Ask for help and a mentor comes to you.',
-    sections: sec('host_controls', call('Desk call'), 'help_queue', 'faq', 'chat', 'mentors_on_duty', 'occupants'),
+    sections: sec('host_controls', call('Desk call'), 'help_queue', 'faq', 'chat', 'mentors_on_duty'),
   }),
   R(5, 0, 'sponsor-booth', 'Tidewater Labs', 'sponsor_booth', 'booth', [5, 4], '#2F8FD6', 1.1, {
-    description: 'Ask about the tides API and the Tidewater prize. Tide and swell forecasts for every OECS harbour, through one API. Free for this hackathon. Tidewater prize: US$5,000 for the best tool for fishers.',
+    description: 'Ask about the tides API and the Tidewater prize.',
     sponsor_name: 'Tidewater Labs',
     sponsor_url: 'https://example.org/tidewater',
-    sections: sec('sponsor_hero', 'host_controls', call('Ana Lucía answers questions'), { id: 'booking_slots', config: { title: 'Talk to Ana Lucía, 15 minutes' } }, 'chat', 'occupants', {
+    sections: sec(
+      {
+        id: 'sponsor_hero',
+        config: {
+          blurb: 'Tide and swell forecasts for every OECS harbour, through one API. Free for this hackathon.',
+          prize_amount: 'US$5,000',
+          prize_label: 'Tidewater prize · best tool for fishers',
+          prize_note: 'Judged with the main panel. Any team using the tides API can win it.',
+        },
+      },
+      'host_controls', call('Ana Lucía answers questions'), { id: 'booking_slots', config: { title: 'Talk to Ana Lucía, 15 minutes' } }, 'chat', 'occupants', {
       id: 'sponsor_links',
       config: {
         links: [
@@ -218,7 +227,17 @@ const ROOMS = [
     audio_mode: 'listen_only',
     sections: sec(
       'focus_timer',
-      body('rules', 'How this room works. No calls and no chat: your microphone stays off while you are here. Only venue-wide news reaches you; room announcements wait until you leave. A soft chime sounds when your timer ends.'),
+      {
+        id: 'rules',
+        config: {
+          title: 'How this room works',
+          items: [
+            { title: 'No calls and no chat', detail: 'Your microphone stays off while you are here.' },
+            { title: 'Only venue-wide news', detail: 'Room announcements wait until you leave.' },
+            { title: 'Back at the bell', detail: 'Your status says when your timer ends.' },
+          ],
+        },
+      },
       tab('occupants', 'Heads down')
     ),
   }),
@@ -233,8 +252,9 @@ const ROOMS = [
     description: 'A small room for one team. This one belongs to Team Mangrove.',
     sections: sec(
       call('Pod call'),
+      'room_notes',
+      { id: 'objectives', config: { title: 'Goal for this session', body: 'Co-op database connected' } },
       'focus_timer',
-      body('objectives', 'Goal for this session: co-op database connected.\n\nToday: sign-up works on phones. Next: connect the co-op database and test with someone from the Help Desk before five.\n\nQuestions for the mentor: do we need consent text in Spanish and English?'),
       'chat',
       'occupants'
     ),
@@ -250,8 +270,29 @@ const ROOMS = [
     audio_mode: 'moderated',
     sections: sec(
       'host_controls',
-      call('Tides API in 30 minutes'),
-      body('objectives', 'By the end you will: call the tides API from your server, cache it inside the free limit, and show the next high tide on a map.\n\nSteps: 1. Get your key from the Files tab. 2. Read the /v1/tides docs. 3. Call it every 10 minutes, and cache the result. 4. Handle a 401 without crashing. 5. Show the next high tide on a map.'),
+      {
+        id: 'av_placeholder',
+        config: {
+          title: 'Tides API in 30 minutes',
+          board: {
+            title: 'Tides API in 30 minutes',
+            steps: [
+              'Get your key from the Files tab',
+              'Read the /v1/tides docs',
+              'Call it every 10 minutes, and cache the result',
+              'Handle a 401 without crashing',
+              'Show the next high tide on a map',
+            ],
+          },
+        },
+      },
+      {
+        id: 'objectives',
+        config: {
+          title: 'By the end you will',
+          checklist: ['Call the tides API from your server', 'Cache it inside the free limit', 'Show the next high tide on a map'],
+        },
+      },
       'resources',
       'chat',
       'occupants',
@@ -263,7 +304,17 @@ const ROOMS = [
     sections: sec(
       call('Bench crew'),
       'kit',
-      body('rules', 'Bench rules. Batteries stay on the mat: lithium cells charge on the fire-safe mat only. Two hours per booking; extend if nobody is waiting.'),
+      { id: 'booking_slots', config: { title: 'Bench time' } },
+      {
+        id: 'rules',
+        config: {
+          title: 'Bench rules',
+          items: [
+            { title: 'Batteries stay on the mat', detail: 'Lithium cells charge on the fire-safe mat only.' },
+            { title: 'Two hours per booking', detail: 'Extend if nobody is waiting.' },
+          ],
+        },
+      },
       'chat',
       tab('occupants', 'Bench crew')
     ),
@@ -278,7 +329,7 @@ const ROOMS = [
   }),
   R(13, 2, 'mentor-lounge', 'Mentor Lounge', 'breakout', 'lounge', [6, 5], '#7AB000', 1, {
     description: 'Book a mentor for 15 minutes, in a language you share.',
-    sections: sec(call('Lounge'), { id: 'booking_slots', config: { title: 'Book a mentor, 15 minutes' } }, 'mentors_on_duty', 'chat', 'occupants'),
+    sections: sec(call('Lounge'), { id: 'booking_slots', config: { title: 'Mentors', cards: true } }, 'chat', 'occupants'),
   }),
 
   // ---- Level 3 · Demos
@@ -633,7 +684,15 @@ const SLOTS = [
   [13, 'keisha', ['16:00', '16:15', '16:30'], { '16:15': 'lucia' }],
   [13, 'marie', ['16:00', '16:15', '16:30'], {}],
   [13, 'devon', ['16:30', '16:45'], { '16:30': 'jaden' }],
+  [11, 'omari', ['14:00', '16:00'], { '14:00': 'shem' }],
 ]
+
+// Team Pod 3's shared page (215).
+const POD_NOTES = `Today
+Sign-up works on phones. Next: connect the co-op database and test with someone from the Help Desk before five.
+
+Questions for the mentor
+Do we need consent text in Spanish and English?`
 
 // The Help Desk line, in order (211): who, what they asked, tags, who is helping.
 const HELP = [
@@ -1122,6 +1181,18 @@ async function main() {
     )
     const { error: slotErr } = await admin.from('venue_booking_slots').insert(slotRows)
     say('booking slots', slotErr, `${slotRows.length} bookable slots`)
+  }
+
+  // ---- Team Pod's shared notes (215), when the table exists
+  {
+    const { error } = await admin.from('venue_room_notes').upsert({
+      room_id: roomId(8),
+      event_id: EVENT_ID,
+      body: POD_NOTES,
+      updated_by: ids.lucia,
+      updated_at: at('15:40'),
+    })
+    say('shared notes', error, 'Team Pod 3 shared notes')
   }
 
   // ---- Help Desk line (211), when the table exists

@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
-import { Award, ExternalLink, Heart } from 'lucide-react'
+import { Award, Heart } from 'lucide-react'
 import { plural } from '@lingui/core/macro'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useToast } from '../../../../contexts/ToastContext'
 import { Button } from '../../../ui/Button'
 import { cn } from '../../../../lib/utils'
-import { isHttpUrl } from '../../../../lib/submission-checklist'
 import { useCastVote, useEventResults, usePeoplesChoice, type BallotEntry } from '../../../../hooks/useJudging'
+import { DemoThumb } from './DemoThumb'
 import type { Event } from '../../../../types'
 
 /**
@@ -91,32 +91,23 @@ export function PeoplesChoicePanel({ event }: { event: Event }) {
             )}
           </p>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {(showTally ? byVotes : ballot.entries).map((entry) => {
+            {(showTally ? byVotes : ballot.entries).map((entry, index) => {
               const mine = ballot.my_vote === entry.id
               const votes = entry.votes ?? 0
               return (
                 <li
                   key={entry.id}
                   className={cn(
-                    'flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3',
+                    'flex min-w-0 flex-col overflow-hidden rounded-surface border',
                     mine ? 'border-ktip-ocean-300 bg-ktip-ocean-50' : 'border-ktip-sand-200'
                   )}
                 >
+                  <DemoThumb index={index} href={entry.demo_video_url} title={entry.title} />
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-ktip-sand-900">{entry.title}</p>
                     {entry.team_name && <p className="text-xs text-ktip-sand-500">{entry.team_name}</p>}
                     {entry.summary && <p className="mt-1 line-clamp-2 text-sm text-ktip-sand-700">{entry.summary}</p>}
-                    {entry.demo_video_url && isHttpUrl(entry.demo_video_url) && (
-                      <a
-                        href={entry.demo_video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-ktip-ocean-700 hover:underline"
-                      >
-                        <ExternalLink size={13} aria-hidden="true" />
-                        <Trans>Watch the demo</Trans>
-                      </a>
-                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     {showTally && (
@@ -142,6 +133,7 @@ export function PeoplesChoicePanel({ event }: { event: Event }) {
                           {mine ? <Trans>Voted</Trans> : <Trans>Vote</Trans>}
                         </Button>
                       ))}
+                  </div>
                   </div>
                 </li>
               )

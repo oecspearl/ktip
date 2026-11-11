@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Eraser, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eraser, Trash2 } from 'lucide-react'
 import { useLocalParticipant } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import { useLingui } from '@lingui/react/macro'
@@ -14,6 +14,8 @@ import {
   ERASER_WIDTH,
   PEN_WIDTH,
   boardPoint,
+  wrapBoardLine,
+  type BoardAgenda,
 } from '../../../lib/call-board'
 
 const CHALK = [
@@ -28,6 +30,43 @@ function wipe(canvas: HTMLCanvasElement) {
   if (!ctx) return
   ctx.fillStyle = BOARD_BACKGROUND
   ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+/** Chalk the agenda onto a clean board, the current step in yellow. */
+function drawAgenda(canvas: HTMLCanvasElement, agenda: BoardAgenda, current: number) {
+  wipe(canvas)
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const font = 'ui-sans-serif, system-ui, "Segoe UI", sans-serif'
+  ctx.textBaseline = 'top'
+  let y = 64
+  if (agenda.title) {
+    ctx.fillStyle = '#F4F1EA'
+    ctx.font = `700 54px ${font}`
+    for (const line of wrapBoardLine(agenda.title, 38)) {
+      ctx.fillText(line, 80, y)
+      y += 66
+    }
+    y += 22
+  }
+  agenda.steps.forEach((step, index) => {
+    const on = index === current
+    const lines = wrapBoardLine(step, 52)
+    if (on) {
+      ctx.fillStyle = 'rgba(245, 197, 66, 0.14)'
+      ctx.fillRect(56, y - 10, canvas.width - 112, lines.length * 46 + 20)
+      ctx.fillStyle = '#F5C542'
+      ctx.fillRect(56, y - 10, 8, lines.length * 46 + 20)
+    }
+    ctx.fillStyle = on ? '#F5C542' : index < current ? 'rgba(244, 241, 234, 0.55)' : '#F4F1EA'
+    ctx.font = `${on ? 700 : 500} 36px ${font}`
+    ctx.fillText(`${index + 1}.`, 84, y)
+    for (const line of lines) {
+      ctx.fillText(line, 140, y)
+      y += 46
+    }
+    y += 22
+  })
 }
 
 interface LiveBoard {
@@ -47,12 +86,25 @@ interface LiveBoard {
  *
  * Must be inside <LiveKitRoom>.
  */
-export function useBoardShare() {
+export function useBoardShare(agenda?: BoardAgenda | null) {
   const { localParticipant } = useLocalParticipant()
   const [board, setBoard] = useState<LiveBoard | null>(null)
   const [pending, setPending] = useState(false)
   const live = useRef<LiveBoard | null>(null)
   live.current = board
+  // Which step of the typed agenda is marked. Moving on redraws the board, so
+  // anything drawn over the last step goes with it.
+  const [step, setStepState] = useState(0)
+  const plan = useRef(agenda ?? null)
+  plan.current = agenda ?? null
+  const setStep = useCallback((next: number) => {
+    const current = plan.current
+    const canvas = live.current?.canvas
+    if (!current || !canvas) return
+    const clamped = Math.max(0, Math.min(current.steps.length - 1, next))
+    setStepState(clamped)
+    drawAgenda(canvas, current, clamped)
+  }, [])
 
   const stop = useCallback(async () => {
     const current = live.current
@@ -74,7 +126,9 @@ export function useBoardShare() {
       const canvas = document.createElement('canvas')
       canvas.width = BOARD_WIDTH
       canvas.height = BOARD_HEIGHT
-      wipe(canvas)
+      if (plan.current) drawAgenda(canvas, plan.current, 0)
+      else wipe(canvas)
+      setStepState(0)
       const media = canvas.captureStream(BOARD_FPS).getVideoTracks()[0]
       if (!media) return
       media.contentHint = 'detail'
@@ -105,14 +159,28 @@ export function useBoardShare() {
     [stop]
   )
 
-  return { canvas: board?.canvas ?? null, on: !!board, pending, start, stop }
+  return {
+    canvas: board?.canvas ?? null,
+    on: !!board,
+    pending,
+    start,
+    stop,
+    /** The typed agenda on this board, if the room has one, and where it is. */
+    agenda: agenda ? { steps: agenda.steps.length, step, setStep } : null,
+  }
 }
 
 /**
  * The host's own view of the board: the live canvas itself, to draw on. Everyone
  * else sees the video of it.
  */
-export function BoardCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
+export function BoardCanvas({
+  canvas,
+  agenda,
+}: {
+  canvas: HTMLCanvasElement
+  agenda?: { steps: number; step: number; setStep: (next: number) => void } | null
+}) {
   const { t, i18n } = useLingui()
   const host = useRef<HTMLDivElement>(null)
   const [color, setColor] = useState(CHALK[0].value)
@@ -177,6 +245,33 @@ export function BoardCanvas({ canvas }: { canvas: HTMLCanvasElement }) {
         aria-label={t`Board tools`}
         className="absolute right-3 top-3 z-raised flex flex-wrap items-center gap-1 rounded-control bg-black/60 p-1"
       >
+        {agenda && (
+          <>
+            <button
+              type="button"
+              aria-label={t`Previous step`}
+              title={t`Previous step`}
+              disabled={agenda.step <= 0}
+              onClick={() => agenda.setStep(agenda.step - 1)}
+              className={cn(swatch, 'text-white hover:bg-white/10 disabled:opacity-40')}
+            >
+              <ChevronLeft size={16} aria-hidden="true" />
+            </button>
+            <span className="px-1 text-micro font-bold tabular-nums text-white" aria-live="polite">
+              {agenda.step + 1} / {agenda.steps}
+            </span>
+            <button
+              type="button"
+              aria-label={t`Next step`}
+              title={t`Next step`}
+              disabled={agenda.step >= agenda.steps - 1}
+              onClick={() => agenda.setStep(agenda.step + 1)}
+              className={cn(swatch, 'text-white hover:bg-white/10 disabled:opacity-40')}
+            >
+              <ChevronRight size={16} aria-hidden="true" />
+            </button>
+          </>
+        )}
         {CHALK.map((chalk) => (
           <button
             key={chalk.value}

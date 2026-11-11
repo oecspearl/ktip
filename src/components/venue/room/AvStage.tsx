@@ -1,3 +1,4 @@
+import type { BoardAgenda } from '../../../lib/call-board'
 import { Suspense, lazy, useMemo, useState } from 'react'
 import { Eye, VideoOff } from 'lucide-react'
 import { cn } from '../../../lib/utils'
@@ -50,11 +51,14 @@ export function AvStage({
   signals,
   onShareChange,
   title,
+  boardAgenda,
 }: {
   room: VenueRoom
   mode: RoomCameraMode
   /** What this call is, set by the host for this room ("Team call", "Day two opening"). */
   title?: string
+  /** The steps the workshop board opens with. */
+  boardAgenda?: BoardAgenda | null
   /** Everyone in this room, for seeding the tiles. */
   occupants: VenueOccupant[]
   /** Whoever is presenting right now, if anyone. */
@@ -200,6 +204,7 @@ export function AvStage({
               fill={fill}
               translationAllowed={room.live_translation !== false}
               allowBoard={room.kind === 'workshop'}
+              boardAgenda={boardAgenda}
               people={people}
               hands={signals?.hands.map((hand) => hand.userId)}
               headerSlots={{ count: countSlot, chips: chipSlot }}

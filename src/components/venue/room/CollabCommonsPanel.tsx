@@ -90,11 +90,14 @@ export function CollabCommonsPanel({ eventId, isHost }: { eventId: string; isHos
   const { openPanel } = useMessagingPanel()
   const nameOf = (id: string | null) => (id ? teams.find((x) => x.id === id)?.name : null) ?? t`Someone`
   const live = bridges.filter((b) => isLive(b))
+  // Offers and needs side by side, so a match is easy to spot. Shared data is
+  // still a place to post; its column appears once somebody has.
+  const shownCols = COLS.filter((c) => c.id !== 'data' || notes.some((n) => n.column_key === 'data'))
 
   return (
     <section className="space-y-4 rounded-2xl border border-ktip-sand-200 bg-white p-4" aria-label={t`Collab Commons`}>
-      <div className="grid gap-3 md:grid-cols-3">
-        {COLS.map((c) => (
+      <div className={shownCols.length > 2 ? 'grid gap-3 md:grid-cols-3' : 'grid gap-3 md:grid-cols-2'}>
+        {shownCols.map((c) => (
           <div key={c.id} className="flex min-h-[12rem] flex-col gap-2 rounded-xl bg-ktip-sand-100 p-2.5">
             <h4 className="px-1 font-display text-sm font-bold text-ktip-sand-800">{i18n._(c.label)}</h4>
             <p className="px-1 text-xs text-ktip-sand-500">{i18n._(c.hint)}</p>

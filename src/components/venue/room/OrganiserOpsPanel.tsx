@@ -1,4 +1,7 @@
 import { Fragment, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../../../lib/supabase'
+import { keys } from '../../../queries/keys'
 import { ArrowDown, ArrowUp, ChevronRight, Download } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
@@ -125,6 +128,25 @@ export function OrganiserOpsPanel({ event, occupants, isHost }: Props) {
   )
   const totals = useMemo(() => grandTotals(grouped), [grouped])
 
+  // The help line (211), when this venue has it: how many wait, and how long.
+  const helpLine = useQuery({
+    queryKey: keys.sub('venue', 'ops-help-line', event.id),
+    enabled: isHost,
+    refetchInterval: 30_000,
+    retry: false,
+    queryFn: async (): Promise<{ count: number; longest: number } | null> => {
+      const { data, error } = await (supabase as any)
+        .from('venue_help_requests')
+        .select('created_at')
+        .eq('event_id', event.id)
+        .eq('status', 'waiting')
+      if (error) return null
+      const rows = (data || []) as Array<{ created_at: string }>
+      const oldest = rows.length ? Math.min(...rows.map((row) => Date.parse(row.created_at))) : null
+      return { count: rows.length, longest: oldest ? Math.max(1, Math.round((Date.now() - oldest) / 60_000)) : 0 }
+    },
+  })
+
   if (!isHost) return null
 
   // ---- KPI row ------------------------------------------------------------
@@ -133,18 +155,52 @@ export function OrganiserOpsPanel({ event, occupants, isHost }: Props) {
   const withoutTeam = present.filter((o) => o.role === 'participant' && !onTeam.has(o.user_id))
   const dash = '–'
 
-  const kpis: Array<{ label: string; value: string; hint?: string }> = [
-    { label: t`People online`, value: String(present.length) },
+  // Who is in a room now, and across how many rooms.
+  const inRooms = present.filter((o) => o.room_id)
+  const busyRooms = new Set(inRooms.map((o) => o.room_id)).size
+  // Who reads the venue in a language other than English: the people a
+  // translation is working for. "FR 21 · ES 11".
+  const readers = new Map<string, number>()
+  for (const o of present) {
+    if (o.lang && o.lang !== 'en') readers.set(o.lang, (readers.get(o.lang) ?? 0) + 1)
+  }
+  const readerCount = [...readers.values()].reduce((sum, n) => sum + n, 0)
+  const readerSplit = [...readers.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([code, n]) => `${code.toUpperCase()} ${n}`)
+    .join(' · ')
+  const waiting = helpLine.data
+  const longest = waiting?.longest ?? 0
+
+  const kpis: Array<{ label: string; value: string; hint?: string; warn?: boolean }> = [
+    { label: t`In the venue`, value: String(present.length) },
+    waiting
+      ? {
+          label: t`Waiting for help`,
+          value: String(waiting.count),
+          hint: waiting.count > 0 ? t`Longest ${longest} min` : t`Nobody in line`,
+          warn: waiting.count >= 4 || longest >= 10,
+        }
+      : {
+          label: t`Open help requests`,
+          value: snapshot.data ? String(snapshot.data.open_help_requests) : dash,
+          hint: t`Hands raised in the last 5 minutes`,
+        },
+    {
+      label: t`In a room`,
+      value: String(inRooms.length),
+      hint: busyRooms === 1 ? t`In 1 room` : t`Across ${busyRooms} rooms`,
+    },
+    {
+      label: t`Following a translation`,
+      value: String(readerCount),
+      hint: readerSplit || t`Everyone reads English`,
+    },
     { label: t`Teams`, value: teamsLoading ? dash : String(teams.length) },
     {
       label: t`Without a team`,
       value: teamsLoading ? dash : String(withoutTeam.length),
       hint: t`Participants online now`,
-    },
-    {
-      label: t`Open help requests`,
-      value: snapshot.data ? String(snapshot.data.open_help_requests) : dash,
-      hint: t`Hands raised in the last 5 minutes`,
     },
     {
       label: t`Submissions`,
@@ -197,12 +253,21 @@ export function OrganiserOpsPanel({ event, occupants, isHost }: Props) {
         <h2 className="font-display text-sm font-bold uppercase tracking-wider text-ktip-sand-700">
           <Trans>Organiser ops</Trans>
         </h2>
+        <span className="text-xs text-ktip-sand-500">
+          <Trans>Updated live</Trans>
+        </span>
       </header>
 
       {/* KPI row */}
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-xl border border-ktip-sand-100 bg-white px-3 py-2.5">
+          <div
+            key={kpi.label}
+            className={cn(
+              'rounded-xl border px-3 py-2.5',
+              kpi.warn ? 'border-ktip-sun-300 bg-ktip-sun-50' : 'border-ktip-sand-100 bg-white'
+            )}
+          >
             <dt className="text-xs font-medium text-ktip-sand-500">{kpi.label}</dt>
             <dd className="font-display text-2xl font-bold text-ktip-sand-900">{kpi.value}</dd>
             {kpi.hint && <dd className="text-xs text-ktip-sand-500">{kpi.hint}</dd>}

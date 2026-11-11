@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Hand, LifeBuoy } from 'lucide-react'
-import { Trans, useLingui } from '@lingui/react/macro'
+import { SelectOrdinal, Trans, useLingui } from '@lingui/react/macro'
 import { cn } from '../../../lib/utils'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useToast } from '../../../contexts/ToastContext'
@@ -110,7 +110,7 @@ export function HelpQueuePanel({
               </span>
               {mine.status === 'waiting' && (
                 <span className="font-display text-5xl font-bold leading-none text-ktip-sand-900">
-                  {ahead === 0 ? <Trans>Next</Trans> : <Trans>No. {myPlace}</Trans>}
+                  {ahead === 0 ? <Trans>Next</Trans> : <SelectOrdinal value={myPlace} one="#st" two="#nd" few="#rd" other="#th" />}
                 </span>
               )}
               <p className="text-sm text-ktip-sand-700">

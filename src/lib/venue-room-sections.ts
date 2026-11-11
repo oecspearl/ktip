@@ -76,6 +76,7 @@ export type RoomSectionId =
   | 'lineup'
   | 'on_next'
   | 'ops_alerts'
+  | 'room_notes'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -478,6 +479,15 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'main',
     defaultFor: [],
     order: 35,
+  },
+  // Migration 215. Opt-in until it is live everywhere.
+  {
+    id: 'room_notes',
+    label: msg`Shared notes`,
+    blurb: msg`One page everyone in the room writes on: today's plan, questions for the mentor.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 34,
   },
   {
     id: 'library',

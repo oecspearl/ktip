@@ -18,7 +18,7 @@ import { CallCaptionsProvider, CaptionOverlay, SubtitleBand, TranslationChip, Tr
 import { CallDock, type CallSignals } from './CallDock'
 import { BoardCanvas, useBoardShare } from './CallBoard'
 import { CallPeopleProvider, CallTile, type CallPerson } from './CallTile'
-import { BOARD_TRACK } from '../../../lib/call-board'
+import { BOARD_TRACK, type BoardAgenda } from '../../../lib/call-board'
 import { cn } from '../../../lib/utils'
 import { reactionArt } from '../../../lib/reaction-emoji'
 import { LIVEKIT_ROOM_OPTIONS } from '../../../lib/livekit-options'
@@ -72,6 +72,7 @@ export function VenueCall({
   translationAllowed = true,
   signals,
   allowBoard = false,
+  boardAgenda,
   onShareChange,
   people,
   hands,
@@ -89,6 +90,8 @@ export function VenueCall({
   signals?: CallSignals & { reactions: FloatingReaction[] }
   /** Offer "Share a board" (workshop rooms). */
   allowBoard?: boolean
+  /** What the board opens with: the session's steps, typed by the host. */
+  boardAgenda?: BoardAgenda | null
   /** Told whenever a share starts, changes hands or ends, and null on leaving. */
   onShareChange?: (sharer: CallSharer | null) => void
   /** Names and photos by user id (the call identity), for camera-off tiles. */
@@ -142,6 +145,7 @@ export function VenueCall({
           canPublish={grant.can_publish}
           signals={signals}
           allowBoard={allowBoard}
+          boardAgenda={boardAgenda}
           onShareChange={onShareChange}
           onLeave={() => setInCall(false)}
         />
@@ -196,6 +200,7 @@ function CallBody({
   canPublish,
   signals,
   allowBoard,
+  boardAgenda,
   onShareChange,
   onLeave,
 }: {
@@ -204,12 +209,13 @@ function CallBody({
   canPublish: boolean
   signals?: CallSignals & { reactions: FloatingReaction[] }
   allowBoard: boolean
+  boardAgenda?: BoardAgenda | null
   onShareChange?: (sharer: CallSharer | null) => void
   onLeave: () => void
 }) {
   const shell = useRef<HTMLDivElement>(null)
   const [columnHidden, setColumnHidden] = useState(false)
-  const board = useBoardShare()
+  const board = useBoardShare(boardAgenda)
 
   const tracks = useTracks(
     [
@@ -258,6 +264,7 @@ function CallBody({
         columnHidden={columnHidden}
         fill={fill}
         boardCanvas={screen.participant.isLocal && sharer?.board ? board.canvas : null}
+        boardAgenda={board.agenda}
       />
     )
   else if (cameras.length === 0) stage = <SubtitleBand />
@@ -302,6 +309,7 @@ function PresentLayout({
   columnHidden,
   fill,
   boardCanvas,
+  boardAgenda,
 }: {
   screen: TrackReference
   cameras: TrackReferenceOrPlaceholder[]
@@ -309,6 +317,7 @@ function PresentLayout({
   fill?: boolean
   /** My own board, to draw on, in place of the video of it. */
   boardCanvas: HTMLCanvasElement | null
+  boardAgenda?: { steps: number; step: number; setStep: (next: number) => void } | null
 }) {
   const { t } = useLingui()
   const isBoard = screen.publication.trackName === BOARD_TRACK
@@ -347,7 +356,7 @@ function PresentLayout({
           )}
         >
           {boardCanvas ? (
-            <BoardCanvas canvas={boardCanvas} />
+            <BoardCanvas canvas={boardCanvas} agenda={boardAgenda} />
           ) : (
             <VideoTrack trackRef={screen} className="h-full w-full object-contain" />
           )}
