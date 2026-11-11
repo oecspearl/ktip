@@ -260,8 +260,13 @@ describe('originalVolume', () => {
 
   it('gives their voice back whenever translation cannot reach me', () => {
     expect(originalVolume({ ...base, translationAllowed: false }).reason).toBe('room-off')
-    for (const cap of ['muted', 'paused', 'cannot', undefined] as const) {
+    for (const cap of ['paused', 'cannot'] as const) {
       expect(originalVolume({ ...base, theirCap: cap })).toEqual({ volume: 1, reason: 'not-transcribed' })
+    }
+    // Before their browser has reported anything, their voice is already
+    // muted: the first sentence must not come through in the original.
+    for (const cap of ['muted', undefined] as const) {
+      expect(originalVolume({ ...base, theirCap: cap })).toEqual({ volume: 0, reason: 'translated' })
     }
     expect(originalVolume({ ...base, untranslated: true })).toEqual({ volume: 1, reason: 'untranslated' })
   })
