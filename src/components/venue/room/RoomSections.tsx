@@ -43,6 +43,8 @@ import type {
 } from '../../../types'
 import { useLingui } from '@lingui/react/macro'
 import { TeamWorkspacePanel } from './homebase/TeamWorkspacePanel'
+import { TeamShelf } from './homebase/TeamShelf'
+import { RunOfShowPanel } from './RunOfShowPanel'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -163,7 +165,7 @@ export function RoomSections({
         : t`${sharerName} started sharing, so the call grew to fill the room. ${toolName} is just below.`
       : null
   const cell = (id: RoomSectionId, extra?: string) => (
-    <div key={id} className={cn('min-w-0 [&:has(>div:empty)]:hidden', extra)}>
+    <div key={id} data-room-section={id} className={cn('min-w-0 scroll-mt-[calc(var(--nav-h)+5rem)] [&:has(>div:empty)]:hidden', extra)}>
       <div>{render(id)}</div>
     </div>
   )
@@ -243,7 +245,12 @@ export function RoomSections({
 
         {plan.shelf.length > 0 && (
           <div className="grid min-w-0 grid-cols-1 content-start gap-4 md:grid-cols-2 lg:col-start-1">
-            {plan.shelf.map((id) => cell(id, WIDE_ON_SHELF.has(id) ? 'md:col-span-2' : undefined))}
+            {plan.shelf.map((id) =>
+              cell(
+                id,
+                WIDE_ON_SHELF.has(id) || (id === 'countdown' && room.kind === 'team') ? 'md:col-span-2' : undefined
+              )
+            )}
           </div>
         )}
       </div>
@@ -506,8 +513,14 @@ function RoomSection({
         />
       )
 
+    // In a Homebase the deadline comes with the team's milestones and what is
+    // left to hand in; everywhere else it is the plain countdown.
     case 'countdown':
-      return <RoomCountdown deadline={event.submission_deadline} />
+      return room.kind === 'team' ? (
+        <TeamShelf event={event} room={room} />
+      ) : (
+        <RoomCountdown deadline={event.submission_deadline} />
+      )
 
     case 'announcements':
       return <RoomAnnouncements eventId={event.id} />
@@ -535,6 +548,9 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'run_of_show':
+      return <RunOfShowPanel eventId={event.id} />
 
     case 'venue_headcount':
       return <VenueHeadcountPanel occupants={occupants} />

@@ -66,6 +66,7 @@ export type RoomSectionId =
   | 'onboarding'
   | 'wayfinding'
   | 'venue_headcount'
+  | 'run_of_show'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -451,6 +452,14 @@ export const SECTIONS: RoomSectionDef[] = [
     slot: 'aside',
     defaultFor: ['main_hall', 'help_desk'],
     order: 80,
+  },
+  {
+    id: 'run_of_show',
+    label: msg`Run of show`,
+    blurb: msg`The event's agenda, with a mark on what is happening now.`,
+    slot: 'aside',
+    defaultFor: ['main_hall'],
+    order: 62,
   },
   {
     id: 'venue_headcount',

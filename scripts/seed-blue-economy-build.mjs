@@ -169,6 +169,7 @@ const ROOMS = [
     description: 'Check in, set your language and find your team before you head in.',
     sections: sec(
       'check_in',
+      'run_of_show',
       body('rules', 'House rules. Be kind, credit what you borrow, and keep keys and passwords out of chat. Submissions close at 18:00 AST and late entries cannot be judged.'),
       'wayfinding',
       tab('chat', 'Desk chat'),
@@ -178,7 +179,7 @@ const ROOMS = [
   R(2, 0, 'main-hall', 'Main Hall', 'main_hall', 'theatre', [9, 8], '#2A5788', 1.75, {
     description: 'Opening talks, announcements and the closing ceremony.',
     audio_mode: 'moderated',
-    sections: sec('host_controls', call('Day two opening'), 'challenge_brief', 'countdown', 'wayfinding', 'chat', 'occupants', 'announcements'),
+    sections: sec('host_controls', call('Day two opening'), 'run_of_show', 'challenge_brief', 'countdown', 'wayfinding', 'chat', 'occupants', 'announcements'),
   }),
   R(3, 0, 'networking-lounge', 'Networking Lounge', 'networking', 'cafe', [8, 6], '#E6AC09', 1.25, {
     description: 'Sit at a table, meet people, find teammates.',
