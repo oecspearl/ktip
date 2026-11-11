@@ -73,6 +73,8 @@ export type RoomSectionId =
   | 'booking_slots'
   | 'library'
   | 'announce_all'
+  | 'lineup'
+  | 'on_next'
 
 export type RoomSectionSlot = 'main' | 'aside'
 
@@ -492,6 +494,23 @@ export const SECTIONS: RoomSectionDef[] = [
     roles: ['organizer'],
     defaultFor: [],
     order: 38,
+  },
+  // Migration 213. Opt-in until it is live everywhere.
+  {
+    id: 'lineup',
+    label: msg`Lineup`,
+    blurb: msg`The stage's running order, with who is on now. Organisers move it on.`,
+    slot: 'aside',
+    defaultFor: [],
+    order: 61,
+  },
+  {
+    id: 'on_next',
+    label: msg`You are on next`,
+    blurb: msg`For speakers: their own coming slot, a countdown, and the way to the stage.`,
+    slot: 'main',
+    defaultFor: [],
+    order: 4,
   },
   {
     id: 'help_queue',

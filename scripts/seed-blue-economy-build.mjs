@@ -275,7 +275,7 @@ const ROOMS = [
     description: 'Every team demos for five minutes. Vote for People’s Choice.',
     audio_mode: 'listen_only',
     max_publishers: 6,
-    sections: sec('host_controls', call('Team Coralline · 3 of 5'), 'peoples_choice', 'showcase_gallery', 'chat', 'qa', 'hand_queue', 'occupants'),
+    sections: sec('host_controls', call('Team Coralline · 3 of 6'), 'peoples_choice', 'lineup', 'showcase_gallery', 'chat', 'qa', 'hand_queue', 'occupants'),
   }),
   R(15, 3, 'quest-board', 'Quest Board', 'breakout', 'podium', [6, 5], '#E6AC09', 1.2, {
     description: 'Small challenges for points. Points count toward the Spirit award.',
@@ -296,7 +296,7 @@ const ROOMS = [
   R(18, 4, 'green-room', 'Green Room', 'breakout', 'lounge', [7, 5], '#041E42', 1, {
     description: 'Speakers check their setup before going on stage.',
     allowed_roles: ['speaker', 'mentor', 'judge', 'organizer'],
-    sections: sec('host_controls', call('Backstage', 'grid'), 'caption_test', 'chat', tab('occupants', 'Stage crew')),
+    sections: sec('on_next', 'host_controls', call('Backstage', 'grid'), 'caption_test', 'chat', tab('occupants', 'Stage crew')),
   }),
 ]
 
@@ -585,6 +585,18 @@ const CHAT = [
   [18, 'kemar', '18:50', 'Nadia, you are on after Mangrove. Test your screen share now.'],
 ]
 
+// The Showcase Stage running order (213): time, title, detail, team, speaker, status.
+// Nadia's own short talk comes after Team Mangrove, so the Green Room tells her
+// "You are on next, after Team Mangrove", as the design has it.
+const LINEUP = [
+  ['19:00', 'Harbour Wait', null, 4, null, 'done'],
+  ['19:06', 'Catch Log', null, 3, null, 'done'],
+  ['19:12', 'ReefWatch', null, 1, null, 'live'],
+  ['19:18', 'Co-op Ledger', null, 2, null, 'upcoming'],
+  ['19:24', 'What fishers told us', 'A short talk by Nadia Bobb', null, 'you', 'upcoming'],
+  ['19:30', 'Net Repair', null, 5, null, 'upcoming'],
+]
+
 // Hardware Bench stock (212): name, how many, how many already reserved.
 const KIT = [
   ['ESP32 boards', 20, 14],
@@ -633,8 +645,7 @@ const NOT_SEEDED = [
   'Help Desk wait estimate: the design says "About 6 minutes" for third in line; the room works it out as 3 minutes per person ahead (needs migration 211)',
   'The US$5,000 prize panel: no field (the prize is in the room description)',
   'Kit reservations are one per person per item, so the taken counts are made up of the cast (needs migration 212)',
-  'Showcase lineup order and the "3 of 12" call title, Live pill: no field',
-  'Green Room "you are on next" slot: no table',
+  'Showcase: 6 slots, not 12; the call title is set by hand per room (needs migration 213 for the lineup)',
   'Focus timer goal and minutes left: the timer lives only in the browser',
   'Coffee table topics: no column (tables are Table 1 to 4)',
   'Pinned chat message: the room pins the newest host message itself; the pinned text is seeded as a host message',
@@ -1015,6 +1026,26 @@ async function main() {
       }))
     )
     say('chat', error, `${CHAT.length} chat lines across ${new Set(CHAT.map((c) => c[0])).size} rooms`)
+  }
+
+  // ---- Stage running order (213), when the table exists
+  {
+    await admin.from('venue_stage_lineup').delete().eq('event_id', EVENT_ID)
+    const { error } = await admin.from('venue_stage_lineup').insert(
+      LINEUP.map(([time, title, detail, team, speaker, status], i) => ({
+        event_id: EVENT_ID,
+        room_id: roomId(14),
+        position: i + 1,
+        title,
+        detail,
+        team_id: team ? teamId(team) : null,
+        speaker_id: speaker ? ids[speaker] : null,
+        starts_at: at(time),
+        minutes: 5,
+        status,
+      }))
+    )
+    say('lineup', error, `${LINEUP.length} slots on the stage`)
   }
 
   // ---- Kit, library and booking slots (212), when the tables exist

@@ -48,6 +48,7 @@ import { RunOfShowPanel } from './RunOfShowPanel'
 import { RoomQuestionsPanel } from './RoomQuestionsPanel'
 import { HelpQueuePanel } from './HelpQueuePanel'
 import { AnnounceAllPanel, BookingSlotsPanel, KitPanel, LibraryPanel } from './RoomToolPanels'
+import { LineupPanel, OnNextPanel } from './StageLineupPanels'
 import { QuestBoardPanel } from './QuestBoardPanel'
 import { CollabCommonsPanel } from './CollabCommonsPanel'
 import { CoffeeTablesPanel } from './CoffeeTablesPanel'
@@ -553,6 +554,12 @@ function RoomSection({
           fill={fill}
         />
       )
+
+    case 'lineup':
+      return <LineupPanel event={event} room={room} isHost={isHost} />
+
+    case 'on_next':
+      return <OnNextPanel event={event} rooms={rooms} />
 
     case 'kit':
       return <KitPanel room={room} isHost={isHost} canPost={canPost} />

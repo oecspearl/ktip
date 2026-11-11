@@ -30,7 +30,7 @@ export interface RoomShellPlan {
   dock: RoomSectionId[]
 }
 
-const BAND: RoomSectionId[] = ['sponsor_hero', 'check_in', 'host_controls']
+const BAND: RoomSectionId[] = ['sponsor_hero', 'check_in', 'on_next', 'host_controls']
 const DOCK_BASE: RoomSectionId[] = ['chat', 'occupants']
 
 /** The one dock tab each kind of room adds, first visible one wins. */
