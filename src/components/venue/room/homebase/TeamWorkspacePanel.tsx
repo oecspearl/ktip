@@ -139,13 +139,13 @@ export function TeamWorkspacePanel({ eventId, room, isHost }: Props) {
   if (!mine && !isHost) return null
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof KanbanSquare }> = [
-    { id: 'board', label: t`Task board`, icon: KanbanSquare },
+    { id: 'board', label: t`Board`, icon: KanbanSquare },
     { id: 'whiteboard', label: t`Whiteboard`, icon: PenTool },
     { id: 'docs', label: t`Docs`, icon: FileText },
-    { id: 'calendar', label: t`Calendar`, icon: CalendarDays },
-    { id: 'milestones', label: t`Milestones`, icon: Flag },
     { id: 'files', label: t`Files`, icon: FolderOpen },
-    { id: 'links', label: t`Integrations`, icon: Link2 },
+    { id: 'calendar', label: t`Calendar`, icon: CalendarDays },
+    { id: 'links', label: t`Links`, icon: Link2 },
+    { id: 'milestones', label: t`Milestones`, icon: Flag },
   ]
 
   return (

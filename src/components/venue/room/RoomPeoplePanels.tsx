@@ -50,7 +50,6 @@ export function SkillFinderPanel({
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, TOP_SKILLS)
-      .map(([skill]) => skill)
   }, [roster])
 
   const term = query.trim()
@@ -65,7 +64,7 @@ export function SkillFinderPanel({
   })
 
   return (
-    <RoomPanel title={t`Find someone`} className={panelShell(fill)}>
+    <RoomPanel title={t`Skills in the room`} className={panelShell(fill)}>
       <div className="p-3">
         <label className="relative block">
           <Search
@@ -84,14 +83,15 @@ export function SkillFinderPanel({
 
         {!needle && skills.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
-            {skills.map((skill) => (
+            {skills.map(([skill, count]) => (
               <button
                 key={skill}
                 type="button"
                 onClick={() => setQuery(skill)}
-                className="rounded-full border border-ktip-sand-200 bg-ktip-sand-50 px-2 py-0.5 text-[11px] text-ktip-sand-600 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
+                className="inline-flex items-center gap-1.5 rounded-full border border-ktip-sand-200 bg-ktip-sand-50 px-2 py-0.5 text-micro font-extrabold text-ktip-sand-700 hover:border-ktip-ocean-300 hover:text-ktip-ocean-700"
               >
                 {skill}
+                <span className="font-semibold tabular-nums text-ktip-sand-400">{count}</span>
               </button>
             ))}
           </div>

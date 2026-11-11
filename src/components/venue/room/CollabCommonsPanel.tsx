@@ -14,8 +14,8 @@ import { isLive, useBridges } from '../../../hooks/useBridges'
 
 type Col = 'offers' | 'needs' | 'data'
 const COLS: Array<{ id: Col; label: MessageDescriptor; hint: MessageDescriptor }> = [
-  { id: 'offers', label: msg`Offers`, hint: msg`Skills or time your team can lend` },
-  { id: 'needs', label: msg`Needs`, hint: msg`What your team is stuck on` },
+  { id: 'offers', label: msg`Offering`, hint: msg`Skills or time your team can lend` },
+  { id: 'needs', label: msg`Looking for`, hint: msg`What your team is stuck on` },
   { id: 'data', label: msg`Shared data`, hint: msg`Datasets and APIs anyone can use` },
 ]
 

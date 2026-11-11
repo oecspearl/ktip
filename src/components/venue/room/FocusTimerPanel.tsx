@@ -44,6 +44,13 @@ export function FocusTimerPanel() {
     setPaused(null)
   }
 
+  const addFive = () => {
+    const extra = 5 * 60 * 1000
+    if (paused !== null) setPaused(paused + extra)
+    else if (endsAt !== null) setEndsAt(Math.max(endsAt, Date.now()) + extra)
+    doneRef.current = false
+  }
+
   const reset = () => {
     setEndsAt(null)
     setPaused(null)
@@ -88,7 +95,7 @@ export function FocusTimerPanel() {
         </div>
       )}
 
-      <div className="mt-4 flex justify-center gap-2">
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
         {running ? (
           <button
             type="button"
@@ -111,11 +118,20 @@ export function FocusTimerPanel() {
         {endsAt !== null && (
           <button
             type="button"
+            onClick={addFive}
+            className="rounded-xl border border-ktip-sand-200 px-3 py-1.5 text-sm font-semibold text-ktip-sand-700 hover:border-ktip-ocean-300"
+          >
+            <Trans>Add 5 minutes</Trans>
+          </button>
+        )}
+        {endsAt !== null && (
+          <button
+            type="button"
             onClick={reset}
             className="flex items-center gap-1.5 rounded-xl border border-ktip-sand-200 px-3 py-1.5 text-sm font-semibold text-ktip-sand-600 hover:border-ktip-sand-300"
           >
             <RotateCcw size={14} aria-hidden="true" />
-            <Trans>Reset</Trans>
+            {finished ? <Trans>Reset</Trans> : <Trans>End early</Trans>}
           </button>
         )}
       </div>
