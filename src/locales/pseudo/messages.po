@@ -1297,6 +1297,10 @@ msgstr ""
 msgid "Message for {appName}"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "What you say, on your own screen"
+msgstr ""
+
 #: src/lib/permissions.ts
 msgid "Manage platform"
 msgstr ""
@@ -4934,6 +4938,10 @@ msgstr ""
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Show my own subtitles"
+msgstr ""
+
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Send invitation"
 msgstr ""
@@ -7228,6 +7236,10 @@ msgstr ""
 #. placeholder {0}: myTeam.name
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Listening for your voice…"
 msgstr ""
 
 #: src/components/venue/room/ReactionFan.tsx
@@ -17382,6 +17394,7 @@ msgstr ""
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
@@ -22097,6 +22110,10 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
+msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your subtitles stopped. The reason is under the call."
 msgstr ""
 
 #: src/components/layout/Navbar.tsx

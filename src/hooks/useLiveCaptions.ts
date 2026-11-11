@@ -109,12 +109,19 @@ export interface LiveCaptions {
 
 export function useLiveCaptions({
   transcribe,
+  followed,
   speaks,
   targets,
   reads,
 }: {
-  /** Run my recogniser: someone follows me, my microphone is on, I have not paused. */
+  /** Run my recogniser: my microphone is on, I have not paused, and someone (or I) will read it. */
   transcribe: boolean
+  /**
+   * Someone else is following me. Whisper is metered against the
+   * organisation's daily allowance, so it never runs just to show me my own
+   * words; the browser's recogniser is free and may.
+   */
+  followed: boolean
   speaks: UiLang
   /** Languages to translate my words into. Empty: originals only. */
   targets: UiLang[]
@@ -264,6 +271,7 @@ export function useLiveCaptions({
 
   useEffect(() => {
     if (!transcribe || !engine) return
+    if (engine === 'whisper' && !followed) return
 
     // Browser recognisers wait for a pause to call anything final, so settled
     // words go out in pieces while the speaker is still talking. Whisper
@@ -341,7 +349,7 @@ export function useLiveCaptions({
     // `speaks` is a dependency on purpose: changing the language you speak
     // mid-call restarts the recogniser, or you carry on being transcribed as
     // the language you no longer speak.
-  }, [transcribe, engine, onFinal, speaks, meterSpeech])
+  }, [transcribe, followed, engine, onFinal, speaks, meterSpeech])
 
   // Sweep expired lines even when nobody is talking.
   useEffect(() => {

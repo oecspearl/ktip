@@ -1317,6 +1317,10 @@ msgstr ""
 msgid "Message for {appName}"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "What you say, on your own screen"
+msgstr "Lo que dices, en tu pantalla"
+
 #: src/lib/permissions.ts
 msgid "Manage platform"
 msgstr "Administrar la plataforma"
@@ -5002,6 +5006,10 @@ msgstr "Habilidades profesionales"
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
 msgstr "La llamada. Hasta que LiveKit esté disponible, se indica claramente en lugar de parecer averiada."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Show my own subtitles"
+msgstr "Mostrar mis propios subtítulos"
+
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Send invitation"
 msgstr "Enviar invitación"
@@ -7331,6 +7339,10 @@ msgstr "Pizarra sin título"
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
 msgstr "Ya forma parte de {0}. Cada equipo tiene un Homebase."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Listening for your voice…"
+msgstr "Escuchando tu voz…"
 
 #: src/components/venue/room/ReactionFan.tsx
 msgid "Remove one to pick another."
@@ -17542,6 +17554,7 @@ msgstr "Esto se envía al equipo de seguridad de la OECS, no a la persona que es
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
@@ -22275,6 +22288,10 @@ msgstr "Gestionar foros"
 #: src/i18n/harvested.ts
 msgid "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
 msgstr ""
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your subtitles stopped. The reason is under the call."
+msgstr "Tus subtítulos se detuvieron. El motivo aparece debajo de la llamada."
 
 #: src/components/layout/Navbar.tsx
 msgid "Start community discussions"

@@ -63,6 +63,8 @@ interface Prefs {
   along?: boolean
   /** Show the original under each translated line. */
   original?: boolean
+  /** My own words as subtitles on my own screen. On unless switched off. */
+  own?: boolean
 }
 
 function readPrefs(): Prefs {
@@ -73,6 +75,7 @@ function readPrefs(): Prefs {
         foreign: isForeignMode(raw.foreign) ? raw.foreign : undefined,
         along: raw.along === true,
         original: raw.original === true,
+        own: raw.own === false ? false : undefined,
       }
     }
     // v2 answers that still mean something: subtitles-only keeps reading
@@ -119,6 +122,12 @@ export interface CallLanguage {
   setAlong: (on: boolean) => void
   showOriginal: boolean
   setShowOriginal: (on: boolean) => void
+  /**
+   * My own words show as subtitles on my screen. On by default: it is how a
+   * speaker checks their own side works before asking why nobody can read them.
+   */
+  own: boolean
+  setOwn: (on: boolean) => void
   /** My own captions, paused for everyone. Per call: a pause should not outlive it. */
   paused: boolean
   setPaused: (on: boolean) => void
@@ -283,6 +292,8 @@ export function useCallLanguage(
     setAlong: useCallback((on: boolean) => update({ along: on }), [update]),
     showOriginal: prefs.original === true,
     setShowOriginal: useCallback((on: boolean) => update({ original: on }), [update]),
+    own: prefs.own !== false,
+    setOwn: useCallback((on: boolean) => update({ own: on }), [update]),
     paused,
     setPaused,
     roster,

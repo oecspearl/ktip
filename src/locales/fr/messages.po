@@ -1317,6 +1317,10 @@ msgstr ""
 msgid "Message for {appName}"
 msgstr ""
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "What you say, on your own screen"
+msgstr "Ce que vous dites, sur votre écran"
+
 #: src/lib/permissions.ts
 msgid "Manage platform"
 msgstr "Gérer la plateforme"
@@ -5002,6 +5006,10 @@ msgstr "Compétences professionnelles"
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
 msgstr "L'appel. Tant que LiveKit n'est pas déployé, cela est indiqué clairement plutôt que de sembler défaillant."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Show my own subtitles"
+msgstr "Afficher mes propres sous-titres"
+
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Send invitation"
 msgstr "Envoyer l'invitation"
@@ -7345,6 +7353,10 @@ msgstr "Tableau blanc sans titre"
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
 msgstr "Vous êtes déjà dans l'équipe {0}. Chaque équipe a une seule Homebase."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Listening for your voice…"
+msgstr "À l’écoute de votre voix…"
 
 #: src/components/venue/room/ReactionFan.tsx
 msgid "Remove one to pick another."
@@ -17704,6 +17716,7 @@ msgstr "Ceci est transmis à l'équipe de sécurité de l'OECS, et non à la per
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
@@ -22491,6 +22504,10 @@ msgstr "Gérer les forums"
 #: src/i18n/harvested.ts
 msgid "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
 msgstr "KTIP — la Plateforme de Connaissance, Technologie et Innovation — est exploité par %entity%, %address%, agissant en tant que responsable du traitement des données personnelles traitées sur la plateforme."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your subtitles stopped. The reason is under the call."
+msgstr "Vos sous-titres se sont arrêtés. La raison est indiquée sous l’appel."
 
 #: src/components/layout/Navbar.tsx
 msgid "Start community discussions"

@@ -119,14 +119,18 @@ export function CallCaptionsProvider({
     [language.roster, language.speaks, translationAllowed]
   )
 
-  // Transcribe only while someone is following AND my microphone is live. The
-  // recogniser opens its own microphone stream, so muting in the call would not
-  // silence it; without the second condition a muted speaker would still be
-  // captioned to the room.
-  const transcribe = canPublish && isMicrophoneEnabled && !language.paused && audience.total > 0
+  // Transcribe while my microphone is live and somebody will read it: someone
+  // following me, or me, checking my own words (2026-11-10: with nobody able
+  // to see their own lines, a two-device test could not tell which side had
+  // failed). The recogniser opens its own microphone stream, so muting in the
+  // call would not silence it; without the microphone condition a muted
+  // speaker would still be captioned to the room.
+  const followed = audience.total > 0
+  const transcribe = canPublish && isMicrophoneEnabled && !language.paused && (followed || language.own)
 
   const live = useLiveCaptions({
     transcribe,
+    followed,
     speaks: language.speaks,
     targets: audience.targets,
     reads: language.reads,
@@ -150,7 +154,10 @@ export function CallCaptionsProvider({
     () => [...language.roster.values()].some((state) => state.speaks !== language.reads),
     [language.roster, language.reads]
   )
-  const subs = language.along || (wantsAnySubtitles(language.foreign, false) && someoneForeign)
+  // My own words count: a speaker alone in a call still gets the area they
+  // appear in.
+  const ownSubs = canPublish && language.own && isMicrophoneEnabled
+  const subs = ownSubs || language.along || (wantsAnySubtitles(language.foreign, false) && someoneForeign)
   const voiceOn = language.foreign === 'voice' && translationAllowed
   const { reading } = useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
 
@@ -314,13 +321,16 @@ export function CaptionOverlay({
   band?: boolean
 }) {
   const { t } = useLingui()
-  const { live, subs, voiceOn, language } = useCallCaptions()
-  const { reads, foreign, along } = language
-  // Someone in my language only when I asked to read along; someone in
-  // another one unless I chose their original.
+  const { live, subs, voiceOn, language, micOn, micProblem, canPublish } = useCallCaptions()
+  const { reads, foreign, along, own } = language
+  // My own words when I have them on. Someone in my language only when I
+  // asked to read along; someone in another one unless I chose their original.
   const lines = useMemo(
-    () => live.captions.filter((caption) => !caption.own && showsLine(caption.lang, reads, foreign, along)),
-    [live.captions, reads, foreign, along]
+    () =>
+      live.captions.filter((caption) =>
+        caption.own ? own : showsLine(caption.lang, reads, foreign, along)
+      ),
+    [live.captions, reads, foreign, along, own]
   )
   const now = useNow(subs && lines.length > 0)
   const notice = useSubtitleNotice(subs, band)
@@ -330,6 +340,16 @@ export function CaptionOverlay({
   const last = runs[runs.length - 1]
   const newest = last?.pieces[last.pieces.length - 1]
   const showing = last && newest && now - newest.at <= HOLD_MS ? last : null
+  // Nothing on screen and my microphone is on: what my own recogniser is
+  // doing, so silence from it never looks like subtitles being off.
+  const mine =
+    !canPublish || !own || !micOn
+      ? null
+      : micProblem || live.failed || !live.supported
+        ? t`Your subtitles stopped. The reason is under the call.`
+        : live.transcribing
+          ? t`Listening for your voice…`
+          : null
 
   return (
     <div
@@ -343,13 +363,20 @@ export function CaptionOverlay({
       )}
     >
       {showing ? (
-        <SubtitleLine run={showing} reads={language.reads} showOriginal={language.showOriginal} voiceOn={voiceOn} readAloud={t`Read aloud`} />
+        <SubtitleLine
+          run={showing}
+          reads={language.reads}
+          showOriginal={language.showOriginal}
+          voiceOn={voiceOn}
+          readAloud={t`Read aloud`}
+          you={t`You`}
+        />
       ) : (
         // Nothing to read: say why, rather than an empty band that looks
         // exactly like subtitles not working.
-        notice && (
+        (notice || mine) && (
           <span className="rounded-full bg-black/60 px-3 py-1 text-micro font-semibold text-white/75">
-            {noticeText(notice)}
+            {notice ? noticeText(notice) : mine}
           </span>
         )
       )}
@@ -378,23 +405,28 @@ function SubtitleLine({
   showOriginal,
   voiceOn,
   readAloud,
+  you,
 }: {
   run: CaptionRun<ResolvedCaption>
   reads: UiLang
   showOriginal: boolean
   voiceOn: boolean
   readAloud: string
+  /** "You", for my own lines. */
+  you: string
 }) {
   const from = run.pieces[0].lang
-  const translated = run.pieces.some((piece) => piece.translated)
-  const shown = tail(run.pieces.map((piece) => piece.display).join(' '), MAX_SUBTITLE_CHARS)
+  // My own words are shown as I said them, never as their translation.
+  const own = run.pieces[0].own
+  const translated = !own && run.pieces.some((piece) => piece.translated)
+  const shown = tail(run.pieces.map((piece) => (own ? piece.text : piece.display)).join(' '), MAX_SUBTITLE_CHARS)
   const original =
     translated && showOriginal ? tail(run.pieces.map((piece) => piece.text).join(' '), MAX_SUBTITLE_CHARS) : null
 
   return (
     <>
       <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-0.5 text-micro font-bold tracking-wide text-white/75">
-        {run.name && <span className="text-white">{run.name}</span>}
+        {(own || run.name) && <span className="text-white">{own ? you : run.name}</span>}
         {translated ? `${from.toUpperCase()} → ${reads.toUpperCase()}` : from.toUpperCase()}
         {translated && voiceOn && <Volume2 size={11} className="text-ktip-tropical-400" aria-label={readAloud} />}
       </span>
@@ -618,7 +650,7 @@ export function SpeakerStatus() {
   const newestMine = mine?.pieces[mine.pieces.length - 1]
   const now = useNow(live.transcribing && !!newestMine)
   const heard =
-    live.transcribing && mine && newestMine && now - newestMine.at <= HOLD_MS
+    !language.own && live.transcribing && mine && newestMine && now - newestMine.at <= HOLD_MS
       ? tail(mine.pieces.map((piece) => piece.text).join(' '), 90)
       : null
   const spoken = i18n._(LANG_NAME[language.speaks])
@@ -747,11 +779,13 @@ export function CallDebug() {
   if (!on || !value) return null
   const { language, live, audience, subs, transcribe, micOn, micProblem, translationAllowed, cap, mix } = value
   const last = live.captions[live.captions.length - 1]
+  const lastMine = [...live.captions].reverse().find((caption) => caption.own)
   const roster = [...language.roster.entries()]
   const volumes = [...mix.entries()]
   return (
     <pre className="col-span-full max-h-48 overflow-auto whitespace-pre-wrap rounded-control bg-black/60 p-2 font-mono text-micro leading-snug text-white/80">
       {[
+        `STEP 1 my own subtitles ${language.own ? 'on' : 'off'}: mic ${micOn}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, error ${live.error ?? 'none'}, heard ${lastMine ? `"${lastMine.text.slice(0, 60)}"` : 'nothing yet'}`,
         `me: speaks ${language.speaks}, reads ${language.reads}, foreign ${language.foreign}, along ${language.along}, subs ${subs}, paused ${language.paused}, mic ${micOn}${micProblem ? ` (${micProblem})` : ''}`,
         `room translation ${translationAllowed ? 'on' : 'off'}; notice ${language.notice ? `${language.notice.name} (${language.notice.speaks})` : 'none'}`,
         `their voices: ${volumes.map(([id, entry]) => `${id.slice(0, 8)} vol ${entry.volume} ${entry.reason}`).join(' | ') || 'nobody'}`,
@@ -900,6 +934,11 @@ function LanguageMenu({
       </div>
       {canPublish && (
         <div className="flex flex-col gap-3 border-t border-ktip-sand-200 pt-3">
+          {row(
+            <Trans>Show my own subtitles</Trans>,
+            <Trans>What you say, on your own screen</Trans>,
+            <Switch checked={language.own} onChange={language.setOwn} label={t`Show my own subtitles`} />
+          )}
           {row(
             <Trans>Subtitle me for others</Trans>,
             <Trans>Runs only while someone is reading your subtitles</Trans>,

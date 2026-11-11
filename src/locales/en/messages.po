@@ -1337,6 +1337,10 @@ msgstr "Shared"
 msgid "Message for {appName}"
 msgstr "Message for {appName}"
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "What you say, on your own screen"
+msgstr "What you say, on your own screen"
+
 #: src/lib/permissions.ts
 msgid "Manage platform"
 msgstr "Manage platform"
@@ -5081,6 +5085,10 @@ msgstr "Professional skills"
 msgid "The call. Until LiveKit lands it says so, rather than looking broken."
 msgstr "The call. Until LiveKit lands it says so, rather than looking broken."
 
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Show my own subtitles"
+msgstr "Show my own subtitles"
+
 #: src/components/venue/room/TeamFinderPanel.tsx
 msgid "Send invitation"
 msgstr "Send invitation"
@@ -7482,6 +7490,10 @@ msgstr "Untitled Whiteboard"
 #: src/components/venue/room/homebase/TeamWorkspacePanel.tsx
 msgid "You are already on {0}. Each team gets one Homebase."
 msgstr "You are already on {0}. Each team gets one Homebase."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Listening for your voice…"
+msgstr "Listening for your voice…"
 
 #: src/components/venue/room/ReactionFan.tsx
 msgid "Remove one to pick another."
@@ -18022,6 +18034,7 @@ msgstr "This goes to the OECS safety team, not to the person you are reporting. 
 #: src/components/profile/PortraitTile.tsx
 #: src/components/share/SharePreview.tsx
 #: src/components/venue/map/VenueMapExplorer.tsx
+#: src/components/venue/room/CallCaptions.tsx
 #: src/components/venue/room/CallTile.tsx
 #: src/components/venue/room/VenueCall.tsx
 #: src/pages/dashboard/tabs/VerificationTab.tsx
@@ -22858,6 +22871,10 @@ msgstr "Manage forums"
 #: src/i18n/harvested.ts
 msgid "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
 msgstr "KTIP — the Knowledge, Technology and Innovation Platform — is operated by %entity%, %address%, acting as the data controller for personal data processed on the platform."
+
+#: src/components/venue/room/CallCaptions.tsx
+msgid "Your subtitles stopped. The reason is under the call."
+msgstr "Your subtitles stopped. The reason is under the call."
 
 #: src/components/layout/Navbar.tsx
 msgid "Start community discussions"
