@@ -5,7 +5,7 @@
  * can be put next to its prototype twin and compared line by line.
  *
  * Usage, from the repo root:
- *   node --env-file=.env scripts/seed-blue-economy-build.mjs [--you someone@oecs.int] [--organiser you@oecs.int] [--layout-seed 42] [--dry-run]
+ *   node --env-file=.env scripts/seed-blue-economy-build.mjs [--you someone@oecs.int] [--organiser you@oecs.int] [--dry-run]
  *
  * The same 18 rooms on the same 5 floors, the same 16 people, teams, quests,
  * criteria, chat lines, coffee tables and entries as the prototype. Anything
@@ -36,7 +36,6 @@
 
 import { randomBytes } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
-import { layoutBuilding } from '../src/lib/venue-layout.ts'
 
 const url = process.env.VITE_SUPABASE_URL
 const secret = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -121,11 +120,11 @@ async function castUserId(key) {
 
 // ---------------------------------------------------------------- building
 const FLOORS = [
-  { key: 'ground', name: 'Ground · Arrivals', door: { side: 's', at: 13 } },
-  { key: 'homebases', name: 'Level 1 · Homebases', door: { side: 's', at: 13 } },
-  { key: 'build', name: 'Level 2 · Build', door: { side: 's', at: 13 } },
-  { key: 'demos', name: 'Level 3 · Demos', door: { side: 's', at: 13 } },
-  { key: 'judging', name: 'Level 4 · Judging and HQ', door: { side: 's', at: 13 } },
+  { key: 'ground', name: 'Ground · Arrivals', door: { side: 's', at: 11 } },
+  { key: 'homebases', name: 'Level 1 · Homebases', door: { side: 's', at: 11 } },
+  { key: 'build', name: 'Level 2 · Build', door: { side: 's', at: 11 } },
+  { key: 'demos', name: 'Level 3 · Demos', door: { side: 's', at: 11 } },
+  { key: 'judging', name: 'Level 4 · Judging and HQ', door: { side: 's', at: 11 } },
 ]
 
 const sec = (...ids) => ids.map((s) => (typeof s === 'string' ? { id: s } : s))
@@ -187,7 +186,7 @@ const ROOMS = [
   }),
   R(4, 0, 'help-desk', 'Help Desk', 'help_desk', 'counter', [6, 5], '#E6AC09', 1.1, {
     description: 'Ask for help and a mentor comes to you.',
-    sections: sec('host_controls', call('Desk call'), 'help_nudge', 'faq', 'chat', 'mentors_on_duty', 'occupants'),
+    sections: sec('host_controls', call('Desk call'), 'help_queue', 'faq', 'chat', 'mentors_on_duty', 'occupants'),
   }),
   R(5, 0, 'sponsor-booth', 'Tidewater Labs', 'sponsor_booth', 'booth', [5, 4], '#2F8FD6', 1.1, {
     description: 'Ask about the tides API and the Tidewater prize. Tide and swell forecasts for every OECS harbour, through one API. Free for this hackathon. Tidewater prize: US$5,000 for the best tool for fishers.',
@@ -306,21 +305,68 @@ const rect = (x0, y0, x1, y1) => {
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) out.push([x, y])
   return out
 }
-const LAYOUT_SEED = arg('layout-seed') ? Number(arg('layout-seed')) : Math.floor(Math.random() * 2 ** 31)
-const LAYOUT = layoutBuilding({
-  cols: 28,
-  rows: 18,
-  seed: LAYOUT_SEED,
-  floors: FLOORS.map((floor, index) => ({
-    door: floor.door,
-    rooms: ROOMS.filter((r) => r.floor === index).map((r) => ({ key: r.key, w: r.size.w, h: r.size.h })),
-  })),
-})
-if (LAYOUT.missing.length) throw new Error(`These rooms did not fit: ${LAYOUT.missing.join(', ')}`)
+// The floor plan, drawn by hand so every floor reads the same way: a 22 by 16
+// grid, the door in the middle of the south wall, a corridor across the middle
+// (rows 7 and 8) and up from the door (columns 11 and 12), big rooms along the
+// north wall and smaller ones along the south. Stairs stand in the two north
+// corners and alternate, so the way up and the way down are never side by side.
+const GRID = { cols: 22, rows: 16 }
+const STAIRS_WEST = { x: 1, y: 1, w: 2, h: 3 }
+const STAIRS_EAST = { x: 19, y: 1, w: 2, h: 3 }
+const FLIGHTS = [
+  { from: 0, ...STAIRS_WEST },
+  { from: 1, ...STAIRS_EAST },
+  { from: 2, ...STAIRS_WEST },
+  { from: 3, ...STAIRS_EAST },
+]
+// key → [x, y, width, height]
+const PLAN = {
+  // Ground: only the west stairs stand here, so the lounge takes the east corner.
+  'main-hall': [4, 0, 9, 7],
+  'networking-lounge': [14, 0, 7, 7],
+  'registration-desk': [1, 9, 5, 5],
+  'help-desk': [7, 9, 4, 5],
+  'sponsor-booth': [13, 9, 4, 5],
+  'quiet-room': [18, 9, 4, 5],
+  // Level 1
+  'team-homebase': [4, 0, 7, 7],
+  'team-pod': [12, 0, 6, 7],
+  'collab-commons': [13, 9, 8, 5],
+  // Level 2
+  'workshop-room': [4, 0, 8, 7],
+  'hardware-bench': [13, 0, 5, 7],
+  'resource-library': [1, 9, 10, 5],
+  'mentor-lounge': [13, 9, 8, 5],
+  // Level 3
+  'showcase-stage': [4, 0, 13, 7],
+  'quest-board': [13, 9, 8, 5],
+  // Level 4
+  'judging-room': [4, 0, 7, 7],
+  'organiser-hq': [12, 0, 6, 7],
+  'green-room': [1, 9, 10, 5],
+}
 for (const r of ROOMS) {
-  const p = LAYOUT.rooms[r.floor][r.key]
-  r.cells = rect(p.x, p.y, p.x + p.w - 1, p.y + p.h - 1)
+  const p = PLAN[r.key]
+  if (!p) throw new Error(`No place on the plan for ${r.key}`)
+  const [x, y, w, h] = p
+  if (x + w > GRID.cols || y + h > GRID.rows) throw new Error(`${r.key} does not fit the grid`)
+  r.cells = rect(x, y, x + w - 1, y + h - 1)
   delete r.size
+}
+// Nothing may overlap on a floor: not two rooms, and not a room and its stairs.
+for (let floor = 0; floor < FLOORS.length; floor++) {
+  const seen = new Map()
+  const mark = (name, cells) => {
+    for (const [x, y] of cells) {
+      const k = `${x},${y}`
+      if (seen.has(k)) throw new Error(`Floor ${floor}: ${name} overlaps ${seen.get(k)}`)
+      seen.set(k, name)
+    }
+  }
+  for (const f of FLIGHTS.filter((f) => f.from === floor || f.from === floor - 1)) {
+    mark('the stairs', rect(f.x, f.y, f.x + f.w - 1, f.y + f.h - 1))
+  }
+  for (const r of ROOMS.filter((r) => r.floor === floor)) mark(r.name, r.cells)
 }
 
 // Speakers and room hosts, per room (venue_room_roles).
@@ -539,6 +585,14 @@ const CHAT = [
   [18, 'kemar', '18:50', 'Nadia, you are on after Mangrove. Test your screen share now.'],
 ]
 
+// The Help Desk line, in order (211): who, what they asked, tags, who is helping.
+const HELP = [
+  ['luc', 'Build fails on Vercel', [], 'devon'],
+  ['shem', 'LoRa range test', [], null],
+  ['you', 'The tides API returns 401 even with the key in .env.', ['API', 'JavaScript'], null],
+  ['aaliyah', 'Survey questions in Kwéyòl', [], null],
+]
+
 // Q&A, as the design has it: question, who asked, upvotes, answered (210).
 const QUESTIONS = [
   [2, 'Can teams of two enter?', 'lucia', 6, true],
@@ -551,7 +605,7 @@ const QUESTIONS = [
 // What the prototype shows and the database cannot hold today.
 const NOT_SEEDED = [
   'Q&A vote counts of 18 / 12 / 9 and 11 / 7: 16 people, so the order is kept as 6 / 4 / 3 and 5 / 3 (needs migration 210)',
-  'Help Desk queue: position, request text, tags, mentor assignment (only "needs help" status lines are seeded)',
+  'Help Desk wait estimate: the design says "About 6 minutes" for third in line; the room works it out as 3 minutes per person ahead (needs migration 211)',
   'Sponsor booking slots and the US$5,000 prize panel: no table (the prize is in the room description)',
   'Hardware Bench kit stock and reservations, bench bookings: no table (stock is written as room text)',
   'Resource Library items for this event, with language tags: no table (items are written as room text)',
@@ -638,7 +692,7 @@ async function main() {
         venue_closes_at: iso(DEADLINE + 21 * 24 * 3600_000),
         spectators_enabled: true,
         spectator_scope: 'members',
-        venue_map: { v: 1, cols: 28, rows: 18, floors: FLOORS, flights: LAYOUT.flights },
+        venue_map: { v: 1, cols: GRID.cols, rows: GRID.rows, floors: FLOORS, flights: FLIGHTS },
       },
       { onConflict: 'id' }
     )
@@ -657,7 +711,7 @@ async function main() {
       .not('id', 'in', `(${ROOMS.map((r) => r.id).join(',')})`)
     if (delErr) throw new Error(`prune rooms: ${delErr.message}`)
   }
-  console.log(`  ${ROOMS.length} rooms on ${FLOORS.length} floors (layout seed ${LAYOUT.seed})`)
+  console.log(`  ${ROOMS.length} rooms on ${FLOORS.length} floors`)
 
   // ---- registrations, venue members, room roles
   {
@@ -938,6 +992,27 @@ async function main() {
       }))
     )
     say('chat', error, `${CHAT.length} chat lines across ${new Set(CHAT.map((c) => c[0])).size} rooms`)
+  }
+
+  // ---- Help Desk line (211), when the table exists
+  {
+    await admin.from('venue_help_requests').delete().eq('event_id', EVENT_ID)
+    const { error } = await admin.from('venue_help_requests').insert(
+      HELP.map(([who, text, tags, mentor], i) => ({
+        id: uid(8, i + 1),
+        event_id: EVENT_ID,
+        room_id: roomId(4),
+        user_id: ids[who],
+        body: text,
+        tags,
+        lang: PEOPLE[who].lang,
+        status: mentor ? 'helping' : 'waiting',
+        mentor_id: mentor ? ids[mentor] : null,
+        picked_at: mentor ? at('13:08') : null,
+        created_at: iso(new Date(at('13:00')).getTime() + i * 120_000),
+      }))
+    )
+    say('help line', error, `${HELP.length} people in the help line`)
   }
 
   // ---- Q&A (210), when the tables exist

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ArrowLeft, ChevronRight, Map as MapIcon, Timer, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
@@ -44,6 +44,32 @@ interface VenueTopBarProps {
  * fixed navy chip: that pairing holds in both themes, which gold on the cream
  * bar would not.
  */
+/**
+ * Back to wherever this member came from: the map, another room, the event
+ * page. Someone who opened the room from a link has nowhere to go back to, so
+ * for them it goes to the map.
+ */
+function RoomBackButton({ fallback }: { fallback: string }) {
+  const { t } = useLingui()
+  const navigate = useNavigate()
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        // React Router keeps its own position in history.state; 0 is the first
+        // page of this visit.
+        const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
+        if (idx > 0) navigate(-1)
+        else navigate(fallback)
+      }}
+      className="inline-flex h-8 items-center gap-1.5 rounded-control border border-ktip-sand-200 bg-ktip-cream px-2.5 font-bold text-ktip-sand-800 transition-colors hover:border-ktip-ocean-400 hover:text-ktip-ocean-700"
+    >
+      <ArrowLeft size={15} aria-hidden="true" />
+      {t`Back`}
+    </button>
+  )
+}
+
 function SubmissionCountdown({ deadline }: { deadline: string }) {
   const { i18n } = useLingui()
   const end = Date.parse(deadline)
@@ -140,6 +166,9 @@ export function VenueTopBar({
       {backToMap && crumbs ? (
         <nav aria-label={t`Breadcrumb`} className="min-w-0 flex-1">
           <ol className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <li>
+              <RoomBackButton fallback={venuePath({ id: eventId, slug: eventSlug, event_type: eventType })} />
+            </li>
             <li>
               <BackLink
                 to={venuePath({ id: eventId, slug: eventSlug, event_type: eventType })}

@@ -108,9 +108,6 @@ export function VenueCall({
    */
   onRecordingControl?: ReactNode
 }) {
-  // Spotlight and grid rooms turn the camera on as you join. A huddle offers
-  // it, off, from the dock.
-  const wantsVideo = mode === 'spotlight' || mode === 'grid'
   // Leaving the call is not leaving the room: chat, panels and the map stay.
   // Unmounting LiveKitRoom disconnects; mounting it again rejoins.
   const [inCall, setInCall] = useState(true)
@@ -123,11 +120,10 @@ export function VenueCall({
       token={token}
       connect
       options={LIVEKIT_ROOM_OPTIONS}
-      // Publishing on connect only when the grant allows it. A listen-only room
-      // or a full room hands back canPublish: false, and the camera never turns
-      // on in the first place rather than turning on and being rejected.
-      video={grant.can_publish && wantsVideo}
-      audio={grant.can_publish}
+      // You walk in with the microphone and the camera off, in every room
+      // (2026-11-11). Nobody is heard or seen until they press the button.
+      video={false}
+      audio={false}
       data-lk-theme="default"
       // LiveKit's theme paints the room near-black. The card around it is the
       // site's navy, so the call sits on that instead of a black slab.
