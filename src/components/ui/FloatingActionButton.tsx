@@ -100,7 +100,7 @@ export function FloatingActionButton() {
   const auth = useAuth()
   const { togglePanel } = useMessagingPanel()
   const { noteCount, fabPanelOpen, setFabPanelOpen } = useStickyNotesSummary()
-  const { startTutorial, isTutorialCompleted } = useTutorials()
+  const { startTutorial, isTutorialCompleted, pageTourId } = useTutorials()
   const { unreadCount } = useUnreadMessageCount(auth.user?.id)
   const { pathname } = useLocation()
   const [dark, setDark] = useThemeMode()
@@ -150,7 +150,8 @@ export function FloatingActionButton() {
   // Keyed by pathname so a route change while closed cannot leave the previous
   // page's tour attached to this one.
   const [resolvedTour, setResolvedTour] = useState<{ path: string; id: string | null } | null>(null)
-  const pageTutorialId = resolvedTour?.path === pathname ? resolvedTour.id : null
+  // A page that picked its own variant (usePageTour) wins over its route's tour
+  const pageTutorialId = pageTourId ?? (resolvedTour?.path === pathname ? resolvedTour.id : null)
   // The one page whose tour is not in the registry: see the tutorial action.
   const isHome = pathname === '/'
 

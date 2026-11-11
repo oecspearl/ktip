@@ -90,7 +90,7 @@ export function PeoplesChoicePanel({ event }: { event: Event }) {
               <Trans>Voting has not opened yet. Organisers see the list early.</Trans>
             )}
           </p>
-          <ul className="flex flex-col gap-2">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {(showTally ? byVotes : ballot.entries).map((entry) => {
               const mine = ballot.my_vote === entry.id
               const votes = entry.votes ?? 0
@@ -139,7 +139,7 @@ export function PeoplesChoicePanel({ event }: { event: Event }) {
                           icon={<Heart size={14} aria-hidden="true" />}
                           onClick={() => onVote(entry)}
                         >
-                          {mine ? <Trans>Your vote</Trans> : <Trans>Vote</Trans>}
+                          {mine ? <Trans>Voted</Trans> : <Trans>Vote</Trans>}
                         </Button>
                       ))}
                   </div>

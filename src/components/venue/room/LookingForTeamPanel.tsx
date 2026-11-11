@@ -1,4 +1,3 @@
-import { MessageSquare } from 'lucide-react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemberPanel } from '../../../contexts/MemberPanelContext'
 import { useMessagingPanel } from '../../../contexts/MessagingPanelContext'
@@ -122,9 +121,9 @@ export function LookingForTeamPanel({
                     onClick={() => openPanel({ userId: member.user_id })}
                     aria-label={t`Message ${name}`}
                     title={t`Message`}
-                    className="shrink-0 rounded-lg p-1.5 text-ktip-sand-500 transition-colors hover:bg-ktip-sand-100 hover:text-ktip-ocean-600"
+                    className="inline-flex h-7 shrink-0 items-center rounded-control border border-ktip-sand-200 px-2.5 text-xs font-bold text-ktip-sand-800 transition-colors hover:border-ktip-ocean-400 hover:text-ktip-ocean-700"
                   >
-                    <MessageSquare size={16} aria-hidden="true" />
+                    <Trans>Say hello</Trans>
                   </button>
                 )}
               </li>

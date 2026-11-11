@@ -1,3 +1,4 @@
+import { useMessagingPanel } from '../../../contexts/MessagingPanelContext'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Cable, Trash2 } from 'lucide-react'
@@ -86,6 +87,7 @@ export function CollabCommonsPanel({ eventId, isHost }: { eventId: string; isHos
     onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   })
 
+  const { openPanel } = useMessagingPanel()
   const nameOf = (id: string | null) => (id ? teams.find((x) => x.id === id)?.name : null) ?? t`Someone`
   const live = bridges.filter((b) => isLive(b))
 
@@ -113,7 +115,16 @@ export function CollabCommonsPanel({ eventId, isHost }: { eventId: string; isHos
                       </button>
                     )}
                   </p>
-                  {n.body}
+                  <span className="block break-words">{n.body}</span>
+                  {n.author_id && n.author_id !== user?.id && (
+                    <button
+                      type="button"
+                      onClick={() => openPanel({ userId: n.author_id as string })}
+                      className="mt-2 inline-flex h-7 items-center rounded-control border border-ktip-sand-300 bg-white px-2.5 text-xs font-bold text-ktip-sand-800 hover:border-ktip-ocean-400"
+                    >
+                      <Trans>Reply</Trans>
+                    </button>
+                  )}
                 </article>
               ))}
           </div>

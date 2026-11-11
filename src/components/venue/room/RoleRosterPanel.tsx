@@ -75,7 +75,19 @@ export function RoleRosterPanel({
                   >
                     {name}
                   </button>
-                  <AvailabilityDot availability={person.availability} size="sm" withLabel />
+                  {role === 'mentor' && (person.availability === 'working' || person.availability === 'busy') ? (
+                    <span
+                      className={
+                        person.availability === 'working'
+                          ? 'inline-flex rounded-full bg-ktip-tropical-50 px-2 py-0.5 text-micro font-extrabold text-ktip-tropical-700'
+                          : 'inline-flex rounded-full bg-ktip-sun-50 px-2 py-0.5 text-micro font-extrabold text-ktip-sun-800'
+                      }
+                    >
+                      {person.availability === 'working' ? t`Free` : t`Helping`}
+                    </span>
+                  ) : (
+                    <AvailabilityDot availability={person.availability} size="sm" withLabel />
+                  )}
                   {person.status_note && (
                     <span className="block truncate text-xs italic text-ktip-sand-500">
                       “{person.status_note}”

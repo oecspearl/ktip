@@ -81,7 +81,7 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
                     <span className="shrink-0 w-6 h-6 rounded-full bg-ktip-ocean-100 text-ktip-ocean-700 text-xs font-semibold flex items-center justify-center mt-0.5">
                       {index + 1}
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-baseline gap-2">
                         <span className="font-medium text-ktip-sand-900">{item.title}</span>
                         {group.kind === 'judging_criterion'
@@ -96,6 +96,14 @@ export function EventChallengeBrief({ criteria, submissionDeadline }: EventChall
                               <span className="text-xs text-ktip-sand-500"><Trans>optional</Trans></span>
                             )}
                       </div>
+                      {group.kind === 'judging_criterion' && showPercent && item.weight != null && (
+                        <span className="mt-1.5 block h-1.5 w-full max-w-64 overflow-hidden rounded-full bg-ktip-sand-100" aria-hidden="true">
+                          <span
+                            className="block h-full rounded-full bg-ktip-ocean-600"
+                            style={{ width: `${Math.min(100, (item.weight / weightTotal) * 100)}%` }}
+                          />
+                        </span>
+                      )}
                       {item.description && (
                         <p className="text-sm text-ktip-sand-600 mt-0.5 whitespace-pre-wrap">
                           {item.description}

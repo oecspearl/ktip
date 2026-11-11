@@ -38,6 +38,10 @@ export interface TutorialStep {
   scrollMode?: 'top' | 'center'
   /** Second spotlight cutout, e.g. a section plus its toolbar */
   secondaryTarget?: string
+  /** The target only renders for some members or some data (a role-only
+   *  control, a section with content). When it is missing the step is skipped
+   *  almost at once instead of after the stranded-step wait. */
+  optional?: boolean
 }
 
 export interface Tutorial {
