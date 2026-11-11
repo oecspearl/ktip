@@ -580,13 +580,21 @@ export function VenueMapStage({
         // Climbs most of a storey even in the flat view, so the stairs read as
         // a way up from across the map rather than as a doormat.
         const rise = VENUE_MAP.LEVEL_H * 0.55 * Math.max(0.65, stacked ? stack : 0.65)
-        for (let i = 0; i < treads; i++) {
+        // Drawn from the top step down to the bottom one. South is the front of
+        // the picture, so the nearer, lower steps must paint last: the other way
+        // round, each taller step's front covered the steps before it and the
+        // flight read as one block.
+        for (let n = 0; n < treads; n++) {
+          const i = treads - 1 - n
           // Lowest step at the south end, where you walk on; top step north.
           const t1 = y + h - (h * i) / treads
           const t0 = y + h - (h * (i + 1)) / treads
           const zTop = zBase + (rise * (i + 1)) / treads
           const top = i === treads - 1
+          // Green marks the landing only: its top face. The risers and the side
+          // stay navy all the way up, so the flight is one staircase.
           const base = top ? '#97D700' : '#2A5788'
+          const body = '#2A5788'
           if (tilt > 0.01) {
             out.push(
               <path
@@ -597,7 +605,7 @@ export function VenueMapStage({
                   [x + w, t1, zTop],
                   [x, t1, zTop],
                 ])}
-                fill={shade(base, 0.78, 1)}
+                fill={shade(body, 0.78, 1)}
                 opacity={o}
               />,
               <path
@@ -608,7 +616,7 @@ export function VenueMapStage({
                   [x + w, t1, zTop],
                   [x + w, t0, zTop],
                 ])}
-                fill={shade(base, 0.6, 1)}
+                fill={shade(body, 0.6, 1)}
                 opacity={o}
               />
             )

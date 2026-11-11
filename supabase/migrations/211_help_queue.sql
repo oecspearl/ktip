@@ -206,3 +206,5 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE venue_help_requests;
   END IF;
 END $$;
+
+NOTIFY pgrst, 'reload schema';
