@@ -7,6 +7,7 @@ import {
 } from '@livekit/components-react'
 import { ConnectionState, RoomEvent, type RemoteParticipant } from 'livekit-client'
 import { useLanguage } from '../i18n/LanguageContext'
+import { useMyCallVoice } from './useMyGender'
 import { type UiLang } from '../lib/i18n/protocol'
 import {
   DEFAULT_FOREIGN,
@@ -208,6 +209,8 @@ export function useCallLanguage(
   }, [])
   useDataChannel(LANG_TOPIC, onData)
 
+  // The voice my translated words are read in, from my profile (209).
+  const voice = useMyCallVoice()
   const mine = useMemo<CallLangState>(
     () => ({
       speaks,
@@ -217,8 +220,9 @@ export function useCallLanguage(
       foreign,
       along,
       ...(cap ? { cap } : {}),
+      ...(voice ? { voice } : {}),
     }),
-    [speaks, reads, foreign, along, paused, cap]
+    [speaks, reads, foreign, along, paused, cap, voice]
   )
   const mineRef = useRef(mine)
   mineRef.current = mine

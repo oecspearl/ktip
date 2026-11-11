@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isSlowStart, isStale, pickVoice, SLOW_START_MS, STALE_MS, type VoiceLike } from './voice'
+import { isSlowStart, isStale, pickVoice, pickVoiceFor, voiceGender, SLOW_START_MS, STALE_MS, type VoiceLike } from './voice'
 
 const v = (name: string, lang: string, localService: boolean): VoiceLike => ({ name, lang, localService })
 
@@ -9,6 +9,48 @@ const voices = [
   v('Microsoft David - English (United States)', 'en-US', true),
   v('Google español', 'es-ES', false),
 ]
+
+describe('pickVoiceFor', () => {
+  const french = [
+    v('Microsoft Hortense - French (France)', 'fr-FR', true),
+    v('Microsoft Paul - French (France)', 'fr-FR', true),
+    v('Microsoft Denise Online (Natural) - French (France)', 'fr-FR', false),
+    v('Microsoft Henri Online (Natural) - French (France)', 'fr-FR', false),
+  ]
+
+  it('reads a man in a man voice and a woman in a woman voice', () => {
+    expect(pickVoiceFor(french, 'fr', new Set(), 'man').voice?.name).toContain('Henri')
+    expect(pickVoiceFor(french, 'fr', new Set(), 'man').pitch).toBe(1)
+    expect(pickVoiceFor(french, 'fr', new Set(), 'woman').voice?.name).toContain('Denise')
+  })
+
+  it('pitches a minor a little higher in a voice of their gender', () => {
+    const boy = pickVoiceFor(french, 'fr', new Set(), 'boy')
+    expect(boy.voice?.name).toContain('Henri')
+    expect(boy.pitch).toBeGreaterThan(1)
+  })
+
+  it('lowers the only voice when no man voice is installed', () => {
+    const only = [v('Google français', 'fr-FR', false)]
+    const man = pickVoiceFor(only, 'fr', new Set(), 'man')
+    expect(man.voice?.name).toBe('Google français')
+    expect(man.pitch).toBe(0.7)
+    expect(pickVoiceFor(only, 'fr', new Set(), 'woman').pitch).toBe(1)
+  })
+
+  it('leaves the default alone for someone who has not said', () => {
+    const plain = pickVoiceFor(french, 'fr', new Set(), undefined)
+    expect(plain.voice?.name).toContain('Denise')
+    expect(plain.pitch).toBe(1)
+  })
+
+  it('reads the gender off a voice name, women first', () => {
+    expect(voiceGender('Google UK English Female')).toBe('woman')
+    expect(voiceGender('Google UK English Male')).toBe('man')
+    expect(voiceGender('Microsoft David - English (United States)')).toBe('man')
+    expect(voiceGender('fr-fr-x-vlf-local')).toBeUndefined()
+  })
+})
 
 describe('pickVoice', () => {
   it('prefers a free neural voice', () => {

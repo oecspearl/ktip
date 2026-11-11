@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useToast } from '../../contexts/ToastContext'
 import { useMyPreferences, useSavePreferences, DEFAULT_NOTIFICATION_PREFERENCES } from '../../hooks/usePreferences'
 import { useThemeMode } from '../../hooks/useThemeMode'
+import { useMyGender, type Gender } from '../../hooks/useMyGender'
 import { AccessibilityControls } from '../../a11y/ui'
 import { useLanguage } from '../../i18n/LanguageContext'
 import { CONNECTION_VISIBILITY_OPTIONS } from '../../lib/constants'
@@ -22,11 +23,14 @@ import {
   Type,
   Moon,
   Users,
+  Volume2,
 } from 'lucide-react'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { resolveCopy } from '../../i18n/copy'
 
 type NotifPrefs = typeof DEFAULT_NOTIFICATION_PREFERENCES
+
+const GENDER_OPTIONS: readonly (Gender | null)[] = ['woman', 'man', null]
 
 const RADIO_CLASS = (selected: boolean) =>
   `flex-1 text-left px-3 py-2.5 rounded-neu-sm border transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -39,6 +43,7 @@ export function PreferencesTab() {
     const { t, i18n } = useLingui()
   const auth = useAuth()
   const toast = useToast()
+  const myGender = useMyGender()
   const { preferences, loading } = useMyPreferences(auth.user?.id)
   const { savePreferences, loading: saving } = useSavePreferences()
   const [darkMode, setDarkMode] = useThemeMode()
@@ -389,6 +394,43 @@ export function PreferencesTab() {
               })}
             </div>
           </div>
+
+          {/* Gender (209). Private, applies at once, not part of Save. Hidden
+              until the server answers, so a database without 209 shows nothing. */}
+          {myGender.available && (
+            <div className="py-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-ktip-sand-800">
+                <Volume2 size={16} className="text-ktip-sand-500" />
+                <Trans>Gender</Trans>
+              </div>
+              <p className="text-xs text-ktip-sand-500 mt-0.5 mb-3">
+                <Trans>Only used in calls. When your words are translated and read aloud, the voice matches you. Nobody sees this and it is not on your profile.</Trans>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2" role="radiogroup" aria-label={t`Gender`}>
+                {GENDER_OPTIONS.map((option) => {
+                  const selected = myGender.gender === option
+                  return (
+                    <button
+                      key={option ?? 'unsaid'}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => {
+                        void myGender.setGender(option).then((saved) => {
+                          if (!saved) toast.error(t`That didn't save. Try again.`)
+                        })
+                      }}
+                      className={RADIO_CLASS(selected)}
+                    >
+                      <span className="block text-sm font-medium">
+                        {option === 'woman' ? t`Woman` : option === 'man' ? t`Man` : t`Prefer not to say`}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

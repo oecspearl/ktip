@@ -1,4 +1,5 @@
 import { isUiLang, type UiLang } from '../i18n/protocol'
+import { isCallVoice, type CallVoice } from './voice'
 
 /**
  * Who in a call needs whose words, and in which language.
@@ -51,6 +52,12 @@ export interface CallLangState {
    * translation not working (2026-11-10 two-device test).
    */
   cap?: CaptionStatus
+  /**
+   * The voice they asked to be read in when their words are translated aloud
+   * (209). One word, never the gender or age behind it. Absent when they have
+   * not said.
+   */
+  voice?: CallVoice
 }
 
 /**
@@ -169,6 +176,7 @@ export function decodeLangState(payload: Uint8Array): CallLangState | null {
     // Still v1: an older client ignores the field, and a status it does not
     // know is dropped here rather than failing the whole message.
     if (isCaptionStatus(raw.cap)) state.cap = raw.cap
+    if (isCallVoice(raw.voice)) state.voice = raw.voice
     // Both or neither: `along` means nothing without the mode it sits beside.
     if (isForeignMode(raw.foreign)) {
       state.foreign = raw.foreign
@@ -265,11 +273,16 @@ export type MixReason =
  * How loud a speaker's own voice plays for me: 0 when only their translation
  * should reach me, 1 otherwise.
  *
- * Muted only when every link of the chain is working: they speak another
- * language, I chose the translated voice, the room allows it, their browser
- * says it is transcribing them (`cap: 'live'`), and their lines are arriving
- * translated. Any broken link gives their own voice back, so a listener is
- * never left in silence because translation failed somewhere they cannot see.
+ * Muted from their first word: they speak another language, I chose the
+ * translated voice, and the room allows it. It used to wait for their browser
+ * to say it was transcribing (`cap: 'live'`), and until that arrived the
+ * start of every first sentence came through in their own voice (2026-11-10).
+ *
+ * Their voice comes back only when translation is known to be failing: their
+ * browser says it cannot subtitle them or they paused it, they have talked
+ * for a while with no line arriving, or a line has waited too long for its
+ * translation. So a listener is not left in silence by a failure they cannot
+ * see, and hears nothing of the original otherwise.
  */
 export function originalVolume({
   foreign,
@@ -295,7 +308,7 @@ export function originalVolume({
   if (foreign === 'original') return { volume: 1, reason: 'wants-original' }
   if (foreign === 'subtitles') return { volume: 1, reason: 'subtitles-only' }
   if (!translationAllowed) return { volume: 1, reason: 'room-off' }
-  if (theirCap !== 'live') return { volume: 1, reason: 'not-transcribed' }
+  if (theirCap === 'cannot' || theirCap === 'paused') return { volume: 1, reason: 'not-transcribed' }
   if (noCaptions) return { volume: 1, reason: 'no-captions' }
   if (untranslated) return { volume: 1, reason: 'untranslated' }
   return { volume: 0, reason: 'translated' }

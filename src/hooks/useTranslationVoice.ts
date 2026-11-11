@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRoomContext } from '@livekit/components-react'
 import type { UiLang } from '../lib/i18n/protocol'
-import { isSlowStart, isStale, pickVoice } from '../lib/captions/voice'
+import { isSlowStart, isStale, pickVoiceFor, type CallVoice } from '../lib/captions/voice'
 import { useSpeechUsage } from './useSpeechUsage'
 import type { ResolvedCaption } from './useLiveCaptions'
 
@@ -77,10 +77,13 @@ export function useTranslationVoice({
   captions,
   enabled,
   lang,
+  voiceOf,
 }: {
   captions: ResolvedCaption[]
   enabled: boolean
   lang: UiLang
+  /** The voice each speaker asked to be read in, by identity (209). */
+  voiceOf?: (identity: string) => CallVoice | undefined
 }): { reading: string | null } {
   const room = useRoomContext()
   // Characters read aloud, for the organiser's usage panel (199).
@@ -90,11 +93,13 @@ export function useTranslationVoice({
   const queue = useRef<QueuedLine[]>([])
   const busy = useRef(false)
   const slow = useRef<Set<string>>(loadSlow())
-  // One voice per language for the whole call. Picking afresh for every line
+  const voiceOfRef = useRef(voiceOf)
+  voiceOfRef.current = voiceOf
+  // One voice per language and kind of speaker for the whole call. Picking afresh for every line
   // let the voice change mid-call: a network voice measured slow on one line
   // was swapped for a local one on the next, a woman's voice for a man's
   // (2026-11-10). A slow voice is still remembered, for the next call.
-  const chosen = useRef(new Map<string, string>())
+  const chosen = useRef(new Map<string, { name: string; pitch: number }>())
   // Whose translated line is playing, for the mixer. Null once the voice is quiet.
   const [reading, setReading] = useState<string | null>(null)
   const restoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -131,12 +136,17 @@ export function useTranslationVoice({
     const utterance = new SpeechSynthesisUtterance(current.text)
     utterance.lang = speakLang
     const voices = window.speechSynthesis.getVoices()
-    const kept = voices.find((candidate) => candidate.name === chosen.current.get(speakLang))
-    const voice = kept ?? pickVoice(voices, speakLang, slow.current)
+    const want = voiceOfRef.current?.(current.identity)
+    const key = `${speakLang}|${want ?? ''}`
+    const before = chosen.current.get(key)
+    const kept = before ? voices.find((candidate) => candidate.name === before.name) : undefined
+    const picked = kept && before ? { voice: kept, pitch: before.pitch } : pickVoiceFor(voices, speakLang, slow.current, want)
+    const voice = picked.voice
     if (voice) {
       utterance.voice = voice
-      chosen.current.set(speakLang, voice.name)
+      chosen.current.set(key, { name: voice.name, pitch: picked.pitch })
     }
+    utterance.pitch = picked.pitch
     utterance.rate = 1.05
 
     const queuedAt = performance.now()

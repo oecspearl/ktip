@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Captions, CaptionsOff, Languages, Pause, Play, Volume2 } from 'lucide-react'
 import { useLocalParticipant, useRemoteParticipants, useRoomContext, useSpeakingParticipants } from '@livekit/components-react'
 import { MediaDeviceFailure, RoomEvent } from 'livekit-client'
@@ -165,7 +165,9 @@ export function CallCaptionsProvider({
   const ownSubs = canPublish && language.own && isMicrophoneEnabled
   const subs = ownSubs || language.along || (wantsAnySubtitles(language.foreign, false) && someoneForeign)
   const voiceOn = language.foreign === 'voice' && translationAllowed
-  const { reading } = useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads })
+  const langRoster = language.roster
+  const voiceOf = useCallback((identity: string) => langRoster.get(identity)?.voice, [langRoster])
+  const { reading } = useTranslationVoice({ captions: live.captions, enabled: voiceOn, lang: language.reads, voiceOf })
 
   // Phones keep speechSynthesis silent until a tap has spoken once, and the
   // translated voice is now on before anyone taps anything about it. The first
@@ -816,7 +818,7 @@ export function CallDebug() {
         `room translation ${translationAllowed ? 'on' : 'off'}; notice ${language.notice ? `${language.notice.name} (${language.notice.speaks})` : 'none'}`,
         `their voices: ${volumes.map(([id, entry]) => `${id.slice(0, 8)} vol ${entry.volume} ${entry.reason}`).join(' | ') || 'nobody'}`,
         `following me: ${audience.total}, translate into [${audience.targets.join(', ')}]; transcribe ${transcribe}, engine ${live.engine ?? 'none'}, running ${live.transcribing}, cap ${cap ?? 'none'}, error ${live.error ?? 'none'}${live.failed ? ' (stopped)' : ''}, translation ${live.translationIssue ?? 'ok'}`,
-        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} ${s.foreign ?? `subs ${s.subs}`}${s.along ? ' along' : ''}${s.paused ? ' paused' : ''} cap ${s.cap ?? '-'}`).join(' | ') || 'empty'}`,
+        `roster (${roster.length}): ${roster.map(([id, s]) => `${id.slice(0, 8)} speaks ${s.speaks} reads ${s.reads} ${s.foreign ?? `subs ${s.subs}`}${s.along ? ' along' : ''}${s.paused ? ' paused' : ''} cap ${s.cap ?? '-'} voice ${s.voice ?? '-'}`).join(' | ') || 'empty'}`,
         `captions: ${live.captions.length}${last ? `, last ${last.own ? 'mine' : 'theirs'} ${last.lang}${last.translated ? ` → ${language.reads}` : ''}: "${last.display.slice(0, 60)}"` : ''}`,
       ].join('\n')}
     </pre>

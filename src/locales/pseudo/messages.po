@@ -1911,6 +1911,10 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "That didn't save. Try again."
+msgstr ""
+
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "An authenticator app shows a 6-digit code that changes every 30 seconds. KTIP asks for it when you sign in, so a stolen password is not enough to get in. Pick an app below to install it and see how to add KTIP."
 msgstr ""
@@ -3868,6 +3872,10 @@ msgstr ""
 
 #: src/pages/security/BackupEmailGatePage.tsx
 msgid "Check your inbox"
+msgstr ""
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Gender"
 msgstr ""
 
 #: src/pages/grants/GrantsPage.tsx
@@ -7280,6 +7288,10 @@ msgstr ""
 #: src/components/events/EventDetailsForm.tsx
 #: src/pages/events/CreateEventPage.tsx
 msgid "This is a virtual event"
+msgstr ""
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Only used in calls. When your words are translated and read aloud, the voice matches you. Nobody sees this and it is not on your profile."
 msgstr ""
 
 #: src/pages/AccessibilityStatementPage.tsx
@@ -10845,10 +10857,6 @@ msgstr ""
 
 #: src/i18n/harvested.ts
 msgid "Click \"Run AI Review\" to get a score and section-by-section suggestions."
-msgstr ""
-
-#: src/components/venue/room/VenueCall.tsx
-msgid "Everyone in the call"
 msgstr ""
 
 #: src/components/settings/VerificationTab.tsx
@@ -21255,6 +21263,10 @@ msgstr ""
 msgid "gives {0} on average"
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Woman"
+msgstr ""
+
 #: src/components/feedback/AdminNotesSection.tsx
 #: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -26364,6 +26376,10 @@ msgstr ""
 msgid "board"
 msgstr ""
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Prefer not to say"
+msgstr ""
+
 #: src/i18n/harvested.ts
 msgid "Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.\n"
 "\n"
@@ -27925,6 +27941,10 @@ msgstr ""
 
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 msgid "When you apply for a grant or register for an event, your copy of the submission shows up here."
+msgstr ""
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Man"
 msgstr ""
 
 #: src/components/events/EventActionCard.tsx

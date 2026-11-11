@@ -1986,6 +1986,10 @@ msgstr "My Reports"
 msgid "Dismiss"
 msgstr "Dismiss"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "That didn't save. Try again."
+msgstr "That didn't save. Try again."
+
 #: src/pages/security/GetAuthenticatorPage.tsx
 msgid "An authenticator app shows a 6-digit code that changes every 30 seconds. KTIP asks for it when you sign in, so a stolen password is not enough to get in. Pick an app below to install it and see how to add KTIP."
 msgstr "An authenticator app shows a 6-digit code that changes every 30 seconds. KTIP asks for it when you sign in, so a stolen password is not enough to get in. Pick an app below to install it and see how to add KTIP."
@@ -3990,6 +3994,10 @@ msgstr "{0}, Col {1}"
 #: src/pages/security/BackupEmailGatePage.tsx
 msgid "Check your inbox"
 msgstr "Check your inbox"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Gender"
+msgstr "Gender"
 
 #: src/pages/grants/GrantsPage.tsx
 msgid "All Focus Areas"
@@ -7542,6 +7550,10 @@ msgstr "Pick a skill, or type a name."
 #: src/pages/events/CreateEventPage.tsx
 msgid "This is a virtual event"
 msgstr "This is a virtual event"
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Only used in calls. When your words are translated and read aloud, the voice matches you. Nobody sees this and it is not on your profile."
+msgstr "Only used in calls. When your words are translated and read aloud, the voice matches you. Nobody sees this and it is not on your profile."
 
 #: src/pages/AccessibilityStatementPage.tsx
 msgid "Voice commands use the speech recognition built into your browser. To turn speech into text, Chrome sends your voice to Google, Edge to Microsoft and Safari to Apple. KTIP never receives the recording. Firefox has no speech recognition, so the commands are not offered there. The French and Spanish commands are new and may not understand every way of saying something."
@@ -11247,10 +11259,6 @@ msgstr "Today"
 #: src/i18n/harvested.ts
 msgid "Click \"Run AI Review\" to get a score and section-by-section suggestions."
 msgstr "Click \"Run AI Review\" to get a score and section-by-section suggestions."
-
-#: src/components/venue/room/VenueCall.tsx
-msgid "Everyone in the call"
-msgstr "Everyone in the call"
 
 #: src/components/settings/VerificationTab.tsx
 msgid "Failed to submit request"
@@ -22003,6 +22011,10 @@ msgstr "Save look"
 msgid "gives {0} on average"
 msgstr "gives {0} on average"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Woman"
+msgstr "Woman"
+
 #: src/components/feedback/AdminNotesSection.tsx
 #: src/pages/sme/OrgMembersPage.tsx
 #: src/pages/sme/OrgProfileEditPage.tsx
@@ -27302,6 +27314,10 @@ msgstr "Active days"
 msgid "board"
 msgstr "board"
 
+#: src/components/settings/PreferencesTab.tsx
+msgid "Prefer not to say"
+msgstr "Prefer not to say"
+
 #: src/i18n/harvested.ts
 msgid "Yes, and it is optional. Students submit their own funding applications — a sponsor is an endorsement, not a permission.\n"
 "\n"
@@ -28920,6 +28936,10 @@ msgstr "Members under 18 get extra protections on their account."
 #: src/pages/dashboard/tabs/SubmissionsTab.tsx
 msgid "When you apply for a grant or register for an event, your copy of the submission shows up here."
 msgstr "When you apply for a grant or register for an event, your copy of the submission shows up here."
+
+#: src/components/settings/PreferencesTab.tsx
+msgid "Man"
+msgstr "Man"
 
 #: src/components/events/EventActionCard.tsx
 msgid "Your event"
