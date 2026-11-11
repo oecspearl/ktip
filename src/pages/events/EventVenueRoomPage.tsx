@@ -21,7 +21,7 @@ import { BridgeRequestCard } from '../../components/venue/room/homebase/Bridges'
 import type { RoomSectionContext } from '../../components/venue/room/RoomSections'
 import { Button } from '../../components/ui/Button'
 import { occupantsInRoom } from '../../lib/venue-presence'
-import { roomUsesSignals, roomViewerRole } from '../../lib/venue-room-sections'
+import { roomUsesSignals, roomViewerRole, sectionsForRoom } from '../../lib/venue-room-sections'
 import { useVenueRoomRoles } from '../../hooks/useVenue'
 import { roomUsesStage } from '../../lib/venue-room-layout'
 import { mapConfigOf } from '../../hooks/useVenueMap'
@@ -278,6 +278,29 @@ export default function EventVenueRoomPage() {
   const handKind = room.kind === 'workshop' || room.kind === 'main_hall' || room.kind === 'stage'
   const canRaiseHand = handKind && room.is_open && signals.connected && membership.role !== 'spectator'
 
+  // "Breakout" says nothing about a room whose whole point is its tool, so the
+  // eyebrow names the tool when the room has one of these.
+  const shown = new Set(sectionsForRoom(room, viewerRole ?? membership.role, event.event_type).map((s) => s.def.id))
+  const toolLabel = room.kind !== 'breakout'
+    ? null
+    : shown.has('organiser_ops')
+      ? t`Operations`
+      : shown.has('quest_board')
+        ? t`Side quests`
+        : shown.has('caption_test') || shown.has('on_next')
+          ? t`Backstage`
+          : shown.has('kit')
+            ? t`Build`
+            : shown.has('library')
+              ? t`Library`
+              : shown.has('mentors_on_duty') || shown.has('booking_slots')
+                ? t`Mentors`
+                : shown.has('focus_timer') && !shown.has('chat')
+                  ? t`Focus`
+                  : shown.has('collab_commons')
+                    ? t`Between teams`
+                    : null
+
   const floorName = mapConfig.floors.length > 1
     ? mapConfig.floors[room.floor]?.name || floorLabel(room.floor)
     : null
@@ -291,6 +314,7 @@ export default function EventVenueRoomPage() {
         eventType={event.event_type}
         eventTitle={event.title}
         headcount={headcount}
+        faces={presence.occupants.filter((o) => o.availability !== 'offline').slice(0, 4)}
         connected={presence.connected}
         availability={presence.availability}
         isAuto={presence.manual === null || presence.manual !== presence.availability}
@@ -330,7 +354,7 @@ export default function EventVenueRoomPage() {
                   KIND_TONE[room.kind]?.eyebrow ?? KIND_TONE.main_hall.eyebrow
                 )}
               >
-                {VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
+                {toolLabel || VENUE_ROOM_KIND_LABELS[room.kind] || room.kind}
                 {/* Which level, on a venue that has more than one. */}
                 {floorName && <span className="text-ktip-sand-400">· {floorName}</span>}
                 {signals.presenter && (

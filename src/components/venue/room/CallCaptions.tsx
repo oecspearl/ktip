@@ -267,11 +267,22 @@ export function TranslationChip() {
   const chip =
     'inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-micro font-bold'
   const code = language.reads.toUpperCase()
+  // One other language in the call: say which way it goes, as the design does.
+  const others = [...new Set([...language.roster.values()].map((state) => state.speaks))].filter(
+    (lang) => lang && lang !== language.reads
+  )
+  const from = others.length === 1 ? String(others[0]).toUpperCase() : null
   if (subs) {
     return (
       <span className={cn(chip, 'border-ktip-tropical-400/35 bg-ktip-tropical-400/15 text-ktip-tropical-300')}>
         <Captions size={12} aria-hidden="true" />
-        {voiceOn ? t`Subtitles · ${code} · voice` : t`Subtitles · ${code}`}
+        {from
+          ? voiceOn
+            ? t`${from} → ${code} · voice`
+            : t`${from} → ${code}`
+          : voiceOn
+            ? t`Subtitles · ${code} · voice`
+            : t`Subtitles · ${code}`}
       </span>
     )
   }

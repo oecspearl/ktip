@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { ArrowLeft, ChevronRight, Map as MapIcon, Timer, WifiOff } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Map as MapIcon, WifiOff } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { venuePath } from '../../lib/event-slug'
 import { IrisLink } from '../ui/IrisTransition'
 import { AvailabilityPicker } from './AvailabilityPicker'
+import { AvatarCluster } from './AvatarCluster'
 import { clockLeft, useNowUntil } from './room/judging/judging-time'
-import type { VenueAvailability } from '../../types'
+import type { VenueAvailability, VenueOccupant } from '../../types'
 import { Trans, useLingui } from '@lingui/react/macro'
 
 interface VenueTopBarProps {
@@ -17,6 +18,8 @@ interface VenueTopBarProps {
   eventType?: string | null
   eventTitle: string
   headcount: number
+  /** A few of the people here, shown as faces beside the count. */
+  faces?: VenueOccupant[]
   connected: boolean
   availability: VenueAvailability
   /** True when the shown availability came from the idle timer. */
@@ -81,9 +84,8 @@ function SubmissionCountdown({ deadline }: { deadline: string }) {
   return (
     <span
       title={at}
-      className="flex items-center gap-2 rounded-full bg-brand-navy px-3 py-1 text-xs font-medium text-white ring-1 ring-ktip-sun-200"
+      className="flex h-7 items-center gap-2 rounded-full bg-brand-navy px-3 text-xs font-semibold text-white/75"
     >
-      <Timer size={14} className="shrink-0 text-ktip-sun-600" aria-hidden="true" />
       {left > 0 ? (
         // role="timer" is polite by default: read on focus, not every second.
         <span role="timer">
@@ -92,7 +94,7 @@ function SubmissionCountdown({ deadline }: { deadline: string }) {
           </span>
           <time
             dateTime={new Date(end).toISOString()}
-            className="font-display text-base font-bold tabular-nums text-ktip-sun-600"
+            className="text-sm font-extrabold tabular-nums tracking-[0.02em] text-ktip-sun-400"
           >
             {clockLeft(left)}
           </time>
@@ -118,6 +120,7 @@ export function VenueTopBar({
   eventType,
   eventTitle,
   headcount,
+  faces,
   connected,
   availability,
   isAuto,
@@ -233,7 +236,11 @@ export function VenueTopBar({
           title={connected ? t`Live presence connected` : t`Reconnecting — headcounts may be stale`}
         >
           {connected ? (
-            <span className="h-2 w-2 rounded-full bg-ktip-tropical-500" aria-hidden="true" />
+            faces && faces.length > 0 ? (
+              <AvatarCluster occupants={faces} size="sm" />
+            ) : (
+              <span className="h-2 w-2 rounded-full bg-ktip-tropical-500" aria-hidden="true" />
+            )
           ) : (
             <WifiOff size={13} aria-hidden="true" />
           )}
